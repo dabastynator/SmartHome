@@ -1,0 +1,54 @@
+package de.newsystem.rmi.server;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import de.newsystem.rmi.protokol.Reply;
+import de.newsystem.rmi.protokol.Request;
+
+
+public class DynamicAdapter {
+	
+	private Object object;
+	private Class template;
+	
+	public DynamicAdapter(Object object) {
+		this.object = object;
+		template = object.getClass();
+	}
+
+	public Reply performeRequest(Request request) {
+		Reply reply = new Reply();
+		try {
+			Method method = findMethod(request);
+			Object result = method.invoke(object, request.getParams());
+			reply.setResult(result);
+			reply.setReturnType(method.getReturnType());
+		} catch (SecurityException e) {
+			reply.setError(e);
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			reply.setError(e);
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			reply.setError(e);
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			reply.setError(e);
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			reply.setError(e.getTargetException());
+		}
+		return reply;
+	}
+
+	private Method findMethod(Request request) throws SecurityException, NoSuchMethodException {
+		Class[] types = new Class[]{};
+		if (request.getParams() != null)
+			types = new Class[request.getParams().length];
+		for (int i=0; i<types.length; i++)
+			types[i] = request.getParams()[i].getClass();
+		return template.getMethod(request.getMethod(), types);
+	}
+
+}

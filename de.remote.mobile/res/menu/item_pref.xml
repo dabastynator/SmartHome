@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/opt_item_play"
+        android:title="Play">
+    </item>
+        <item
+        android:id="@+id/opt_item_addplaylist"
+        android:title="Add to playlist">
+    </item>
+
+</menu>

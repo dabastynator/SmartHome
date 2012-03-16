@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/item1"
+        android:title="Server">
+        <menu>
+            <item
+                android:id="@+id/opt_idefix"
+                android:title="Idefix">
+            </item>
+            <item
+                android:id="@+id/opt_inspiron"
+                android:title="Inspiron">
+            </item>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/item2"
+        android:title="Player">
+        <menu>
+            <item
+                android:id="@+id/opt_mplayer"
+                android:title="MPlayer"/>
+            <item
+                android:id="@+id/opt_totem"
+                android:title="Totem"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/item3"
+        android:title="Control">
+        <menu>
+            <item
+                android:id="@+id/opt_light_off"
+                android:title="Abdunkeln"/>
+            <item
+                android:id="@+id/opt_light_on"
+                android:title="Aufhellen"/>
+            <item
+                android:id="@+id/opt_shutdown"
+                android:title="Ausschalten"/>
+            <item
+                android:id="@+id/opt_audiotrack"
+                android:title="Audio-Spur"/>
+            <item
+                android:id="@+id/opt_right"
+                android:title="Nach Rechts"/>
+            <item
+                android:id="@+id/opt_left"
+                android:title="Nach Links"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/opt_exit"
+        android:title="Exit">
+    </item>
+    <item
+        android:id="@+id/item5"
+        android:title="Playlists">
+        <menu>
+            <item android:id="@+id/opt_playlist" android:title="Show Playlists"/>
+            <item android:id="@+id/opt_create_playlist" android:title="Create new Playlist"/>
+        </menu>
+    </item>
+        <item
+        android:id="@+id/opt_folder"
+        android:title="Folders">
+    </item>
+        <item android:id="@+id/opt_chat" android:title="Chat"></item>
+
+</menu>

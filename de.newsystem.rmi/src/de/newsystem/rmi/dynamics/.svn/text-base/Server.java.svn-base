@@ -1,0 +1,44 @@
+package de.newsystem.rmi.server;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+
+public class Server {
+
+	private HashMap<String, DynamicAdapter> adapters = new HashMap<String, DynamicAdapter>();
+	private int port = 5003;
+
+	public void register(String id, Object o) {
+		adapters.put(id, new DynamicAdapter(o));
+	}
+
+	public void init(int port) {
+		this.port = port;
+	}
+
+	public void run() {
+		try {
+			ServerSocket server = new ServerSocket(port);
+			System.out.println("server is listening on port: " + port);
+			while (true) {
+				final Socket socket = server.accept();
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							ConnectionHandler handler = new ConnectionHandler(adapters,
+									socket);
+							handler.handle();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/opt_pls_show"
+        android:title="Show Playlist">
+    </item>
+        <item
+        android:id="@+id/opt_pls_delete"
+        android:title="Delete Playlist">
+    </item>
+
+</menu>
