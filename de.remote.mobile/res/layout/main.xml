@@ -17,45 +17,50 @@
         android:layout_weight="8"
         android:orientation="horizontal" >
 
-        <Button
+        <ImageButton
             android:id="@+id/button_play"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:onClick="playPause"
+            android:src="@drawable/pause"
             android:text="|>" />
 
-        <Button
+        <ImageButton
             android:id="@+id/button_quit"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:onClick="stopPlayer"
+            android:src="@drawable/stop"
             android:text="x" />
 
-                <Button
-                    android:id="@+id/button_pref"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="1"
-                    android:onClick="prev"
-                    android:text="&lt;" />
-        
-        <Button
+        <ImageButton
+            android:id="@+id/button_pref"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="prev"
+            android:src="@drawable/prev"
+            android:text="&lt;" />
+
+        <ImageButton
             android:id="@+id/button_next"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:onClick="next"
+            android:src="@drawable/next"
             android:text=">" />
-        
-                <Button
-                    android:id="@+id/button_full"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="1"
-                    android:onClick="fullScreen"
-                    android:text=">&lt;" />
+
+        <ImageButton
+            android:id="@+id/button_full"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="fullScreen"
+            android:src="@drawable/full"
+            android:text=">&lt;" />
 
     </LinearLayout>
 

@@ -19,7 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,11 +65,11 @@ public class BrowserActivity extends Activity {
 		}
 	};
 
-	private Button buttonPlay;
-	private Button buttonFull;
-	private Button buttonNext;
-	private Button buttonPref;
-	private Button buttonQuit;
+	private ImageButton buttonPlay;
+	private ImageButton buttonFull;
+	private ImageButton buttonNext;
+	private ImageButton buttonPref;
+	private ImageButton buttonQuit;
 
 	public String selectedItem;
 
@@ -90,11 +90,11 @@ public class BrowserActivity extends Activity {
 
 	private void findComponents() {
 		listView = (ListView) findViewById(R.id.fileList);
-		buttonPlay = (Button) findViewById(R.id.button_play);
-		buttonFull = (Button) findViewById(R.id.button_full);
-		buttonNext = (Button) findViewById(R.id.button_next);
-		buttonPref = (Button) findViewById(R.id.button_pref);
-		buttonQuit = (Button) findViewById(R.id.button_quit);
+		buttonPlay = (ImageButton) findViewById(R.id.button_play);
+		buttonFull = (ImageButton) findViewById(R.id.button_full);
+		buttonNext = (ImageButton) findViewById(R.id.button_next);
+		buttonPref = (ImageButton) findViewById(R.id.button_pref);
+		buttonQuit = (ImageButton) findViewById(R.id.button_quit);
 
 	}
 
