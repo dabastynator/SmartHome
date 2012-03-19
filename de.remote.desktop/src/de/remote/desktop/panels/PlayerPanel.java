@@ -24,20 +24,26 @@ public class PlayerPanel extends Panel {
 	private Button volUp;
 	private Button volDown;
 	private Button quit;
+	private Button seekFWB;
+	private Button seekBWB;
 
 	public PlayerPanel() {
 		setName("Player control");
 		setLayout(new GridLayout());
-		this.play = new Button("Play");
-		this.next = new Button("Next");
-		this.prev = new Button("Previous");
+		this.play = new Button("|>");
+		this.next = new Button(">>|");
+		this.prev = new Button("|<<");
+		this.seekFWB = new Button(">>");
+		this.seekBWB = new Button("<<");
 		this.full = new Button("Fullscreen");
 		this.volUp = new Button("Vol+");
 		this.volDown = new Button("Vol-");
 		this.quit = new Button("Quit");
-		add(this.play);
-		add(this.next);
 		add(this.prev);
+		add(this.seekBWB);
+		add(this.play);
+		add(this.seekFWB);
+		add(this.next);
 		add(this.full);
 		add(this.volUp);
 		add(this.volDown);
@@ -68,6 +74,28 @@ public class PlayerPanel extends Panel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PlayerPanel.this.player.previous();
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				} catch (PlayerException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		this.seekBWB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					PlayerPanel.this.player.seekBackwards();
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				} catch (PlayerException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		this.seekFWB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					PlayerPanel.this.player.seekForwards();
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
 				} catch (PlayerException e1) {
