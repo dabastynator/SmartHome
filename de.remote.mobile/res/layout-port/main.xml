@@ -17,7 +17,7 @@
         android:layout_weight="8"
         android:orientation="horizontal" >
 
-        <ImageButton
+        <ImageView
             android:id="@+id/button_play"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -26,7 +26,7 @@
             android:src="@drawable/pause"
             android:text="|>" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/button_quit"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -35,7 +35,7 @@
             android:src="@drawable/stop"
             android:text="x" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/button_pref"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -44,7 +44,7 @@
             android:src="@drawable/prev"
             android:text="&lt;" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/button_next"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -53,7 +53,7 @@
             android:src="@drawable/next"
             android:text=">" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/button_full"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

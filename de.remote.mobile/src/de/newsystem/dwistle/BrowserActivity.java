@@ -19,7 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,11 +65,11 @@ public class BrowserActivity extends Activity {
 		}
 	};
 
-	private ImageButton buttonPlay;
-	private ImageButton buttonFull;
-	private ImageButton buttonNext;
-	private ImageButton buttonPref;
-	private ImageButton buttonQuit;
+	private ImageView buttonPlay;
+	private ImageView buttonFull;
+	private ImageView buttonNext;
+	private ImageView buttonPref;
+	private ImageView buttonQuit;
 
 	public String selectedItem;
 
@@ -90,11 +90,11 @@ public class BrowserActivity extends Activity {
 
 	private void findComponents() {
 		listView = (ListView) findViewById(R.id.fileList);
-		buttonPlay = (ImageButton) findViewById(R.id.button_play);
-		buttonFull = (ImageButton) findViewById(R.id.button_full);
-		buttonNext = (ImageButton) findViewById(R.id.button_next);
-		buttonPref = (ImageButton) findViewById(R.id.button_pref);
-		buttonQuit = (ImageButton) findViewById(R.id.button_quit);
+		buttonPlay = (ImageView) findViewById(R.id.button_play);
+		buttonFull = (ImageView) findViewById(R.id.button_full);
+		buttonNext = (ImageView) findViewById(R.id.button_next);
+		buttonPref = (ImageView) findViewById(R.id.button_pref);
+		buttonQuit = (ImageView) findViewById(R.id.button_quit);
 
 	}
 
@@ -264,6 +264,22 @@ public class BrowserActivity extends Activity {
 	public void prev(View v) {
 		try {
 			binder.getPlayer().previous();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public void seekBwd(View w){
+		try {
+			binder.getPlayer().seekBackwards();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public void seekFwd(View w){
+		try {
+			binder.getPlayer().seekForwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}

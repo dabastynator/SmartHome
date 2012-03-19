@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="4" >
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/button_play"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:onClick="playPause"
+                android:src="@drawable/pause" />
+
+            <ImageView
+                android:id="@+id/button_quit"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:onClick="stopPlayer"
+                android:src="@drawable/stop" />
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/button_pref"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:onClick="prev"
+                android:src="@drawable/prev" />
+
+            <ImageView
+                android:id="@+id/button_next"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:onClick="next"
+                android:src="@drawable/next" />
+        </TableRow>
+
+        <TableRow>
+
+
+                <ImageView
+                    android:id="@+id/button_seek_bwd"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:onClick="seekBwd"
+                    android:src="@drawable/seek_bwd" />
+
+                <ImageView
+                    android:id="@+id/button_seek_fwd"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:onClick="seekFwd"
+                    android:src="@drawable/seek_fwd" />
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/button_full"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:onClick="fullScreen"
+                android:src="@drawable/full"
+                android:text=">&lt;" />
+        </TableRow>
+    </TableLayout>
+
+    <ListView
+        android:id="@+id/fileList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" />
+
+</LinearLayout>
