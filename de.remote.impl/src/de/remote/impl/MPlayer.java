@@ -23,6 +23,7 @@ public class MPlayer implements IPlayer {
 	private int fullscreen = 1;
 	private int volume = 50;
 	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
+	private int seekValue;
 
 	@Override
 	public void play(String file) {
@@ -102,6 +103,33 @@ public class MPlayer implements IPlayer {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
 		mplayerIn.print("pt_step previous");
+		mplayerIn.print("\n");
+		mplayerIn.flush();
+	}
+	
+
+	@Override
+	public void seekForwards() throws RemoteException, PlayerException {
+		if (mplayerIn == null)
+			throw new PlayerException("mplayer is down");
+		if (seekValue <= 0)
+			seekValue = 1;
+		else
+			seekValue *= 5;
+		mplayerIn.print("seek " + seekValue + " 0");
+		mplayerIn.print("\n");
+		mplayerIn.flush();
+	}
+
+	@Override
+	public void seekBackwards() throws RemoteException, PlayerException {
+		if (mplayerIn == null)
+			throw new PlayerException("mplayer is down");
+		if (seekValue >= 0)
+			seekValue = -1;
+		else
+			seekValue *= 5;
+		mplayerIn.print("seek " + seekValue + " 0");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
@@ -214,6 +242,7 @@ public class MPlayer implements IPlayer {
 			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
+//					System.out.println(line);
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8));
 					if (line.startsWith(" Artist: "))
@@ -245,4 +274,5 @@ public class MPlayer implements IPlayer {
 		}
 
 	}
+
 }

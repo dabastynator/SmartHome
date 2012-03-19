@@ -17,6 +17,8 @@ public class TotemPlayer implements IPlayer {
 	private static final String VOL_UP = "totem --volume-up";
 	private static final String VOL_DOWN = "totem --volume-down";
 	private static final String FULL_SCREEN = "totem --fullscreen";
+	private static final String SEEK_FWD = "totem --seek-fwd";
+	private static final String SEEK_BWD = "totem --seek-bwd";
 
 	@Override
 	public void play(String file) {
@@ -129,6 +131,24 @@ public class TotemPlayer implements IPlayer {
 			Runtime.getRuntime().exec(
 					new String[] { PLAY,
 							PlayListImpl.PLAYLIST_LOCATION + pls + ".pls" });
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void seekForwards() throws RemoteException, PlayerException {
+		try {
+			Runtime.getRuntime().exec(SEEK_FWD);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void seekBackwards() throws RemoteException, PlayerException {
+		try {
+			Runtime.getRuntime().exec(SEEK_BWD);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
