@@ -65,12 +65,6 @@ public class BrowserActivity extends Activity {
 		}
 	};
 
-	private ImageView buttonPlay;
-	private ImageView buttonFull;
-	private ImageView buttonNext;
-	private ImageView buttonPref;
-	private ImageView buttonQuit;
-
 	public String selectedItem;
 
 	private String currentPlayList;
@@ -90,11 +84,11 @@ public class BrowserActivity extends Activity {
 
 	private void findComponents() {
 		listView = (ListView) findViewById(R.id.fileList);
-		buttonPlay = (ImageView) findViewById(R.id.button_play);
-		buttonFull = (ImageView) findViewById(R.id.button_full);
-		buttonNext = (ImageView) findViewById(R.id.button_next);
-		buttonPref = (ImageView) findViewById(R.id.button_pref);
-		buttonQuit = (ImageView) findViewById(R.id.button_quit);
+//		buttonPlay = (ImageView) findViewById(R.id.button_play);
+//		buttonFull = (ImageView) findViewById(R.id.button_full);
+//		buttonNext = (ImageView) findViewById(R.id.button_next);
+//		buttonPref = (ImageView) findViewById(R.id.button_pref);
+//		buttonQuit = (ImageView) findViewById(R.id.button_quit);
 
 	}
 
@@ -149,11 +143,6 @@ public class BrowserActivity extends Activity {
 	}
 
 	private void enableButtons(boolean b) {
-		buttonPlay.setEnabled(b);
-		buttonFull.setEnabled(b);
-		buttonNext.setEnabled(b);
-		buttonPref.setEnabled(b);
-		buttonQuit.setEnabled(b);
 	}
 
 	@Override
@@ -285,6 +274,24 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	public void volUp(View w){
+		try {
+			binder.getPlayer().volUp();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	
+	public void volDown(View w){
+		try {
+			binder.getPlayer().volDown();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	
 	public void fullScreen(View v) {
 		try {
 			binder.getPlayer().fullScreen();
