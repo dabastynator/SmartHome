@@ -53,6 +53,22 @@ public interface IPlayer extends RemoteAble {
 	void previous() throws RemoteException, PlayerException;
 
 	/**
+	 * seek forwards in current playing file
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void seekForwards() throws RemoteException, PlayerException;
+	
+	/**
+	 * seek backwards in current playing file
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void seekBackwards() throws RemoteException, PlayerException;
+
+	/**
 	 * volume up
 	 * 
 	 * @throws RemoteException
