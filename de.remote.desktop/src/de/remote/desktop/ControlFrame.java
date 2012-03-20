@@ -30,53 +30,137 @@ import de.remote.desktop.panels.PlayListPanel;
 import de.remote.desktop.panels.PlayerPanel;
 
 /**
- * The main frame for the gui
+ * The main frame for the gui. It creates all panels and menus that will be
+ * needed.
  * 
  * @author sebastian
  */
+/**
+ * @author sebastian
+ *
+ */
+/**
+ * @author sebastian
+ * 
+ */
 public class ControlFrame extends JFrame {
 
-	public static final Map<String, String> serverList = new HashMap();
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = 1222897455250462547L;
+
+	/**
+	 * list of all connectable servers
+	 */
+	public static final Map<String, String> serverList = new HashMap<String, String>();
+
+	/**
+	 * control panel for the player
+	 */
 	private PlayerPanel playerControl;
-	private DesktopPlayerListener playerListener;
-	private IPlayer currentPlayer;
+
+	/**
+	 * browser panel to display directories
+	 */
 	private BrowserPanel fileBrowser;
-	private IBrowser browser;
+
+	/**
+	 * playlist panel to display playlists and items of playlists
+	 */
 	private PlayListPanel plsBrowser;
+
+	/**
+	 * chat panel with textfiels do write and get messages
+	 */
 	private ChatPanel chat;
-	public IStation station;
-	public Server server;
-	private ControlMenu controlMenu;
-	private int port;
-	private String clientName;
+
+	/**
+	 * menu to choose different server to connect with
+	 */
 	private ServerMenu serverMenu;
+
+	/**
+	 * menu to choose different player
+	 */
 	private PlayerMenu playerMenu;
+
+	/**
+	 * menu for main control options, example shutdown
+	 */
+	private ControlMenu controlMenu;
+
+	/**
+	 * listener for the player
+	 */
+	private DesktopPlayerListener playerListener;
+
+	/**
+	 * player object for the remote player
+	 */
+	private IPlayer currentPlayer;
+
+	/**
+	 * remote factory object to get all other remote objects
+	 */
+	public IStation station;
+
+	/**
+	 * remote mplayer
+	 */
 	private IPlayer mPlayer;
+
+	/**
+	 * remote totem
+	 */
 	private IPlayer totemPlayer;
+
+	/**
+	 * chat server object
+	 */
 	private IChatServer chatServer;
+
+	/**
+	 * the local server
+	 */
+	public Server server;
+
+	/**
+	 * port for the local server
+	 */
+	private int port;
+
+	/**
+	 * client name used for chat client
+	 */
+	private String clientName;
 
 	static {
 		serverList.put("Idefix", "192.168.1.4");
 		serverList.put("Inspiron", "192.168.1.3");
-		// serverList.put("Home", "192.168.2.109");
 		serverList.put("localhost", "localhost");
 	}
 
+	/**
+	 * allocate frame and create all panels and menus
+	 */
 	public ControlFrame() {
 		setDefaultCloseOperation(3);
 		setSize(600, 400);
 		setTitle("Idefix");
 		this.playerControl = new PlayerPanel();
+		this.chat = new ChatPanel();
+		this.plsBrowser = new PlayListPanel();
+		this.fileBrowser = new BrowserPanel();
 		this.playerListener = new DesktopPlayerListener();
+
 		setLayout(new BorderLayout());
 		add("South", this.playerControl);
+
 		JTabbedPane tabs = new JTabbedPane();
 		add(tabs);
-		this.fileBrowser = new BrowserPanel();
 		tabs.add(this.fileBrowser);
-		this.plsBrowser = new PlayListPanel();
 		tabs.add(this.plsBrowser);
-		this.chat = new ChatPanel();
 		tabs.add(this.chat);
 		setVisible(true);
 		addWindowListener(new DesktopWindowListener());
@@ -91,6 +175,12 @@ public class ControlFrame extends JFrame {
 		setMenuBar(menuBar);
 	}
 
+	/**
+	 * set new current player. playerpanel, browserpanel and plspanel will be
+	 * informed.
+	 * 
+	 * @param player
+	 */
 	public void setPlayer(IPlayer player) {
 		this.currentPlayer = player;
 		this.fileBrowser.setPlayer(player);
@@ -98,6 +188,14 @@ public class ControlFrame extends JFrame {
 		this.playerControl.setPlayer(player);
 	}
 
+	/**
+	 * create new connection to server, read objects from new registry. start
+	 * new local server at given port.
+	 * 
+	 * @param registry
+	 * @param port
+	 * @param name
+	 */
 	public void connectToServer(String registry, int port, String name) {
 		try {
 			closeConnections();
@@ -135,6 +233,9 @@ public class ControlFrame extends JFrame {
 		}
 	}
 
+	/**
+	 * close connection from server, remove listeners.
+	 */
 	private void closeConnections() {
 		try {
 			if (this.mPlayer != null)

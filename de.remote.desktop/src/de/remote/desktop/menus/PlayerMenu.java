@@ -9,15 +9,37 @@ import de.remote.api.IPlayer;
 import de.remote.desktop.ControlFrame;
 
 /**
- * menu to switch the current player
+ * Menu to switch the current player. There are two possible players: mplayer
+ * and totem.
  * 
  * @author sebastian
  */
 public class PlayerMenu extends Menu {
+	
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = -3270281115030502334L;
+	
+	/**
+	 * reference to the main frame to inform about new player 
+	 */
 	private ControlFrame mainFraim;
+	
+	/**
+	 * mplayer object 
+	 */
 	private IPlayer mplayer;
+	
+	/**
+	 * totem object 
+	 */
 	private IPlayer totem;
 
+	/**
+	 * allocates menu, create and initialize menu items
+	 * @param mainFrame
+	 */
 	public PlayerMenu(ControlFrame mainFrame) {
 		super("Player");
 		this.mainFraim = mainFrame;
@@ -37,6 +59,11 @@ public class PlayerMenu extends Menu {
 		add(totemItem);
 	}
 
+	/**
+	 * set player objects
+	 * @param totemPlayer
+	 * @param mPlayer
+	 */
 	public void setPlayer(IPlayer totemPlayer, IPlayer mPlayer) {
 		this.totem = totemPlayer;
 		this.mplayer = mPlayer;

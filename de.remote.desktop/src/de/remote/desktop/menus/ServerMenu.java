@@ -8,13 +8,28 @@ import java.awt.event.ActionListener;
 import de.remote.desktop.ControlFrame;
 
 /**
- * menu to switch the current server
+ * Menu to switch the current server. All server are listed in a map of the main
+ * frame.
  * 
  * @author sebastian
  */
 public class ServerMenu extends Menu {
+
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = -7292966307439063009L;
+
+	/**
+	 * main frame to inform about new server to connect with
+	 */
 	private ControlFrame mainFrame;
 
+	/**
+	 * allocates new menu, create and initialize menu items
+	 * 
+	 * @param mainFrame
+	 */
 	public ServerMenu(ControlFrame mainFrame) {
 		super("Server");
 		this.mainFrame = mainFrame;
@@ -26,19 +41,19 @@ public class ServerMenu extends Menu {
 	}
 
 	/**
-	 * listener to set the selected server
+	 * listener to inform the main frame about the selected server.
 	 * 
 	 * @author sebastian
 	 */
 	public class ServerActionListener implements ActionListener {
-		private String ip;
+		private String newServerIp;
 
 		public ServerActionListener(String server) {
-			this.ip = ((String) ControlFrame.serverList.get(server));
+			this.newServerIp = ((String) ControlFrame.serverList.get(server));
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			ServerMenu.this.mainFrame.connectToServer(this.ip);
+			ServerMenu.this.mainFrame.connectToServer(this.newServerIp);
 		}
 	}
 }

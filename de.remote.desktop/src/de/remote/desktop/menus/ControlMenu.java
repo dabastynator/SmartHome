@@ -9,13 +9,26 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IControl;
 
 /**
- * menu to handle standard commands for the computer
+ * Menu to handle standard commands for the computer. Provides items to handle
+ * display brightness and to shutdown the remote computer.
  * 
  * @author sebastian
  */
 public class ControlMenu extends Menu {
+
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * remote control object
+	 */
 	private IControl control;
 
+	/**
+	 * allocates new menu, create and initialize menu items.
+	 */
 	public ControlMenu() {
 		super("Control");
 		MenuItem shutdown = new MenuItem("Shutdown Server");
@@ -53,6 +66,11 @@ public class ControlMenu extends Menu {
 		});
 	}
 
+	/**
+	 * set the remote control object
+	 * 
+	 * @param control
+	 */
 	public void setControl(IControl control) {
 		this.control = control;
 	}
