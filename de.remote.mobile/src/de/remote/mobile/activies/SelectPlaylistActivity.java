@@ -1,4 +1,4 @@
-package de.newsystem.dwistle;
+package de.remote.mobile.activies;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -8,9 +8,26 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * this activity provides functionality to select a playlist.
+ * 
+ * @author sebastian
+ */
 public class SelectPlaylistActivity extends ListActivity {
 
+	/**
+	 * return code for selected playlist result
+	 */
+	public static final int SELECT_PLS_CODE = 0;
+
+	/**
+	 * name of parameter value, to get the available playlists from intent
+	 */
 	public static final String PLS_LIST = "plsList";
+
+	/**
+	 * 
+	 */
 	public static final String RESULT = "result";
 
 	@Override
@@ -29,7 +46,7 @@ public class SelectPlaylistActivity extends ListActivity {
 		String pls = ((TextView) v).getText().toString();
 		Intent i = new Intent();
 		i.putExtra(RESULT, pls);
-		setResult(BrowserActivity.SELECT_PLS_CODE, i);
+		setResult(SELECT_PLS_CODE, i);
 		finish();
 	}
 }

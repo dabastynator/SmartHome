@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, BrowserActivity!</string>
-    <string name="app_name">Dogwistle</string>
+    <string name="app_name">RemoteControl</string>
     <string name="str_post">Post</string>
+    <string name="str_add_new_server">Add new Server</string>
+    <string name="str_name">Name</string>
+    <string name="str_ip">IP</string>
+    <string name="str_create">Create</string>
+    <string name="str_server_delete">Remove Server</string>
+    <string name="str_server_edit">Edit Server</string>
+    <string name="str_server_favorite">Set as favorite</string>
+    <string name="str_server_name">server name</string>
 
 </resources>

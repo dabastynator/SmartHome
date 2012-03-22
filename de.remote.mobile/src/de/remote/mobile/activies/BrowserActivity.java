@@ -1,4 +1,4 @@
-package de.newsystem.dwistle;
+package de.remote.mobile.activies;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -19,35 +18,91 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.newsystem.dwistle.services.IdefixService;
-import de.newsystem.dwistle.services.IdefixService.PlayerBinder;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
+import de.remote.mobile.R;
+import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.services.RemoteService;
+import de.remote.mobile.services.RemoteService.PlayerBinder;
 
+/**
+ * the browser activity shows the current directory with all folders and files.
+ * It provides icons to control the music player.
+ * 
+ * @author sebastian
+ */
 public class BrowserActivity extends Activity {
 
+	/**
+	 * name for extra data for server name
+	 */
+	public static final String EXTRA_SERVER_NAME = "serverName";
+
+	/**
+	 * name of the viewer state field to store and restore the value
+	 */
 	private static final String VIEWER_STATE = "viewerstate";
 
-	public static final int SELECT_PLS_CODE = 0;
-
+	/**
+	 * viewer states of the browser
+	 * 
+	 * @author sebastian
+	 */
 	public enum ViewerState {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
-	};
+	}
 
+	/**
+	 * current directories
+	 */
 	private String[] directories;
 
+	/**
+	 * current files
+	 */
 	private String[] files;
 
+	/**
+	 * list view
+	 */
 	private ListView listView;
 
+	/**
+	 * binder object
+	 */
 	private PlayerBinder binder;
 
+	/**
+	 * current viewer state
+	 */
 	private ViewerState viewerState = ViewerState.DIRECTORIES;
 
+	/**
+	 * current selected item of the list view
+	 */
+	public String selectedItem;
+
+	/**
+	 * current shown playlist
+	 */
+	private String currentPlayList;
+
+	/**
+	 * database object
+	 */
+	private ServerDatabase serverDB;
+
+	/**
+	 * name of connected server
+	 */
+	private String serverName;
+
+	/**
+	 * connection to the service
+	 */
 	private ServiceConnection playerConnection = new ServiceConnection() {
 
 		@Override
@@ -58,21 +113,31 @@ public class BrowserActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			disableScreen();
-			if (binder.getChatServer() == null)
-				binder.connectToServer("192.168.1.3", new ShowFolderRunnable());
-			else
+			if (binder.getChatServer() == null) {
+				if (getIntent().getExtras() != null
+						&& getIntent().getExtras().containsKey(
+								EXTRA_SERVER_NAME))
+					serverName = getIntent().getExtras().getString(
+							EXTRA_SERVER_NAME);
+				else
+					serverName = serverDB.getFavoriteServer();
+
+				if (serverName != null && serverName.length() > 0)
+					binder.connectToServer(serverName, new ShowFolderRunnable());
+				else
+					Toast.makeText(BrowserActivity.this,
+							"no server configurated", Toast.LENGTH_SHORT)
+							.show();
+			} else
 				new ShowFolderRunnable().run();
 		}
 	};
-
-	public String selectedItem;
-
-	private String currentPlayList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		serverDB = new ServerDatabase(this);
 		findComponents();
 		listView.setBackgroundResource(R.drawable.idefix_dark);
 		listView.setScrollingCacheEnabled(false);
@@ -82,21 +147,17 @@ public class BrowserActivity extends Activity {
 		registerForContextMenu(listView);
 	}
 
+	/**
+	 * find components by their id
+	 */
 	private void findComponents() {
 		listView = (ListView) findViewById(R.id.fileList);
-//		buttonPlay = (ImageView) findViewById(R.id.button_play);
-//		buttonFull = (ImageView) findViewById(R.id.button_full);
-//		buttonNext = (ImageView) findViewById(R.id.button_next);
-//		buttonPref = (ImageView) findViewById(R.id.button_pref);
-//		buttonQuit = (ImageView) findViewById(R.id.button_quit);
-
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		System.out.println("createcontextmenu");
 		MenuInflater mi = new MenuInflater(getApplication());
 		if (viewerState == ViewerState.DIRECTORIES)
 			mi.inflate(R.menu.item_pref, menu);
@@ -130,19 +191,9 @@ public class BrowserActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-		Intent intent = new Intent(this, IdefixService.class);
+		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
-		boolean bound = bindService(intent, playerConnection,
-				Context.BIND_AUTO_CREATE);
-		if (!bound)
-			Log.e("nicht verbunden!!!", "service nicht verbunden");
-		// if (binder == null)
-		// disableScreen();
-		// else
-		// showUpDateUI();
-	}
-
-	private void enableButtons(boolean b) {
+		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -151,8 +202,11 @@ public class BrowserActivity extends Activity {
 		super.onPause();
 	}
 
+	/**
+	 * update gui elements, show current directory or playlist
+	 */
 	private void showUpDateUI() {
-		if (binder == null || binder.getBrowser() == null){
+		if (binder == null || binder.getBrowser() == null) {
 			disableScreen();
 			return;
 		}
@@ -166,21 +220,20 @@ public class BrowserActivity extends Activity {
 						files.length);
 				listView.setAdapter(new ArrayAdapter<String>(this,
 						android.R.layout.simple_list_item_1, all));
-				setTitle(binder.getBrowser().getLocation());
+				setTitle(binder.getBrowser().getLocation() + "@" + serverName);
 			}
 			if (viewerState == ViewerState.PLAYLISTS) {
 				listView.setAdapter(new ArrayAdapter<String>(this,
 						android.R.layout.simple_list_item_1, binder
 								.getPlayList().getPlayLists()));
-				setTitle("Playlists");
+				setTitle("Playlists@" + serverName);
 			}
 			if (viewerState == ViewerState.PLS_ITEMS) {
 				listView.setAdapter(new ArrayAdapter<String>(this,
 						android.R.layout.simple_list_item_1, binder
 								.getPlayList().listContent(currentPlayList)));
-				setTitle("Playlist: " + currentPlayList);
+				setTitle("Playlist: " + currentPlayList + "@" + serverName);
 			}
-			enableButtons(true);
 		} catch (RemoteException e) {
 			disableScreen();
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -226,6 +279,11 @@ public class BrowserActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/**
+	 * toggle playing and pausing status on player.
+	 * 
+	 * @param v
+	 */
 	public void playPause(View v) {
 		try {
 			binder.getPlayer().playPause();
@@ -234,6 +292,11 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * quit player
+	 * 
+	 * @param v
+	 */
 	public void stopPlayer(View v) {
 		try {
 			binder.getPlayer().quit();
@@ -242,6 +305,11 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * play next file
+	 * 
+	 * @param v
+	 */
 	public void next(View v) {
 		try {
 			binder.getPlayer().next();
@@ -250,6 +318,11 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * play previous file
+	 * 
+	 * @param v
+	 */
 	public void prev(View v) {
 		try {
 			binder.getPlayer().previous();
@@ -257,16 +330,26 @@ public class BrowserActivity extends Activity {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
-	
-	public void seekBwd(View w){
+
+	/**
+	 * seek backward
+	 * 
+	 * @param v
+	 */
+	public void seekBwd(View v) {
 		try {
 			binder.getPlayer().seekBackwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
-	
-	public void seekFwd(View w){
+
+	/**
+	 * seek forward
+	 * 
+	 * @param v
+	 */
+	public void seekFwd(View v) {
 		try {
 			binder.getPlayer().seekForwards();
 		} catch (Exception e) {
@@ -274,7 +357,12 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
-	public void volUp(View w){
+	/**
+	 * volume up
+	 * 
+	 * @param v
+	 */
+	public void volUp(View v) {
 		try {
 			binder.getPlayer().volUp();
 		} catch (Exception e) {
@@ -282,8 +370,12 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
-	
-	public void volDown(View w){
+	/**
+	 * volume down
+	 * 
+	 * @param v
+	 */
+	public void volDown(View v) {
 		try {
 			binder.getPlayer().volDown();
 		} catch (Exception e) {
@@ -291,7 +383,11 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
-	
+	/**
+	 * switch fullscreen status
+	 * 
+	 * @param v
+	 */
 	public void fullScreen(View v) {
 		try {
 			binder.getPlayer().fullScreen();
@@ -304,14 +400,6 @@ public class BrowserActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		try {
 			switch (item.getItemId()) {
-			case R.id.opt_idefix:
-				disableScreen();
-				binder.connectToServer("192.168.1.4", new ShowFolderRunnable());
-				break;
-			case R.id.opt_inspiron:
-				disableScreen();
-				binder.connectToServer("192.168.1.3", new ShowFolderRunnable());
-				break;
 			case R.id.opt_mplayer:
 				binder.useMPlayer();
 				break;
@@ -355,6 +443,10 @@ public class BrowserActivity extends Activity {
 				Intent intent = new Intent(this, ChatActivity.class);
 				startActivity(intent);
 				break;
+			case R.id.opt_server_select:
+				intent = new Intent(this, SelectServerActivity.class);
+				startActivity(intent);
+				break;
 			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -376,7 +468,7 @@ public class BrowserActivity extends Activity {
 				Intent i = new Intent(this, SelectPlaylistActivity.class);
 				i.putExtra(SelectPlaylistActivity.PLS_LIST, binder
 						.getPlayList().getPlayLists());
-				startActivityForResult(i, SELECT_PLS_CODE);
+				startActivityForResult(i, SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
 			case R.id.opt_pls_delete:
 				binder.getPlayList().removePlayList(selectedItem);
@@ -412,7 +504,7 @@ public class BrowserActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		try {
-			if (requestCode == SELECT_PLS_CODE) {
+			if (requestCode == SelectPlaylistActivity.SELECT_PLS_CODE) {
 				if (data.getExtras() == null)
 					return;
 				String pls = data.getExtras().getString(
@@ -439,13 +531,21 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * disable the gui elements. inform user about connecting status.
+	 */
 	private void disableScreen() {
 		setTitle("connecting...");
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
-		enableButtons(false);
 	}
 
+	/**
+	 * callback for connecting to the remote server. update the list view and
+	 * show the directory.
+	 * 
+	 * @author sebastian
+	 */
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
@@ -453,6 +553,11 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * listener for clicks on the list view. play the selected item.
+	 * 
+	 * @author sebastian
+	 */
 	public class MyClickListener implements OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View view, int arg2,
@@ -461,7 +566,7 @@ public class BrowserActivity extends Activity {
 			try {
 				if (viewerState == ViewerState.PLAYLISTS) {
 					binder.getPlayer().playPlayList(item);
-					Toast.makeText(BrowserActivity.this, "Playlist abspielen",
+					Toast.makeText(BrowserActivity.this, "play playlist",
 							Toast.LENGTH_SHORT).show();
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
@@ -485,6 +590,12 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * listener for long clicks on the list view. store the selected item in the
+	 * selecteditem field.
+	 * 
+	 * @author sebastian
+	 */
 	public class MyLongClickListener implements OnItemLongClickListener {
 
 		@Override

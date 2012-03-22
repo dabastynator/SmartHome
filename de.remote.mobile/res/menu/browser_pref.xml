@@ -2,18 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/item1"
+        android:id="@+id/opt_server_select"
         android:title="Server">
-        <menu>
-            <item
-                android:id="@+id/opt_idefix"
-                android:title="Idefix">
-            </item>
-            <item
-                android:id="@+id/opt_inspiron"
-                android:title="Inspiron">
-            </item>
-        </menu>
     </item>
     <item
         android:id="@+id/item2"
