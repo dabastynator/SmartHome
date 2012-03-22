@@ -120,9 +120,9 @@ public class RemoteService extends Service {
 	 * create connection, execute runnable if connection has started in the ui
 	 * thread.
 	 * 
-	 * @param r
+	 * @param successRunnable
 	 */
-	private void connect(final Runnable r) {
+	private void connect(final Runnable successRunnable) {
 		new Thread() {
 
 			@Override
@@ -149,8 +149,8 @@ public class RemoteService extends Service {
 					control = station.getControl();
 					playList = station.getPlayList();
 					chatServer = station.getChatServer();
-					if (r != null)
-						handler.post(r);
+					if (successRunnable != null)
+						handler.post(successRunnable);
 				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						@Override

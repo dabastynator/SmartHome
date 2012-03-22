@@ -113,23 +113,18 @@ public class BrowserActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			disableScreen();
-			if (binder.getChatServer() == null) {
-				if (getIntent().getExtras() != null
-						&& getIntent().getExtras().containsKey(
-								EXTRA_SERVER_NAME))
-					serverName = getIntent().getExtras().getString(
-							EXTRA_SERVER_NAME);
-				else
-					serverName = serverDB.getFavoriteServer();
+			if (getIntent().getExtras() != null
+					&& getIntent().getExtras().containsKey(EXTRA_SERVER_NAME))
+				serverName = getIntent().getExtras().getString(
+						EXTRA_SERVER_NAME);
+			else
+				serverName = serverDB.getFavoriteServer();
 
-				if (serverName != null && serverName.length() > 0)
-					binder.connectToServer(serverName, new ShowFolderRunnable());
-				else
-					Toast.makeText(BrowserActivity.this,
-							"no server configurated", Toast.LENGTH_SHORT)
-							.show();
-			} else
-				new ShowFolderRunnable().run();
+			if (serverName != null && serverName.length() > 0)
+				binder.connectToServer(serverName, new ShowFolderRunnable());
+			else
+				Toast.makeText(BrowserActivity.this, "no server configurated",
+						Toast.LENGTH_SHORT).show();
 		}
 	};
 
@@ -431,10 +426,6 @@ public class BrowserActivity extends Activity {
 				viewerState = ViewerState.PLAYLISTS;
 				showUpDateUI();
 				break;
-			case R.id.opt_folder:
-				viewerState = ViewerState.DIRECTORIES;
-				showUpDateUI();
-				break;
 			case R.id.opt_create_playlist:
 				Intent i = new Intent(this, GetTextActivity.class);
 				startActivityForResult(i, GetTextActivity.RESULT_CODE);
@@ -446,6 +437,7 @@ public class BrowserActivity extends Activity {
 			case R.id.opt_server_select:
 				intent = new Intent(this, SelectServerActivity.class);
 				startActivity(intent);
+				finish();
 				break;
 			}
 		} catch (Exception e) {
@@ -468,7 +460,8 @@ public class BrowserActivity extends Activity {
 				Intent i = new Intent(this, SelectPlaylistActivity.class);
 				i.putExtra(SelectPlaylistActivity.PLS_LIST, binder
 						.getPlayList().getPlayLists());
-				startActivityForResult(i, SelectPlaylistActivity.SELECT_PLS_CODE);
+				startActivityForResult(i,
+						SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
 			case R.id.opt_pls_delete:
 				binder.getPlayList().removePlayList(selectedItem);

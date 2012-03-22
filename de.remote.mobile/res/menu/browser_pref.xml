@@ -49,14 +49,17 @@
         android:id="@+id/item5"
         android:title="Playlists">
         <menu>
-            <item android:id="@+id/opt_playlist" android:title="Show Playlists"/>
-            <item android:id="@+id/opt_create_playlist" android:title="Create new Playlist"/>
+            <item
+                android:id="@+id/opt_playlist"
+                android:title="Show Playlists"/>
+            <item
+                android:id="@+id/opt_create_playlist"
+                android:title="Create new Playlist"/>
         </menu>
     </item>
-        <item
-        android:id="@+id/opt_folder"
-        android:title="Folders">
+    <item
+        android:id="@+id/opt_chat"
+        android:title="Chat">
     </item>
-        <item android:id="@+id/opt_chat" android:title="Chat"></item>
 
 </menu>
