@@ -94,34 +94,27 @@ public class TotemPlayer implements IPlayer {
 
 	@Override
 	public void nextAudio() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
+		throw new PlayerException("not supported function for totem");
 	}
 
 	@Override
 	public void moveLeft() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
+		throw new PlayerException("not supported function for totem");
 	}
 
 	@Override
 	public void moveRight() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
+		throw new PlayerException("not supported function for totem");
 	}
 
 	@Override
 	public void addPlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void removePlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

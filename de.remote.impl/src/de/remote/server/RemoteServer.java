@@ -1,7 +1,7 @@
 package de.remote.server;
 
 import java.io.IOException;
-import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import de.newsystem.rmi.api.Server;
@@ -18,16 +18,16 @@ public class RemoteServer {
 
 		if (args.length > 0)
 			place = args[0];
-		
+
 		if (args.length > 1)
 			registry = args[1];
 
 		System.out.println("Browse at " + place + " (" + registry + ")");
 
 		Server server = Server.getServer();
-		
+
 		IStation station = new StationImpl(place);
-		
+
 		try {
 			forceConnectToRegistry(registry);
 			server.startServer(ControlConstants.STATION_PORT);
@@ -37,19 +37,22 @@ public class RemoteServer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
-	private static void forceConnectToRegistry(String registry) throws UnknownHostException,
-			IOException {
+	private static void forceConnectToRegistry(String registry)
+			throws UnknownHostException, IOException {
 		Server server = Server.getServer();
 		boolean connected = false;
+		int counter = 1;
 		while (!connected) {
 			try {
 				server.connectToRegistry(registry);
 				connected = true;
-			} catch (NoRouteToHostException e) {
+			} catch (SocketException e) {
 				connected = false;
+				System.out.println("socketexception " + (counter++)
+						+ ". time: " + e.getMessage());
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e1) {

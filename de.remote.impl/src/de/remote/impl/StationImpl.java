@@ -12,7 +12,6 @@ public class StationImpl implements IStation {
 
 	private TotemPlayer totem;
 	private MPlayer mplayer;
-	private BrowserImpl browser;
 	private ControlImpl control;
 	private PlayListImpl playlist;
 	private ChatServerImpl chatServer;
