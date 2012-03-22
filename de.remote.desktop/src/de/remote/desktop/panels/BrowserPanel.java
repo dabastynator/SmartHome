@@ -19,19 +19,52 @@ import de.remote.api.IPlayer;
 import de.remote.api.PlayerException;
 
 /**
- * panel to browse throw the file system. the panel has a buttons to control the
- * player and edit playlists.
+ * panel to browse throw the file system, it contains a list to list all
+ * directories and files. the panel has buttons to start the player with the
+ * selected element and edit playlists.
  * 
  * @author sebastian
  */
 public class BrowserPanel extends Panel {
+	
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = -4475675762287419881L;
+	
+	/**
+	 * remote browser object 
+	 */
 	private IBrowser browser;
+	
+	/**
+	 * remote player object 
+	 */
 	private IPlayer player;
+	
+	/**
+	 * current directories 
+	 */
 	private String[] directories;
+	
+	/**
+	 * current files 
+	 */
 	private String[] files;
+	
+	/**
+	 * swing list that contains all directories and files
+	 */
 	private List fileList;
+	
+	/**
+	 * remote playlist object 
+	 */
 	private IPlayList pls;
 
+	/**
+	 * allocate browserpanel, create and initialize all ui elements
+	 */
 	public BrowserPanel() {
 		setName("File-Browser");
 		this.fileList = new List();

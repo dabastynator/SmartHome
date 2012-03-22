@@ -24,13 +24,45 @@ import de.remote.api.IChatServer;
  * @author sebastian
  */
 public class ChatPanel extends Panel {
+
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = 1943882690369058543L;
+
+	/**
+	 * list of all clients in the chatroom
+	 */
 	private List clientList;
+
+	/**
+	 * listener for new messages and clients
+	 */
 	private ChatListener actionListener;
+
+	/**
+	 * area for all messages
+	 */
 	private TextArea textArea;
+
+	/**
+	 * textfield for new message
+	 */
 	private TextField inputText;
+
+	/**
+	 * remote chatserver object
+	 */
 	private IChatServer server;
+
+	/**
+	 * name of the client
+	 */
 	private String clientName;
 
+	/**
+	 * allocate chatpanel, create and initialize gui elements
+	 */
 	public ChatPanel() {
 		setName("Chat");
 		this.clientList = new List();
@@ -43,6 +75,12 @@ public class ChatPanel extends Panel {
 		add("South", getControl());
 	}
 
+	/**
+	 * create, initialize and return area for new messages, this contains a
+	 * textfield and a button.
+	 * 
+	 * @return control
+	 */
 	private Component getControl() {
 		Panel p = new Panel();
 		p.setLayout(new GridLayout());
@@ -88,6 +126,11 @@ public class ChatPanel extends Panel {
 		return p;
 	}
 
+	/**
+	 * set remote chatserver object
+	 * 
+	 * @param server
+	 */
 	public void setChatServer(IChatServer server) {
 		this.server = server;
 		try {
@@ -100,21 +143,39 @@ public class ChatPanel extends Panel {
 		}
 	}
 
+	/**
+	 * remove the listener from the chatserver
+	 * 
+	 * @throws RemoteException
+	 */
 	public void removeListener() throws RemoteException {
 		if (this.server != null)
 			this.server.removeChatListener(this.actionListener);
 		this.clientList.removeAll();
 	}
 
+	/**
+	 * set the name of the client
+	 * 
+	 * @param name
+	 */
 	public void setClientName(String name) {
 		setName(name + " @ Chat");
 		this.clientName = name;
 	}
 
+	/**
+	 * the chatlistener listens for new messages from the chatserver. in writes
+	 * new messages in the textarea.
+	 * 
+	 * @author sebastian
+	 */
 	public class ChatListener implements IChatListener {
+		
 		public ChatListener() {
 		}
 
+		@Override
 		public void informMessage(String client, String msg)
 				throws RemoteException {
 			String txt = ChatPanel.this.textArea.getText();
@@ -122,14 +183,17 @@ public class ChatPanel extends Panel {
 			ChatPanel.this.textArea.setText(txt);
 		}
 
+		@Override
 		public void informNewClient(String client) throws RemoteException {
 			ChatPanel.this.clientList.add(client);
 		}
 
+		@Override
 		public void informLeftClient(String client) throws RemoteException {
 			ChatPanel.this.clientList.remove(client);
 		}
 
+		@Override
 		public String getName() throws RemoteException {
 			return ChatPanel.this.clientName;
 		}

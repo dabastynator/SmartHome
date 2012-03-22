@@ -16,17 +16,65 @@ import de.remote.api.PlayerException;
  * @author sebastian
  */
 public class PlayerPanel extends Panel {
+
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = -1645107804597739638L;
+
+	/**
+	 * remote player object
+	 */
 	private IPlayer player;
+
+	/**
+	 * play button
+	 */
 	private Button play;
+
+	/**
+	 * next button
+	 */
 	private Button next;
+
+	/**
+	 * previous button
+	 */
 	private Button prev;
-	private Button full;
+
+	/**
+	 * fullscreen button
+	 */
+	private Button fullscreen;
+
+	/**
+	 * volume up button
+	 */
 	private Button volUp;
+
+	/**
+	 * volume down button
+	 */
 	private Button volDown;
+
+	/**
+	 * quit player button
+	 */
 	private Button quit;
+
+	/**
+	 * seek forward button
+	 */
 	private Button seekFWB;
+
+	/**
+	 * seek backward button
+	 */
 	private Button seekBWB;
 
+	/**
+	 * allocate playerpanel, create and initialize all buttons
+	 */
 	public PlayerPanel() {
 		setName("Player control");
 		setLayout(new GridLayout());
@@ -35,7 +83,7 @@ public class PlayerPanel extends Panel {
 		this.prev = new Button("|<<");
 		this.seekFWB = new Button(">>");
 		this.seekBWB = new Button("<<");
-		this.full = new Button("Fullscreen");
+		this.fullscreen = new Button("Fullscreen");
 		this.volUp = new Button("Vol+");
 		this.volDown = new Button("Vol-");
 		this.quit = new Button("Quit");
@@ -44,7 +92,7 @@ public class PlayerPanel extends Panel {
 		add(this.play);
 		add(this.seekFWB);
 		add(this.next);
-		add(this.full);
+		add(this.fullscreen);
 		add(this.volUp);
 		add(this.volDown);
 		add(this.quit);
@@ -103,7 +151,7 @@ public class PlayerPanel extends Panel {
 				}
 			}
 		});
-		this.full.addActionListener(new ActionListener() {
+		this.fullscreen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PlayerPanel.this.player.fullScreen();
@@ -149,6 +197,11 @@ public class PlayerPanel extends Panel {
 		});
 	}
 
+	/**
+	 * set remote player object
+	 * 
+	 * @param player
+	 */
 	public void setPlayer(IPlayer player) {
 		this.player = player;
 	}

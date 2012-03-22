@@ -25,12 +25,39 @@ import de.remote.api.PlayerException;
  * @author sebastian
  */
 public class PlayListPanel extends Panel {
-	private List plsList;
-	private List itemList;
-	private IPlayList pls;
-	private IPlayer player;
-	private Map<String, String> itemMap = new HashMap();
+	/**
+	 * generated id
+	 */
+	private static final long serialVersionUID = -6342722191582738735L;
 
+	/**
+	 * list for all playlists
+	 */
+	private List plsList;
+
+	/**
+	 * list for all items of a playlist
+	 */
+	private List itemList;
+
+	/**
+	 * remote playlist object
+	 */
+	private IPlayList pls;
+
+	/**
+	 * remote player object
+	 */
+	private IPlayer player;
+
+	/**
+	 * map to match short and full name of a item
+	 */
+	private Map<String, String> itemMap = new HashMap<String, String>();
+
+	/**
+	 * allocate new playlist panel, create and initialize gui elements
+	 */
 	public PlayListPanel() {
 		setName("Playlists");
 
@@ -39,6 +66,11 @@ public class PlayListPanel extends Panel {
 		add("North", createButtons());
 	}
 
+	/**
+	 * create, initialize and return the area for the two lists.
+	 * 
+	 * @return listarea
+	 */
 	private Component createLists() {
 		this.plsList = new List();
 		this.plsList.addActionListener(new ActionListener() {
@@ -55,6 +87,11 @@ public class PlayListPanel extends Panel {
 		return lists;
 	}
 
+	/**
+	 * create, initialize and return the area for buttons.
+	 * 
+	 * @return buttonarea
+	 */
 	private Component createButtons() {
 		Button playPls = new Button("Play Playlist");
 		playPls.addActionListener(new ActionListener() {
@@ -139,11 +176,18 @@ public class PlayListPanel extends Panel {
 		return buttons;
 	}
 
+	/**
+	 * set remote playlist object 
+	 * @param pls
+	 */
 	public void setPlayList(IPlayList pls) {
 		this.pls = pls;
 		updatePlsContent();
 	}
 
+	/**
+	 * update content of playlist list
+	 */
 	private void updatePlsContent() {
 		this.plsList.removeAll();
 		try {
@@ -154,6 +198,10 @@ public class PlayListPanel extends Panel {
 		}
 	}
 
+	/**
+	 * update content of playlist item list
+	 * @param plsName
+	 */
 	private void updatePlsContent(String plsName) {
 		this.itemList.removeAll();
 		this.itemMap.clear();
@@ -170,6 +218,10 @@ public class PlayListPanel extends Panel {
 		}
 	}
 
+	/**
+	 * set remote player object
+	 * @param player
+	 */
 	public void setPlayer(IPlayer player) {
 		this.player = player;
 	}
