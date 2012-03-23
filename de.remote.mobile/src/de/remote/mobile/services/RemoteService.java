@@ -28,7 +28,7 @@ import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.activies.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
-import de.remote.mobile.util.TempBrowser;
+import de.remote.mobile.util.BufferBrowser;
 
 /**
  * service for remotecontrol an server. the binder enables functions to control
@@ -143,7 +143,7 @@ public class RemoteService extends Service {
 						throw new RemoteException(ControlConstants.STATION_ID,
 								"station not found in registry");
 
-					browser = new TempBrowser(station.createBrowser());
+					browser = new BufferBrowser(station.createBrowser());
 					player = station.getMPlayer();
 					player.addPlayerMessageListener(playerListener);
 					control = station.getControl();

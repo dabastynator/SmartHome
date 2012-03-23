@@ -27,6 +27,7 @@ import de.remote.mobile.R;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.PlayerBinder;
+import de.remote.mobile.util.BrowserAdapter;
 
 /**
  * the browser activity shows the current directory with all folders and files.
@@ -45,6 +46,11 @@ public class BrowserActivity extends Activity {
 	 * name of the viewer state field to store and restore the value
 	 */
 	private static final String VIEWER_STATE = "viewerstate";
+	
+	/**
+	 * name of the playlist field to store and restore the value
+	 */
+	private static final String PLAYLIST = "playlist";
 
 	/**
 	 * viewer states of the browser
@@ -174,12 +180,14 @@ public class BrowserActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt(VIEWER_STATE, viewerState.ordinal());
+		outState.putString(PLAYLIST, currentPlayList);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle bundle) {
 		super.onRestoreInstanceState(bundle);
 		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
+		currentPlayList = bundle.getString(PLAYLIST);
 	}
 
 	@Override
@@ -213,20 +221,20 @@ public class BrowserActivity extends Activity {
 				System.arraycopy(directories, 0, all, 0, directories.length);
 				System.arraycopy(files, 0, all, directories.length,
 						files.length);
-				listView.setAdapter(new ArrayAdapter<String>(this,
-						android.R.layout.simple_list_item_1, all));
+				listView.setAdapter(new BrowserAdapter(this, binder
+						.getBrowser(), all, viewerState));
 				setTitle(binder.getBrowser().getLocation() + "@" + serverName);
 			}
 			if (viewerState == ViewerState.PLAYLISTS) {
-				listView.setAdapter(new ArrayAdapter<String>(this,
-						android.R.layout.simple_list_item_1, binder
-								.getPlayList().getPlayLists()));
+				listView.setAdapter(new BrowserAdapter(this, binder
+						.getBrowser(), binder.getPlayList().getPlayLists(),
+						viewerState));
 				setTitle("Playlists@" + serverName);
 			}
 			if (viewerState == ViewerState.PLS_ITEMS) {
-				listView.setAdapter(new ArrayAdapter<String>(this,
-						android.R.layout.simple_list_item_1, binder
-								.getPlayList().listContent(currentPlayList)));
+				listView.setAdapter(new BrowserAdapter(this, binder
+						.getBrowser(), binder.getPlayList().listContent(
+						currentPlayList), viewerState));
 				setTitle("Playlist: " + currentPlayList + "@" + serverName);
 			}
 		} catch (RemoteException e) {
@@ -553,9 +561,10 @@ public class BrowserActivity extends Activity {
 	 */
 	public class MyClickListener implements OnItemClickListener {
 		@Override
-		public void onItemClick(AdapterView<?> arg0, View view, int arg2,
+		public void onItemClick(AdapterView<?> arg0, View view, int position,
 				long arg3) {
-			String item = ((TextView) view).getText().toString();
+			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
+					.getText().toString();
 			try {
 				if (viewerState == ViewerState.PLAYLISTS) {
 					binder.getPlayer().playPlayList(item);
@@ -563,12 +572,11 @@ public class BrowserActivity extends Activity {
 							Toast.LENGTH_SHORT).show();
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
-					for (String str : directories)
-						if (str.equals(item)) {
-							binder.getBrowser().goTo(item);
-							showUpDateUI();
-							return;
-						}
+					if (position < binder.getBrowser().getDirectories().length) {
+						binder.getBrowser().goTo(item);
+						showUpDateUI();
+						return;
+					}
 					String file = binder.getBrowser().getFullLocation() + item;
 
 					binder.getPlayer().play(file);
@@ -594,7 +602,8 @@ public class BrowserActivity extends Activity {
 		@Override
 		public boolean onItemLongClick(AdapterView<?> arg0, View view,
 				int position, long arg3) {
-			selectedItem = ((TextView) view).getText().toString();
+			selectedItem = ((TextView) view.findViewById(R.id.lbl_item_name))
+					.getText().toString();
 			return false;
 		}
 	}

@@ -7,7 +7,7 @@ import de.remote.api.IBrowser;
  * this proxy buffers temporary information about the current directory.
  * @author sebastian
  */
-public class TempBrowser implements IBrowser{
+public class BufferBrowser implements IBrowser{
 
 	/**
 	 * browser object
@@ -58,7 +58,7 @@ public class TempBrowser implements IBrowser{
 	 * allocates new buffered browser.
 	 * @param browser
 	 */
-	public TempBrowser(IBrowser browser) {
+	public BufferBrowser(IBrowser browser) {
 		this.browser = browser;
 		isDirtyDirectory = true;
 		isDirtyFile = true;
