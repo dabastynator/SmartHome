@@ -13,7 +13,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
-import de.remote.mobile.R;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.ControlConstants;
@@ -26,6 +25,7 @@ import de.remote.api.IPlayerListener;
 import de.remote.api.IStation;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
+import de.remote.mobile.R;
 import de.remote.mobile.activies.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.util.BufferBrowser;
@@ -177,6 +177,7 @@ public class RemoteService extends Service {
 				System.currentTimeMillis());
 		Intent nIntent = new Intent(this, BrowserActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_NAME, serverName);
 		PendingIntent pInent = PendingIntent.getActivity(this, 0, nIntent, 0);
 		notification.setLatestEventInfo(getApplicationContext(), title, body,
 				pInent);
@@ -186,6 +187,8 @@ public class RemoteService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(RemoteService.NOTIFICATION_ID);
 		disconnect();
 		serverDB.close();
 	}

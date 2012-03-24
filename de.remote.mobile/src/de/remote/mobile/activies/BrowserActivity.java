@@ -428,6 +428,8 @@ public class BrowserActivity extends Activity {
 				binder.getPlayer().moveRight();
 				break;
 			case R.id.opt_exit:
+				Intent intent = new Intent(this, RemoteService.class);
+				stopService(intent);
 				finish();
 				break;
 			case R.id.opt_playlist:
@@ -439,7 +441,7 @@ public class BrowserActivity extends Activity {
 				startActivityForResult(i, GetTextActivity.RESULT_CODE);
 				break;
 			case R.id.opt_chat:
-				Intent intent = new Intent(this, ChatActivity.class);
+				intent = new Intent(this, ChatActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.opt_server_select:
