@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 
 public class BrowserImpl implements IBrowser {
@@ -58,6 +59,11 @@ public class BrowserImpl implements IBrowser {
 	@Override
 	public String getFullLocation() {
 		return location;
+	}
+
+	@Override
+	public boolean delete(String file) throws RemoteException {
+		return new File(file).delete();
 	}
 
 }

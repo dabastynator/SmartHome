@@ -20,53 +20,63 @@ public class MPlayer implements IPlayer {
 
 	private Process mplayerProcess;
 	private PrintStream mplayerIn;
-	private int fullscreen = 1;
+	private int fullscreen = 0;
 	private int volume = 50;
 	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
 	private int seekValue;
 
 	@Override
 	public void play(String file) {
-		if (mplayerProcess == null) {
-			try {
-				mplayerProcess = Runtime.getRuntime().exec(
-						new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
-								"-idle" });
-				// the standard input of MPlayer
-				mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
-				// start player observer
-				new PlayerObserver(mplayerProcess.getInputStream()).start();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		if (mplayerProcess == null) 
+			startPlayer();
+		
 		if (new File(file).isDirectory()) {
-			try {
-				Process exec = Runtime.getRuntime().exec(
-						new String[] { "/usr/bin/find", file + "/" });
-				PrintStream output = new PrintStream(new FileOutputStream(
-						"/home/sebastian/temp/playlist.pls"));
-				BufferedReader input = new BufferedReader(
-						new InputStreamReader(exec.getInputStream()));
-				BufferedReader error = new BufferedReader(
-						new InputStreamReader(exec.getErrorStream()));
-				String line = "";
-				while ((line = input.readLine()) != null)
-					output.println(line);
-				while ((line = error.readLine()) != null)
-					System.out.println(line);
-				output.close();
-				input.close();
-				error.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			createPlayList(file);
 			mplayerIn.print("loadlist /home/sebastian/temp/playlist.pls\n");
 			mplayerIn.flush();
 		} else {
 			mplayerIn.print("loadfile \"" + file + "\" 0\n");
 			mplayerIn.flush();
 		}
+	}
+
+	private void createPlayList(String file) {
+		try {
+			Process exec = Runtime.getRuntime().exec(
+					new String[] { "/usr/bin/find", file + "/" });
+			PrintStream output = new PrintStream(new FileOutputStream(
+					"/home/sebastian/temp/playlist.pls"));
+			BufferedReader input = new BufferedReader(
+					new InputStreamReader(exec.getInputStream()));
+			BufferedReader error = new BufferedReader(
+					new InputStreamReader(exec.getErrorStream()));
+			String line = "";
+			while ((line = input.readLine()) != null)
+				output.println(line);
+			while ((line = error.readLine()) != null)
+				System.out.println(line);
+			output.close();
+			input.close();
+			error.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+
+	private void startPlayer() {
+		try {
+			mplayerProcess = Runtime.getRuntime().exec(
+					new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
+							"-idle" });
+			// the standard input of MPlayer
+			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
+			// start player observer
+			new PlayerObserver(mplayerProcess.getInputStream()).start();
+			// set default volume
+			mplayerIn.print("volume " + volume + " 1");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 
 	@Override
