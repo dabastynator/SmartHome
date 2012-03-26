@@ -1,5 +1,7 @@
 package de.remote.api;
 
+import java.util.Date;
+
 import de.newsystem.rmi.api.oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -12,14 +14,17 @@ import de.newsystem.rmi.protokol.RemoteException;
 public interface IChatListener extends RemoteAble {
 
 	/**
-	 * inform about a new message by author
+	 * inform about a new message. the client is the author of the message, time
+	 * contains the time when the message comes to the server.
 	 * 
 	 * @param client
 	 * @param msg
+	 * @param time
 	 * @throws RemoteException
 	 */
 	@oneway
-	public void informMessage(String client, String msg) throws RemoteException;
+	public void informMessage(String client, String message, Date time)
+			throws RemoteException;
 
 	/**
 	 * inform about new client

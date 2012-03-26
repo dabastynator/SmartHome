@@ -1,6 +1,7 @@
 package de.remote.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.newsystem.rmi.protokol.RemoteException;
@@ -17,8 +18,9 @@ public class ChatServerImpl implements IChatServer {
 
 	@Override
 	public void postMessage(String author, String msg) throws RemoteException {
+		Date time = new Date();
 		for (IChatListener listener : listeners)
-			listener.informMessage(author, msg);
+			listener.informMessage(author, msg, time);
 	}
 
 	@Override
