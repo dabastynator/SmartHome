@@ -65,7 +65,7 @@ public class DynamicAdapter {
 		Reply reply = new Reply();
 		try {
 			Method method = findMethod(request);
-			if (method == null){
+			if (method == null) {
 				reply.setError(new RemoteException(request.getObject(),
 						"no such method found: " + request.getMethod()));
 				return reply;
@@ -122,8 +122,10 @@ public class DynamicAdapter {
 						r.getServerPort());
 				request.getParams()[i] = Server.getServer().createProxy(
 						r.getNewId(), sp, r.getReturnType());
-			} else
+			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();
+			else
+				types[i] = Void.class;
 		}
 		return getCompatibleMethod(template, request.getMethod(), types);
 	}

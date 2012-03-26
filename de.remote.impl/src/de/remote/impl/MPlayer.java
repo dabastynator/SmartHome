@@ -103,7 +103,7 @@ public class MPlayer implements IPlayer {
 	public void next() throws PlayerException {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
-		mplayerIn.print("pt_step next");
+		mplayerIn.print("pt_step 1");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
@@ -112,7 +112,7 @@ public class MPlayer implements IPlayer {
 	public void previous() throws PlayerException {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
-		mplayerIn.print("pt_step previous");
+		mplayerIn.print("pt_step -1");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
@@ -123,8 +123,8 @@ public class MPlayer implements IPlayer {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
 		if (seekValue <= 0)
-			seekValue = 1;
-		else
+			seekValue = 5;
+		else if (seekValue < -600)
 			seekValue *= 5;
 		mplayerIn.print("seek " + seekValue + " 0");
 		mplayerIn.print("\n");
@@ -136,8 +136,8 @@ public class MPlayer implements IPlayer {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
 		if (seekValue >= 0)
-			seekValue = -1;
-		else
+			seekValue = -5;
+		else if (seekValue > -600)
 			seekValue *= 5;
 		mplayerIn.print("seek " + seekValue + " 0");
 		mplayerIn.print("\n");

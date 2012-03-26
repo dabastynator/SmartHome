@@ -30,7 +30,7 @@ public class RemoteServer {
 
 		try {
 			forceConnectToRegistry(registry);
-			server.startServer(ControlConstants.STATION_PORT);
+			server.startServer(ControlConstants.STATION_PORT+2);
 			server.register(ControlConstants.STATION_ID, station);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
