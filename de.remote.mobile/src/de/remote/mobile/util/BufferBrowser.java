@@ -116,4 +116,19 @@ public class BufferBrowser implements IBrowser{
 		return fullLocation;
 	}
 
+	@Override
+	public boolean delete(String file) throws RemoteException {
+		return browser.delete(file);
+	}
+
+	/**
+	 * set buffered browser dirty. to force to get all information from the remote browser
+	 */
+	public void setDirty() {
+		isDirtyDirectory = true;
+		isDirtyFile = true;
+		isDirtyFullLocation = true;
+		isDirtyLocation = true;
+	}
+
 }

@@ -6,9 +6,8 @@
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
+        android:layout_width="64dp"
         android:layout_height="match_parent"
-        android:layout_weight="6"
         android:orientation="vertical" >
 
         <ImageView
@@ -44,17 +43,45 @@
             android:src="@drawable/voldown" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/fileList"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="2" />
-
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="6"
+        android:layout_weight="2"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/layout_search"
+            android:layout_width="fill_parent"
+            android:layout_height="36dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <EditText
+                android:id="@+id/txt_search"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/button_search"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="6"
+                android:onClick="search"
+                android:src="@drawable/search" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/fileList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
         android:orientation="vertical" >
 
         <ImageView
@@ -62,7 +89,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="playPause"
+            android:onClick="stopPlayer"
             android:src="@drawable/stop" />
 
         <ImageView
@@ -70,7 +97,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="prev"
+            android:onClick="next"
             android:src="@drawable/next" />
 
         <ImageView
@@ -78,7 +105,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="seekBwd"
+            android:onClick="seekFwd"
             android:src="@drawable/seek_fwd" />
 
         <ImageView

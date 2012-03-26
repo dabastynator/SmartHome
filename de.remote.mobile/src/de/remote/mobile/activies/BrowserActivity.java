@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -18,6 +20,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +32,7 @@ import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.PlayerBinder;
 import de.remote.mobile.util.BrowserAdapter;
+import de.remote.mobile.util.BufferBrowser;
 
 /**
  * the browser activity shows the current directory with all folders and files.
@@ -46,11 +51,16 @@ public class BrowserActivity extends Activity {
 	 * name of the viewer state field to store and restore the value
 	 */
 	private static final String VIEWER_STATE = "viewerstate";
-	
+
 	/**
 	 * name of the playlist field to store and restore the value
 	 */
 	private static final String PLAYLIST = "playlist";
+
+	/**
+	 * name of the position in the list view
+	 */
+	private static final String LISTVIEW_POSITION = "listviewPosition";
 
 	/**
 	 * viewer states of the browser
@@ -75,6 +85,16 @@ public class BrowserActivity extends Activity {
 	 * list view
 	 */
 	private ListView listView;
+
+	/**
+	 * search input field
+	 */
+	private EditText searchText;
+
+	/**
+	 * area that contains the search field and button
+	 */
+	private LinearLayout searchLayout;
 
 	/**
 	 * binder object
@@ -105,6 +125,11 @@ public class BrowserActivity extends Activity {
 	 * name of connected server
 	 */
 	private String serverName;
+
+	/**
+	 * current selected item
+	 */
+	private int selectedPosition;
 
 	/**
 	 * connection to the service
@@ -146,6 +171,12 @@ public class BrowserActivity extends Activity {
 		listView.setOnItemClickListener(new MyClickListener());
 		listView.setOnItemLongClickListener(new MyLongClickListener());
 		registerForContextMenu(listView);
+
+		searchText.addTextChangedListener(new MyTextWatcher());
+
+		Intent intent = new Intent(this, RemoteService.class);
+		startService(intent);
+		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	/**
@@ -153,6 +184,8 @@ public class BrowserActivity extends Activity {
 	 */
 	private void findComponents() {
 		listView = (ListView) findViewById(R.id.fileList);
+		searchText = (EditText) findViewById(R.id.txt_search);
+		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
 	}
 
 	@Override
@@ -181,6 +214,7 @@ public class BrowserActivity extends Activity {
 		super.onSaveInstanceState(outState);
 		outState.putInt(VIEWER_STATE, viewerState.ordinal());
 		outState.putString(PLAYLIST, currentPlayList);
+		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
 	}
 
 	@Override
@@ -188,27 +222,13 @@ public class BrowserActivity extends Activity {
 		super.onRestoreInstanceState(bundle);
 		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
 		currentPlayList = bundle.getString(PLAYLIST);
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
-		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
-	}
-
-	@Override
-	protected void onPause() {
-		unbindService(playerConnection);
-		super.onPause();
+		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
 	}
 
 	/**
 	 * update gui elements, show current directory or playlist
 	 */
-	private void showUpDateUI() {
+	private void showUpdateUI() {
 		if (binder == null || binder.getBrowser() == null) {
 			disableScreen();
 			return;
@@ -237,6 +257,7 @@ public class BrowserActivity extends Activity {
 						currentPlayList), viewerState));
 				setTitle("Playlist: " + currentPlayList + "@" + serverName);
 			}
+			listView.setSelection(selectedPosition);
 		} catch (RemoteException e) {
 			disableScreen();
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -254,19 +275,22 @@ public class BrowserActivity extends Activity {
 			if (keyCode == KeyEvent.KEYCODE_BACK) {
 				if (viewerState == ViewerState.DIRECTORIES)
 					if (binder.getBrowser().goBack()) {
-						showUpDateUI();
+						showUpdateUI();
 						return true;
 					}
 				if (viewerState == ViewerState.PLAYLISTS) {
 					viewerState = ViewerState.DIRECTORIES;
-					showUpDateUI();
+					showUpdateUI();
 					return true;
 				}
 				if (viewerState == ViewerState.PLS_ITEMS) {
 					viewerState = ViewerState.PLAYLISTS;
-					showUpDateUI();
+					showUpdateUI();
 					return true;
 				}
+			}
+			if (keyCode == KeyEvent.KEYCODE_SEARCH){
+				searchLayout.setVisibility(View.VISIBLE);
 			}
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 				binder.getPlayer().volDown();
@@ -399,6 +423,29 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * perform search in the list view
+	 * 
+	 * @param v
+	 */
+	public void search(View v) {
+		@SuppressWarnings("unchecked")
+		ArrayAdapter<String> adapter = (ArrayAdapter<String>) listView
+				.getAdapter();
+		if (adapter != null) {
+			String s = searchText.getText().toString();
+			adapter.getFilter().filter(s);
+			adapter.notifyDataSetChanged();
+		}
+		searchLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	protected void onDestroy() {
+		unbindService(playerConnection);
+		super.onDestroy();
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		try {
@@ -434,7 +481,7 @@ public class BrowserActivity extends Activity {
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
-				showUpDateUI();
+				showUpdateUI();
 				break;
 			case R.id.opt_create_playlist:
 				Intent i = new Intent(this, GetTextActivity.class);
@@ -473,9 +520,16 @@ public class BrowserActivity extends Activity {
 				startActivityForResult(i,
 						SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
+			case R.id.opt_item_delete:
+				selectedPosition = listView.getFirstVisiblePosition();
+				binder.getBrowser().delete(
+						binder.getBrowser().getFullLocation() + selectedItem);
+				((BufferBrowser) binder.getBrowser()).setDirty();
+				showUpdateUI();
+				break;
 			case R.id.opt_pls_delete:
 				binder.getPlayList().removePlayList(selectedItem);
-				showUpDateUI();
+				showUpdateUI();
 				Toast.makeText(BrowserActivity.this,
 						"Playlist '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -483,11 +537,11 @@ public class BrowserActivity extends Activity {
 			case R.id.opt_pls_show:
 				viewerState = ViewerState.PLS_ITEMS;
 				currentPlayList = selectedItem;
-				showUpDateUI();
+				showUpdateUI();
 				break;
 			case R.id.opt_pls_item_delete:
 				binder.getPlayList().removeItem(currentPlayList, selectedItem);
-				showUpDateUI();
+				showUpdateUI();
 				Toast.makeText(BrowserActivity.this,
 						"Entry '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -520,7 +574,7 @@ public class BrowserActivity extends Activity {
 			if (requestCode == GetTextActivity.RESULT_CODE) {
 				String pls = data.getExtras().getString(GetTextActivity.RESULT);
 				binder.getPlayList().addPlayList(pls);
-				showUpDateUI();
+				showUpdateUI();
 				Toast.makeText(BrowserActivity.this,
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
@@ -552,7 +606,7 @@ public class BrowserActivity extends Activity {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			showUpDateUI();
+			showUpdateUI();
 		}
 	}
 
@@ -576,7 +630,7 @@ public class BrowserActivity extends Activity {
 				if (viewerState == ViewerState.DIRECTORIES) {
 					if (position < binder.getBrowser().getDirectories().length) {
 						binder.getBrowser().goTo(item);
-						showUpDateUI();
+						showUpdateUI();
 						return;
 					}
 					String file = binder.getBrowser().getFullLocation() + item;
@@ -610,4 +664,33 @@ public class BrowserActivity extends Activity {
 		}
 	}
 
+	/**
+	 * the text watcher gets the new input of the search field and informs the
+	 * adapter to filder the input.
+	 * 
+	 * @author sebastian
+	 */
+	public class MyTextWatcher implements TextWatcher {
+
+		@Override
+		public void afterTextChanged(Editable s) {
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			@SuppressWarnings("unchecked")
+			ArrayAdapter<String> adapter = (ArrayAdapter<String>) listView
+					.getAdapter();
+			if (adapter != null) {
+				adapter.getFilter().filter(s);
+				adapter.notifyDataSetChanged();
+			}
+		}
+	}
 }

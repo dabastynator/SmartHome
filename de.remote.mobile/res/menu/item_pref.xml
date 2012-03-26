@@ -9,5 +9,9 @@
         android:id="@+id/opt_item_addplaylist"
         android:title="Add to playlist">
     </item>
+    <item
+        android:id="@+id/opt_item_delete"
+        android:title="Delete">
+    </item>
 
 </menu>

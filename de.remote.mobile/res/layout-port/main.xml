@@ -4,6 +4,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <LinearLayout
+        android:id="@+id/layout_search"
+        android:layout_width="fill_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <EditText
+            android:id="@+id/txt_search"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/button_search"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"
+            android:onClick="search"
+            android:src="@drawable/search" />
+    </LinearLayout>
+
     <ListView
         android:id="@+id/fileList"
         android:layout_width="fill_parent"
@@ -13,8 +35,7 @@
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="8"
+        android:layout_height="60dp"
         android:orientation="horizontal" >
 
         <ImageView
@@ -61,7 +82,6 @@
             android:onClick="fullScreen"
             android:src="@drawable/full"
             android:text=">&lt;" />
-
     </LinearLayout>
 
 </LinearLayout>
