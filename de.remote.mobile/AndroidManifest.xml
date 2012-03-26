@@ -13,7 +13,8 @@
         android:label="@string/app_name" >
         <activity
             android:name="de.remote.mobile.activies.BrowserActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,7 +33,8 @@
         </activity>
         <activity
             android:name="de.remote.mobile.activies.ChatActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
         </activity>
         <activity
             android:name="de.remote.mobile.activies.SelectServerActivity"

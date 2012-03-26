@@ -3,11 +3,11 @@
 
     <item
         android:id="@+id/opt_server_select"
-        android:title="Server">
+        android:title="Server" android:icon="@drawable/server" android:titleCondensed="Server">
     </item>
     <item
         android:id="@+id/item2"
-        android:title="Player">
+        android:title="Player" android:icon="@drawable/player">
         <menu>
             <item
                 android:id="@+id/opt_mplayer"
@@ -19,35 +19,31 @@
     </item>
     <item
         android:id="@+id/item3"
-        android:title="Control">
+        android:title="Control" android:icon="@drawable/control">
         <menu>
-            <item
+            <item android:id="@+id/opt_light_on" android:title="Aufhellen" android:icon="@drawable/light_on" android:titleCondensed="Aufhellen"/><item
                 android:id="@+id/opt_light_off"
-                android:title="Abdunkeln"/>
-            <item
-                android:id="@+id/opt_light_on"
-                android:title="Aufhellen"/>
-            <item
-                android:id="@+id/opt_shutdown"
-                android:title="Ausschalten"/>
+                android:title="Abdunkeln" android:icon="@drawable/light_off" android:titleCondensed="Abdunkeln"/>
+            
+            
             <item
                 android:id="@+id/opt_audiotrack"
-                android:title="Audio-Spur"/>
+                android:title="Audio-Spur" android:icon="@drawable/audio"/>
             <item
                 android:id="@+id/opt_right"
-                android:title="Nach Rechts"/>
+                android:title="Nach Rechts" android:icon="@drawable/right"/>
             <item
                 android:id="@+id/opt_left"
-                android:title="Nach Links"/>
+                android:title="Nach Links" android:icon="@drawable/left"/><item android:id="@+id/opt_shutdown" android:title="Ausschalten" android:icon="@drawable/exit" />
         </menu>
     </item>
     <item
         android:id="@+id/opt_exit"
-        android:title="Exit">
+        android:title="Exit" android:icon="@drawable/exit">
     </item>
     <item
         android:id="@+id/item5"
-        android:title="Playlists">
+        android:title="Playlists" android:icon="@drawable/pls_smal">
         <menu>
             <item
                 android:id="@+id/opt_playlist"
@@ -59,7 +55,7 @@
     </item>
     <item
         android:id="@+id/opt_chat"
-        android:title="Chat">
+        android:title="Chat" android:icon="@drawable/chat">
     </item>
 
 </menu>

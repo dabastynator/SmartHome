@@ -1,5 +1,8 @@
 package de.remote.mobile.activies;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,12 +15,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 import de.remote.mobile.R;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.PlayerBinder;
+import de.remote.mobile.util.ChatAdapter;
 
 /**
  * the chatactivity provides functions to chat with other clients connected to
@@ -29,9 +34,9 @@ import de.remote.mobile.services.RemoteService.PlayerBinder;
 public class ChatActivity extends Activity implements IChatListener {
 
 	/**
-	 * textarea for conversation
+	 * area for conversation
 	 */
-	private EditText chatArea;
+	private ListView chatArea;
 
 	/**
 	 * textfield for new message
@@ -52,6 +57,11 @@ public class ChatActivity extends Activity implements IChatListener {
 	 * button to post an own message
 	 */
 	private Button postButton;
+	
+	/**
+	 * this list contains all messages
+	 */
+	private List<Message> messages = new ArrayList<Message>(); 
 
 	/**
 	 * connection with service
@@ -83,6 +93,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat);
 		findComponents();
+		chatArea.setAdapter(new ChatAdapter(this, messages));
 	}
 
 	@Override
@@ -112,7 +123,7 @@ public class ChatActivity extends Activity implements IChatListener {
 	 * find all components by their id
 	 */
 	private void findComponents() {
-		chatArea = (EditText) findViewById(R.id.txt_chat_area);
+		chatArea = (ListView) findViewById(R.id.list_chat);
 		chatInput = (EditText) findViewById(R.id.txt_chat_input);
 		postButton = (Button) findViewById(R.id.btn_chat_post);
 		chatArea.setEnabled(false);
@@ -157,9 +168,10 @@ public class ChatActivity extends Activity implements IChatListener {
 
 			@Override
 			public void run() {
-				String area = chatArea.getText().toString();
-				area += "   " + client + "\n" + msg + "\n";
-				chatArea.setText(area);
+				Message message = new Message(client, msg);
+				messages.add(message);
+				chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
+				chatArea.setSelection(messages.size());
 			}
 		});
 	}
@@ -194,5 +206,22 @@ public class ChatActivity extends Activity implements IChatListener {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * this object represents a message with author and message
+	 * 
+	 * @author sebastian
+	 */
+	public class Message {
+
+		public Message(String client, String msg) {
+			author = client;
+			message = msg;
+		}
+
+		public String author;
+		public String message;
+
 	}
 }

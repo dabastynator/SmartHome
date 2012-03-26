@@ -183,6 +183,7 @@ public class BrowserActivity extends Activity {
 
 		searchText.addTextChangedListener(new MyTextWatcher());
 
+		// bind service
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
@@ -286,6 +287,7 @@ public class BrowserActivity extends Activity {
 					searchLayout.setVisibility(View.GONE);
 					return true;
 				}
+				selectedPosition = 0;
 				if (viewerState == ViewerState.DIRECTORIES)
 					if (binder.getBrowser().goBack()) {
 						showUpdateUI();
@@ -502,8 +504,8 @@ public class BrowserActivity extends Activity {
 				showUpdateUI();
 				break;
 			case R.id.opt_create_playlist:
-				Intent i = new Intent(this, GetTextActivity.class);
-				startActivityForResult(i, GetTextActivity.RESULT_CODE);
+				intent = new Intent(this, GetTextActivity.class);
+				startActivityForResult(intent, GetTextActivity.RESULT_CODE);
 				break;
 			case R.id.opt_chat:
 				intent = new Intent(this, ChatActivity.class);
@@ -511,8 +513,7 @@ public class BrowserActivity extends Activity {
 				break;
 			case R.id.opt_server_select:
 				intent = new Intent(this, SelectServerActivity.class);
-				startActivity(intent);
-				finish();
+				startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 				break;
 			}
 		} catch (Exception e) {
@@ -597,6 +598,14 @@ public class BrowserActivity extends Activity {
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
 			}
+			if (requestCode == SelectServerActivity.RESULT_CODE) {
+				if (data == null || data.getExtras() == null)
+					return;
+				serverName = data.getExtras().getString(
+						SelectServerActivity.SERVER_NAME);
+				disableScreen();
+				binder.connectToServer(serverName, new ShowFolderRunnable());
+			}
 		} catch (RemoteException e) {
 			Toast.makeText(BrowserActivity.this, e.getMessage(),
 					Toast.LENGTH_SHORT).show();
@@ -679,6 +688,7 @@ public class BrowserActivity extends Activity {
 				int position, long arg3) {
 			selectedItem = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
+			selectedPosition = position;
 			return false;
 		}
 	}

@@ -4,15 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/txt_chat_area"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:inputType="textMultiLine" >
-
-        <requestFocus />
-    </EditText>
+    <ListView
+        android:id="@+id/list_chat"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -33,7 +29,6 @@
             android:layout_weight="1"
             android:onClick="post"
             android:text="@string/str_post" />
-
     </LinearLayout>
 
 </LinearLayout>

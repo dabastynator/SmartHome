@@ -30,6 +30,16 @@ import de.remote.mobile.util.ServerCursorAdapter;
 public class SelectServerActivity extends ListActivity {
 
 	/**
+	 * request code for this activity
+	 */
+	public static final int RESULT_CODE = 2;
+
+	/**
+	 * name of the server name attribute
+	 */
+	public static final String SERVER_NAME = "serverName";
+
+	/**
 	 * store the current selected server
 	 */
 	protected String selectedItem;
@@ -55,11 +65,9 @@ public class SelectServerActivity extends ListActivity {
 			public void onItemClick(AdapterView<?> arg0, View view, int arg2,
 					long arg3) {
 				String item = getServerOfRow(view);
-				Intent intent = new Intent(SelectServerActivity.this,
-						BrowserActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-				intent.putExtra(BrowserActivity.EXTRA_SERVER_NAME, item);
-				startActivity(intent);
+				Intent i = new Intent();
+				i.putExtra(SERVER_NAME, item);
+				setResult(RESULT_CODE, i);
 				finish();
 			}
 
@@ -144,7 +152,6 @@ public class SelectServerActivity extends ListActivity {
 		case R.id.opt_select_server_add:
 			Intent intent = new Intent(this, NewServerActivity.class);
 			startActivity(intent);
-			finish();
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
