@@ -8,13 +8,13 @@
         android:id="@+id/list_chat"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="#FFFFFF" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="8" >
+        android:layout_height="45dp" >
 
         <EditText
             android:id="@+id/txt_chat_input"

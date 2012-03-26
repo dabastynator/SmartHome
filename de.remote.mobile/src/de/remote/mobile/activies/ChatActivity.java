@@ -1,7 +1,8 @@
 package de.remote.mobile.activies;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -17,9 +18,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-import de.remote.mobile.R;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
+import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.PlayerBinder;
 import de.remote.mobile.util.ChatAdapter;
@@ -32,6 +33,11 @@ import de.remote.mobile.util.ChatAdapter;
  * @author sebastian
  */
 public class ChatActivity extends Activity implements IChatListener {
+
+	/**
+	 * name of the attribute with all messages
+	 */
+	public static final String MESSAGE_LIST = "messageList";
 
 	/**
 	 * area for conversation
@@ -57,11 +63,11 @@ public class ChatActivity extends Activity implements IChatListener {
 	 * button to post an own message
 	 */
 	private Button postButton;
-	
+
 	/**
 	 * this list contains all messages
 	 */
-	private List<Message> messages = new ArrayList<Message>(); 
+	private ArrayList<Message> messages = new ArrayList<Message>();
 
 	/**
 	 * connection with service
@@ -105,6 +111,9 @@ public class ChatActivity extends Activity implements IChatListener {
 				Context.BIND_AUTO_CREATE);
 		if (!bound)
 			Log.e("nicht verbunden!!!", "service nicht verbunden");
+		
+		chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
+		chatArea.setSelection(messages.size());
 	}
 
 	@Override
@@ -124,9 +133,10 @@ public class ChatActivity extends Activity implements IChatListener {
 	 */
 	private void findComponents() {
 		chatArea = (ListView) findViewById(R.id.list_chat);
+		chatArea.setScrollingCacheEnabled(false);
+		chatArea.setCacheColorHint(0);
 		chatInput = (EditText) findViewById(R.id.txt_chat_input);
 		postButton = (Button) findViewById(R.id.btn_chat_post);
-		chatArea.setEnabled(false);
 	}
 
 	/**
@@ -148,7 +158,6 @@ public class ChatActivity extends Activity implements IChatListener {
 	 * disapble gui elements
 	 */
 	private void disableScreen() {
-		chatArea.setEnabled(false);
 		chatInput.setEnabled(false);
 		postButton.setEnabled(false);
 	}
@@ -162,13 +171,13 @@ public class ChatActivity extends Activity implements IChatListener {
 	}
 
 	@Override
-	public void informMessage(final String client, final String msg)
+	public void informMessage(final String client, final String msg, final Date time)
 			throws RemoteException {
 		handler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				Message message = new Message(client, msg);
+				Message message = new Message(client, msg, time);
 				messages.add(message);
 				chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
 				chatArea.setSelection(messages.size());
@@ -189,6 +198,20 @@ public class ChatActivity extends Activity implements IChatListener {
 	@Override
 	public String getName() throws RemoteException {
 		return "Android";
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable(MESSAGE_LIST, messages);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		messages = (ArrayList<Message>) savedInstanceState
+				.getSerializable(MESSAGE_LIST);
 	}
 
 	/**
@@ -213,15 +236,32 @@ public class ChatActivity extends Activity implements IChatListener {
 	 * 
 	 * @author sebastian
 	 */
-	public class Message {
+	public class Message implements Serializable {
 
-		public Message(String client, String msg) {
+		/**
+		 * generated id
+		 */
+		private static final long serialVersionUID = -3004935219876939234L;
+
+		/**
+		 * author of the message
+		 */
+		public String author;
+		
+		/**
+		 * text of the message 
+		 */
+		public String message;
+		
+		/**
+		 * time of the message
+		 */
+		public Date date;
+		
+		public Message(String client, String msg, Date date) {
 			author = client;
 			message = msg;
+			this.date = date;
 		}
-
-		public String author;
-		public String message;
-
 	}
 }
