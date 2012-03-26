@@ -208,6 +208,8 @@ public class RemoteService extends Service {
 				localServer.close();
 			} catch (IOException e) {
 			}
+		station = null;
+		player = null;
 	}
 
 	@Override
@@ -336,6 +338,13 @@ public class RemoteService extends Service {
 		 */
 		public IChatServer getChatServer() {
 			return chatServer;
+		}
+
+		/**
+		 * @return true if there is a connection wich a server
+		 */
+		public boolean isConnected() {
+			return station != null;
 		}
 	}
 

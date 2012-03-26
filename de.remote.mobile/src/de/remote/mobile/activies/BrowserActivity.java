@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -144,18 +145,26 @@ public class BrowserActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			disableScreen();
+			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
 					&& getIntent().getExtras().containsKey(EXTRA_SERVER_NAME))
 				serverName = getIntent().getExtras().getString(
 						EXTRA_SERVER_NAME);
-			else
+			// else just connect if there is no connection
+			else if (!binder.isConnected()) {
 				serverName = serverDB.getFavoriteServer();
+				if (serverName == null)
+					Toast.makeText(BrowserActivity.this,
+							"no server configurated", Toast.LENGTH_SHORT)
+							.show();
+			}
 
+			// if there is a server name to connect -> connect
 			if (serverName != null && serverName.length() > 0)
 				binder.connectToServer(serverName, new ShowFolderRunnable());
-			else
-				Toast.makeText(BrowserActivity.this, "no server configurated",
-						Toast.LENGTH_SHORT).show();
+			// else if there is still a connection update the gui
+			else if (binder.isConnected())
+				new ShowFolderRunnable().run();
 		}
 	};
 
@@ -273,6 +282,10 @@ public class BrowserActivity extends Activity {
 			if (binder == null)
 				return super.onKeyDown(keyCode, event);
 			if (keyCode == KeyEvent.KEYCODE_BACK) {
+				if (searchLayout.getVisibility() == View.VISIBLE) {
+					searchLayout.setVisibility(View.GONE);
+					return true;
+				}
 				if (viewerState == ViewerState.DIRECTORIES)
 					if (binder.getBrowser().goBack()) {
 						showUpdateUI();
@@ -289,8 +302,11 @@ public class BrowserActivity extends Activity {
 					return true;
 				}
 			}
-			if (keyCode == KeyEvent.KEYCODE_SEARCH){
+			if (keyCode == KeyEvent.KEYCODE_SEARCH) {
 				searchLayout.setVisibility(View.VISIBLE);
+				searchText.requestFocus();
+				InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
 			}
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 				binder.getPlayer().volDown();
@@ -437,6 +453,8 @@ public class BrowserActivity extends Activity {
 			adapter.getFilter().filter(s);
 			adapter.notifyDataSetChanged();
 		}
+		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 		searchLayout.setVisibility(View.GONE);
 	}
 
@@ -630,6 +648,7 @@ public class BrowserActivity extends Activity {
 				if (viewerState == ViewerState.DIRECTORIES) {
 					if (position < binder.getBrowser().getDirectories().length) {
 						binder.getBrowser().goTo(item);
+						selectedPosition = 0;
 						showUpdateUI();
 						return;
 					}
