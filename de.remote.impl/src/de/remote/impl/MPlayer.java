@@ -73,7 +73,8 @@ public class MPlayer implements IPlayer {
 			// start player observer
 			new PlayerObserver(mplayerProcess.getInputStream()).start();
 			// set default volume
-			mplayerIn.print("volume " + volume + " 1");
+			mplayerIn.print("volume " + volume + " 1\n");
+			mplayerIn.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
