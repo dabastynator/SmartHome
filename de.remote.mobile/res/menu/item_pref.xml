@@ -3,15 +3,15 @@
 
     <item
         android:id="@+id/opt_item_play"
-        android:title="Play">
+        android:title="@string/str_play">
     </item>
         <item
         android:id="@+id/opt_item_addplaylist"
-        android:title="Add to playlist">
+        android:title="@string/str_add_to_playlist">
     </item>
     <item
         android:id="@+id/opt_item_delete"
-        android:title="Delete">
+        android:title="@string/str_delete">
     </item>
 
 </menu>

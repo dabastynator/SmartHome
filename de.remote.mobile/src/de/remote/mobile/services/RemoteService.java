@@ -346,6 +346,13 @@ public class RemoteService extends Service {
 		public boolean isConnected() {
 			return station != null;
 		}
+
+		/**
+		 * @return name of connected server
+		 */
+		public String getServerName() {
+			return serverName;
+		}
 	}
 
 }

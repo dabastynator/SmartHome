@@ -3,11 +3,11 @@
 
     <item
         android:id="@+id/opt_server_select"
-        android:title="Server" android:icon="@drawable/server" android:titleCondensed="Server">
+        android:title="@string/str_server_name" android:icon="@drawable/server">
     </item>
     <item
         android:id="@+id/item2"
-        android:title="Player" android:icon="@drawable/player">
+        android:title="@string/str_player" android:icon="@drawable/player">
         <menu>
             <item
                 android:id="@+id/opt_mplayer"
@@ -19,27 +19,27 @@
     </item>
     <item
         android:id="@+id/item3"
-        android:title="Control" android:icon="@drawable/control">
+        android:title="@string/str_control" android:icon="@drawable/control">
         <menu>
-            <item android:id="@+id/opt_light_on" android:title="Aufhellen" android:icon="@drawable/light_on" android:titleCondensed="Aufhellen"/><item
+            <item android:id="@+id/opt_light_on" android:title="@string/str_make_bright" android:icon="@drawable/light_on"/><item
                 android:id="@+id/opt_light_off"
-                android:title="Abdunkeln" android:icon="@drawable/light_off" android:titleCondensed="Abdunkeln"/>
+                android:title="@string/str_make_dark" android:icon="@drawable/light_off"/>
             
             
             <item
                 android:id="@+id/opt_audiotrack"
-                android:title="Audio-Spur" android:icon="@drawable/audio"/>
+                android:title="@string/str_audio_track" android:icon="@drawable/audio"/>
             <item
                 android:id="@+id/opt_right"
-                android:title="Nach Rechts" android:icon="@drawable/right"/>
+                android:title="@string/str_move_right" android:icon="@drawable/right"/>
             <item
                 android:id="@+id/opt_left"
-                android:title="Nach Links" android:icon="@drawable/left"/><item android:id="@+id/opt_shutdown" android:title="Ausschalten" android:icon="@drawable/exit" />
+                android:title="@string/str_move_left" android:icon="@drawable/left"/><item android:id="@+id/opt_shutdown" android:title="@string/str_shutdown" android:icon="@drawable/exit" />
         </menu>
     </item>
     <item
         android:id="@+id/opt_exit"
-        android:title="Exit" android:icon="@drawable/exit">
+        android:title="@string/str_exit" android:icon="@drawable/exit">
     </item>
     <item
         android:id="@+id/item5"
@@ -47,10 +47,10 @@
         <menu>
             <item
                 android:id="@+id/opt_playlist"
-                android:title="Show Playlists"/>
+                android:title="@string/str_show_playlist"/>
             <item
                 android:id="@+id/opt_create_playlist"
-                android:title="Create new Playlist"/>
+                android:title="@string/str_create_playlist"/>
         </menu>
     </item>
     <item

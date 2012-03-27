@@ -633,6 +633,7 @@ public class BrowserActivity extends Activity {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
+			serverName = binder.getServerName();
 			showUpdateUI();
 		}
 	}
