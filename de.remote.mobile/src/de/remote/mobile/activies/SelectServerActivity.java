@@ -3,6 +3,7 @@ package de.remote.mobile.activies;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -14,8 +15,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import de.remote.mobile.R;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.database.ServerTable;
@@ -37,12 +36,12 @@ public class SelectServerActivity extends ListActivity {
 	/**
 	 * name of the server name attribute
 	 */
-	public static final String SERVER_NAME = "serverName";
+	public static final String SERVER_ID = "serverID";
 
 	/**
 	 * store the current selected server
 	 */
-	protected String selectedItem;
+	protected int selectedItem;
 
 	/**
 	 * database object to execute changes
@@ -62,11 +61,13 @@ public class SelectServerActivity extends ListActivity {
 		db.close();
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View view, int arg2,
+			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				String item = getServerOfRow(view);
 				Intent i = new Intent();
-				i.putExtra(SERVER_NAME, item);
+				SQLiteCursor c = (SQLiteCursor) getListAdapter().getItem(
+						position);
+				selectedItem = c.getInt(ServerTable.INDEX_ID);
+				i.putExtra(SERVER_ID, selectedItem);
 				setResult(RESULT_CODE, i);
 				finish();
 			}
@@ -75,25 +76,14 @@ public class SelectServerActivity extends ListActivity {
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View view,
-					int arg2, long arg3) {
-				selectedItem = getServerOfRow(view);
+					int position, long arg3) {
+				SQLiteCursor c = (SQLiteCursor) getListAdapter().getItem(
+						position);
+				selectedItem = c.getInt(ServerTable.INDEX_ID);
 				return false;
 			}
 		});
 		registerForContextMenu(getListView());
-	}
-
-	/**
-	 * get the server name of the selected view element.
-	 * 
-	 * @param view
-	 * @return servername
-	 */
-	private String getServerOfRow(View view) {
-		LinearLayout row = (LinearLayout) view;
-		LinearLayout col = (LinearLayout) row.getChildAt(1);
-		TextView name = (TextView) col.getChildAt(0);
-		return name.getText().toString();
 	}
 
 	@Override
@@ -114,7 +104,7 @@ public class SelectServerActivity extends ListActivity {
 		case R.id.opt_server_edit:
 			Intent intent = new Intent(SelectServerActivity.this,
 					NewServerActivity.class);
-			intent.putExtra(BrowserActivity.EXTRA_SERVER_NAME, selectedItem);
+			intent.putExtra(BrowserActivity.EXTRA_SERVER_ID, selectedItem);
 			startActivity(intent);
 			finish();
 			break;

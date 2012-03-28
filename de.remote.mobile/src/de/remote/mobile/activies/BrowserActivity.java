@@ -46,7 +46,7 @@ public class BrowserActivity extends Activity {
 	/**
 	 * name for extra data for server name
 	 */
-	public static final String EXTRA_SERVER_NAME = "serverName";
+	public static final String EXTRA_SERVER_ID = "serverId";
 
 	/**
 	 * name of the viewer state field to store and restore the value
@@ -123,9 +123,9 @@ public class BrowserActivity extends Activity {
 	private ServerDatabase serverDB;
 
 	/**
-	 * name of connected server
+	 * id of connected server
 	 */
-	private String serverName;
+	private int serverID = -1;
 
 	/**
 	 * current selected item
@@ -147,21 +147,20 @@ public class BrowserActivity extends Activity {
 			disableScreen();
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
-					&& getIntent().getExtras().containsKey(EXTRA_SERVER_NAME))
-				serverName = getIntent().getExtras().getString(
-						EXTRA_SERVER_NAME);
+					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID))
+				serverID = getIntent().getExtras().getInt(EXTRA_SERVER_ID);
 			// else just connect if there is no connection
 			else if (!binder.isConnected()) {
-				serverName = serverDB.getFavoriteServer();
-				if (serverName == null)
+				serverID = serverDB.getFavoriteServer();
+				if (serverID == -1)
 					Toast.makeText(BrowserActivity.this,
 							"no server configurated", Toast.LENGTH_SHORT)
 							.show();
 			}
 
 			// if there is a server name to connect -> connect
-			if (serverName != null && serverName.length() > 0)
-				binder.connectToServer(serverName, new ShowFolderRunnable());
+			if (serverID >= 0)
+				binder.connectToServer(serverID, new ShowFolderRunnable());
 			// else if there is still a connection update the gui
 			else if (binder.isConnected())
 				new ShowFolderRunnable().run();
@@ -253,19 +252,21 @@ public class BrowserActivity extends Activity {
 						files.length);
 				listView.setAdapter(new BrowserAdapter(this, binder
 						.getBrowser(), all, viewerState));
-				setTitle(binder.getBrowser().getLocation() + "@" + serverName);
+				setTitle(binder.getBrowser().getLocation() + "@"
+						+ binder.getServerName());
 			}
 			if (viewerState == ViewerState.PLAYLISTS) {
 				listView.setAdapter(new BrowserAdapter(this, binder
 						.getBrowser(), binder.getPlayList().getPlayLists(),
 						viewerState));
-				setTitle("Playlists@" + serverName);
+				setTitle("Playlists@" + binder.getServerName());
 			}
 			if (viewerState == ViewerState.PLS_ITEMS) {
 				listView.setAdapter(new BrowserAdapter(this, binder
 						.getBrowser(), binder.getPlayList().listContent(
 						currentPlayList), viewerState));
-				setTitle("Playlist: " + currentPlayList + "@" + serverName);
+				setTitle("Playlist: " + currentPlayList + "@"
+						+ binder.getServerName());
 			}
 			listView.setSelection(selectedPosition);
 		} catch (RemoteException e) {
@@ -601,10 +602,10 @@ public class BrowserActivity extends Activity {
 			if (requestCode == SelectServerActivity.RESULT_CODE) {
 				if (data == null || data.getExtras() == null)
 					return;
-				serverName = data.getExtras().getString(
-						SelectServerActivity.SERVER_NAME);
+				serverID = data.getExtras().getInt(
+						SelectServerActivity.SERVER_ID);
 				disableScreen();
-				binder.connectToServer(serverName, new ShowFolderRunnable());
+				binder.connectToServer(serverID, new ShowFolderRunnable());
 			}
 		} catch (RemoteException e) {
 			Toast.makeText(BrowserActivity.this, e.getMessage(),
@@ -633,7 +634,6 @@ public class BrowserActivity extends Activity {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			serverName = binder.getServerName();
 			showUpdateUI();
 		}
 	}

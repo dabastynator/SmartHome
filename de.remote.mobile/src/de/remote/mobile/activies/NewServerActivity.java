@@ -35,23 +35,24 @@ public class NewServerActivity extends Activity {
 	/**
 	 * if editing an old server, the name will be stored in this field.
 	 */
-	private String oldServer = null;
+	private int oldServer = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.newserver);
 		findComponents();
-		oldServer = null;
+		oldServer = -1;
 		serverDB = new ServerDatabase(this);
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(
-						BrowserActivity.EXTRA_SERVER_NAME)) {
-			String server = getIntent().getExtras().getString(
-					BrowserActivity.EXTRA_SERVER_NAME);
+						BrowserActivity.EXTRA_SERVER_ID)) {
+			int server = getIntent().getExtras().getInt(
+					BrowserActivity.EXTRA_SERVER_ID);
 			String ip = serverDB.getIpOfServer(server);
-			name.setText(server);
+			String name = serverDB.getNameOfServer(server);
 			oldServer = server;
+			this.name.setText(name);
 			this.ip.setText(ip);
 		}
 	}
@@ -71,14 +72,14 @@ public class NewServerActivity extends Activity {
 	 */
 	public void createServer(View view) {
 		String serverName = name.getText().toString();
-		if (oldServer != null)
+		if (oldServer >= 0)
 			serverDB.deleteServer(oldServer);
-		serverDB.insertServer(serverName, ip.getText().toString());
+		int id = (int) serverDB.insertServer(serverName, ip.getText().toString());
 		Toast.makeText(this, "server '" + serverName + "' added",
 				Toast.LENGTH_SHORT).show();
 		Intent i = new Intent(this, BrowserActivity.class);
 		i.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		i.putExtra(BrowserActivity.EXTRA_SERVER_NAME, serverName);
+		i.putExtra(BrowserActivity.EXTRA_SERVER_ID, id);
 		startActivity(i);
 		finish();
 	}

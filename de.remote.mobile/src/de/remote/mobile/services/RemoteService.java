@@ -46,12 +46,17 @@ public class RemoteService extends Service {
 	/**
 	 * name of current server
 	 */
-	private String serverName;
+	private int serverID;
 
 	/**
 	 * ip of current server
 	 */
 	private String serverIP;
+	
+	/**
+	 * name of current server
+	 */
+	private String serverName;
 
 	/**
 	 * the binder to execute all functions
@@ -177,7 +182,7 @@ public class RemoteService extends Service {
 				System.currentTimeMillis());
 		Intent nIntent = new Intent(this, BrowserActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_NAME, serverName);
+		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pInent = PendingIntent.getActivity(this, 0, nIntent, 0);
 		notification.setLatestEventInfo(getApplicationContext(), title, body,
 				pInent);
@@ -289,17 +294,18 @@ public class RemoteService extends Service {
 		/**
 		 * connect to server, ip of the server will be load from the database
 		 * 
-		 * @param name
+		 * @param id
 		 * @param r
 		 */
-		public void connectToServer(String name, Runnable r) {
-			if (name.equals(serverName)) {
+		public void connectToServer(int id, Runnable r) {
+			if (id == serverID) {
 				if (r != null)
 					r.run();
 			} else {
 				disconnect();
-				serverName = name;
-				serverIP = serverDB.getIpOfServer(name);
+				serverID = id;
+				serverIP = serverDB.getIpOfServer(id);
+				serverName = serverDB.getNameOfServer(id);
 				connect(r);
 			}
 		}

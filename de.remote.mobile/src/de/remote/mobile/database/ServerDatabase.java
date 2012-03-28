@@ -46,33 +46,48 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * delete all servers with equal name.
+	 * delete the server with the given id
 	 * 
-	 * @param name
+	 * @param id of the server to delete
 	 */
-	public void deleteServer(String name) {
+	public void deleteServer(int id) {
 		SQLiteDatabase db = getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_DELETE_SERVER);
-		stmt.bindString(1, name);
+		stmt.bindLong(1, id);
 		stmt.execute();
 		db.close();
 	}
 
 	/**
-	 * delete all servers with equal name.
+	 * get ip of server with given id
 	 * 
-	 * @param name
+	 * @param id of the server
 	 * @return ip
 	 */
-	public String getIpOfServer(String name) {
+	public String getIpOfServer(int id) {
 		SQLiteDatabase db = getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_IP_FROM_SERVER);
-		stmt.bindString(1, name);
+		stmt.bindLong(1, id);
 		String ip = stmt.simpleQueryForString();
 		db.close();
 		return ip;
+	}
+	
+	/**
+	 * get the name of the server with given id
+	 * @param id
+	 * @return name
+	 */
+	public String getNameOfServer(int id) {
+		SQLiteDatabase db = getReadableDatabase();
+		SQLiteStatement stmt = db
+				.compileStatement(ServerTable.SQL_NAME_FROM_SERVER);
+		stmt.bindLong(1, id);
+		String name = stmt.simpleQueryForString();
+		db.close();
+		return name;
 	}
 
 	/**
@@ -80,15 +95,15 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * 
 	 * @return server
 	 */
-	public String getFavoriteServer() {
+	public int getFavoriteServer() {
 		SQLiteDatabase db = getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_FAVORITE_SERVER);
-		String server = null;
+		int server = -1;
 		try {
-			server = stmt.simpleQueryForString();
+			server = Integer.parseInt(stmt.simpleQueryForString());
 		} catch (SQLiteDoneException e) {
-			server = null;
+			server = -1;
 		}
 		db.close();
 		return server;
@@ -100,31 +115,31 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @param name
 	 * @param ip
 	 */
-	public void insertServer(String serverName, String ip) {
+	public long insertServer(String serverName, String ip) {
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(ServerTable.NAME, serverName);
 		cv.put(ServerTable.IP, ip);
-		db.insert(ServerTable.TABLE_NAME, null, cv);
+		long id = db.insert(ServerTable.TABLE_NAME, null, cv);
 		db.close();
+		return id;
 	}
 
 	/**
 	 * set server to favorite server
 	 * 
-	 * @param serverName
+	 * @param id of the server
 	 */
-	public void setFavorite(String serverName) {
+	public void setFavorite(int id) {
 		SQLiteDatabase db = getWritableDatabase();
 		try {
 			SQLiteStatement stmt = db
 					.compileStatement(ServerTable.SQL_SET_FAVORITE);
-			stmt.bindString(1, serverName);
+			stmt.bindLong(1, id);
 			stmt.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		db.close();
 	}
-
 }

@@ -87,9 +87,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			disableScreen();
-			if (binder.getChatServer() == null)
-				binder.connectToServer("192.168.1.3", new EnableAreaRunnable());
-			else
+			if (binder.isConnected())
 				new EnableAreaRunnable().run();
 		}
 	};
@@ -111,7 +109,7 @@ public class ChatActivity extends Activity implements IChatListener {
 				Context.BIND_AUTO_CREATE);
 		if (!bound)
 			Log.e("nicht verbunden!!!", "service nicht verbunden");
-		
+
 		chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
 		chatArea.setSelection(messages.size());
 	}
@@ -171,8 +169,8 @@ public class ChatActivity extends Activity implements IChatListener {
 	}
 
 	@Override
-	public void informMessage(final String client, final String msg, final Date time)
-			throws RemoteException {
+	public void informMessage(final String client, final String msg,
+			final Date time) throws RemoteException {
 		handler.post(new Runnable() {
 
 			@Override
@@ -247,17 +245,17 @@ public class ChatActivity extends Activity implements IChatListener {
 		 * author of the message
 		 */
 		public String author;
-		
+
 		/**
-		 * text of the message 
+		 * text of the message
 		 */
 		public String message;
-		
+
 		/**
 		 * time of the message
 		 */
 		public Date date;
-		
+
 		public Message(String client, String msg, Date date) {
 			author = client;
 			message = msg;

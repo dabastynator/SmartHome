@@ -27,23 +27,29 @@ public class ServerTable implements Server {
 			FAVORITE };
 
 	/**
-	 * delete server by name
+	 * delete server by id
 	 */
 	public static final String SQL_DELETE_SERVER = "DELETE FROM " + TABLE_NAME
-			+ " WHERE " + NAME + " = ?";
+			+ " WHERE " + ID + " = ?";
 
 	/**
-	 * get ip from server by name
+	 * get ip from server by id
 	 */
 	public static final String SQL_IP_FROM_SERVER = "SELECT " + IP + " FROM "
-			+ TABLE_NAME + " WHERE " + NAME + " = ?";
+			+ TABLE_NAME + " WHERE " + ID + " = ?";
+	
+	/**
+	 * get name from server by id
+	 */
+	public static final String SQL_NAME_FROM_SERVER = "SELECT " + NAME + " FROM "
+			+ TABLE_NAME + " WHERE " + ID + " = ?";
 
-	public static final String SQL_FAVORITE_SERVER = "SELECT " + NAME
+	public static final String SQL_FAVORITE_SERVER = "SELECT " + ID
 			+ " FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1";
 
 	/**
 	 * set favorite 1 if name equals, otherwise set favorite 0
 	 */
 	public static final String SQL_SET_FAVORITE = "UPDATE " + TABLE_NAME
-			+ " SET " + FAVORITE + " = (" + NAME + " = ?)";
+			+ " SET " + FAVORITE + " = (" + ID + " = ?)";
 }
