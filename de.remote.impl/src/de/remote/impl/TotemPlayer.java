@@ -6,6 +6,7 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IPlayer;
 import de.remote.api.IPlayerListener;
 import de.remote.api.PlayerException;
+import de.remote.api.PlayingBean;
 
 public class TotemPlayer implements IPlayer {
 
@@ -145,6 +146,17 @@ public class TotemPlayer implements IPlayer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void useShuffle(boolean shuffle) throws RemoteException,
+			PlayerException {
+		throw new PlayerException("not supported function for totem");
+	}
+
+	@Override
+	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
+		throw new PlayerException("not supported function for totem");
 	}
 
 }

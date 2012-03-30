@@ -59,7 +59,7 @@ public interface IPlayer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	void seekForwards() throws RemoteException, PlayerException;
-	
+
 	/**
 	 * seek backwards in current playing file
 	 * 
@@ -115,6 +115,24 @@ public interface IPlayer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	void moveRight() throws RemoteException, PlayerException;
+
+	/**
+	 * set the player to play random order for the files.
+	 * 
+	 * @param shuffle
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void useShuffle(boolean shuffle) throws RemoteException, PlayerException;
+
+	/**
+	 * get the current playing file. return null if nothing is playing.
+	 * 
+	 * @return current playing file
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	PlayingBean getPlayingFile() throws RemoteException, PlayerException;
 
 	/**
 	 * add listener for player states

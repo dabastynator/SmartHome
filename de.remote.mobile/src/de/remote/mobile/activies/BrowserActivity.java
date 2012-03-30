@@ -516,6 +516,12 @@ public class BrowserActivity extends Activity {
 				intent = new Intent(this, SelectServerActivity.class);
 				startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 				break;
+			case R.id.opt_shuffle_on:
+				binder.getPlayer().useShuffle(true);
+				break;
+			case R.id.opt_shuffle_off:
+				binder.getPlayer().useShuffle(false);
+				break;
 			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();

@@ -21,15 +21,17 @@ public class MPlayer implements IPlayer {
 	private Process mplayerProcess;
 	private PrintStream mplayerIn;
 	private int fullscreen = 0;
+	private boolean shuffle = false;
 	private int volume = 50;
 	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
 	private int seekValue;
+	public PlayingBean bean;
 
 	@Override
 	public void play(String file) {
-		if (mplayerProcess == null) 
+		if (mplayerProcess == null)
 			startPlayer();
-		
+
 		if (new File(file).isDirectory()) {
 			createPlayList(file);
 			mplayerIn.print("loadlist /home/sebastian/temp/playlist.pls\n");
@@ -46,10 +48,10 @@ public class MPlayer implements IPlayer {
 					new String[] { "/usr/bin/find", file + "/" });
 			PrintStream output = new PrintStream(new FileOutputStream(
 					"/home/sebastian/temp/playlist.pls"));
-			BufferedReader input = new BufferedReader(
-					new InputStreamReader(exec.getInputStream()));
-			BufferedReader error = new BufferedReader(
-					new InputStreamReader(exec.getErrorStream()));
+			BufferedReader input = new BufferedReader(new InputStreamReader(
+					exec.getInputStream()));
+			BufferedReader error = new BufferedReader(new InputStreamReader(
+					exec.getErrorStream()));
 			String line = "";
 			while ((line = input.readLine()) != null)
 				output.println(line);
@@ -60,14 +62,19 @@ public class MPlayer implements IPlayer {
 			error.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	private void startPlayer() {
 		try {
-			mplayerProcess = Runtime.getRuntime().exec(
-					new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
-							"-idle" });
+			String[] args = null;
+			if (shuffle)
+				args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
+						"-idle", "-shuffle" };
+			else
+				args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
+						"-idle" };
+			mplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
 			// start player observer
@@ -76,8 +83,8 @@ public class MPlayer implements IPlayer {
 			mplayerIn.print("volume " + volume + " 1\n");
 			mplayerIn.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
-		}		
+			// throw new PlayerException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -117,7 +124,6 @@ public class MPlayer implements IPlayer {
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
-	
 
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
@@ -222,17 +228,7 @@ public class MPlayer implements IPlayer {
 			PlayerException {
 		String fullPls = PlayListImpl.PLAYLIST_LOCATION + pls + ".pls";
 		if (mplayerIn == null) {
-			try {
-				mplayerProcess = Runtime.getRuntime().exec(
-						new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
-								"-idle" });
-				// the standard input of MPlayer
-				mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
-				// start player observer
-				new PlayerObserver(mplayerProcess.getInputStream()).start();
-			} catch (IOException e) {
-				throw new PlayerException(e.getMessage());
-			}
+			startPlayer();
 		}
 		if (!new File(fullPls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
@@ -250,10 +246,10 @@ public class MPlayer implements IPlayer {
 		@Override
 		public void run() {
 			String line = null;
-			PlayingBean bean = new PlayingBean();
+			bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
-//					System.out.println(line);
+					// System.out.println(line);
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8));
 					if (line.startsWith(" Artist: "))
@@ -284,6 +280,23 @@ public class MPlayer implements IPlayer {
 			listeners.removeAll(exceptionList);
 		}
 
+	}
+
+	@Override
+	public void useShuffle(boolean shuffle) throws RemoteException,
+			PlayerException {
+		this.shuffle = shuffle;
+		try {
+			quit();
+		} catch (Exception e) {
+
+		}
+		startPlayer();
+	}
+
+	@Override
+	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
+		return bean;
 	}
 
 }
