@@ -25,4 +25,6 @@
     <string name="str_name">Name</string>
     <string name="app_name">RemoteControl</string>
     <string name="str_create_playlist">Neue Playlist anlegen</string>
+    <string name="str_clear_screen">Löschen</string>
+    <string name="str_chat_name">Name ändern</string>
 </resources>

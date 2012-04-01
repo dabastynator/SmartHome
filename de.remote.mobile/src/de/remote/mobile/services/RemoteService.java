@@ -52,7 +52,7 @@ public class RemoteService extends Service {
 	 * ip of current server
 	 */
 	private String serverIP;
-	
+
 	/**
 	 * name of current server
 	 */
@@ -151,6 +151,7 @@ public class RemoteService extends Service {
 					browser = new BufferBrowser(station.createBrowser());
 					player = station.getMPlayer();
 					player.addPlayerMessageListener(playerListener);
+					playerListener.playerMessage(player.getPlayingFile());
 					control = station.getControl();
 					playList = station.getPlayList();
 					chatServer = station.getChatServer();
@@ -231,16 +232,16 @@ public class RemoteService extends Service {
 
 		@Override
 		public void playerMessage(final PlayingBean playing) {
+			if (playing == null)
+				return;
 			StringBuilder sb = new StringBuilder();
 			String t = "Playing";
 			if (playing.getTitle() != null && playing.getTitle().length() > 0)
 				t = playing.getTitle();
 			if (playing.getArtist() != null && playing.getArtist().length() > 0)
-				sb.append("Artist: " + playing.getArtist() + "\n");
+				sb.append(playing.getArtist());
 			if (playing.getAlbum() != null && playing.getAlbum().length() > 0)
-				sb.append("Album: " + playing.getAlbum() + "\n");
-			if (playing.getState() == STATE.DOWN)
-				t = "player is down";
+				sb.append(" <" + playing.getAlbum() + ">");
 			final String msg = sb.toString();
 			final String title = t;
 			handler.post(new Runnable() {

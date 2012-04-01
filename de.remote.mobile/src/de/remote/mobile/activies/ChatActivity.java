@@ -1,6 +1,7 @@
 package de.remote.mobile.activies;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -9,10 +10,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,7 +36,17 @@ import de.remote.mobile.util.ChatAdapter;
  * 
  * @author sebastian
  */
-public class ChatActivity extends Activity implements IChatListener {
+public class ChatActivity extends Activity {
+
+	/**
+	 * name of chat properties
+	 */
+	public static final String CHAT_PROPERTIES = "chatProperties";
+
+	/**
+	 * name of the attribute for the client name
+	 */
+	public static final String CLIENT_NAME = "clientName";
 
 	/**
 	 * name of the attribute with all messages
@@ -55,6 +69,11 @@ public class ChatActivity extends Activity implements IChatListener {
 	private PlayerBinder binder;
 
 	/**
+	 * the chat listener will be informed about events on the chat server
+	 */
+	private IChatListener listener = new ChatListener();
+
+	/**
 	 * hander to post actions from any thread
 	 */
 	private Handler handler = new Handler();
@@ -65,9 +84,19 @@ public class ChatActivity extends Activity implements IChatListener {
 	private Button postButton;
 
 	/**
+	 * format for date
+	 */
+	private SimpleDateFormat formatter = new SimpleDateFormat("(HH:mm:ss)");
+	
+	/**
 	 * this list contains all messages
 	 */
 	private ArrayList<Message> messages = new ArrayList<Message>();
+
+	/**
+	 * name of the chat client
+	 */
+	private String clientName;
 
 	/**
 	 * connection with service
@@ -77,7 +106,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			try {
-				binder.getChatServer().removeChatListener(ChatActivity.this);
+				binder.getChatServer().removeChatListener(listener);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -96,6 +125,9 @@ public class ChatActivity extends Activity implements IChatListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat);
+		SharedPreferences sharedPreferences = getSharedPreferences(
+				CHAT_PROPERTIES, 0);
+		clientName = sharedPreferences.getString(CLIENT_NAME, "Android");
 		findComponents();
 		chatArea.setAdapter(new ChatAdapter(this, messages));
 	}
@@ -105,10 +137,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		super.onResume();
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
-		boolean bound = bindService(intent, playerConnection,
-				Context.BIND_AUTO_CREATE);
-		if (!bound)
-			Log.e("nicht verbunden!!!", "service nicht verbunden");
+		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 
 		chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
 		chatArea.setSelection(messages.size());
@@ -117,9 +146,9 @@ public class ChatActivity extends Activity implements IChatListener {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (binder != null)
+		if (binder != null && binder.getChatServer() != null)
 			try {
-				binder.getChatServer().removeChatListener(this);
+				binder.getChatServer().removeChatListener(listener);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -146,7 +175,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		String msg = chatInput.getText().toString();
 		chatInput.setText("");
 		try {
-			binder.getChatServer().postMessage("Android", msg);
+			binder.getChatServer().postMessage(clientName, msg);
 		} catch (RemoteException e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -169,36 +198,6 @@ public class ChatActivity extends Activity implements IChatListener {
 	}
 
 	@Override
-	public void informMessage(final String client, final String msg,
-			final Date time) throws RemoteException {
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				Message message = new Message(client, msg, time);
-				messages.add(message);
-				chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
-				chatArea.setSelection(messages.size());
-			}
-		});
-	}
-
-	@Override
-	public void informNewClient(String client) throws RemoteException {
-
-	}
-
-	@Override
-	public void informLeftClient(String client) throws RemoteException {
-
-	}
-
-	@Override
-	public String getName() throws RemoteException {
-		return "Android";
-	}
-
-	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable(MESSAGE_LIST, messages);
@@ -212,6 +211,49 @@ public class ChatActivity extends Activity implements IChatListener {
 				.getSerializable(MESSAGE_LIST);
 	}
 
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.opt_chat_clear:
+			messages.clear();
+			chatArea.setAdapter(new ChatAdapter(ChatActivity.this, messages));
+			return true;
+		case R.id.opt_chat_name:
+			Intent intent = new Intent(this, GetTextActivity.class);
+			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
+			return true;
+		}
+		return super.onMenuItemSelected(featureId, item);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == GetTextActivity.RESULT_CODE && data != null
+				&& data.getExtras() != null) {
+			String newName = data.getExtras().getString(GetTextActivity.RESULT);
+			SharedPreferences.Editor editor = getSharedPreferences(
+					CHAT_PROPERTIES, 0).edit();
+			editor.putString(CLIENT_NAME, newName);
+			editor.commit();
+			try {
+				binder.getChatServer().removeChatListener(listener);
+				clientName = newName;
+				binder.getChatServer().addChatListener(listener);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		MenuInflater mi = new MenuInflater(getApplication());
+		mi.inflate(R.menu.chat_pref, menu);
+		return true;
+	}
+
 	/**
 	 * runnable to start chat. it enables the gui elements.
 	 * 
@@ -222,7 +264,7 @@ public class ChatActivity extends Activity implements IChatListener {
 		public void run() {
 			enableArea();
 			try {
-				binder.getChatServer().addChatListener(ChatActivity.this);
+				binder.getChatServer().addChatListener(listener);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -254,12 +296,52 @@ public class ChatActivity extends Activity implements IChatListener {
 		/**
 		 * time of the message
 		 */
-		public Date date;
+		public String date;
 
-		public Message(String client, String msg, Date date) {
+		public Message(String client, String msg, String date) {
 			author = client;
 			message = msg;
 			this.date = date;
+		}
+	}
+
+	/**
+	 * the chat listener listenes on the chat server and will be informed about
+	 * events such as new/old clients or messages.
+	 * 
+	 * @author sebastian
+	 */
+	public class ChatListener implements IChatListener {
+
+		@Override
+		public void informMessage(final String client, final String msg,
+				final Date time) throws RemoteException {
+			handler.post(new Runnable() {
+
+				@Override
+				public void run() {
+					Message message = new Message(client, msg, formatter.format(time));
+					messages.add(message);
+					chatArea.setAdapter(new ChatAdapter(ChatActivity.this,
+							messages));
+					chatArea.setSelection(messages.size());
+				}
+			});
+		}
+
+		@Override
+		public void informNewClient(String client) throws RemoteException {
+
+		}
+
+		@Override
+		public void informLeftClient(String client) throws RemoteException {
+
+		}
+
+		@Override
+		public String getName() throws RemoteException {
+			return clientName;
 		}
 	}
 }

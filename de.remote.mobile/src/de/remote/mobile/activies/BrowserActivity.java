@@ -1,5 +1,8 @@
 package de.remote.mobile.activies;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -91,6 +94,11 @@ public class BrowserActivity extends Activity {
 	 * search input field
 	 */
 	private EditText searchText;
+
+	/**
+	 * map to get full path string from a file name of a playlist item
+	 */
+	private Map<String, String> plsFileMap = new HashMap<String, String>();
 
 	/**
 	 * area that contains the search field and button
@@ -262,9 +270,17 @@ public class BrowserActivity extends Activity {
 				setTitle("Playlists@" + binder.getServerName());
 			}
 			if (viewerState == ViewerState.PLS_ITEMS) {
+				plsFileMap.clear();
+				for (String item : binder.getPlayList().listContent(
+						currentPlayList))
+					if (item.indexOf("/") >= 0)
+						plsFileMap.put(item.substring(item.lastIndexOf("/") + 1),
+								item);
+					else
+						plsFileMap.put(item, item);
 				listView.setAdapter(new BrowserAdapter(this, binder
-						.getBrowser(), binder.getPlayList().listContent(
-						currentPlayList), viewerState));
+						.getBrowser(), plsFileMap.keySet().toArray(
+						new String[] {}), viewerState));
 				setTitle("Playlist: " + currentPlayList + "@"
 						+ binder.getServerName());
 			}
@@ -695,6 +711,8 @@ public class BrowserActivity extends Activity {
 				int position, long arg3) {
 			selectedItem = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
+			if (viewerState == ViewerState.PLS_ITEMS)
+				selectedItem = plsFileMap.get(selectedItem);
 			selectedPosition = position;
 			return false;
 		}

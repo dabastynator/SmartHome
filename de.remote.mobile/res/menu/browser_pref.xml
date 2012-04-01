@@ -34,7 +34,9 @@
                 android:title="@string/str_move_right" android:icon="@drawable/right"/>
             <item
                 android:id="@+id/opt_left"
-                android:title="@string/str_move_left" android:icon="@drawable/left"/><item android:id="@+id/opt_shutdown" android:title="@string/str_shutdown" android:icon="@drawable/exit" />
+                android:title="@string/str_move_left" android:icon="@drawable/left"/>
+                <item android:id="@+id/opt_shuffle_on" android:title="Shuffle"/>
+                <item android:id="@+id/opt_shuffle_off" android:title="No shuffle"/><item android:id="@+id/opt_shutdown" android:title="@string/str_shutdown" android:icon="@drawable/exit" />
         </menu>
     </item>
     <item

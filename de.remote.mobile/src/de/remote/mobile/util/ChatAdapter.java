@@ -1,6 +1,5 @@
 package de.remote.mobile.util;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import android.app.Activity;
@@ -25,11 +24,6 @@ public class ChatAdapter extends ArrayAdapter<Message> {
 	 */
 	private Message[] messages;
 	
-	/**
-	 * format for date
-	 */
-	private SimpleDateFormat formatter = new SimpleDateFormat("(HH:mm:ss)");
-
 	/**
 	 * allocate new adapter
 	 * 
@@ -67,7 +61,7 @@ public class ChatAdapter extends ArrayAdapter<Message> {
 		Message msg = messages[position];
 		holder.lbl_chat_name.setText(msg.author);
 		holder.lbl_chat_text.setText(msg.message);
-		holder.lbl_chat_date.setText(formatter.format(msg.date));
+		holder.lbl_chat_date.setText(msg.date);
 
 		return row;
 	}
