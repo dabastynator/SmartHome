@@ -1,12 +1,9 @@
 package de.remote.impl;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayer;
-import de.remote.api.IPlayerListener;
 import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
 
-public class VLCPlayer implements IPlayer{
+public class VLCPlayer extends AbstractPlayer{
 
 	@Override
 	public void play(String file) throws RemoteException {
@@ -87,15 +84,8 @@ public class VLCPlayer implements IPlayer{
 	}
 
 	@Override
-	public void addPlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void removePlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
+	public void useShuffle(boolean shuffle) throws RemoteException,
+			PlayerException {
 		// TODO Auto-generated method stub
 		
 	}
@@ -106,18 +96,4 @@ public class VLCPlayer implements IPlayer{
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void useShuffle(boolean shuffle) throws RemoteException,
-			PlayerException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

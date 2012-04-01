@@ -3,12 +3,10 @@ package de.remote.impl;
 import java.io.IOException;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayer;
-import de.remote.api.IPlayerListener;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 
-public class TotemPlayer implements IPlayer {
+public class TotemPlayer extends AbstractPlayer {
 
 	private static final String QUIT = "totem --quit";
 	private static final String PLAY_PAUSE = "totem --play-pause";
@@ -106,16 +104,6 @@ public class TotemPlayer implements IPlayer {
 	@Override
 	public void moveRight() throws RemoteException, PlayerException {
 		throw new PlayerException("not supported function for totem");
-	}
-
-	@Override
-	public void addPlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
-	}
-
-	@Override
-	public void removePlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
 	}
 
 	@Override

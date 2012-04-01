@@ -7,25 +7,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayer;
-import de.remote.api.IPlayerListener;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 
-public class MPlayer implements IPlayer {
+public class MPlayer extends AbstractPlayer {
 
 	private Process mplayerProcess;
 	private PrintStream mplayerIn;
 	private int fullscreen = 0;
 	private boolean shuffle = false;
 	private int volume = 50;
-	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
 	private int seekValue;
-	public PlayingBean bean;
 
 	@Override
 	public void play(String file) {
@@ -212,18 +206,6 @@ public class MPlayer implements IPlayer {
 	}
 
 	@Override
-	public void addPlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
-		listeners.add(listener);
-	}
-
-	@Override
-	public void removePlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
-		listeners.remove(listener);
-	}
-
-	@Override
 	public void playPlayList(String pls) throws RemoteException,
 			PlayerException {
 		String fullPls = PlayListImpl.PLAYLIST_LOCATION + pls + ".pls";
@@ -246,10 +228,9 @@ public class MPlayer implements IPlayer {
 		@Override
 		public void run() {
 			String line = null;
-			bean = new PlayingBean();
+			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
-					// System.out.println(line);
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8));
 					if (line.startsWith(" Artist: "))
@@ -268,18 +249,6 @@ public class MPlayer implements IPlayer {
 				e.printStackTrace();
 			}
 		}
-
-		private void inform(PlayingBean bean) {
-			List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
-			for (IPlayerListener listener : listeners)
-				try {
-					listener.playerMessage(bean);
-				} catch (RemoteException e) {
-					exceptionList.add(listener);
-				}
-			listeners.removeAll(exceptionList);
-		}
-
 	}
 
 	@Override
@@ -293,10 +262,4 @@ public class MPlayer implements IPlayer {
 		}
 		startPlayer();
 	}
-
-	@Override
-	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
-		return bean;
-	}
-
 }

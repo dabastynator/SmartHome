@@ -52,8 +52,11 @@ public class BrowserImpl implements IBrowser {
 
 	@Override
 	public String getLocation() {
-		String str = location.substring(0, location.lastIndexOf('/'));
-		return str.substring(str.lastIndexOf('/') + 1);
+		if (location.lastIndexOf('/') >= 0) {
+			String str = location.substring(0, location.lastIndexOf('/'));
+			return str.substring(str.lastIndexOf('/') + 1);
+		}
+		return location;
 	}
 
 	@Override

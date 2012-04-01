@@ -13,8 +13,8 @@ public class RemoteServer {
 
 	public static void main(String[] args) {
 
-		String place = "/media/baestynator/";
-		String registry = "192.168.1.3";
+		String place = "/home/sebastian/";
+		String registry = "192.168.43.175";
 
 		if (args.length > 0)
 			place = args[0];

@@ -26,6 +26,8 @@ public class ChatServerImpl implements IChatServer {
 	@Override
 	public boolean addChatListener(IChatListener listener)
 			throws RemoteException {
+		if (listeners.contains(listener))
+			return false;
 		boolean add = listeners.add(listener);
 		List<IChatListener> removeListener = new ArrayList<IChatListener>();
 		String client = "";
