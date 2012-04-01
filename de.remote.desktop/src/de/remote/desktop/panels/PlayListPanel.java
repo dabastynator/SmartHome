@@ -62,8 +62,8 @@ public class PlayListPanel extends Panel {
 		setName("Playlists");
 
 		setLayout(new BorderLayout());
-		add("Center", createLists());
-		add("North", createButtons());
+		add(BorderLayout.CENTER, createLists());
+		add(BorderLayout.NORTH, createButtons());
 	}
 
 	/**

@@ -12,7 +12,7 @@ public class RemoteControl {
 
 	public static void main(String[] args) {
 		ControlFrame frame = new ControlFrame();
-		String registry = "192.168.1.3";
+		String registry = "localhost";
 		int port = 5007;
 		if (args.length > 0)
 			registry = args[0];

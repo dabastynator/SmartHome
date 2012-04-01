@@ -6,8 +6,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -20,6 +18,7 @@ import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.IPlayerListener;
 import de.remote.api.IStation;
+import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.desktop.menus.ControlMenu;
 import de.remote.desktop.menus.PlayerMenu;
@@ -28,6 +27,7 @@ import de.remote.desktop.panels.BrowserPanel;
 import de.remote.desktop.panels.ChatPanel;
 import de.remote.desktop.panels.PlayListPanel;
 import de.remote.desktop.panels.PlayerPanel;
+import de.remote.desktop.panels.ServerPanel;
 
 /**
  * The main frame for the gui. It creates all panels and menus that will be
@@ -49,11 +49,6 @@ public class ControlFrame extends JFrame {
 	 * generated id
 	 */
 	private static final long serialVersionUID = 1222897455250462547L;
-
-	/**
-	 * list of all connectable servers
-	 */
-	public static final Map<String, String> serverList = new HashMap<String, String>();
 
 	/**
 	 * control panel for the player
@@ -135,11 +130,10 @@ public class ControlFrame extends JFrame {
 	 */
 	private String clientName;
 
-	static {
-		serverList.put("Idefix", "192.168.1.4");
-		serverList.put("Inspiron", "192.168.1.3");
-		serverList.put("localhost", "localhost");
-	}
+	/**
+	 * the server editor provides functionality to edit the server list.
+	 */
+	private ServerPanel serverEditor;
 
 	/**
 	 * allocate frame and create all panels and menus
@@ -147,11 +141,15 @@ public class ControlFrame extends JFrame {
 	public ControlFrame() {
 		setDefaultCloseOperation(3);
 		setSize(600, 400);
-		setTitle("Idefix");
+		this.controlMenu = new ControlMenu();
+		this.serverMenu = new ServerMenu(this);
+		this.playerMenu = new PlayerMenu(this);
+		
 		this.playerControl = new PlayerPanel();
 		this.chat = new ChatPanel();
 		this.plsBrowser = new PlayListPanel();
 		this.fileBrowser = new BrowserPanel();
+		this.serverEditor = new ServerPanel(serverMenu);
 		this.playerListener = new DesktopPlayerListener();
 
 		setLayout(new BorderLayout());
@@ -162,13 +160,11 @@ public class ControlFrame extends JFrame {
 		tabs.add(this.fileBrowser);
 		tabs.add(this.plsBrowser);
 		tabs.add(this.chat);
+		tabs.add(this.serverEditor);
 		setVisible(true);
 		addWindowListener(new DesktopWindowListener());
 
 		MenuBar menuBar = new MenuBar();
-		this.controlMenu = new ControlMenu();
-		this.serverMenu = new ServerMenu(this);
-		this.playerMenu = new PlayerMenu(this);
 		menuBar.add(this.controlMenu);
 		menuBar.add(this.serverMenu);
 		menuBar.add(this.playerMenu);
@@ -211,6 +207,11 @@ public class ControlFrame extends JFrame {
 			totemPlayer = station.getTotemPlayer();
 			IBrowser browser = station.createBrowser();
 			mPlayer.addPlayerMessageListener(playerListener);
+			try {
+				playerListener.playerMessage(mPlayer.getPlayingFile());
+			} catch (PlayerException e) {
+				e.printStackTrace();
+			}
 			fileBrowser.setBrowser(browser);
 			IPlayList playList = station.getPlayList();
 			fileBrowser.setPlayList(playList);
@@ -221,9 +222,6 @@ public class ControlFrame extends JFrame {
 			setPlayer(mPlayer);
 			playerMenu.setPlayer(totemPlayer, mPlayer);
 			controlMenu.setControl(station.getControl());
-			for (String serverName : serverList.keySet())
-				if (((String) serverList.get(serverName)).equals(registry))
-					setTitle(serverName);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -261,8 +259,11 @@ public class ControlFrame extends JFrame {
 		}
 
 		public void playerMessage(PlayingBean playing) throws RemoteException {
-			ControlFrame.this.setTitle("Idefix - " + playing.getArtist()
-					+ " - " + playing.getTitle());
+			if (playing == null)
+				return;
+			System.out.println(playing.getTitle());
+			ControlFrame.this.setTitle(playing.getArtist() + " - "
+					+ playing.getTitle());
 		}
 	}
 

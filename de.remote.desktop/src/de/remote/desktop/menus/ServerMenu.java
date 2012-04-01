@@ -4,8 +4,10 @@ import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 import de.remote.desktop.ControlFrame;
+import de.remote.desktop.panels.ServerPanel;
 
 /**
  * Menu to switch the current server. All server are listed in a map of the main
@@ -26,6 +28,11 @@ public class ServerMenu extends Menu {
 	private ControlFrame mainFrame;
 
 	/**
+	 * the map contains all server as key with ip as value
+	 */
+	private Map<String, String> serverMap;
+
+	/**
 	 * allocates new menu, create and initialize menu items
 	 * 
 	 * @param mainFrame
@@ -33,13 +40,22 @@ public class ServerMenu extends Menu {
 	public ServerMenu(ControlFrame mainFrame) {
 		super("Server");
 		this.mainFrame = mainFrame;
-		for (String name : ControlFrame.serverList.keySet()) {
+		updateServers();
+	}
+
+	/**
+	 * update list of available servers
+	 */
+	public void updateServers() {
+		removeAll();
+		serverMap = ServerPanel.loadServers(ServerPanel.SERVER_FILE);
+		for (String name : serverMap.keySet()) {
 			MenuItem item = new MenuItem(name);
-			item.addActionListener(new ServerActionListener(name));
+			item.addActionListener(new ServerActionListener(serverMap.get(name)));
 			add(item);
 		}
 	}
-
+	
 	/**
 	 * listener to inform the main frame about the selected server.
 	 * 
@@ -48,8 +64,8 @@ public class ServerMenu extends Menu {
 	public class ServerActionListener implements ActionListener {
 		private String newServerIp;
 
-		public ServerActionListener(String server) {
-			this.newServerIp = ((String) ControlFrame.serverList.get(server));
+		public ServerActionListener(String ip) {
+			this.newServerIp = ip;
 		}
 
 		public void actionPerformed(ActionEvent e) {

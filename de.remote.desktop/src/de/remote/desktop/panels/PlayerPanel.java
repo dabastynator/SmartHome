@@ -71,7 +71,17 @@ public class PlayerPanel extends Panel {
 	 * seek backward button
 	 */
 	private Button seekBWB;
-
+	
+	/**
+	 * shuffle button
+	 */
+	private Button shuffle;
+	
+	/**
+	 * true if shuffle is active, otherwise false
+	 */
+	private boolean isShuffle = false;
+	
 	/**
 	 * allocate playerpanel, create and initialize all buttons
 	 */
@@ -87,6 +97,7 @@ public class PlayerPanel extends Panel {
 		this.volUp = new Button("Vol+");
 		this.volDown = new Button("Vol-");
 		this.quit = new Button("Quit");
+		this.shuffle = new Button("Shuffle");
 		add(this.prev);
 		add(this.seekBWB);
 		add(this.play);
@@ -95,6 +106,7 @@ public class PlayerPanel extends Panel {
 		add(this.fullscreen);
 		add(this.volUp);
 		add(this.volDown);
+		add(this.shuffle);
 		add(this.quit);
 		this.play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -188,6 +200,19 @@ public class PlayerPanel extends Panel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PlayerPanel.this.player.quit();
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				} catch (PlayerException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		this.shuffle.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					isShuffle = !isShuffle;
+					player.useShuffle(isShuffle);
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
 				} catch (PlayerException e1) {
