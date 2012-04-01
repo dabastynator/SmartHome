@@ -56,6 +56,22 @@ public class PlayingBean implements Serializable{
 	private STATE state;
 
 
+	public PlayingBean(PlayingBean bean) {
+		if (bean == null)
+			return;
+		album = bean.getAlbum();
+		artist = bean.getArtist();
+		title = bean.getTitle();
+		file = bean.getFile();
+		radio = bean.getRadio();
+		state = bean.getState();
+	}
+
+
+	public PlayingBean() {
+	}
+
+
 	public String getArtist() {
 		return artist;
 	}
