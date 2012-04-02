@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/opt_chat_clear"
-        android:title="@string/str_clear_screen">
+        android:title="@string/str_clear_screen" android:icon="@drawable/clear">
     </item>
     
     <item
         android:id="@+id/opt_chat_name"
-        android:title="@string/str_chat_name">
+        android:title="@string/str_chat_name" android:icon="@drawable/edit">
     </item>
 
 </menu>
