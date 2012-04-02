@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
@@ -177,10 +176,10 @@ public class ChatPanel extends Panel {
 		}
 
 		@Override
-		public void informMessage(String client, String msg, Date time)
+		public void informMessage(String client, String msg, String time)
 				throws RemoteException {
 			String txt = ChatPanel.this.textArea.getText();
-			txt = txt + client + ": " + msg + "\n";
+			txt = txt + client + " (" + time + ")\n>" + msg + "\n";
 			ChatPanel.this.textArea.setText(txt);
 		}
 
