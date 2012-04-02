@@ -13,14 +13,15 @@ public class RemoteServer {
 
 	public static void main(String[] args) {
 
-		String place = "/home/sebastian/";
-		String registry = "192.168.43.175";
+		if (args.length < 2) {
+			System.err.println("argument missing!");
+			System.err.println("first argument: directory to browse");
+			System.err.println("second argument: ip of the registry");
+			System.exit(1);
+		}
 
-		if (args.length > 0)
-			place = args[0];
-
-		if (args.length > 1)
-			registry = args[1];
+		String place = args[0];
+		String registry = args[1];
 
 		System.out.println("Browse at " + place + " (" + registry + ")");
 
@@ -30,7 +31,7 @@ public class RemoteServer {
 
 		try {
 			forceConnectToRegistry(registry);
-			server.startServer(ControlConstants.STATION_PORT+2);
+			server.startServer(ControlConstants.STATION_PORT + 2);
 			server.register(ControlConstants.STATION_ID, station);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();

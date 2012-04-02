@@ -1,5 +1,6 @@
 package de.remote.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,13 +13,18 @@ public class ChatServerImpl implements IChatServer {
 
 	private List<IChatListener> listeners;
 
+	/**
+	 * format for date
+	 */
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+
 	public ChatServerImpl() {
 		listeners = new ArrayList<IChatListener>();
 	}
 
 	@Override
 	public void postMessage(String author, String msg) throws RemoteException {
-		Date time = new Date();
+		String time = formatter.format(new Date());
 		for (IChatListener listener : listeners)
 			listener.informMessage(author, msg, time);
 	}
