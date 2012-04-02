@@ -274,8 +274,9 @@ public class BrowserActivity extends Activity {
 				for (String item : binder.getPlayList().listContent(
 						currentPlayList))
 					if (item.indexOf("/") >= 0)
-						plsFileMap.put(item.substring(item.lastIndexOf("/") + 1),
-								item);
+						plsFileMap
+								.put(item.substring(item.lastIndexOf("/") + 1),
+										item);
 					else
 						plsFileMap.put(item, item);
 				listView.setAdapter(new BrowserAdapter(this, binder
@@ -613,7 +614,8 @@ public class BrowserActivity extends Activity {
 				Toast.makeText(BrowserActivity.this, selectedItem + " added",
 						Toast.LENGTH_SHORT).show();
 			}
-			if (requestCode == GetTextActivity.RESULT_CODE) {
+			if (requestCode == GetTextActivity.RESULT_CODE && data != null
+					&& data.getExtras() != null) {
 				String pls = data.getExtras().getString(GetTextActivity.RESULT);
 				binder.getPlayList().addPlayList(pls);
 				showUpdateUI();

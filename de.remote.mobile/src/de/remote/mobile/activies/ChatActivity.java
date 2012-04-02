@@ -1,9 +1,6 @@
 package de.remote.mobile.activies;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -14,6 +11,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -83,11 +82,6 @@ public class ChatActivity extends Activity {
 	 */
 	private Button postButton;
 
-	/**
-	 * format for date
-	 */
-	private SimpleDateFormat formatter = new SimpleDateFormat("(HH:mm:ss)");
-	
 	/**
 	 * this list contains all messages
 	 */
@@ -200,15 +194,13 @@ public class ChatActivity extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putSerializable(MESSAGE_LIST, messages);
+		outState.putParcelableArrayList(MESSAGE_LIST, messages);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		messages = (ArrayList<Message>) savedInstanceState
-				.getSerializable(MESSAGE_LIST);
+		messages = savedInstanceState.getParcelableArrayList(MESSAGE_LIST);
 	}
 
 	@Override
@@ -220,6 +212,7 @@ public class ChatActivity extends Activity {
 			return true;
 		case R.id.opt_chat_name:
 			Intent intent = new Intent(this, GetTextActivity.class);
+			intent.putExtra(GetTextActivity.DEFAULT_TEXT, clientName);
 			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
 			return true;
 		}
@@ -265,8 +258,9 @@ public class ChatActivity extends Activity {
 			enableArea();
 			try {
 				binder.getChatServer().addChatListener(listener);
-			} catch (RemoteException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				Toast.makeText(ChatActivity.this, e.getMessage(),
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -276,12 +270,7 @@ public class ChatActivity extends Activity {
 	 * 
 	 * @author sebastian
 	 */
-	public class Message implements Serializable {
-
-		/**
-		 * generated id
-		 */
-		private static final long serialVersionUID = -3004935219876939234L;
+	public class Message implements Parcelable {
 
 		/**
 		 * author of the message
@@ -298,11 +287,50 @@ public class ChatActivity extends Activity {
 		 */
 		public String date;
 
+		/**
+		 * allocate new message bean
+		 * 
+		 * @param client
+		 * @param msg
+		 * @param date
+		 */
 		public Message(String client, String msg, String date) {
 			author = client;
 			message = msg;
 			this.date = date;
 		}
+
+		@Override
+		public int describeContents() {
+			return hashCode();
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeString(author);
+			dest.writeString(message);
+			dest.writeString(date);
+		}
+	}
+
+	/**
+	 * message creator reads parcel source and creates a message message
+	 * 
+	 * @author sebastian
+	 */
+	public class MessageCreator implements Parcelable.Creator<Message> {
+
+		@Override
+		public Message createFromParcel(Parcel source) {
+			return new Message(source.readString(), source.readString(),
+					source.readString());
+		}
+
+		@Override
+		public Message[] newArray(int size) {
+			return new Message[size];
+		}
+
 	}
 
 	/**
@@ -315,12 +343,12 @@ public class ChatActivity extends Activity {
 
 		@Override
 		public void informMessage(final String client, final String msg,
-				final Date time) throws RemoteException {
+				final String time) throws RemoteException {
 			handler.post(new Runnable() {
 
 				@Override
 				public void run() {
-					Message message = new Message(client, msg, formatter.format(time));
+					Message message = new Message(client, msg, '(' + time + ')');
 					messages.add(message);
 					chatArea.setAdapter(new ChatAdapter(ChatActivity.this,
 							messages));

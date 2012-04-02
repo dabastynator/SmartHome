@@ -25,6 +25,11 @@ public class GetTextActivity extends Activity {
 	public static final String RESULT = "result";
 
 	/**
+	 * name of default value for the text
+	 */
+	public static final String DEFAULT_TEXT = "dafaultValue";
+
+	/**
 	 * textfield with the value
 	 */
 	private EditText text;
@@ -34,6 +39,9 @@ public class GetTextActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gettext);
 		findComponents();
+		if (getIntent().getExtras() != null
+				&& getIntent().getExtras().containsKey(DEFAULT_TEXT))
+			text.setText(getIntent().getExtras().getString(DEFAULT_TEXT));
 	}
 
 	/**
