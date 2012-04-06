@@ -2,6 +2,8 @@ package de.remote.mobile.services;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -31,7 +34,7 @@ import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.util.BufferBrowser;
 
 /**
- * service for remotecontrol an server. the binder enables functions to control
+ * service for remotecontrol a server. the binder enables functions to control
  * all functions on the server.
  * 
  * @author sebastian
@@ -113,6 +116,11 @@ public class RemoteService extends Service {
 	 */
 	private ServerDatabase serverDB;
 
+	/**
+	 * list of all listeners for any action on this service
+	 */
+	private List<IRemoteActionListener> actionListener = new ArrayList<IRemoteActionListener>();
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -157,12 +165,21 @@ public class RemoteService extends Service {
 					chatServer = station.getChatServer();
 					if (successRunnable != null)
 						handler.post(successRunnable);
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							for (IRemoteActionListener listener: actionListener)
+								listener.serverConnectionChanged(serverName);							
+						}
+					});
 				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
 							Toast.makeText(RemoteService.this, e.getMessage(),
 									Toast.LENGTH_SHORT).show();
+							for (IRemoteActionListener listener: actionListener)
+								listener.serverConnectionChanged(null);
 						}
 					});
 				}
@@ -216,6 +233,8 @@ public class RemoteService extends Service {
 			}
 		station = null;
 		player = null;
+		for (IRemoteActionListener listener:actionListener)
+			listener.serverConnectionChanged(null);
 	}
 
 	@Override
@@ -232,6 +251,8 @@ public class RemoteService extends Service {
 
 		@Override
 		public void playerMessage(final PlayingBean playing) {
+			Log.e("player", "new file");
+
 			if (playing == null)
 				return;
 			StringBuilder sb = new StringBuilder();
@@ -252,9 +273,35 @@ public class RemoteService extends Service {
 						nm.cancel(RemoteService.NOTIFICATION_ID);
 					} else
 						makeNotification(title, msg);
+					for (IRemoteActionListener listener: actionListener)
+						listener.newPlayingFile(playing);
 				}
 			});
 		}
+	}
+
+	/**
+	 * this interface informs listener about any action on the remote service,
+	 * such as new connection or new playing file.
+	 * 
+	 * @author sebastian
+	 */
+	public interface IRemoteActionListener {
+
+		/**
+		 * server player plays new file
+		 * 
+		 * @param bean
+		 */
+		void newPlayingFile(PlayingBean bean);
+
+		/**
+		 * connection with server changed
+		 * 
+		 * @param serverName
+		 */
+		void serverConnectionChanged(String serverName);
+
 	}
 
 	/**
@@ -359,6 +406,30 @@ public class RemoteService extends Service {
 		 */
 		public String getServerName() {
 			return serverName;
+		}
+
+		public PlayerListener getPlayerListener() {
+			return playerListener;
+		}
+
+		/**
+		 * add new remote action listener. the listener will be informed about
+		 * actions on this service
+		 * 
+		 * @param listener
+		 */
+		public void addRemoteActionListener(IRemoteActionListener listener) {
+			if (!actionListener.contains(listener))
+				actionListener.add(listener);
+		}
+
+		/**
+		 * remove action listener
+		 * 
+		 * @param listener
+		 */
+		public void removeRemoteActionListener(IRemoteActionListener listener) {
+			actionListener.remove(listener);
 		}
 	}
 
