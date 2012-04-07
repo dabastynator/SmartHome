@@ -167,8 +167,8 @@ public class RemoteService extends Service {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							for (IRemoteActionListener listener: actionListener)
-								listener.serverConnectionChanged(serverName);							
+							for (IRemoteActionListener listener : actionListener)
+								listener.serverConnectionChanged(serverName);
 						}
 					});
 				} catch (final Exception e) {
@@ -177,7 +177,7 @@ public class RemoteService extends Service {
 						public void run() {
 							Toast.makeText(RemoteService.this, e.getMessage(),
 									Toast.LENGTH_SHORT).show();
-							for (IRemoteActionListener listener: actionListener)
+							for (IRemoteActionListener listener : actionListener)
 								listener.serverConnectionChanged(null);
 						}
 					});
@@ -216,7 +216,7 @@ public class RemoteService extends Service {
 	}
 
 	/**
-	 * disconnect from current cunnection
+	 * disconnect from current connection
 	 */
 	private void disconnect() {
 		if (player != null) {
@@ -232,7 +232,9 @@ public class RemoteService extends Service {
 			}
 		station = null;
 		player = null;
-		for (IRemoteActionListener listener:actionListener)
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(RemoteService.NOTIFICATION_ID);
+		for (IRemoteActionListener listener : actionListener)
 			listener.serverConnectionChanged(null);
 	}
 
@@ -270,7 +272,7 @@ public class RemoteService extends Service {
 						nm.cancel(RemoteService.NOTIFICATION_ID);
 					} else
 						makeNotification(title, msg);
-					for (IRemoteActionListener listener: actionListener)
+					for (IRemoteActionListener listener : actionListener)
 						listener.newPlayingFile(playing);
 				}
 			});

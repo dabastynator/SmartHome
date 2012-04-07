@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -54,7 +53,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			if (binder.isConnected())
 				updateWidget();
 			else
-				setWidgetText("not connected", "no connection with any server","");
+				setWidgetText("not connected", "no connection with any server",
+						"");
 
 		}
 	};
@@ -76,7 +76,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		} catch (PlayerException e) {
 		}
 		if (playing == null) {
-			setWidgetText("no file playing", "","");
+			setWidgetText("no file playing", "", "");
 			return;
 		}
 		String title = "playing";
@@ -138,7 +138,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			if (binder.isConnected())
 				updateWidget();
 			else
-				setWidgetText("not connected", "no connection with any server","");
+				setWidgetText("not connected", "no connection with any server",
+						"");
 		}
 	}
 
@@ -193,12 +194,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void serverConnectionChanged(String serverName) {
-		if (serverName != null)
-			Log.e("new server", serverName);
-		else
-			Log.e("new server", "disconnect");
 		if (serverName == null)
-			setWidgetText("no connection", "","");
+			setWidgetText("no connection", "", "");
 		else
 			updateWidget();
 	}

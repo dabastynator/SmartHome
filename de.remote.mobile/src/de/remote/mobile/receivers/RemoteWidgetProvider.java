@@ -3,9 +3,9 @@ package de.remote.mobile.receivers;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.RemoteViews;
 import de.remote.mobile.R;
 import de.remote.mobile.activies.BrowserActivity;
@@ -46,10 +46,13 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
-		Log.e("update", "update");
+		// appWidgetIds contains not all necessary ids -> get all ids
 		Intent serviceIntent = new Intent(context, WidgetService.class);
 		context.startService(serviceIntent);
-
+		ComponentName thisWidget = new ComponentName(context,
+				RemoteWidgetProvider.class);
+		appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+		
 		// update each of the app widgets with the remote adapter
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
@@ -95,8 +98,17 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 
 			views.setOnClickPendingIntent(R.id.button_widget_prev, prevPending);
 
+			// Register update onClickListener
+			Intent intent = new Intent(context, RemoteWidgetProvider.class);
+
+			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+
+			pendingIntent = PendingIntent.getBroadcast(context,
+					0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
+
 			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}
-		super.onUpdate(context, appWidgetManager, appWidgetIds);
 	}
 }

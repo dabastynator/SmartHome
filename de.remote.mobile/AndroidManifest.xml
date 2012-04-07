@@ -56,7 +56,7 @@
         <receiver
             android:name=".receivers.RemoteWidgetProvider"
             android:icon="@drawable/ic_launcher"
-            android:label="Remote Control Widget" >
+            android:label="Remote Control" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
