@@ -17,10 +17,9 @@
         android:layout_weight="1"
         android:gravity="center_horizontal|center_vertical"
         android:text="Static Text" >
-
     </TextView>
-    
-        <TextView
+
+    <TextView
         android:id="@+id/lbl_widget_small"
         style="@android:style/TextAppearance.Small"
         android:layout_width="match_parent"
@@ -30,13 +29,24 @@
         android:layout_weight="1"
         android:gravity="center_horizontal|center_vertical"
         android:text="Static Text" >
+    </TextView>
 
+    <TextView
+        android:id="@+id/lbl_widget_small2"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:layout_margin="4dip"
+        android:layout_weight="1"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="Static Text" >
     </TextView>
 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="64dp"
+        android:layout_height="50dp"
         android:orientation="horizontal" >
 
         <ImageView
@@ -44,29 +54,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/pause"/>
-        
+            android:src="@drawable/pause" />
+
         <ImageView
             android:id="@+id/button_widget_quit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/stop"/>
+            android:src="@drawable/stop" />
 
         <ImageView
-            android:id="@+id/button_widget_pref"
+            android:id="@+id/button_widget_prev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/prev"/>
+            android:src="@drawable/prev" />
 
         <ImageView
             android:id="@+id/button_widget_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/next"/>
-
+            android:src="@drawable/next" />
     </LinearLayout>
- 
+
 </LinearLayout>

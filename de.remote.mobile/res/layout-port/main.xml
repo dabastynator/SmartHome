@@ -30,13 +30,16 @@
         android:id="@+id/fileList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:fadingEdge="vertical"
+        android:fastScrollEnabled="true"/>
 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="60dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/button_play"

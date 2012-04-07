@@ -75,7 +75,10 @@
         <ListView
             android:id="@+id/fileList"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
+            android:layout_height="fill_parent"
+            android:fadingEdge="vertical"
+            android:fastScrollEnabled="true"
+            android:scrollbars="vertical" />
     </LinearLayout>
 
     <LinearLayout

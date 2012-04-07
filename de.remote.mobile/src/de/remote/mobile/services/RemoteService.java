@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -251,8 +250,6 @@ public class RemoteService extends Service {
 
 		@Override
 		public void playerMessage(final PlayingBean playing) {
-			Log.e("player", "new file");
-
 			if (playing == null)
 				return;
 			StringBuilder sb = new StringBuilder();
