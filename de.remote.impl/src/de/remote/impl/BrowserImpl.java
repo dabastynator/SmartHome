@@ -20,14 +20,14 @@ public class BrowserImpl implements IBrowser {
 	public boolean goBack() {
 		if (root.equals(location))
 			return false;
-		location = location.substring(0, location.lastIndexOf("/"));
-		location = location.substring(0, location.lastIndexOf("/") + 1);
+		location = location.substring(0, location.lastIndexOf(File.separator));
+		location = location.substring(0, location.lastIndexOf(File.separator) + 1);
 		return true;
 	}
 
 	@Override
 	public void goTo(String directory) {
-		location += directory + "/";
+		location += directory + File.separator;
 	}
 
 	@Override
@@ -52,9 +52,9 @@ public class BrowserImpl implements IBrowser {
 
 	@Override
 	public String getLocation() {
-		if (location.lastIndexOf('/') >= 0) {
-			String str = location.substring(0, location.lastIndexOf('/'));
-			return str.substring(str.lastIndexOf('/') + 1);
+		if (location.lastIndexOf(File.separator) >= 0) {
+			String str = location.substring(0, location.lastIndexOf(File.separator));
+			return str.substring(str.lastIndexOf(File.separator) + 1);
 		}
 		return location;
 	}
