@@ -1,5 +1,0 @@
-package de.newsystem.rmi.protokol;
-
-public interface RemoteAble {
-
-}
