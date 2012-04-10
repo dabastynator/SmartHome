@@ -104,6 +104,11 @@ public class RemoteService extends Service {
 	 * remote chatserver object
 	 */
 	private IChatServer chatServer;
+	
+	/**
+	 * current playing file
+	 */
+	private PlayingBean playingFile;
 
 	/**
 	 * handler to post actions in the ui thread
@@ -252,6 +257,7 @@ public class RemoteService extends Service {
 
 		@Override
 		public void playerMessage(final PlayingBean playing) {
+			playingFile = playing;
 			if (playing == null)
 				return;
 			StringBuilder sb = new StringBuilder();
@@ -429,6 +435,13 @@ public class RemoteService extends Service {
 		 */
 		public void removeRemoteActionListener(IRemoteActionListener listener) {
 			actionListener.remove(listener);
+		}
+
+		/**
+		 * @return current playing file
+		 */
+		public PlayingBean getPlayingFile() {
+			return playingFile;
 		}
 	}
 
