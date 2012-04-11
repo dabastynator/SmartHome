@@ -82,4 +82,13 @@ public interface IPlayList extends RemoteAble {
 	 */
 	public void removeItem(String pls, String item) throws RemoteException,
 			PlayerException;
+
+	/**
+	 * generate the pull path to the playlist file
+	 * 
+	 * @param pls
+	 * @return full path to the playlist
+	 * @throws RemoteException
+	 */
+	public String getPlaylistFullpath(String pls) throws RemoteException;
 }
