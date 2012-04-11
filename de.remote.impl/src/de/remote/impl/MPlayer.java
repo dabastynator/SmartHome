@@ -208,13 +208,12 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void playPlayList(String pls) throws RemoteException,
 			PlayerException {
-		String fullPls = PlayListImpl.PLAYLIST_LOCATION + pls + ".pls";
 		if (mplayerIn == null) {
 			startPlayer();
 		}
-		if (!new File(fullPls).exists())
+		if (!new File(pls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
-		mplayerIn.print("loadlist " + fullPls + "\n");
+		mplayerIn.print("loadlist " + pls + "\n");
 		mplayerIn.flush();
 	}
 
@@ -231,6 +230,16 @@ public class MPlayer extends AbstractPlayer {
 			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
+					if (line.startsWith("Playing")){
+						try {
+							String file = line.substring(8);
+							file = file.substring(0,file.length()-1);
+							bean = readFileInformations(new File(file));
+						} catch (IOException e) {
+							bean = new PlayingBean();
+						}
+						bean.setFile(line.substring(line.lastIndexOf(File.separator)+1));
+					}
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8));
 					if (line.startsWith(" Artist: "))
@@ -239,12 +248,11 @@ public class MPlayer extends AbstractPlayer {
 						bean.setAlbum(line.substring(8));
 					if (line.equals("Starting playback...")) {
 						bean.setState(PlayingBean.STATE.PLAY);
-						inform(bean);
-						bean = new PlayingBean();
+						informPlayingBean(bean);
 					}
 				}
 				bean.setState(PlayingBean.STATE.DOWN);
-				inform(bean);
+				informPlayingBean(bean);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

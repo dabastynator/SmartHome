@@ -1,5 +1,6 @@
 package de.remote.impl;
 
+import java.io.File;
 import java.io.IOException;
 
 import de.newsystem.rmi.protokol.RemoteException;
@@ -23,6 +24,7 @@ public class TotemPlayer extends AbstractPlayer {
 	public void play(String file) {
 		try {
 			Runtime.getRuntime().exec(new String[] { PLAY, file });
+			informFile(new File(file));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -110,9 +112,7 @@ public class TotemPlayer extends AbstractPlayer {
 	public void playPlayList(String pls) throws RemoteException,
 			PlayerException {
 		try {
-			Runtime.getRuntime().exec(
-					new String[] { PLAY,
-							PlayListImpl.PLAYLIST_LOCATION + pls + ".pls" });
+			Runtime.getRuntime().exec(new String[] { PLAY, pls });
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
