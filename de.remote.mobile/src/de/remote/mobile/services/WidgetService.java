@@ -78,6 +78,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		String title = "playing";
 		if (playing.getTitle() != null)
 			title = playing.getTitle();
+		else if (playing.getFile() != null)
+			title = playing.getFile();
 		String author = "";
 		if (playing.getArtist() != null)
 			author = playing.getArtist();

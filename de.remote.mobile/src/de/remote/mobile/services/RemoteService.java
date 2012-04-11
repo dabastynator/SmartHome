@@ -163,6 +163,7 @@ public class RemoteService extends Service {
 					browser = new BufferBrowser(station.createBrowser());
 					player = station.getMPlayer();
 					player.addPlayerMessageListener(playerListener);
+					station.getTotemPlayer().addPlayerMessageListener(playerListener);
 					playerListener.playerMessage(player.getPlayingFile());
 					control = station.getControl();
 					playList = station.getPlayList();
@@ -264,6 +265,8 @@ public class RemoteService extends Service {
 			String t = "Playing";
 			if (playing.getTitle() != null && playing.getTitle().length() > 0)
 				t = playing.getTitle();
+			else if (playing.getFile() != null)
+				t = playing.getFile();
 			if (playing.getArtist() != null && playing.getArtist().length() > 0)
 				sb.append(playing.getArtist());
 			if (playing.getAlbum() != null && playing.getAlbum().length() > 0)

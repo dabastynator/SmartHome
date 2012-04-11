@@ -675,9 +675,12 @@ public class BrowserActivity extends Activity {
 					.getText().toString();
 			try {
 				if (viewerState == ViewerState.PLAYLISTS) {
-					binder.getPlayer().playPlayList(item);
+					binder.getPlayer().playPlayList(binder.getPlayList().getPlaylistFullpath(item));
 					Toast.makeText(BrowserActivity.this, "play playlist",
 							Toast.LENGTH_SHORT).show();
+				}
+				if (viewerState == ViewerState.PLS_ITEMS){
+					binder.getPlayer().play(plsFileMap.get(item));
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
 					if (position < binder.getBrowser().getDirectories().length) {
