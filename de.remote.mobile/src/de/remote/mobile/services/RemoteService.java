@@ -104,7 +104,7 @@ public class RemoteService extends Service {
 	 * remote chatserver object
 	 */
 	private IChatServer chatServer;
-	
+
 	/**
 	 * current playing file
 	 */
@@ -140,56 +140,50 @@ public class RemoteService extends Service {
 	 * @param successRunnable
 	 */
 	private void connect(final Runnable successRunnable) {
-		new Thread() {
-
-			@Override
-			public void run() {
-				localServer = Server.getServer();
-				try {
-					try {
-						localServer.connectToRegistry(serverIP);
-					} catch (SocketException e) {
-						localServer.connectToRegistry(serverIP);
-					}
-					localServer.startServer();
-
-					station = (IStation) localServer.find(
-							ControlConstants.STATION_ID, IStation.class);
-
-					if (station == null)
-						throw new RemoteException(ControlConstants.STATION_ID,
-								"station not found in registry");
-
-					browser = new BufferBrowser(station.createBrowser());
-					player = station.getMPlayer();
-					player.addPlayerMessageListener(playerListener);
-					station.getTotemPlayer().addPlayerMessageListener(playerListener);
-					playerListener.playerMessage(player.getPlayingFile());
-					control = station.getControl();
-					playList = station.getPlayList();
-					chatServer = station.getChatServer();
-					if (successRunnable != null)
-						handler.post(successRunnable);
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							for (IRemoteActionListener listener : actionListener)
-								listener.serverConnectionChanged(serverName);
-						}
-					});
-				} catch (final Exception e) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							Toast.makeText(RemoteService.this, e.getMessage(),
-									Toast.LENGTH_SHORT).show();
-							for (IRemoteActionListener listener : actionListener)
-								listener.serverConnectionChanged(null);
-						}
-					});
-				}
+		localServer = Server.getServer();
+		try {
+			try {
+				localServer.connectToRegistry(serverIP);
+			} catch (SocketException e) {
+				localServer.connectToRegistry(serverIP);
 			}
-		}.start();
+			localServer.startServer();
+
+			station = (IStation) localServer.find(ControlConstants.STATION_ID,
+					IStation.class);
+
+			if (station == null)
+				throw new RemoteException(ControlConstants.STATION_ID,
+						"station not found in registry");
+
+			browser = new BufferBrowser(station.createBrowser());
+			player = station.getMPlayer();
+			player.addPlayerMessageListener(playerListener);
+			station.getTotemPlayer().addPlayerMessageListener(playerListener);
+			playerListener.playerMessage(player.getPlayingFile());
+			control = station.getControl();
+			playList = station.getPlayList();
+			chatServer = station.getChatServer();
+			if (successRunnable != null)
+				handler.post(successRunnable);
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					for (IRemoteActionListener listener : actionListener)
+						listener.serverConnectionChanged(serverName);
+				}
+			});
+		} catch (final Exception e) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this, e.getMessage(),
+							Toast.LENGTH_SHORT).show();
+					for (IRemoteActionListener listener : actionListener)
+						listener.serverConnectionChanged(null);
+				}
+			});
+		}
 	}
 
 	/**
@@ -240,8 +234,12 @@ public class RemoteService extends Service {
 		player = null;
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(RemoteService.NOTIFICATION_ID);
-		for (IRemoteActionListener listener : actionListener)
-			listener.serverConnectionChanged(null);
+		handler.post(new Runnable() {
+			public void run() {
+				for (IRemoteActionListener listener : actionListener)
+					listener.serverConnectionChanged(null);
+			}
+		});
 	}
 
 	@Override
@@ -353,35 +351,63 @@ public class RemoteService extends Service {
 		 * @param id
 		 * @param r
 		 */
-		public void connectToServer(int id, Runnable r) {
-			if (id == serverID) {
-				if (r != null)
-					r.run();
-			} else {
-				disconnect();
-				serverID = id;
-				serverIP = serverDB.getIpOfServer(id);
-				serverName = serverDB.getNameOfServer(id);
-				connect(r);
-			}
+		public void connectToServer(final int id, final Runnable r) {
+			new Thread() {
+				public void run() {
+					if (id == serverID) {
+						if (r != null)
+							r.run();
+					} else {
+						RemoteService.this.disconnect();
+						serverID = id;
+						serverIP = serverDB.getIpOfServer(id);
+						serverName = serverDB.getNameOfServer(id);
+						connect(r);
+					}
+				}
+			}.start();
+		}
+
+		public void disconnect(final Runnable r) {
+			new Thread() {
+				public void run() {
+					RemoteService.this.disconnect();
+					if (r != null)
+						handler.post(r);
+				}
+			}.start();
 		}
 
 		/**
 		 * set mplayer for current player
 		 * 
-		 * @throws RemoteException
 		 */
-		public void useMPlayer() throws RemoteException {
-			player = station.getMPlayer();
+		public void useMPlayer() {
+			new Thread() {
+				public void run() {
+					try {
+						player = station.getMPlayer();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
 		}
 
 		/**
 		 * set totem for current player
-		 * 
-		 * @throws RemoteException
 		 */
-		public void useTotemPlayer() throws RemoteException {
-			player = station.getTotemPlayer();
+		public void useTotemPlayer() {
+			new Thread() {
+				public void run() {
+					try {
+						player = station.getTotemPlayer();
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}.start();
 		}
 
 		/**

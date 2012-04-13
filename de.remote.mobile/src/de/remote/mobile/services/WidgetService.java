@@ -9,11 +9,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemoteWidgetProvider;
@@ -36,6 +36,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	 * list of all remote views
 	 */
 	private List<RemoteViews> remoteViewsList = new ArrayList<RemoteViews>();
+
+	/**
+	 * the handler executes runnables in the ui thread
+	 */
+	private Handler handler = new Handler();
 
 	/**
 	 * connection to the service
@@ -91,8 +96,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent == null || intent.getAction() == null
-				|| !executeCommand(intent.getAction())) {
+		if (intent != null && intent.getAction() != null)
+			executeCommand(intent.getAction());
+		else {
 			configureWidgets();
 			initializeWidgets();
 		}
@@ -105,30 +111,33 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	 * @param action
 	 * @return true if action is known
 	 */
-	private boolean executeCommand(String action) {
-		try {
-			if (binder == null)
-				throw new RemoteException("not binded", "not binded");
-			if (binder.getPlayer() == null)
-				throw new RemoteException("not connected", "not connected");
-			else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
-				binder.getPlayer().playPause();
-			else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
-				binder.getPlayer().quit();
-			else if (action.equals(RemoteWidgetProvider.ACTION_NEXT))
-				binder.getPlayer().next();
-			else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
-				binder.getPlayer().previous();
-			else
-				return false;
-		} catch (RemoteException e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-			return false;
-		} catch (PlayerException e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-			return false;
-		}
-		return true;
+	private void executeCommand(final String action) {
+		new Thread() {
+			public void run() {
+				try {
+					if (binder == null)
+						throw new RemoteException("not binded", "not binded");
+					if (binder.getPlayer() == null)
+						throw new RemoteException("not connected",
+								"not connected");
+					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
+						binder.getPlayer().playPause();
+					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
+						binder.getPlayer().quit();
+					else if (action.equals(RemoteWidgetProvider.ACTION_NEXT))
+						binder.getPlayer().next();
+					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
+						binder.getPlayer().previous();
+				} catch (final Exception e) {
+					handler.post(new Runnable() {
+						public void run() {
+							Toast.makeText(WidgetService.this, e.getMessage(),
+									Toast.LENGTH_SHORT).show();
+						}
+					});
+				}
+			}
+		}.start();
 	}
 
 	private void initializeWidgets() {
@@ -142,22 +151,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	private void configureWidgets() {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
-				.getApplicationContext());
-
-		ComponentName thisWidget = new ComponentName(getApplicationContext(),
-				RemoteWidgetProvider.class);
-		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-		for (int widgetId : allWidgetIds) {
-			// Create some random data
-
-			RemoteViews remoteViews = new RemoteViews(getApplicationContext()
-					.getPackageName(), R.layout.widget);
-			remoteViewsList.add(remoteViews);
-			// Set the text
-
-			appWidgetManager.updateAppWidget(widgetId, remoteViews);
-		}
+		RemoteViews remoteViews = new RemoteViews(getApplicationContext()
+				.getPackageName(), R.layout.widget);
+		remoteViewsList.add(remoteViews);
 	}
 
 	protected void setWidgetText(String big, String small, String small2) {

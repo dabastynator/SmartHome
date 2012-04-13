@@ -513,6 +513,7 @@ public class BrowserActivity extends Activity {
 				binder.getPlayer().moveRight();
 				break;
 			case R.id.opt_exit:
+				binder.disconnect(null);
 				Intent intent = new Intent(this, RemoteService.class);
 				stopService(intent);
 				finish();
