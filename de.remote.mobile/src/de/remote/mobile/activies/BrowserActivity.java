@@ -25,15 +25,19 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
+import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.RemoteService;
+import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerBinder;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
@@ -141,6 +145,16 @@ public class BrowserActivity extends Activity {
 	private int selectedPosition;
 
 	/**
+	 * play / pause button
+	 */
+	private ImageView playButton;
+
+	/**
+	 * listener for remote actions
+	 */
+	private MyRemoteListener remoteListener = new MyRemoteListener();
+
+	/**
 	 * connection to the service
 	 */
 	private ServiceConnection playerConnection = new ServiceConnection() {
@@ -152,6 +166,8 @@ public class BrowserActivity extends Activity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
+			binder.addRemoteActionListener(remoteListener);
+			remoteListener.newPlayingFile(binder.getPlayingFile());
 			disableScreen();
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
@@ -203,6 +219,7 @@ public class BrowserActivity extends Activity {
 		listView = (ListView) findViewById(R.id.fileList);
 		searchText = (EditText) findViewById(R.id.txt_search);
 		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
+		playButton = (ImageView) findViewById(R.id.button_play);
 	}
 
 	@Override
@@ -676,11 +693,12 @@ public class BrowserActivity extends Activity {
 					.getText().toString();
 			try {
 				if (viewerState == ViewerState.PLAYLISTS) {
-					binder.getPlayer().playPlayList(binder.getPlayList().getPlaylistFullpath(item));
+					binder.getPlayer().playPlayList(
+							binder.getPlayList().getPlaylistFullpath(item));
 					Toast.makeText(BrowserActivity.this, "play playlist",
 							Toast.LENGTH_SHORT).show();
 				}
-				if (viewerState == ViewerState.PLS_ITEMS){
+				if (viewerState == ViewerState.PLS_ITEMS) {
 					binder.getPlayer().play(plsFileMap.get(item));
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
@@ -752,5 +770,22 @@ public class BrowserActivity extends Activity {
 				adapter.notifyDataSetChanged();
 			}
 		}
+	}
+
+	public class MyRemoteListener implements IRemoteActionListener {
+
+		@Override
+		public void newPlayingFile(PlayingBean bean) {
+			if (bean == null || bean.getState() == STATE.PLAY)
+				playButton.setImageResource(R.drawable.pause);
+			else if (bean.getState() == STATE.PAUSE)
+				playButton.setImageResource(R.drawable.play);
+		}
+
+		@Override
+		public void serverConnectionChanged(String serverName) {
+
+		}
+
 	}
 }

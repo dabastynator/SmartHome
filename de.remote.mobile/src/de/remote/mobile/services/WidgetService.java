@@ -15,6 +15,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemoteWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -59,7 +60,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				updateWidget();
 			else
 				setWidgetText("not connected", "no connection with any server",
-						"");
+						"", false);
 
 		}
 	};
@@ -77,7 +78,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder.getPlayer() != null)
 			playing = binder.getPlayingFile();
 		if (playing == null) {
-			setWidgetText("no file playing", "", "");
+			setWidgetText("no file playing", "", "", false);
 			return;
 		}
 		String title = "playing";
@@ -91,7 +92,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		String album = "";
 		if (playing.getAlbum() != null)
 			album = playing.getAlbum();
-		setWidgetText(title, author, album);
+		setWidgetText(title, author, album, playing.getState() == STATE.PLAY);
 	}
 
 	@Override
@@ -146,7 +147,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				updateWidget();
 			else
 				setWidgetText("not connected", "no connection with any server",
-						"");
+						"", false);
 		}
 	}
 
@@ -156,7 +157,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		remoteViewsList.add(remoteViews);
 	}
 
-	protected void setWidgetText(String big, String small, String small2) {
+	protected void setWidgetText(String big, String small, String small2,
+			boolean playing) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
@@ -165,6 +167,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			remote.setTextViewText(R.id.lbl_widget_big, big);
 			remote.setTextViewText(R.id.lbl_widget_small, small);
 			remote.setTextViewText(R.id.lbl_widget_small2, small2);
+			if (playing)
+				remote.setImageViewResource(R.id.button_widget_play,
+						R.drawable.pause);
+			else
+				remote.setImageViewResource(R.id.button_widget_play,
+						R.drawable.play);
 			appWidgetManager.updateAppWidget(thisWidget, remote);
 		}
 	}
@@ -189,7 +197,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void serverConnectionChanged(String serverName) {
 		if (serverName == null)
-			setWidgetText("no connection", "", "");
+			setWidgetText("no connection", "", "", false);
 		else
 			updateWidget();
 	}

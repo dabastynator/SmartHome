@@ -160,7 +160,7 @@ public class RemoteService extends Service {
 			player = station.getMPlayer();
 			player.addPlayerMessageListener(playerListener);
 			station.getTotemPlayer().addPlayerMessageListener(playerListener);
-			playerListener.playerMessage(player.getPlayingFile());
+			playerListener.playerMessage(player.getPlayingBean());
 			control = station.getControl();
 			playList = station.getPlayList();
 			chatServer = station.getChatServer();
