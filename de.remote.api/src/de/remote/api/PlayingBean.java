@@ -4,58 +4,66 @@ import java.io.Serializable;
 
 /**
  * contains playing information
+ * 
  * @author sebastian
  */
-public class PlayingBean implements Serializable{
+public class PlayingBean implements Serializable {
 
 	/**
 	 * states of the player
+	 * 
 	 * @author sebastian
 	 */
 	public enum STATE {
 		PLAY, PAUSE, DOWN
 	};
-	
+
 	/**
 	 * generated uid
 	 */
 	private static final long serialVersionUID = 991634045875693050L;
 
-
 	/**
 	 * current artist
 	 */
 	private String artist;
-	
-	
+
 	/**
-	 * current title; 
+	 * current title;
 	 */
 	private String title;
-	
-	
+
 	/**
-	 * current album 
+	 * current album
 	 */
 	private String album;
-	
-	
+
 	/**
-	 * current radio 
+	 * current radio
 	 */
 	private String radio;
-	
+
 	/**
 	 * current file
 	 */
 	private String file;
-	
+
 	/**
 	 * current state
 	 */
 	private STATE state;
 
+	/**
+	 * allocate new bean
+	 */
+	public PlayingBean() {
+	}
 
+	/**
+	 * allocate new bean and copy all attributes
+	 * 
+	 * @param bean
+	 */
 	public PlayingBean(PlayingBean bean) {
 		if (bean == null)
 			return;
@@ -67,69 +75,108 @@ public class PlayingBean implements Serializable{
 		state = bean.getState();
 	}
 
-
-	public PlayingBean() {
+	/**
+	 * allocation new bean and set values
+	 * 
+	 * @param artist
+	 * @param album
+	 * @param title
+	 * @param file
+	 * @param radio
+	 * @param state
+	 */
+	public PlayingBean(String artist, String album, String title, String file,
+			String radio, STATE state) {
+		this.artist = artist;
+		this.album = album;
+		this.title = title;
+		this.file = file;
+		this.radio = radio;
+		this.state = state;
 	}
 
-
+	/**
+	 * @return artist
+	 */
 	public String getArtist() {
 		return artist;
 	}
 
-
+	/**
+	 * @param artist
+	 */
 	public void setArtist(String artist) {
 		this.artist = artist;
 	}
 
-
+	/**
+	 * @return title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
-
+	/**
+	 * @param title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
-
+	/**
+	 * @return album
+	 */
 	public String getAlbum() {
 		return album;
 	}
 
-
+	/**
+	 * @param album
+	 */
 	public void setAlbum(String album) {
 		this.album = album;
 	}
 
-
+	/**
+	 * @return radio
+	 */
 	public String getRadio() {
 		return radio;
 	}
 
-
+	/**
+	 * @param radio
+	 */
 	public void setRadio(String radio) {
 		this.radio = radio;
 	}
 
-
+	/**
+	 * @return state
+	 */
 	public STATE getState() {
 		return state;
 	}
 
-
+	/**
+	 * @param state
+	 */
 	public void setState(STATE state) {
 		this.state = state;
 	}
 
-
+	/**
+	 * @return file
+	 */
 	public String getFile() {
 		return file;
 	}
 
-
+	/**
+	 * @param file
+	 */
 	public void setFile(String file) {
 		this.file = file;
 	}
-	
-	
+
 }
