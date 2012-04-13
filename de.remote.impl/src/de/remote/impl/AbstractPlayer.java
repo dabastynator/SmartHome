@@ -7,9 +7,7 @@ import java.util.List;
 
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
-import org.farng.mp3.filename.FilenameTag;
 import org.farng.mp3.id3.AbstractID3v2;
-import org.farng.mp3.id3.ID3v1;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IPlayer;
@@ -108,14 +106,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	}
 
 	@Override
-	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
-		if (playingBean == null)
-			return null;
-		if (playingBean.getAlbum() == null && playingBean.getArtist() == null
-				&& playingBean.getFile() == null
-				&& playingBean.getRadio() == null
-				&& playingBean.getTitle() == null)
-			return null;
+	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
 		return playingBean;
 	}
 }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 
 public class TotemPlayer extends AbstractPlayer {
 
@@ -20,9 +21,12 @@ public class TotemPlayer extends AbstractPlayer {
 	private static final String SEEK_FWD = "totem --seek-fwd";
 	private static final String SEEK_BWD = "totem --seek-bwd";
 
+	private STATE state;
+
 	@Override
 	public void play(String file) {
 		try {
+			state = STATE.PLAY;
 			Runtime.getRuntime().exec(new String[] { PLAY, file });
 			informFile(new File(file));
 		} catch (IOException e) {
@@ -34,7 +38,16 @@ public class TotemPlayer extends AbstractPlayer {
 	public void playPause() {
 		try {
 			Runtime.getRuntime().exec(PLAY_PAUSE);
+			state = (state == STATE.PLAY) ? STATE.PAUSE : STATE.PLAY;
+			getPlayingBean().setState(state);
+			informPlayingBean(getPlayingBean());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PlayerException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -43,7 +56,13 @@ public class TotemPlayer extends AbstractPlayer {
 	public void quit() {
 		try {
 			Runtime.getRuntime().exec(QUIT);
+			getPlayingBean().setState(STATE.DOWN);
+			informPlayingBean(getPlayingBean());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (PlayerException e) {
 			e.printStackTrace();
 		}
 	}
@@ -52,7 +71,16 @@ public class TotemPlayer extends AbstractPlayer {
 	public void next() {
 		try {
 			Runtime.getRuntime().exec(NEXT);
+			getPlayingBean().setState(STATE.PLAY);
+			state = STATE.PLAY;
+			informPlayingBean(getPlayingBean());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PlayerException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -61,7 +89,14 @@ public class TotemPlayer extends AbstractPlayer {
 	public void previous() {
 		try {
 			Runtime.getRuntime().exec(PREVIOUS);
+			getPlayingBean().setState(STATE.PLAY);
+			state = STATE.PLAY;
+			informPlayingBean(getPlayingBean());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (PlayerException e) {
 			e.printStackTrace();
 		}
 	}
@@ -143,7 +178,7 @@ public class TotemPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public PlayingBean getPlayingFile() throws RemoteException, PlayerException {
+	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
 		throw new PlayerException("not supported function for totem");
 	}
 

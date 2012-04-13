@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 
 public class MPlayer extends AbstractPlayer {
 
@@ -20,9 +21,11 @@ public class MPlayer extends AbstractPlayer {
 	private boolean shuffle = false;
 	private int volume = 50;
 	private int seekValue;
+	private STATE state;
 
 	@Override
 	public void play(String file) {
+		state = STATE.PLAY;
 		if (mplayerProcess == null)
 			startPlayer();
 
@@ -85,6 +88,13 @@ public class MPlayer extends AbstractPlayer {
 	public void playPause() throws PlayerException {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
+		state = (state == STATE.PLAY)? STATE.PAUSE: STATE.PLAY;
+		try {
+			getPlayingBean().setState(state);
+			informPlayingBean(getPlayingBean());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 		mplayerIn.print("pause");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
@@ -105,6 +115,7 @@ public class MPlayer extends AbstractPlayer {
 	public void next() throws PlayerException {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
+		state = STATE.PLAY;
 		mplayerIn.print("pt_step 1");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
@@ -114,6 +125,7 @@ public class MPlayer extends AbstractPlayer {
 	public void previous() throws PlayerException {
 		if (mplayerIn == null)
 			throw new PlayerException("mplayer is down");
+		state = STATE.PLAY;
 		mplayerIn.print("pt_step -1");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
