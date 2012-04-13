@@ -7,11 +7,10 @@
         android:color="#FF000000" />
 
     <gradient
-        android:angle="45"
+        android:angle="270"
         android:type="linear"
-        android:endColor="#a09f0f0f"
-        android:startColor="#a00f9f0f" 
-        android:centerColor="#a00f0f9f"/>
+        android:endColor="#FF000000"
+        android:startColor="#FF313131"/>
 
     <corners
         android:bottomLeftRadius="7dp"
