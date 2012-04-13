@@ -208,7 +208,7 @@ public class ControlFrame extends JFrame {
 			IBrowser browser = station.createBrowser();
 			mPlayer.addPlayerMessageListener(playerListener);
 			try {
-				playerListener.playerMessage(mPlayer.getPlayingFile());
+				playerListener.playerMessage(mPlayer.getPlayingBean());
 			} catch (PlayerException e) {
 				e.printStackTrace();
 			}

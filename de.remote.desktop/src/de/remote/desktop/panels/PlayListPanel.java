@@ -97,9 +97,9 @@ public class PlayListPanel extends Panel {
 		playPls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					PlayListPanel.this.player
-							.playPlayList(PlayListPanel.this.plsList
-									.getSelectedItem());
+					PlayListPanel.this.player.playPlayList(pls
+							.getPlaylistFullpath(PlayListPanel.this.plsList
+									.getSelectedItem()));
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
 				} catch (PlayerException e1) {
@@ -177,7 +177,8 @@ public class PlayListPanel extends Panel {
 	}
 
 	/**
-	 * set remote playlist object 
+	 * set remote playlist object
+	 * 
 	 * @param pls
 	 */
 	public void setPlayList(IPlayList pls) {
@@ -200,6 +201,7 @@ public class PlayListPanel extends Panel {
 
 	/**
 	 * update content of playlist item list
+	 * 
 	 * @param plsName
 	 */
 	private void updatePlsContent(String plsName) {
@@ -220,6 +222,7 @@ public class PlayListPanel extends Panel {
 
 	/**
 	 * set remote player object
+	 * 
 	 * @param player
 	 */
 	public void setPlayer(IPlayer player) {
