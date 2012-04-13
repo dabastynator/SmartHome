@@ -6,36 +6,6 @@ import de.remote.api.PlayerException;
 public class VLCPlayer extends AbstractPlayer{
 
 	@Override
-	public void play(String file) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void playPause() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void quit() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void next() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void previous() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
 		// TODO Auto-generated method stub
 		
@@ -96,4 +66,5 @@ public class VLCPlayer extends AbstractPlayer{
 		// TODO Auto-generated method stub
 		
 	}
+
 }

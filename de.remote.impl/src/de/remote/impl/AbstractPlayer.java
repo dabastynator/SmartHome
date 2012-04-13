@@ -109,4 +109,46 @@ public abstract class AbstractPlayer implements IPlayer {
 	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
 		return playingBean;
 	}
+
+	@Override
+	public void playPause()throws PlayerException {
+		if (playingBean != null) {
+			playingBean
+					.setState((playingBean.getState() == STATE.PLAY) ? STATE.PAUSE
+							: STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	@Override
+	public void play(String file) {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	@Override
+	public void quit() throws PlayerException {
+		if (playingBean == null)
+			playingBean = new PlayingBean();
+		playingBean.setState(STATE.DOWN);
+		informPlayingBean(playingBean);
+	}
+
+	@Override
+	public void next() throws PlayerException {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	@Override
+	public void previous() throws PlayerException {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
 }
