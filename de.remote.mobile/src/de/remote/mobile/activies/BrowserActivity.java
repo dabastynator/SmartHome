@@ -263,7 +263,7 @@ public class BrowserActivity extends Activity {
 	 * update gui elements, show current directory or playlist
 	 */
 	private void showUpdateUI() {
-		if (binder == null || binder.getBrowser() == null) {
+		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return;
 		}
