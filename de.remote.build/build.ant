@@ -1,0 +1,59 @@
+<project>
+
+	<property name="lib.dir" value="./../de.remote.impl/lib" />
+	<property name="classes.dir" value="./build/classes" />
+	<property name="jar.dir" value="./build/jar" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="build" />
+	</target>
+
+	<target name="compile_rmi">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" />
+	</target>
+
+	<target name="jar_rmi" depends="compile_rmi">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/registry.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.newsystem.rmi.api.Registry" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="compile_remote">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}" />
+		<javac srcdir="./../de.remote.impl/src" destdir="${classes.dir}" classpathref="classpath" />
+	</target>
+
+	<target name="jar_remote" depends="compile_remote">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/server.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="" />
+			<manifest>
+				<attribute name="Main-Class" value="de.remote.server.RemoteServer" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="compile_desktop">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}" />
+		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}" />
+	</target>
+
+	<target name="jar_desktop" depends="compile_desktop">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.remote.desktop.RemoteControl" />
+			</manifest>
+		</jar>
+	</target>
+</project>
