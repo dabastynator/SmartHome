@@ -232,6 +232,8 @@ public class RemoteService extends Service {
 			}
 		station = null;
 		player = null;
+		serverID = -1;
+		serverName = null;
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(RemoteService.NOTIFICATION_ID);
 		handler.post(new Runnable() {
