@@ -104,12 +104,6 @@ public class Server {
 	 */
 	private String ip;
 
-//	/**
-//	 * singleton constructor
-//	 */
-//	private Server() {
-//	}
-
 	/**
 	 * create connection to the registry
 	 * 
@@ -151,7 +145,7 @@ public class Server {
 	}
 
 	/**
-	 * start the server
+	 * start the server at default port
 	 */
 	public void startServer() {
 		startServer(PORT);
