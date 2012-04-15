@@ -52,19 +52,25 @@ public class ConnectionHandler {
 	private Socket socket;
 
 	/**
+	 * the server that holds all provided objects
+	 */
+	private Server server;
+
+	/**
 	 * Die Kathi hat den Basti lieb!!!!!
 	 * 
 	 * @param ip
 	 * @param socket
 	 * @throws IOException
 	 */
-	public ConnectionHandler(String ip, int port, Socket socket)
+	public ConnectionHandler(String ip, int port, Socket socket, Server server)
 			throws IOException {
 		this.ip = ip;
 		this.port = port;
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 		this.socket = socket;
+		this.server = server;
 	}
 
 	/**
@@ -72,13 +78,12 @@ public class ConnectionHandler {
 	 */
 	public void handle() {
 		System.out.println("client connection started");
-		Server server = Server.getServer();
 		try {
 			while (true) {
 				Object object = in.readObject();
 				Request request = (Request) object;
-				DynamicAdapter adapter = Server.getServer().getAdapterMap()
-						.get(request.getObject());
+				DynamicAdapter adapter = server.getAdapterMap().get(
+						request.getObject());
 				if (adapter != null) {
 					Reply reply = adapter.performeRequest(request);
 					if (reply.getResult() instanceof RemoteAble) {
@@ -89,7 +94,7 @@ public class ConnectionHandler {
 							reply.setResult(null);
 						} else {
 							DynamicAdapter dynamicAdapter = new DynamicAdapter(
-									reply.getResult());
+									reply.getResult(), server);
 							String id = getNextId();
 							server.getAdapterMap().put(id, dynamicAdapter);
 							reply.setNewId(id);
@@ -114,7 +119,7 @@ public class ConnectionHandler {
 				e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-		} finally{
+		} finally {
 			try {
 				socket.close();
 			} catch (IOException e) {

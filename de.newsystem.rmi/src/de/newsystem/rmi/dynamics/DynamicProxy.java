@@ -42,6 +42,11 @@ public class DynamicProxy implements InvocationHandler {
 	 */
 	private ServerPort serverPort;
 
+	/**
+	 * server on witch provides the proxy
+	 */
+	private Server server;
+
 	private static int counter = 0;
 
 	/**
@@ -50,11 +55,12 @@ public class DynamicProxy implements InvocationHandler {
 	 * @param id
 	 * @param serverPort
 	 */
-	public DynamicProxy(String id, ServerPort serverPort) {
+	public DynamicProxy(String id, ServerPort serverPort, Server server) {
 		this.id = id;
 		in = serverPort.getInput();
 		out = serverPort.getOutput();
 		this.serverPort = serverPort;
+		this.server = server;
 	}
 
 	@Override
@@ -80,7 +86,7 @@ public class DynamicProxy implements InvocationHandler {
 				reply = (Reply) in.readObject();
 			} catch (IOException e) {
 				serverPort.close();
-				serverPort = Server.getServer().connectToServer(serverPort);
+				serverPort = server.connectToServer(serverPort);
 				in = serverPort.getInput();
 				out = serverPort.getOutput();
 				out.writeObject(request);
@@ -93,8 +99,8 @@ public class DynamicProxy implements InvocationHandler {
 		}
 		if (reply.getError() == null) {
 			if (reply.getReturnType() != null && reply.getNewId() != null)
-				return Server.getServer().createProxy(reply.getNewId(),
-						serverPort, reply.getReturnType());
+				return server.createProxy(reply.getNewId(), serverPort,
+						reply.getReturnType());
 			else
 				return reply.getResult();
 		} else
@@ -110,20 +116,18 @@ public class DynamicProxy implements InvocationHandler {
 		if (paramters != null)
 			for (int i = 0; i < paramters.length; i++) {
 				if (paramters[i] instanceof RemoteAble) {
-					String objId = Server.getServer().getAdapterObjectIdMap()
-							.get(paramters[i]);
+					String objId = server.getAdapterObjectIdMap().get(
+							paramters[i]);
 					if (objId == null) {
 						DynamicAdapter adapter = new DynamicAdapter(
-								paramters[i]);
+								paramters[i], server);
 						objId = getNextId();
-						Server.getServer().getAdapterMap().put(objId, adapter);
-						Server.getServer().getAdapterObjectIdMap()
-								.put(paramters[i], objId);
+						server.getAdapterMap().put(objId, adapter);
+						server.getAdapterObjectIdMap().put(paramters[i], objId);
 					}
 					Reply r = new Reply();
 					r.setNewId(objId);
-					r.setServerPort(new ServerPort(Server.getServer()
-							.getServerPort()));
+					r.setServerPort(new ServerPort(server.getServerPort()));
 					r.setReturnType(paramters[i].getClass().getInterfaces()[0]);
 					paramters[i] = r;
 
@@ -132,8 +136,8 @@ public class DynamicProxy implements InvocationHandler {
 	}
 
 	private String getNextId() {
-		String id = "newsystem.parameter(" + Server.getServer().getServerPort()
-				+ ":" + (counter++) + ")";
+		String id = "newsystem.parameter(" + server.getServerPort() + ":"
+				+ (counter++) + ")";
 		return id;
 	}
 

@@ -9,7 +9,15 @@ import de.newsystem.rmi.handler.RegistryHandler;
 import de.newsystem.rmi.protokol.GlobalObject;
 
 /**
- * registry holds all global objects
+ * registry holds all global objects. To run the registry, it could be
+ * initialized with a port and then start with the run method.<br>
+ * <br>
+ * <code>
+ * Registry r = Registry.getRegistry();<br>
+ * r.init(PORT);<br>
+ * r.run();<br>
+ * </code> <br>
+ * the run method listens on the port and blocks
  * 
  * @author sebastian
  */
@@ -81,7 +89,8 @@ public class Registry {
 	}
 
 	/**
-	 * start registry
+	 * Start the registry. it listens on the initialized port for new
+	 * connections. New connections will be handled in a separate thread.
 	 */
 	public void run() {
 		try {

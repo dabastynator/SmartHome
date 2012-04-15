@@ -25,7 +25,15 @@ import de.newsystem.rmi.protokol.ServerPort;
 import de.newsystem.rmi.protokol.RegistryRequest.Type;
 
 /**
- * server api for all clients
+ * server api for all clients. to provide a remote object first initialize the
+ * server then register the object.<br>
+ * <br>
+ * <code>
+ * Server s = Server.getServer();<br>
+ * s.connectToRegistry(REGISTRY_LOCATION, REGISTRY_URL);<br>
+ * s.startServer(SERVER_PORT);<br>
+ * s.register(OBJECT_ID, remoteObject);<br>
+ * <code>
  * 
  * @author sebastian
  */
@@ -96,11 +104,11 @@ public class Server {
 	 */
 	private String ip;
 
-	/**
-	 * singleton constructor
-	 */
-	private Server() {
-	}
+//	/**
+//	 * singleton constructor
+//	 */
+//	private Server() {
+//	}
 
 	/**
 	 * create connection to the registry
@@ -131,7 +139,9 @@ public class Server {
 	}
 
 	/**
-	 * start the server
+	 * start the server. the port must be initialized, otherwise the default
+	 * server port will be used. the server starts a new thread, so this method
+	 * is not blocking.
 	 * 
 	 * @param port
 	 */
@@ -159,13 +169,16 @@ public class Server {
 	}
 
 	/**
+	 * register a object in the registry. the registry must be initialized
+	 * before.
+	 * 
 	 * @param id
 	 * @param object
 	 */
 	public void register(String id, Object object) {
 		// add adapter
 		ServerPort serverPort = new ServerPort(ip, port);
-		adapterMap.put(id, new DynamicAdapter(object));
+		adapterMap.put(id, new DynamicAdapter(object, this));
 		adapterObjectId.put(object, id);
 		// tell registry
 		GlobalObject globalObject = new GlobalObject(id, serverPort);
@@ -183,6 +196,9 @@ public class Server {
 	}
 
 	/**
+	 * remove a object from the registry. the registry must be initialized
+	 * before.
+	 * 
 	 * @param id
 	 */
 	public void unRegister(String id) {
@@ -200,6 +216,9 @@ public class Server {
 	}
 
 	/**
+	 * search a remote object in the registry. the registry must be initialized
+	 * before.
+	 * 
 	 * @param id
 	 * @param template
 	 * @return object
@@ -236,7 +255,7 @@ public class Server {
 		Object p = proxyMap.get(id);
 		if (p != null)
 			return p;
-		p = new DynamicProxy(id, sp);
+		p = new DynamicProxy(id, sp, this);
 		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),
 				new Class[] { template }, (InvocationHandler) p);
 		proxyMap.put(id, object);
@@ -270,7 +289,7 @@ public class Server {
 						public void run() {
 							try {
 								ConnectionHandler handler = new ConnectionHandler(
-										ip,port, socket);
+										ip, port, socket, Server.this);
 								handlers.add(handler);
 								handler.handle();
 							} catch (IOException e) {

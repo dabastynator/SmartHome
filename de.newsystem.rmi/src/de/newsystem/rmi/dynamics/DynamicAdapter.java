@@ -31,6 +31,11 @@ public class DynamicAdapter {
 	private Class template;
 
 	/**
+	 * the server witch controls the object
+	 */
+	private Server server;
+
+	/**
 	 * primitive Map
 	 */
 	private static Map<Class, Class> primitiveMap = new HashMap<Class, Class>();
@@ -50,9 +55,10 @@ public class DynamicAdapter {
 	 * 
 	 * @param object
 	 */
-	public DynamicAdapter(Object object) {
+	public DynamicAdapter(Object object, Server server) {
 		this.object = object;
 		template = object.getClass();
+		this.server = server;
 	}
 
 	/**
@@ -118,10 +124,9 @@ public class DynamicAdapter {
 			if (request.getParams()[i] instanceof Reply) {
 				Reply r = ((Reply) request.getParams()[i]);
 				types[i] = r.getReturnType();
-				ServerPort sp = Server.getServer().connectToServer(
-						r.getServerPort());
-				request.getParams()[i] = Server.getServer().createProxy(
-						r.getNewId(), sp, r.getReturnType());
+				ServerPort sp = server.connectToServer(r.getServerPort());
+				request.getParams()[i] = server.createProxy(r.getNewId(), sp,
+						r.getReturnType());
 			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();
 			else
