@@ -13,21 +13,23 @@ public class RemoteServer {
 
 	public static void main(String[] args) {
 
-		if (args.length < 2) {
+		if (args.length < 3) {
 			System.err.println("argument missing!");
-			System.err.println("first argument: directory to browse");
-			System.err.println("second argument: ip of the registry");
+			System.err.println("1. argument: directory to browse");
+			System.err.println("2. argument: direcotry for playlists");
+			System.err.println("3. argument: ip of the registry");
 			System.exit(1);
 		}
 
 		String place = args[0];
-		String registry = args[1];
+		String plsDirecotry = args[1];
+		String registry = args[2];
 
 		System.out.println("Browse at " + place + " (" + registry + ")");
 
 		Server server = Server.getServer();
 
-		IStation station = new StationImpl(place);
+		IStation station = new StationImpl(place, plsDirecotry);
 
 		try {
 			forceConnectToRegistry(registry);

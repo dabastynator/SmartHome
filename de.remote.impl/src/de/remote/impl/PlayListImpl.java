@@ -20,8 +20,11 @@ public class PlayListImpl implements IPlayList {
 
 	public PlayListImpl(String playlistLocation) {
 		this.playlistLocation = playlistLocation;
+		if (playlistLocation != null
+				&& !playlistLocation.endsWith(File.separator))
+			this.playlistLocation += File.separator;
 	}
-	
+
 	@Override
 	public String[] getPlayLists() throws RemoteException {
 		List<String> plsList = new ArrayList<String>();

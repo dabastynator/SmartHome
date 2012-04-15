@@ -10,8 +10,6 @@ import de.remote.api.IStation;
 
 public class StationImpl implements IStation {
 
-	public static final String PLAYLIST_LOCATION = "/home/sebastian/temp/playlists/";
-	
 	private TotemPlayer totem;
 	private MPlayer mplayer;
 	private ControlImpl control;
@@ -19,12 +17,12 @@ public class StationImpl implements IStation {
 	private ChatServerImpl chatServer;
 	private String browserLocation;
 
-	public StationImpl(String location) {
+	public StationImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
 		mplayer = new MPlayer();
-		browserLocation = location;
+		browserLocation = browseLocation;
 		control = new ControlImpl();
-		playlist = new PlayListImpl(PLAYLIST_LOCATION);
+		playlist = new PlayListImpl(playlistLocation);
 		chatServer = new ChatServerImpl();
 	}
 
