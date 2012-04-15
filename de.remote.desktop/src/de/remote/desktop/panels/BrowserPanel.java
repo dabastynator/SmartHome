@@ -155,7 +155,7 @@ public class BrowserPanel extends Panel {
 
 	private void updateContent() {
 		this.fileList.removeAll();
-		this.fileList.add("←");
+		this.fileList.add("<go back>");
 		try {
 			this.directories = this.browser.getDirectories();
 			this.files = this.browser.getFiles();
