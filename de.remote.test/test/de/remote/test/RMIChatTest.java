@@ -16,7 +16,7 @@ import de.remote.api.IChatServer;
 import de.remote.api.IStation;
 import de.remote.impl.StationImpl;
 
-public class RMITest extends TestCase{
+public class RMIChatTest extends TestCase {
 
 	/**
 	 * port for registry
@@ -94,7 +94,7 @@ public class RMITest extends TestCase{
 	 * start the server
 	 */
 	private void startServer() {
-		StationImpl impl = new StationImpl(null);
+		StationImpl impl = new StationImpl(null, null);
 		Server s = new Server();
 		try {
 			s.connectToRegistry("localhost", RMI_TEST_PORT_REGISTRY);

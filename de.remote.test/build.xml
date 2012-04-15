@@ -4,7 +4,6 @@
 	<property name="lib.junit" value="./lib" />
 	<property name="classes.dir" value="./../de.remote.build/build/classes" />
 	<property name="jar.dir" value="./../de.remote.build/build/jar" />
-	<property name="main.class" value="de.remote.test.RMITest" />
 	<property name="jar.name" value="test_junit" />
 	<property name="bin.test" value="./build" />
 	<property name="report.dir" value="./reports" />
