@@ -81,24 +81,24 @@ public class DynamicAdapter {
 			if (method.getReturnType() != void.class)
 				reply.setReturnType(method.getReturnType());
 		} catch (SecurityException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			reply.setError(e.getTargetException());
 		} catch (UnknownHostException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		} catch (IOException e) {
-			reply.setError(e);
+			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
 			e.printStackTrace();
 		}
 		return reply;
