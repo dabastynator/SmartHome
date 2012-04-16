@@ -18,7 +18,7 @@ public class PlayListTest extends TestCase {
 	@Test
 	public void testPlayList() {
 		try {
-			IPlayList pls = new StationImpl(null, "/home/sebastian/temp/test")
+			IPlayList pls = new StationImpl(null, BrowserTest.TEST_LOCATION)
 					.getPlayList();
 			String plsName = "test_pls";
 			testAddRemote(pls, plsName);

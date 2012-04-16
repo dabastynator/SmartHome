@@ -39,6 +39,11 @@ public class RMIChatTest extends TestCase {
 	public static final String RMI_TEST_OBJECT_ID = "de.test.rmi.object";
 
 	/**
+	 * received message over chat client
+	 */
+	public boolean received = false;
+
+	/**
 	 * start registry in separate thread
 	 */
 	private void startRegistry() {
@@ -64,6 +69,7 @@ public class RMIChatTest extends TestCase {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		Assert.assertTrue("no message received", received);
 	}
 
 	/**
@@ -113,6 +119,7 @@ public class RMIChatTest extends TestCase {
 				throws RemoteException {
 			System.out.println("receive message: " + client + " : " + message
 					+ " at " + time);
+			received = true;
 		}
 
 		@Override
