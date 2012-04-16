@@ -186,9 +186,10 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	public void onDestroy() {
 		if (binder != null)
 			binder.removeRemoteActionListener(this);
+		unbindService(playerConnection);
 		super.onDestroy();
 	}
-
+	
 	@Override
 	public void newPlayingFile(PlayingBean bean) {
 		updateWidget();

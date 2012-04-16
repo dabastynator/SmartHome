@@ -11,6 +11,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,11 +27,13 @@ import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.IPlayerListener;
 import de.remote.api.IStation;
+import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.activies.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.receivers.WLANReceiver;
 import de.remote.mobile.util.BufferBrowser;
 
 /**
@@ -131,6 +135,8 @@ public class RemoteService extends Service {
 		binder = new PlayerBinder();
 		playerListener = new PlayerListener();
 		serverDB = new ServerDatabase(this);
+		registerReceiver(new WLANReceiver(this), new IntentFilter(
+				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 	}
 
 	/**
@@ -158,12 +164,10 @@ public class RemoteService extends Service {
 
 			browser = new BufferBrowser(station.createBrowser());
 			player = station.getMPlayer();
-			player.addPlayerMessageListener(playerListener);
-			station.getTotemPlayer().addPlayerMessageListener(playerListener);
-			playerListener.playerMessage(player.getPlayingBean());
 			control = station.getControl();
 			playList = station.getPlayList();
 			chatServer = station.getChatServer();
+			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);
 			handler.post(new Runnable() {
@@ -184,6 +188,12 @@ public class RemoteService extends Service {
 				}
 			});
 		}
+	}
+
+	public void registerAndUpdate() throws RemoteException, PlayerException {
+			station.getMPlayer().addPlayerMessageListener(playerListener);
+			station.getTotemPlayer().addPlayerMessageListener(playerListener);
+			playerListener.playerMessage(player.getPlayingBean());
 	}
 
 	/**
@@ -245,7 +255,7 @@ public class RemoteService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent intent) {
+	public PlayerBinder onBind(Intent intent) {
 		return binder;
 	}
 
