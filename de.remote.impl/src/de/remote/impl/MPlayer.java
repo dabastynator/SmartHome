@@ -243,7 +243,9 @@ public class MPlayer extends AbstractPlayer {
 						} catch (IOException e) {
 							bean = new PlayingBean();
 						}
-						bean.setFile(line.substring(line.lastIndexOf(File.separator)+1));
+						String file = line.substring(line.lastIndexOf(File.separator)+1);
+						file = file.substring(0, file.length()-1);
+						bean.setFile(file);
 					}
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8));
