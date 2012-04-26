@@ -41,7 +41,7 @@
 		</junit>
 	</target>
 
-	<target name="junitreport" depends="junit" if="full.ant">
+	<target name="junit_report" depends="junit" if="full.ant">
 		<junitreport todir="${report.dir}">
 
 			<fileset dir="${report.dir}" />
