@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
-import de.remote.mobile.services.RemoteService;
+import de.remote.mobile.services.RemoteBaseService;
 
 /**
  * this receiver gets information about wlan connections, to update about new
@@ -24,13 +24,13 @@ public class WLANReceiver extends BroadcastReceiver {
 	/**
 	 * the service to inform about new wlan connection
 	 */
-	private RemoteService service;
+	private RemoteBaseService service;
 
 	/**
 	 * allocate new wlan receiver
 	 */
-	public WLANReceiver(RemoteService service) {
-		this.service = service;
+	public WLANReceiver(RemoteBaseService remoteBaseService) {
+		this.service = remoteBaseService;
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package de.remote.mobile.util;
 
+import java.io.IOException;
+
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 
@@ -129,6 +131,12 @@ public class BufferBrowser implements IBrowser{
 		isDirtyFile = true;
 		isDirtyFullLocation = true;
 		isDirtyLocation = true;
+	}
+
+	@Override
+	public String publishFile(String file, int port) throws RemoteException,
+			IOException {
+		return browser.publishFile(file, port);
 	}
 
 }

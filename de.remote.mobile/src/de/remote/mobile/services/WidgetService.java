@@ -19,7 +19,6 @@ import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemoteWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
-import de.remote.mobile.services.RemoteService.PlayerBinder;
 
 /**
  * this service updates a widget and handles actions on the widget.

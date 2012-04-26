@@ -9,9 +9,10 @@
         android:id="@+id/opt_item_addplaylist"
         android:title="@string/str_add_to_playlist">
     </item>
-    <item
+    <item android:id="@+id/opt_item_download" android:title="@string/str_download"></item><item
         android:id="@+id/opt_item_delete"
         android:title="@string/str_delete">
     </item>
+    
 
 </menu>

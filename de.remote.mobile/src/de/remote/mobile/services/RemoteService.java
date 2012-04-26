@@ -1,40 +1,16 @@
 package de.remote.mobile.services;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
-import android.os.Binder;
-import android.os.Handler;
-import android.os.IBinder;
 import android.widget.Toast;
-import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.ControlConstants;
-import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
-import de.remote.api.IControl;
-import de.remote.api.IPlayList;
-import de.remote.api.IPlayer;
+import de.newsystem.rmi.transceiver.ReceiverProgress;
 import de.remote.api.IPlayerListener;
-import de.remote.api.IStation;
-import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
-import de.remote.mobile.R;
-import de.remote.mobile.activies.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
-import de.remote.mobile.util.BufferBrowser;
 
 /**
  * service for remotecontrol a server. the binder enables functions to control
@@ -42,221 +18,70 @@ import de.remote.mobile.util.BufferBrowser;
  * 
  * @author sebastian
  */
-public class RemoteService extends Service {
-
-	/**
-	 * id of the notification
-	 */
-	public static final int NOTIFICATION_ID = 1;
-
-	/**
-	 * name of current server
-	 */
-	private int serverID;
-
-	/**
-	 * ip of current server
-	 */
-	private String serverIP;
-
-	/**
-	 * name of current server
-	 */
-	private String serverName;
-
-	/**
-	 * the binder to execute all functions
-	 */
-	private PlayerBinder binder;
-
-	/**
-	 * local server, to provide
-	 */
-	private Server localServer;
-
-	/**
-	 * remote station object
-	 */
-	private IStation station;
-
-	/**
-	 * remote browser object
-	 */
-	private IBrowser browser;
-
-	/**
-	 * current selected remote player object
-	 */
-	private IPlayer player;
-
-	/**
-	 * remote control object
-	 */
-	private IControl control;
-
-	/**
-	 * listener for player
-	 */
-	private PlayerListener playerListener;
-
-	/**
-	 * remote playlist object
-	 */
-	private IPlayList playList;
-
-	/**
-	 * remote chatserver object
-	 */
-	private IChatServer chatServer;
-
-	/**
-	 * current playing file
-	 */
-	private PlayingBean playingFile;
-
-	/**
-	 * handler to post actions in the ui thread
-	 */
-	private Handler handler = new Handler();
-
-	/**
-	 * database object to the local database
-	 */
-	private ServerDatabase serverDB;
-
-	/**
-	 * list of all listeners for any action on this service
-	 */
-	private List<IRemoteActionListener> actionListener = new ArrayList<IRemoteActionListener>();
+public class RemoteService extends RemoteBaseService {
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		binder = new PlayerBinder();
+		binder = new PlayerBinder(this);
 		playerListener = new PlayerListener();
+		progressListener = new MobileReceiverListener();
 		serverDB = new ServerDatabase(this);
 		registerReceiver(new WLANReceiver(this), new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 	}
 
 	/**
-	 * create connection, execute runnable if connection has started in the ui
-	 * thread.
+	 * the receiver gets information about the download progress and informs via
+	 * a notification.
 	 * 
-	 * @param successRunnable
+	 * @author sebastian
 	 */
-	private void connect(final Runnable successRunnable) {
-		localServer = Server.getServer();
-		try {
-			try {
-				localServer.connectToRegistry(serverIP);
-			} catch (SocketException e) {
-				localServer.connectToRegistry(serverIP);
-			}
-			localServer.startServer();
+	public class MobileReceiverListener implements ReceiverProgress {
 
-			station = (IStation) localServer.find(ControlConstants.STATION_ID,
-					IStation.class);
+		/**
+		 * current downloading file
+		 */
+		private String file;
+		
+		/**
+		 * size of the whole file
+		 */
+		private long fullSize;
 
-			if (station == null)
-				throw new RemoteException(ControlConstants.STATION_ID,
-						"station not found in registry");
+		/**
+		 * set new donwloading file
+		 * 
+		 * @param file
+		 */
+		public void setFile(String file) {
+			this.file = file;
+		}
 
-			browser = new BufferBrowser(station.createBrowser());
-			player = station.getMPlayer();
-			control = station.getControl();
-			playList = station.getPlayList();
-			chatServer = station.getChatServer();
-			registerAndUpdate();
-			if (successRunnable != null)
-				handler.post(successRunnable);
-			handler.post(new Runnable() {
+		@Override
+		public void startReceive(long size) {
+			fullSize = size;
+			makeDonwloadingNotification(file, 0);
+		}
+
+		@Override
+		public void progressReceive(long size) {
+			System.out.println(size);
+			makeDonwloadingNotification(file, ((float)size)/((float)fullSize));
+		}
+
+		@Override
+		public void endReceive(long size) {
+			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
+			handler.post(new Runnable(){
 				@Override
 				public void run() {
-					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(serverName);
-				}
-			});
-		} catch (final Exception e) {
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(RemoteService.this, e.getMessage(),
-							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(null);
+					Toast.makeText(RemoteService.this, file + " loaded", Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
-	}
 
-	public void registerAndUpdate() throws RemoteException, PlayerException {
-			station.getMPlayer().addPlayerMessageListener(playerListener);
-			station.getTotemPlayer().addPlayerMessageListener(playerListener);
-			playerListener.playerMessage(player.getPlayingBean());
-	}
-
-	/**
-	 * create notification
-	 * 
-	 * @param title
-	 * @param body
-	 */
-	private void makeNotification(String title, String body) {
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.browser;
-		Notification notification = new Notification(icon, "Player started",
-				System.currentTimeMillis());
-		Intent nIntent = new Intent(this, BrowserActivity.class);
-		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
-		PendingIntent pInent = PendingIntent.getActivity(this, 0, nIntent, 0);
-		notification.setLatestEventInfo(getApplicationContext(), title, body,
-				pInent);
-		nm.notify(NOTIFICATION_ID, notification);
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(RemoteService.NOTIFICATION_ID);
-		disconnect();
-		serverDB.close();
-	}
-
-	/**
-	 * disconnect from current connection
-	 */
-	private void disconnect() {
-		if (player != null) {
-			try {
-				player.removePlayerMessageListener(playerListener);
-			} catch (Exception e) {
-			}
-		}
-		if (localServer != null)
-			try {
-				localServer.close();
-			} catch (IOException e) {
-			}
-		station = null;
-		player = null;
-		serverID = -1;
-		serverName = null;
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(RemoteService.NOTIFICATION_ID);
-		handler.post(new Runnable() {
-			public void run() {
-				for (IRemoteActionListener listener : actionListener)
-					listener.serverConnectionChanged(null);
-			}
-		});
-	}
-
-	@Override
-	public PlayerBinder onBind(Intent intent) {
-		return binder;
 	}
 
 	/**
@@ -288,9 +113,9 @@ public class RemoteService extends Service {
 				public void run() {
 					if (playing.getState() == STATE.DOWN) {
 						NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						nm.cancel(RemoteService.NOTIFICATION_ID);
+						nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
 					} else
-						makeNotification(title, msg);
+						makePlayingNotification(title, msg);
 					for (IRemoteActionListener listener : actionListener)
 						listener.newPlayingFile(playing);
 				}
@@ -321,169 +146,4 @@ public class RemoteService extends Service {
 		void serverConnectionChanged(String serverName);
 
 	}
-
-	/**
-	 * binder as api for this service. it provides all functionality to the
-	 * remote server.
-	 * 
-	 * @author sebastian
-	 */
-	public class PlayerBinder extends Binder {
-
-		/**
-		 * get remote browser object
-		 * 
-		 * @return browser
-		 */
-		public IBrowser getBrowser() {
-			return browser;
-		}
-
-		/**
-		 * get current remote player object
-		 * 
-		 * @return player
-		 */
-		public IPlayer getPlayer() {
-			return player;
-		}
-
-		/**
-		 * get remote control object
-		 * 
-		 * @return control
-		 */
-		public IControl getControl() {
-			return control;
-		}
-
-		/**
-		 * connect to server, ip of the server will be load from the database
-		 * 
-		 * @param id
-		 * @param r
-		 */
-		public void connectToServer(final int id, final Runnable r) {
-			new Thread() {
-				public void run() {
-					if (id == serverID) {
-						if (r != null)
-							r.run();
-					} else {
-						RemoteService.this.disconnect();
-						serverID = id;
-						serverIP = serverDB.getIpOfServer(id);
-						serverName = serverDB.getNameOfServer(id);
-						connect(r);
-					}
-				}
-			}.start();
-		}
-
-		public void disconnect(final Runnable r) {
-			new Thread() {
-				public void run() {
-					RemoteService.this.disconnect();
-					if (r != null)
-						handler.post(r);
-				}
-			}.start();
-		}
-
-		/**
-		 * set mplayer for current player
-		 * 
-		 */
-		public void useMPlayer() {
-			new Thread() {
-				public void run() {
-					try {
-						player = station.getMPlayer();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}.start();
-		}
-
-		/**
-		 * set totem for current player
-		 */
-		public void useTotemPlayer() {
-			new Thread() {
-				public void run() {
-					try {
-						player = station.getTotemPlayer();
-					} catch (RemoteException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}.start();
-		}
-
-		/**
-		 * get remote playlist object
-		 * 
-		 * @return playlist
-		 */
-		public IPlayList getPlayList() {
-			return playList;
-		}
-
-		/**
-		 * get remote chatserver object
-		 * 
-		 * @return chatserver
-		 */
-		public IChatServer getChatServer() {
-			return chatServer;
-		}
-
-		/**
-		 * @return true if there is a connection wich a server
-		 */
-		public boolean isConnected() {
-			return station != null;
-		}
-
-		/**
-		 * @return name of connected server
-		 */
-		public String getServerName() {
-			return serverName;
-		}
-
-		public PlayerListener getPlayerListener() {
-			return playerListener;
-		}
-
-		/**
-		 * add new remote action listener. the listener will be informed about
-		 * actions on this service
-		 * 
-		 * @param listener
-		 */
-		public void addRemoteActionListener(IRemoteActionListener listener) {
-			if (!actionListener.contains(listener))
-				actionListener.add(listener);
-		}
-
-		/**
-		 * remove action listener
-		 * 
-		 * @param listener
-		 */
-		public void removeRemoteActionListener(IRemoteActionListener listener) {
-			actionListener.remove(listener);
-		}
-
-		/**
-		 * @return current playing file
-		 */
-		public PlayingBean getPlayingFile() {
-			return playingFile;
-		}
-	}
-
 }

@@ -36,9 +36,9 @@ import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
-import de.remote.mobile.services.RemoteService.PlayerBinder;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
 
@@ -580,6 +580,9 @@ public class BrowserActivity extends Activity {
 						.getPlayList().getPlayLists());
 				startActivityForResult(i,
 						SelectPlaylistActivity.SELECT_PLS_CODE);
+				break;
+			case R.id.opt_item_download:
+				binder.downloadFile(selectedItem);
 				break;
 			case R.id.opt_item_delete:
 				selectedPosition = listView.getFirstVisiblePosition();

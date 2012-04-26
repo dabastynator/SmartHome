@@ -24,8 +24,8 @@ import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
 import de.remote.mobile.R;
+import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
-import de.remote.mobile.services.RemoteService.PlayerBinder;
 import de.remote.mobile.util.ChatAdapter;
 
 /**
