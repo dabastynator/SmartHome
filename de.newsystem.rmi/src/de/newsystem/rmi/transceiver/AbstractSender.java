@@ -1,4 +1,4 @@
-package de.newsystem.rmi.transeiver;
+package de.newsystem.rmi.transceiver;
 
 import java.io.IOException;
 import java.io.OutputStream;

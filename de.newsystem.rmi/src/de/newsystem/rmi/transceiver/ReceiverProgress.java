@@ -1,4 +1,4 @@
-package de.newsystem.rmi.transeiver;
+package de.newsystem.rmi.transceiver;
 
 /**
  * the interface provides to listen on the progress of an receive.
