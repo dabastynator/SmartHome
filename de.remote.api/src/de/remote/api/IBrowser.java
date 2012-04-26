@@ -1,5 +1,7 @@
 package de.remote.api;
 
+import java.io.IOException;
+
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -55,6 +57,20 @@ public interface IBrowser extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	String getFullLocation() throws RemoteException;
+
+	/**
+	 * publish given file, so a client can connect to the given port and
+	 * download the file. the implementation must return the ip of the server on
+	 * witch the file can be download.
+	 * 
+	 * @param file
+	 * @param port
+	 * @return ip of the file server
+	 * @throws RemoteException
+	 * @throws IOException
+	 */
+	String publishFile(String file, int port) throws RemoteException,
+			IOException;
 
 	/**
 	 * Deletes the file or directory denoted by this abstract pathname. If this
