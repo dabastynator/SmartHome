@@ -63,11 +63,15 @@ public class FileReceiver extends AbstractReceiver {
 			// receive file data from stream
 			byte[] data = new byte[(int) Math.min(size, progressStep)];
 			int i;
-			long currentSize = 0;
+			long currentSize = 0, count = 0;
 			while ((i = input.read(data, 0, data.length)) != -1) {
 				output.write(data, 0, i);
 				currentSize += i;
-				informProgress(currentSize);
+				count += i;
+				if (count >= progressStep) {
+					count = 0;
+					informProgress(currentSize);
+				}
 			}
 
 			output.close();
