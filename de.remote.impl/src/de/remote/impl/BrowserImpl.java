@@ -1,10 +1,13 @@
 package de.remote.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
 
 public class BrowserImpl implements IBrowser {
@@ -13,6 +16,8 @@ public class BrowserImpl implements IBrowser {
 	private String root;
 
 	public BrowserImpl(String string) {
+		if (!string.endsWith(File.separator))
+			string += File.separator;
 		root = location = string;
 	}
 
@@ -71,6 +76,14 @@ public class BrowserImpl implements IBrowser {
 	@Override
 	public boolean delete(String file) throws RemoteException {
 		return new File(file).delete();
+	}
+
+	@Override
+	public String publishFile(String file, int port) throws RemoteException,
+			IOException {
+		FileSender sender = new FileSender(new File(location + file), port, 1);
+		sender.sendAsync();
+		return Server.getServer().getServerPort().getIp();
 	}
 
 }
