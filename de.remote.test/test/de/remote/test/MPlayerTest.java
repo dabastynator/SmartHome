@@ -52,7 +52,7 @@ public class MPlayerTest extends TestCase {
 			player = new MPlayer();
 			player.addPlayerMessageListener(new PlayerListener());
 			player.play(BrowserTest.TEST_LOCATION + TEST_FILE);
-			Thread.sleep(2500);
+			Thread.sleep(5000);
 			Assert.assertTrue("false file is played", file);
 			Assert.assertTrue("false state of the player", state == STATE.PLAY);
 			player.playPause();
