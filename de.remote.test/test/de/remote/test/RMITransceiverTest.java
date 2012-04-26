@@ -6,13 +6,13 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.newsystem.rmi.transeiver.FileReceiver;
-import de.newsystem.rmi.transeiver.FileSender;
-import de.newsystem.rmi.transeiver.ReceiverProgress;
+import de.newsystem.rmi.transceiver.FileReceiver;
+import de.newsystem.rmi.transceiver.FileSender;
+import de.newsystem.rmi.transceiver.ReceiverProgress;
 
 import junit.framework.TestCase;
 
-public class RMITranceiverTest extends TestCase {
+public class RMITransceiverTest extends TestCase {
 
 	/**
 	 * port for transceiver
