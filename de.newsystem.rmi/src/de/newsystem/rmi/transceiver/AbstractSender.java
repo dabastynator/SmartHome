@@ -78,5 +78,6 @@ public abstract class AbstractSender {
 	 * 
 	 * @param outputStream
 	 */
-	protected abstract void writeData(OutputStream outputStream);
+	protected abstract void writeData(OutputStream outputStream)
+			throws IOException;
 }

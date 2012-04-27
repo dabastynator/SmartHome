@@ -2,7 +2,6 @@ package de.newsystem.rmi.transceiver;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,7 +16,7 @@ public class FileSender extends AbstractSender {
 	/**
 	 * the file that will be transfered
 	 */
-	private File file;
+	protected File file;
 
 	/**
 	 * allocate new file sender. the sender creates a server socket on specified
@@ -48,28 +47,22 @@ public class FileSender extends AbstractSender {
 	}
 
 	@Override
-	protected void writeData(OutputStream output) {
-		try {
-			InputStream input = new FileInputStream(file);
-			// send file length (long -> byte array)
-			long length = file.length();
-			byte[] l = new byte[4];
-			for (int i = 0; i < 4; i++) {
-				l[3 - i] = (byte) (length >>> (i * 8));
-			}
-			output.write(l);
-			
-			// send data
-			byte[] data = new byte[(int) length];
-			input.read(data, 0, data.length);
-			output.write(data, 0, data.length);
-			output.flush();
-			input.close();
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	protected void writeData(OutputStream output) throws IOException {
+		InputStream input = new FileInputStream(file);
+		// send file length (long -> byte array)
+		long length = file.length();
+		byte[] l = new byte[4];
+		for (int i = 0; i < 4; i++) {
+			l[3 - i] = (byte) (length >>> (i * 8));
 		}
+		output.write(l);
+
+		// send data
+		byte[] data = new byte[(int) length];
+		input.read(data, 0, data.length);
+		output.write(data, 0, data.length);
+		output.flush();
+		input.close();
 	}
 
 }

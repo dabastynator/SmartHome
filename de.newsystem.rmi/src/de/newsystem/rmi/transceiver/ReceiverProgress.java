@@ -26,4 +26,11 @@ public interface ReceiverProgress {
 	 */
 	public void endReceive(long size);
 
+	/**
+	 * inform listener about occurred exception
+	 * 
+	 * @param e
+	 */
+	public void exceptionOccurred(Exception e);
+
 }

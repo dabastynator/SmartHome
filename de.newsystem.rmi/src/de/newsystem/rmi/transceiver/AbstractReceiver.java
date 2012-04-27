@@ -66,11 +66,21 @@ public abstract class AbstractReceiver {
 			public void run() {
 				try {
 					receiveSync();
-				} catch (UnknownHostException e) {
-				} catch (IOException e) {
+				} catch (Exception e) {
+					informException(e);
 				}
 			};
 		}.start();
+	} 
+
+	/**
+	 * inform all listener about occurred exception
+	 * 
+	 * @param e
+	 */
+	protected void informException(Exception e) {
+		for (ReceiverProgress progress : progressListener)
+			progress.exceptionOccurred(e);
 	}
 
 	/**
@@ -88,8 +98,10 @@ public abstract class AbstractReceiver {
 	 * receive data from stream
 	 * 
 	 * @param inputStream
+	 * @throws IOException
 	 */
-	protected abstract void receiveData(InputStream inputStream);
+	protected abstract void receiveData(InputStream inputStream)
+			throws IOException;
 
 	/**
 	 * @return list of progress listener

@@ -17,7 +17,7 @@ public class FileReceiver extends AbstractReceiver {
 	/**
 	 * the file that will be created
 	 */
-	private File file;
+	protected File file;
 
 	/**
 	 * allocate new file receiver with given specifications. the file must not
@@ -46,39 +46,38 @@ public class FileReceiver extends AbstractReceiver {
 	}
 
 	@Override
-	protected void receiveData(InputStream input) {
-		try {
-			OutputStream output = new FileOutputStream(file);
+	protected void receiveData(InputStream input) throws IOException {
+		OutputStream output = new FileOutputStream(file);
 
-			// read file size from stream (byte array -> long)
-			long size = 0;
-			byte[] b = new byte[4];
-			input.read(b);
-			for (int j = 0; j < 4; j++) {
-				size <<= 8;
-				size ^= (long) b[j] & 0xFF;
-			}
-			informStart(size);
-
-			// receive file data from stream
-			byte[] data = new byte[(int) Math.min(size, progressStep)];
-			int i;
-			long currentSize = 0, count = 0;
-			while ((i = input.read(data, 0, data.length)) != -1) {
-				output.write(data, 0, i);
-				currentSize += i;
-				count += i;
-				if (count >= progressStep) {
-					count = 0;
-					informProgress(currentSize);
-				}
-			}
-
-			output.close();
-			informEnd(size);
-		} catch (IOException e) {
-			e.printStackTrace();
+		// read file size from stream (byte array -> long)
+		long size = 0;
+		byte[] b = new byte[4];
+		input.read(b);
+		for (int j = 0; j < 4; j++) {
+			size <<= 8;
+			size ^= (long) b[j] & 0xFF;
 		}
+		informStart(size);
+
+		// receive file data from stream
+		byte[] data = new byte[(int) Math.min(size, progressStep)];
+		int i;
+		long currentSize = 0, count = 0;
+		while ((i = input.read(data, 0,
+				(int) Math.min(data.length, size - currentSize))) != -1) {
+			output.write(data, 0, i);
+			currentSize += i;
+			count += i;
+			if (count >= progressStep) {
+				count = 0;
+				informProgress(currentSize);
+			}
+			if (currentSize >= size)
+				break;
+		}
+
+		output.close();
+		informEnd(size);
 	}
 
 }
