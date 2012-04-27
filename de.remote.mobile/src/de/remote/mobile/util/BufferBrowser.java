@@ -139,4 +139,10 @@ public class BufferBrowser implements IBrowser{
 		return browser.publishFile(file, port);
 	}
 
+	@Override
+	public String publishDirectory(String directory, int port)
+			throws RemoteException, IOException {
+		return browser.publishDirectory(directory, port);
+	}
+
 }

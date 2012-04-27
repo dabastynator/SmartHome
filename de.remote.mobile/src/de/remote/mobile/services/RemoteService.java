@@ -43,7 +43,7 @@ public class RemoteService extends RemoteBaseService {
 		 * current downloading file
 		 */
 		private String file;
-		
+
 		/**
 		 * size of the whole file
 		 */
@@ -67,17 +67,33 @@ public class RemoteService extends RemoteBaseService {
 		@Override
 		public void progressReceive(long size) {
 			System.out.println(size);
-			makeDonwloadingNotification(file, ((float)size)/((float)fullSize));
+			makeDonwloadingNotification(file, ((float) size)
+					/ ((float) fullSize));
 		}
 
 		@Override
 		public void endReceive(long size) {
 			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
-			handler.post(new Runnable(){
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(RemoteService.this, file + " loaded", Toast.LENGTH_SHORT).show();
+					Toast.makeText(RemoteService.this, file + " loaded",
+							Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
+
+		@Override
+		public void exceptionOccurred(final Exception e) {
+			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this,
+							"error occurred while loading: " + e.getMessage(),
+							Toast.LENGTH_SHORT).show();
 				}
 			});
 		}

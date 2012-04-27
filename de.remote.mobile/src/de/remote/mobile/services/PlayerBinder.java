@@ -6,6 +6,8 @@ import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.transceiver.AbstractReceiver;
+import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.remote.api.IBrowser;
 import de.remote.api.IChatServer;
@@ -193,21 +195,61 @@ public class PlayerBinder extends Binder {
 		return service.playingFile;
 	}
 
+	/**
+	 * download the given file from the remote browser
+	 * 
+	 * @param file
+	 */
 	public void downloadFile(String file) {
 		try {
 			String ip = service.browser.publishFile(file,
 					RemoteBaseService.DOWNLOAD_PORT);
-			String destiny = Environment.getExternalStorageDirectory()
-					.toString() + File.separator + file;
+			String folder = Environment.getExternalStorageDirectory()
+					.toString() + File.separator + getServerName().trim();
+			File dir = new File(folder);
+			if (!dir.exists())
+				dir.mkdir();
+			File newFile = new File(folder + File.separator + file.trim());
 			FileReceiver receiver = new FileReceiver(ip,
-					RemoteBaseService.DOWNLOAD_PORT, 200000, new File(destiny));
+					RemoteBaseService.DOWNLOAD_PORT, 200000, newFile);
 			service.progressListener.setFile(file);
-			receiver.getProgressListener().add(service.progressListener);
-			receiver.receiveAsync();
-			Toast.makeText(service, "download started", Toast.LENGTH_SHORT)
-					.show();
+			download(receiver);
 		} catch (Exception e) {
 			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+	}
+
+	/**
+	 * download the given directory from the remote browser
+	 * 
+	 * @param directory
+	 */
+	public void downloadDirectory(String directory) {
+		try {
+			String ip = service.browser.publishDirectory(directory,
+					RemoteBaseService.DOWNLOAD_PORT);
+			String folder = Environment.getExternalStorageDirectory()
+					.toString() + File.separator + getServerName().trim();
+			File dir = new File(folder);
+			if (!dir.exists())
+				dir.mkdir();
+			DirectoryReceiver receiver = new DirectoryReceiver(ip,
+					RemoteBaseService.DOWNLOAD_PORT, dir);
+			service.progressListener.setFile(directory);
+			download(receiver);
+		} catch (Exception e) {
+			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
+		}
+	}
+
+	/**
+	 * start the download
+	 * 
+	 * @param receiver
+	 */
+	private void download(AbstractReceiver receiver) {
+		receiver.getProgressListener().add(service.progressListener);
+		receiver.receiveAsync();
+		Toast.makeText(service, "download started", Toast.LENGTH_SHORT).show();
 	}
 }

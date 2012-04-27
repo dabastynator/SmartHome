@@ -582,7 +582,10 @@ public class BrowserActivity extends Activity {
 						SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
 			case R.id.opt_item_download:
-				binder.downloadFile(selectedItem);
+				if (selectedPosition < binder.getBrowser().getDirectories().length)
+					binder.downloadDirectory(selectedItem);
+				else
+					binder.downloadFile(selectedItem);
 				break;
 			case R.id.opt_item_delete:
 				selectedPosition = listView.getFirstVisiblePosition();
