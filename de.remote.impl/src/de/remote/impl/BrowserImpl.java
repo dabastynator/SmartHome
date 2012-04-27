@@ -7,6 +7,7 @@ import java.util.List;
 
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.transceiver.DirectorySender;
 import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
 
@@ -82,6 +83,14 @@ public class BrowserImpl implements IBrowser {
 	public String publishFile(String file, int port) throws RemoteException,
 			IOException {
 		FileSender sender = new FileSender(new File(location + file), port, 1);
+		sender.sendAsync();
+		return Server.getServer().getServerPort().getIp();
+	}
+
+	@Override
+	public String publishDirectory(String directory, int port)
+			throws RemoteException, IOException {
+		DirectorySender sender = new DirectorySender(new File(location + directory), port, 1);
 		sender.sendAsync();
 		return Server.getServer().getServerPort().getIp();
 	}
