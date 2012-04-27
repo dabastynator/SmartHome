@@ -126,5 +126,10 @@ public class RMITransceiverTest extends TestCase {
 
 		}
 
+		@Override
+		public void exceptionOccurred(Exception e) {
+			System.out.println(e.getMessage());
+		}
+
 	}
 }
