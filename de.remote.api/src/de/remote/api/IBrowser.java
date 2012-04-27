@@ -73,6 +73,20 @@ public interface IBrowser extends RemoteAble {
 			IOException;
 
 	/**
+	 * publish given directory, so a client can connect to the given port and
+	 * download the directory. the implementation must return the ip of the
+	 * server on witch the directory can be download.
+	 * 
+	 * @param directory
+	 * @param port
+	 * @return ip of the file server
+	 * @throws RemoteException
+	 * @throws IOException
+	 */
+	String publishDirectory(String directory, int port) throws RemoteException,
+			IOException;
+
+	/**
 	 * Deletes the file or directory denoted by this abstract pathname. If this
 	 * pathname denotes a directory, then the directory must be empty in order
 	 * to be deleted.
