@@ -131,5 +131,10 @@ public class RMITransceiverTest extends TestCase {
 			System.out.println(e.getMessage());
 		}
 
+		@Override
+		public void downloadCanceled() {
+			
+		}
+
 	}
 }
