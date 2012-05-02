@@ -59,20 +59,31 @@ public class RemoteService extends RemoteBaseService {
 		}
 
 		@Override
-		public void startReceive(long size) {
+		public void startReceive(final long size) {
 			fullSize = size;
 			makeDonwloadingNotification(file, 0);
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.startReceive(size);
+				}
+			});
 		}
 
 		@Override
-		public void progressReceive(long size) {
-			System.out.println(size);
+		public void progressReceive(final long size) {
 			makeDonwloadingNotification(file, ((float) size)
 					/ ((float) fullSize));
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.progressReceive(size);
+				}
+			});
 		}
 
 		@Override
-		public void endReceive(long size) {
+		public void endReceive(final long size) {
 			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
 			handler.post(new Runnable() {
@@ -80,6 +91,8 @@ public class RemoteService extends RemoteBaseService {
 				public void run() {
 					Toast.makeText(RemoteService.this, file + " loaded",
 							Toast.LENGTH_SHORT).show();
+					for (IRemoteActionListener l : actionListener)
+						l.endReceive(size);
 				}
 			});
 		}
@@ -94,6 +107,23 @@ public class RemoteService extends RemoteBaseService {
 					Toast.makeText(RemoteService.this,
 							"error occurred while loading: " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
+					for (IRemoteActionListener l : actionListener)
+						l.exceptionOccurred(e);
+				}
+			});
+		}
+
+		@Override
+		public void downloadCanceled() {
+			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this, "download cancled",
+							Toast.LENGTH_SHORT).show();
+					for (IRemoteActionListener l : actionListener)
+						l.downloadCanceled();
 				}
 			});
 		}
@@ -145,7 +175,7 @@ public class RemoteService extends RemoteBaseService {
 	 * 
 	 * @author sebastian
 	 */
-	public interface IRemoteActionListener {
+	public interface IRemoteActionListener extends ReceiverProgress {
 
 		/**
 		 * server player plays new file

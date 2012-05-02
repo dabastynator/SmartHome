@@ -28,9 +28,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
@@ -110,6 +112,11 @@ public class BrowserActivity extends Activity {
 	private LinearLayout searchLayout;
 
 	/**
+	 * area that contains the download progress and cancel button
+	 */
+	private LinearLayout downloadLayout;
+
+	/**
 	 * binder object
 	 */
 	private PlayerBinder binder;
@@ -148,6 +155,11 @@ public class BrowserActivity extends Activity {
 	 * play / pause button
 	 */
 	private ImageView playButton;
+
+	/**
+	 * progress bar for download progress
+	 */
+	private ProgressBar downloadProgress;
 
 	/**
 	 * listener for remote actions
@@ -219,6 +231,8 @@ public class BrowserActivity extends Activity {
 		listView = (ListView) findViewById(R.id.fileList);
 		searchText = (EditText) findViewById(R.id.txt_search);
 		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
+		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
+		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
 	}
 
@@ -320,6 +334,7 @@ public class BrowserActivity extends Activity {
 			if (keyCode == KeyEvent.KEYCODE_BACK) {
 				if (searchLayout.getVisibility() == View.VISIBLE) {
 					searchLayout.setVisibility(View.GONE);
+					searchText.setText("");
 					return true;
 				}
 				selectedPosition = 0;
@@ -493,6 +508,20 @@ public class BrowserActivity extends Activity {
 		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 		searchLayout.setVisibility(View.GONE);
+	}
+
+	/**
+	 * cancel the current download
+	 * 
+	 * @param v
+	 */
+	public void cancelDownload(View v) {
+		AbstractReceiver receiver = binder.getReceiver();
+		if (receiver != null) {
+			receiver.cancel();
+		} else
+			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT)
+					.show();
 	}
 
 	@Override
@@ -780,6 +809,8 @@ public class BrowserActivity extends Activity {
 
 	public class MyRemoteListener implements IRemoteActionListener {
 
+		private long max = 0;
+
 		@Override
 		public void newPlayingFile(PlayingBean bean) {
 			if (bean == null || bean.getState() == STATE.PLAY)
@@ -791,6 +822,33 @@ public class BrowserActivity extends Activity {
 		@Override
 		public void serverConnectionChanged(String serverName) {
 
+		}
+
+		@Override
+		public void startReceive(long size) {
+			max = size;
+			downloadLayout.setVisibility(View.VISIBLE);
+			downloadProgress.setProgress(0);
+		}
+
+		@Override
+		public void progressReceive(long size) {
+			downloadProgress.setProgress((int) ((100d * size) / max));
+		}
+
+		@Override
+		public void endReceive(long size) {
+			downloadLayout.setVisibility(View.GONE);
+		}
+
+		@Override
+		public void exceptionOccurred(Exception e) {
+			downloadLayout.setVisibility(View.GONE);
+		}
+
+		@Override
+		public void downloadCanceled() {
+			downloadLayout.setVisibility(View.GONE);
 		}
 
 	}

@@ -30,4 +30,16 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src_api</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/remote/de.remote.api/src</locationURI>
+		</link>
+		<link>
+			<name>src_rmi</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/remote/de.newsystem.rmi/src</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

@@ -80,6 +80,44 @@
             android:fastScrollEnabled="true"
             android:scrollbars="vertical" />
     </LinearLayout>
+    
+        <LinearLayout
+        android:id="@+id/layout_download"
+        android:layout_width="fill_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/lbl_download"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/str_download" />
+
+            <ProgressBar
+                android:id="@+id/prg_donwload"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:max="100"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/button_cancel_download"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"
+            android:onClick="cancelDownload"
+            android:src="@drawable/cancel" />
+    </LinearLayout>
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

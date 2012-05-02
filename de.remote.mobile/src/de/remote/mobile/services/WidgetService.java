@@ -202,4 +202,34 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			updateWidget();
 	}
 
+	@Override
+	public void startReceive(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void progressReceive(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void endReceive(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void exceptionOccurred(Exception e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void downloadCanceled() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

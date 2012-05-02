@@ -32,6 +32,11 @@ public class PlayerBinder extends Binder {
 	private RemoteBaseService service;
 
 	/**
+	 * current receiver
+	 */
+	private AbstractReceiver receiver;
+
+	/**
 	 * allocate new binder.
 	 * 
 	 * @param service
@@ -248,8 +253,16 @@ public class PlayerBinder extends Binder {
 	 * @param receiver
 	 */
 	private void download(AbstractReceiver receiver) {
+		this.receiver = receiver;
 		receiver.getProgressListener().add(service.progressListener);
 		receiver.receiveAsync();
 		Toast.makeText(service, "download started", Toast.LENGTH_SHORT).show();
+	}
+
+	/**
+	 * get the current receiver
+	 */
+	public AbstractReceiver getReceiver() {
+		return receiver;
 	}
 }

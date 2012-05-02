@@ -48,7 +48,7 @@ public abstract class RemoteBaseService extends Service {
 	/**
 	 * port for downloads
 	 */
-	protected static final int DOWNLOAD_PORT = 5015;
+	protected static final int DOWNLOAD_PORT = 5021;
 
 	/**
 	 * name of current server
