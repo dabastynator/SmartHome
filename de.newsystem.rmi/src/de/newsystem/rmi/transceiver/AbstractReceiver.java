@@ -2,6 +2,7 @@ package de.newsystem.rmi.transceiver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -13,6 +14,15 @@ import java.util.List;
  * @author sebastian
  */
 public abstract class AbstractReceiver {
+
+	/**
+	 * possible stated of the receiver
+	 * 
+	 * @author sebastian
+	 */
+	public enum ReceiverState {
+		READY, LOADING, FAILED, CANCELD, FINISHED
+	};
 
 	/**
 	 * port of the sender
@@ -35,6 +45,21 @@ public abstract class AbstractReceiver {
 	protected long progressStep;
 
 	/**
+	 * current state of the receiver
+	 */
+	protected ReceiverState state;
+
+	/**
+	 * input stream from the socket
+	 */
+	protected InputStream input;
+
+	/**
+	 * output stream from the socket
+	 */
+	protected OutputStream output;
+
+	/**
 	 * allocate new receiver. the receiver receives from specified ip and port.
 	 * inform listener about progress specified in progressStep.
 	 * 
@@ -46,6 +71,7 @@ public abstract class AbstractReceiver {
 		this.ip = ip;
 		this.port = port;
 		this.progressStep = progressStep;
+		this.state = ReceiverState.READY;
 	}
 
 	/**
@@ -67,11 +93,12 @@ public abstract class AbstractReceiver {
 				try {
 					receiveSync();
 				} catch (Exception e) {
+					state = ReceiverState.FAILED;
 					informException(e);
 				}
 			};
 		}.start();
-	} 
+	}
 
 	/**
 	 * inform all listener about occurred exception
@@ -91,7 +118,11 @@ public abstract class AbstractReceiver {
 	 */
 	public void receiveSync() throws UnknownHostException, IOException {
 		Socket socket = new Socket(ip, port);
-		receiveData(socket.getInputStream());
+		state = ReceiverState.LOADING;
+		input = socket.getInputStream();
+		output = socket.getOutputStream();
+		receiveData(input);
+		socket.close();
 	}
 
 	/**
@@ -138,6 +169,25 @@ public abstract class AbstractReceiver {
 	protected void informEnd(long size) {
 		for (ReceiverProgress listener : progressListener)
 			listener.endReceive(size);
+	}
+
+	/**
+	 * cancel current download
+	 */
+	public void cancel() {
+		state = ReceiverState.CANCELD;
+		try {
+			output.write(ReceiverState.CANCELD.ordinal());
+			output.close();
+		} catch (IOException e) {
+		}
+	}
+
+	/**
+	 * @return current state of the receiver
+	 */
+	public ReceiverState getState() {
+		return state;
 	}
 
 }

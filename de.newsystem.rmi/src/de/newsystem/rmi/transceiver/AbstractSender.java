@@ -1,9 +1,12 @@
 package de.newsystem.rmi.transceiver;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 
 /**
  * the sender sends data via a tcp connection. the count of clients can be
@@ -66,9 +69,14 @@ public abstract class AbstractSender {
 	public void sendSync() throws IOException {
 		ServerSocket serverPort = new ServerSocket(port);
 		for (int i = 0; i < times || times == -1; i++) {
-			Socket socket = serverPort.accept();
-			writeData(socket.getOutputStream());
-			socket.close();
+			try {
+				Socket socket = serverPort.accept();
+				new UploadObserver(socket).start();
+				writeData(socket.getOutputStream());
+				socket.close();
+			} catch (IOException e) {
+
+			}
 		}
 		serverPort.close();
 	}
@@ -80,4 +88,29 @@ public abstract class AbstractSender {
 	 */
 	protected abstract void writeData(OutputStream outputStream)
 			throws IOException;
+
+	public class UploadObserver extends Thread {
+
+		private Socket socket;
+
+		public UploadObserver(Socket socket) {
+			this.socket = socket;
+		}
+
+		public void run() {
+			try {
+				InputStream input = socket.getInputStream();
+				int msg;
+				while ((msg = input.read()) != -1) {
+					if (msg == ReceiverState.CANCELD.ordinal()) {
+						socket.getOutputStream().close();
+						socket.getInputStream().close();
+						socket.close();
+					}
+				}
+			} catch (IOException e) {
+			}
+		}
+
+	}
 }

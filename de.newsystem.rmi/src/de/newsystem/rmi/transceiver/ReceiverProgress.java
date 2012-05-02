@@ -32,5 +32,10 @@ public interface ReceiverProgress {
 	 * @param e
 	 */
 	public void exceptionOccurred(Exception e);
+	
+	/**
+	 * 
+	 */
+	public void downloadCanceled();
 
 }

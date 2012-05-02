@@ -44,6 +44,8 @@ public class DirectoryReceiver extends FileReceiver {
 	 */
 	private void receiveDirectory(DataInputStream dataInputStream,
 			File directory) throws IOException {
+		if (state == ReceiverState.CANCELD)
+			return;
 		// prepare destiny
 		if (!directory.exists())
 			directory.mkdir();
@@ -64,6 +66,8 @@ public class DirectoryReceiver extends FileReceiver {
 			if (directory.getAbsolutePath().equals(
 					this.directory.getAbsolutePath()))
 				super.informProgress(i);
+			if (state == ReceiverState.CANCELD)
+				return;
 		}
 		
 		// read all directories in this directory
@@ -74,6 +78,8 @@ public class DirectoryReceiver extends FileReceiver {
 			if (directory.getAbsolutePath().equals(
 					this.directory.getAbsolutePath()))
 				super.informProgress(subDirectories + i);
+			if (state == ReceiverState.CANCELD)
+				return;
 		}
 		if (directory.getAbsolutePath()
 				.equals(this.directory.getAbsolutePath()))
