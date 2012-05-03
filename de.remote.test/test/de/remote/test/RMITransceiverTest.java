@@ -19,12 +19,12 @@ public class RMITransceiverTest extends TestCase {
 	/**
 	 * port for file transceiver
 	 */
-	public static final int TRANSCEIVER_FILE_PORT = RMIChatTest.RMI_TEST_PORT_CLIENT + 3;
+	public static final int TRANSCEIVER_FILE_PORT = RMIChatTest.RMI_TEST_PORT_CLIENT + 1;
 
 	/**
 	 * port for directory transceiver
 	 */
-	public static final int TRANSCEIVER_DIRECTORY_PORT = RMIChatTest.RMI_TEST_PORT_CLIENT + 3;
+	public static final int TRANSCEIVER_DIRECTORY_PORT = RMIChatTest.RMI_TEST_PORT_CLIENT + 1;
 
 	/**
 	 * prefix for copied file
@@ -50,7 +50,7 @@ public class RMITransceiverTest extends TestCase {
 					TRANSCEIVER_FILE_PORT, 50000, dest);
 			receiver.getProgressListener().add(new MyListener());
 			sender.sendAsync();
-			Thread.sleep(500);
+			Thread.sleep(100);
 			receiver.receiveAsync();
 			Thread.sleep(500);
 		} catch (IOException e) {
@@ -81,7 +81,7 @@ public class RMITransceiverTest extends TestCase {
 					TRANSCEIVER_DIRECTORY_PORT, dest);
 			receiver.getProgressListener().add(new MyListener());
 			sender.sendAsync();
-			Thread.sleep(500);
+			Thread.sleep(100);
 			receiver.receiveAsync();
 			Thread.sleep(500);
 		} catch (IOException e) {
@@ -93,6 +93,66 @@ public class RMITransceiverTest extends TestCase {
 			Assert.assertTrue("destiny directory does not exist", false);
 		Assert.assertTrue("destiny contains no file", dest.list().length > 0);
 		delete(dest);
+	}
+
+	/**
+	 * perform file transceiver test with canceling
+	 */
+	@Test
+	public void testFileTransceiverCancel() {
+		File src = new File(BrowserTest.TEST_LOCATION + MPlayerTest.TEST_FILE);
+		File dest = new File(BrowserTest.TEST_LOCATION + TEST_FILE
+				+ MPlayerTest.TEST_FILE);
+		if (dest.exists())
+			dest.delete();
+		try {
+			FileSender sender = new FileSender(src, TRANSCEIVER_FILE_PORT, 1);
+			FileReceiver receiver = new FileReceiver("localhost",
+					TRANSCEIVER_FILE_PORT, 50000, dest){
+				@Override
+				protected void informProgress(long size) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
+					super.informProgress(size);
+				}
+			};
+			receiver.getProgressListener().add(new MyListener());
+
+			// transceiver with cancel
+			sender.sendAsync();
+			Thread.sleep(100);
+			receiver.receiveAsync();
+			Thread.sleep(500);
+			receiver.cancel();
+			Thread.sleep(100);
+			if (!dest.exists())
+				Assert.assertTrue("destiny file does not exist", false);
+			Assert.assertTrue("canceled file size equals",
+					src.length() != dest.length());
+			dest.delete();
+
+			// transceiver without cancel
+			sender = new FileSender(src, TRANSCEIVER_FILE_PORT, 1);
+			receiver = new FileReceiver("localhost",
+					TRANSCEIVER_FILE_PORT, 50000, dest);
+			receiver.getProgressListener().add(new MyListener());
+			sender.sendAsync();
+			Thread.sleep(500);
+			receiver.receiveAsync();
+			Thread.sleep(100);
+		} catch (IOException e) {
+			Assert.assertTrue(e.getMessage(), false);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (!dest.exists())
+			Assert.assertTrue("destiny file does not exist", false);
+		Assert.assertTrue("file size does not equal",
+				src.length() == dest.length());
+		if (dest.exists())
+			dest.delete();
 	}
 
 	private void delete(File dest) {
@@ -133,7 +193,7 @@ public class RMITransceiverTest extends TestCase {
 
 		@Override
 		public void downloadCanceled() {
-			
+
 		}
 
 	}
