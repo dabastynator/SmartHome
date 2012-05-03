@@ -60,6 +60,16 @@ public abstract class AbstractReceiver {
 	protected OutputStream output;
 
 	/**
+	 * size of downloading data
+	 */
+	protected long downloadSize;
+
+	/**
+	 * current progress of downloading data
+	 */
+	protected long downloadProgress;
+
+	/**
 	 * allocate new receiver. the receiver receives from specified ip and port.
 	 * inform listener about progress specified in progressStep.
 	 * 
@@ -147,6 +157,7 @@ public abstract class AbstractReceiver {
 	 * @param size
 	 */
 	protected void informStart(long size) {
+		downloadSize = size;
 		for (ReceiverProgress listener : progressListener)
 			listener.startReceive(size);
 	}
@@ -157,6 +168,7 @@ public abstract class AbstractReceiver {
 	 * @param size
 	 */
 	protected void informProgress(long size) {
+		downloadProgress = size;
 		for (ReceiverProgress listener : progressListener)
 			listener.progressReceive(size);
 	}
@@ -190,4 +202,17 @@ public abstract class AbstractReceiver {
 		return state;
 	}
 
+	/**
+	 * @return full size of downloading data
+	 */
+	public long getFullSize() {
+		return downloadSize;
+	}
+
+	/**
+	 * @return current progress of downloading data
+	 */
+	public long getDownloadProgress() {
+		return downloadProgress;
+	}
 }
