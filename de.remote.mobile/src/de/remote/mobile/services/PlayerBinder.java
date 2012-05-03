@@ -248,12 +248,14 @@ public class PlayerBinder extends Binder {
 	}
 
 	/**
-	 * start the download
+	 * configure receiver and start the download
 	 * 
 	 * @param receiver
 	 */
-	private void download(AbstractReceiver receiver) {
+	private void download(FileReceiver receiver) {
 		this.receiver = receiver;
+		// set maximum byte size to 1MB
+		receiver.setBufferSize(1000000);
 		receiver.getProgressListener().add(service.progressListener);
 		receiver.receiveAsync();
 		Toast.makeText(service, "download started", Toast.LENGTH_SHORT).show();

@@ -1,15 +1,15 @@
 package de.remote.mobile.util;
 
-import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.mobile.R;
-import de.remote.mobile.activies.BrowserActivity.ViewerState;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.api.IBrowser;
+import de.remote.mobile.R;
+import de.remote.mobile.activies.BrowserBase.ViewerState;
 
 /**
  * the browser adapter sets the correct icon for the shown item.

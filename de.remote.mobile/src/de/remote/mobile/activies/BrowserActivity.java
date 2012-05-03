@@ -1,9 +1,5 @@
 package de.remote.mobile.activies;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,20 +20,15 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
+import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
-import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -50,121 +41,12 @@ import de.remote.mobile.util.BufferBrowser;
  * 
  * @author sebastian
  */
-public class BrowserActivity extends Activity {
-
-	/**
-	 * name for extra data for server name
-	 */
-	public static final String EXTRA_SERVER_ID = "serverId";
-
-	/**
-	 * name of the viewer state field to store and restore the value
-	 */
-	private static final String VIEWER_STATE = "viewerstate";
-
-	/**
-	 * name of the playlist field to store and restore the value
-	 */
-	private static final String PLAYLIST = "playlist";
-
-	/**
-	 * name of the position in the list view
-	 */
-	private static final String LISTVIEW_POSITION = "listviewPosition";
-
-	/**
-	 * viewer states of the browser
-	 * 
-	 * @author sebastian
-	 */
-	public enum ViewerState {
-		DIRECTORIES, PLAYLISTS, PLS_ITEMS
-	}
-
-	/**
-	 * current directories
-	 */
-	private String[] directories;
-
-	/**
-	 * current files
-	 */
-	private String[] files;
-
-	/**
-	 * list view
-	 */
-	private ListView listView;
-
-	/**
-	 * search input field
-	 */
-	private EditText searchText;
-
-	/**
-	 * map to get full path string from a file name of a playlist item
-	 */
-	private Map<String, String> plsFileMap = new HashMap<String, String>();
-
-	/**
-	 * area that contains the search field and button
-	 */
-	private LinearLayout searchLayout;
-
-	/**
-	 * area that contains the download progress and cancel button
-	 */
-	private LinearLayout downloadLayout;
-
-	/**
-	 * binder object
-	 */
-	private PlayerBinder binder;
-
-	/**
-	 * current viewer state
-	 */
-	private ViewerState viewerState = ViewerState.DIRECTORIES;
-
-	/**
-	 * current selected item of the list view
-	 */
-	public String selectedItem;
-
-	/**
-	 * current shown playlist
-	 */
-	private String currentPlayList;
-
-	/**
-	 * database object
-	 */
-	private ServerDatabase serverDB;
-
-	/**
-	 * id of connected server
-	 */
-	private int serverID = -1;
-
-	/**
-	 * current selected item
-	 */
-	private int selectedPosition;
-
-	/**
-	 * play / pause button
-	 */
-	private ImageView playButton;
-
-	/**
-	 * progress bar for download progress
-	 */
-	private ProgressBar downloadProgress;
+public class BrowserActivity extends BrowserBase {
 
 	/**
 	 * listener for remote actions
 	 */
-	private MyRemoteListener remoteListener = new MyRemoteListener();
+	protected MyRemoteListener remoteListener = new MyRemoteListener();
 
 	/**
 	 * connection to the service
@@ -198,42 +80,33 @@ public class BrowserActivity extends Activity {
 			if (serverID >= 0)
 				binder.connectToServer(serverID, new ShowFolderRunnable());
 			// else if there is still a connection update the gui
-			else if (binder.isConnected())
+			else if (binder.isConnected()) {
 				new ShowFolderRunnable().run();
+				if (binder.getReceiver() != null
+						&& binder.getReceiver().getState() == ReceiverState.LOADING) {
+					downloadLayout.setVisibility(View.VISIBLE);
+					downloadProgress.setProgress((int) ((100d * binder
+							.getReceiver().getDownloadProgress()) / binder
+							.getReceiver().getFullSize()));
+					System.out.println(downloadProgress.getProgress());
+				}
+			}
 		}
 	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-		serverDB = new ServerDatabase(this);
-		findComponents();
-		listView.setBackgroundResource(R.drawable.idefix_dark);
-		listView.setScrollingCacheEnabled(false);
-		listView.setCacheColorHint(0);
+
+		// set listener
+		searchText.addTextChangedListener(new MyTextWatcher());
 		listView.setOnItemClickListener(new MyClickListener());
 		listView.setOnItemLongClickListener(new MyLongClickListener());
-		registerForContextMenu(listView);
-
-		searchText.addTextChangedListener(new MyTextWatcher());
 
 		// bind service
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
-	}
-
-	/**
-	 * find components by their id
-	 */
-	private void findComponents() {
-		listView = (ListView) findViewById(R.id.fileList);
-		searchText = (EditText) findViewById(R.id.txt_search);
-		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
-		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
-		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
-		playButton = (ImageView) findViewById(R.id.button_play);
 	}
 
 	@Override
@@ -257,22 +130,6 @@ public class BrowserActivity extends Activity {
 		return true;
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putInt(VIEWER_STATE, viewerState.ordinal());
-		outState.putString(PLAYLIST, currentPlayList);
-		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle bundle) {
-		super.onRestoreInstanceState(bundle);
-		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
-		currentPlayList = bundle.getString(PLAYLIST);
-		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
-	}
-
 	/**
 	 * update gui elements, show current directory or playlist
 	 */
@@ -283,8 +140,8 @@ public class BrowserActivity extends Activity {
 		}
 		try {
 			if (viewerState == ViewerState.DIRECTORIES) {
-				directories = binder.getBrowser().getDirectories();
-				files = binder.getBrowser().getFiles();
+				String[] directories = binder.getBrowser().getDirectories();
+				String[] files = binder.getBrowser().getFiles();
 				String[] all = new String[directories.length + files.length];
 				System.arraycopy(directories, 0, all, 0, directories.length);
 				System.arraycopy(files, 0, all, directories.length,
@@ -519,9 +376,11 @@ public class BrowserActivity extends Activity {
 		AbstractReceiver receiver = binder.getReceiver();
 		if (receiver != null) {
 			receiver.cancel();
-		} else
+		} else{
 			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT)
 					.show();
+			downloadLayout.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -567,18 +426,6 @@ public class BrowserActivity extends Activity {
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
 				showUpdateUI();
-				break;
-			case R.id.opt_create_playlist:
-				intent = new Intent(this, GetTextActivity.class);
-				startActivityForResult(intent, GetTextActivity.RESULT_CODE);
-				break;
-			case R.id.opt_chat:
-				intent = new Intent(this, ChatActivity.class);
-				startActivity(intent);
-				break;
-			case R.id.opt_server_select:
-				intent = new Intent(this, SelectServerActivity.class);
-				startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 				break;
 			case R.id.opt_shuffle_on:
 				binder.getPlayer().useShuffle(true);
@@ -833,6 +680,8 @@ public class BrowserActivity extends Activity {
 
 		@Override
 		public void progressReceive(long size) {
+			if (max == 0)
+				max = binder.getReceiver().getFullSize();
 			downloadProgress.setProgress((int) ((100d * size) / max));
 		}
 

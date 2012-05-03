@@ -81,9 +81,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			return;
 		}
 		String title = "playing";
-		if (playing.getTitle() != null)
+		if (playing.getTitle() != null) {
 			title = playing.getTitle();
-		else if (playing.getFile() != null)
+			if (title.length() == 0)
+				title = playing.getFile();
+		} else
 			title = playing.getFile();
 		String author = "";
 		if (playing.getArtist() != null)
@@ -188,7 +190,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		unbindService(playerConnection);
 		super.onDestroy();
 	}
-	
+
 	@Override
 	public void newPlayingFile(PlayingBean bean) {
 		updateWidget();
@@ -205,31 +207,31 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void startReceive(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void progressReceive(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endReceive(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void exceptionOccurred(Exception e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void downloadCanceled() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
