@@ -81,6 +81,7 @@ public class FileReceiver extends AbstractReceiver {
 			if (currentSize >= size)
 				break;
 			if (state == ReceiverState.CANCELD) {
+				output.flush();
 				output.close();
 				return;
 			}

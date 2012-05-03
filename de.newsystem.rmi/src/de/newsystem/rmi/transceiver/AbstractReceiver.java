@@ -128,10 +128,15 @@ public abstract class AbstractReceiver {
 	 */
 	public void receiveSync() throws UnknownHostException, IOException {
 		Socket socket = new Socket(ip, port);
-		state = ReceiverState.LOADING;
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
-		receiveData(input);
+		if (state == ReceiverState.READY) {
+			state = ReceiverState.LOADING;
+			output.write(ReceiverState.LOADING.ordinal());
+			receiveData(input);
+		} else if (state == ReceiverState.CANCELD){
+			output.write(ReceiverState.CANCELD.ordinal());
+		}
 		socket.close();
 	}
 
@@ -189,8 +194,10 @@ public abstract class AbstractReceiver {
 	public void cancel() {
 		state = ReceiverState.CANCELD;
 		try {
-			output.write(ReceiverState.CANCELD.ordinal());
-			output.close();
+			if (output != null) {
+				output.write(ReceiverState.CANCELD.ordinal());
+				output.close();
+			}
 		} catch (IOException e) {
 		}
 	}
