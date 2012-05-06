@@ -134,6 +134,7 @@ public abstract class AbstractReceiver {
 			state = ReceiverState.LOADING;
 			output.write(ReceiverState.LOADING.ordinal());
 			receiveData(input);
+			state = ReceiverState.FINISHED;
 		} else if (state == ReceiverState.CANCELD){
 			output.write(ReceiverState.CANCELD.ordinal());
 		}
