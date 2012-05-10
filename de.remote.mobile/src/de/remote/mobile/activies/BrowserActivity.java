@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Editable;
@@ -98,6 +99,9 @@ public class BrowserActivity extends BrowserBase {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		setProgressBarIndeterminateVisibility(true);
+		setProgressBarVisibility(true);
+
 		// set listener
 		searchText.addTextChangedListener(new MyTextWatcher());
 		listView.setOnItemClickListener(new MyClickListener());
@@ -130,34 +134,24 @@ public class BrowserActivity extends BrowserBase {
 		return true;
 	}
 
-	/**
-	 * update gui elements, show current directory or playlist
-	 */
-	private void showUpdateUI() {
+	private String[] loadItems() {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
-			return;
+			return new String[] {};
 		}
 		try {
-			if (viewerState == ViewerState.DIRECTORIES) {
+			switch (viewerState) {
+			case DIRECTORIES:
 				String[] directories = binder.getBrowser().getDirectories();
 				String[] files = binder.getBrowser().getFiles();
 				String[] all = new String[directories.length + files.length];
 				System.arraycopy(directories, 0, all, 0, directories.length);
 				System.arraycopy(files, 0, all, directories.length,
 						files.length);
-				listView.setAdapter(new BrowserAdapter(this, binder
-						.getBrowser(), all, viewerState));
-				setTitle(binder.getBrowser().getLocation() + "@"
-						+ binder.getServerName());
-			}
-			if (viewerState == ViewerState.PLAYLISTS) {
-				listView.setAdapter(new BrowserAdapter(this, binder
-						.getBrowser(), binder.getPlayList().getPlayLists(),
-						viewerState));
-				setTitle("Playlists@" + binder.getServerName());
-			}
-			if (viewerState == ViewerState.PLS_ITEMS) {
+				return all;
+			case PLAYLISTS:
+				return binder.getPlayList().getPlayLists();
+			case PLS_ITEMS:
 				plsFileMap.clear();
 				for (String item : binder.getPlayList().listContent(
 						currentPlayList))
@@ -167,20 +161,61 @@ public class BrowserActivity extends BrowserBase {
 										item);
 					else
 						plsFileMap.put(item, item);
-				listView.setAdapter(new BrowserAdapter(this, binder
-						.getBrowser(), plsFileMap.keySet().toArray(
-						new String[] {}), viewerState));
-				setTitle("Playlist: " + currentPlayList + "@"
-						+ binder.getServerName());
+				return plsFileMap.keySet().toArray(new String[] {});
 			}
-			listView.setSelection(selectedPosition);
-		} catch (RemoteException e) {
-			disableScreen();
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		} catch (PlayerException e) {
-			disableScreen();
+		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
+		return new String[] {};
+	}
+
+	/**
+	 * update gui elements, show current directory or playlist
+	 */
+	private void showUpdateUI() {
+		if (binder == null || !binder.isConnected()) {
+			disableScreen();
+			return;
+		}
+		new AsyncTask<Integer, Integer, String[]>() {
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				setProgressBarVisibility(true);
+				setTitle("loading...");
+			}
+
+			@Override
+			protected String[] doInBackground(Integer... params) {
+				return loadItems();
+			}
+
+			@Override
+			protected void onPostExecute(String[] result) {
+				super.onPostExecute(result);
+				setProgressBarVisibility(false);
+				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
+						binder.getBrowser(), result, viewerState));
+				switch (viewerState) {
+				case DIRECTORIES:
+					try {
+						setTitle(binder.getBrowser().getLocation() + "@"
+								+ binder.getServerName());
+					} catch (RemoteException e) {
+						setTitle("no connection");
+					}
+					break;
+				case PLAYLISTS:
+					setTitle("Playlists@" + binder.getServerName());
+					break;
+				case PLS_ITEMS:
+					setTitle("Playlist: " + currentPlayList + "@"
+							+ binder.getServerName());
+				}
+			}
+
+		}.execute(new Integer[] {});
 	}
 
 	@Override
@@ -376,7 +411,7 @@ public class BrowserActivity extends BrowserBase {
 		AbstractReceiver receiver = binder.getReceiver();
 		if (receiver != null) {
 			receiver.cancel();
-		} else{
+		} else {
 			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT)
 					.show();
 			downloadLayout.setVisibility(View.GONE);
@@ -545,6 +580,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	private void disableScreen() {
 		setTitle("connecting...");
+		setProgressBarVisibility(true);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
 	}
