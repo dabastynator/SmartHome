@@ -58,15 +58,15 @@ public abstract class AbstractPlayer implements IPlayer {
 		PlayingBean bean = new PlayingBean();
 		try {
 			MP3File mp3File = new MP3File(file);
-			bean.setFile(file.getName());
+			bean.setFile(file.getName().trim());
 			AbstractID3v2 id3v2Tag = mp3File.getID3v2Tag();
 			if (id3v2Tag != null) {
 				if (id3v2Tag.getAuthorComposer() != null)
-					bean.setArtist(id3v2Tag.getAuthorComposer());
+					bean.setArtist(id3v2Tag.getAuthorComposer().trim());
 				if (id3v2Tag.getSongTitle() != null)
-					bean.setTitle(id3v2Tag.getSongTitle());
+					bean.setTitle(id3v2Tag.getSongTitle().trim());
 				if (id3v2Tag.getAlbumTitle() != null)
-					bean.setAlbum(id3v2Tag.getAlbumTitle());
+					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
 			}
 		} catch (TagException e) {
 			System.out.println(e);
@@ -111,7 +111,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	}
 
 	@Override
-	public void playPause()throws PlayerException {
+	public void playPause() throws PlayerException {
 		if (playingBean != null) {
 			playingBean
 					.setState((playingBean.getState() == STATE.PLAY) ? STATE.PAUSE

@@ -245,14 +245,14 @@ public class MPlayer extends AbstractPlayer {
 						}
 						String file = line.substring(line.lastIndexOf(File.separator)+1);
 						file = file.substring(0, file.length()-1);
-						bean.setFile(file);
+						bean.setFile(file.trim());
 					}
 					if (line.startsWith(" Title: "))
-						bean.setTitle(line.substring(8));
+						bean.setTitle(line.substring(8).trim());
 					if (line.startsWith(" Artist: "))
-						bean.setArtist(line.substring(9));
+						bean.setArtist(line.substring(9).trim());
 					if (line.startsWith(" Album: "))
-						bean.setAlbum(line.substring(8));
+						bean.setAlbum(line.substring(8).trim());
 					if (line.equals("Starting playback...")) {
 						bean.setState(PlayingBean.STATE.PLAY);
 						informPlayingBean(bean);
