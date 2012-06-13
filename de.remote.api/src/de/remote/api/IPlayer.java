@@ -1,6 +1,6 @@
 package de.remote.api;
 
-import de.newsystem.rmi.api.oneway;
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -17,7 +17,7 @@ public interface IPlayer extends RemoteAble {
 	 * @param file
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	void play(String file) throws RemoteException;
 
 	/**
@@ -140,7 +140,7 @@ public interface IPlayer extends RemoteAble {
 	 * @param listener
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	void addPlayerMessageListener(IPlayerListener listener)
 			throws RemoteException;
 
@@ -150,7 +150,7 @@ public interface IPlayer extends RemoteAble {
 	 * @param listener
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	void removePlayerMessageListener(IPlayerListener listener)
 			throws RemoteException;
 

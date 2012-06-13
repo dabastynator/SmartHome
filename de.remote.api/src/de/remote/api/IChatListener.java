@@ -1,6 +1,6 @@
 package de.remote.api;
 
-import de.newsystem.rmi.api.oneway;
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -20,7 +20,7 @@ public interface IChatListener extends RemoteAble {
 	 * @param time
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void informMessage(String client, String message, String time)
 			throws RemoteException;
 
@@ -30,7 +30,7 @@ public interface IChatListener extends RemoteAble {
 	 * @param client
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void informNewClient(String client) throws RemoteException;
 
 	/**
@@ -39,7 +39,7 @@ public interface IChatListener extends RemoteAble {
 	 * @param client
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void informLeftClient(String client) throws RemoteException;
 
 	/**

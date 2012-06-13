@@ -1,6 +1,6 @@
 package de.remote.api;
 
-import de.newsystem.rmi.api.oneway;
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -27,7 +27,7 @@ public interface IPlayList extends RemoteAble {
 	 * @param name
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void addPlayList(String name) throws RemoteException;
 
 	/**
@@ -59,7 +59,7 @@ public interface IPlayList extends RemoteAble {
 	 * @param pls
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void removePlayList(String pls) throws RemoteException;
 
 	/**

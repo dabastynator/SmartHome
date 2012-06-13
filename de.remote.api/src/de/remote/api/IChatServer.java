@@ -1,6 +1,6 @@
 package de.remote.api;
 
-import de.newsystem.rmi.api.oneway;
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -18,7 +18,7 @@ public interface IChatServer extends RemoteAble {
 	 * @param msg
 	 * @throws RemoteException
 	 */
-	@oneway
+	@Oneway
 	public void postMessage(String client, String msg) throws RemoteException;
 
 	/**
