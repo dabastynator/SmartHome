@@ -6,8 +6,8 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.api.oneway;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
@@ -76,7 +76,7 @@ public class DynamicProxy implements InvocationHandler {
 		Request request = new Request(id, method.getName());
 		checkParameter(vals);
 		request.setParams(vals);
-		request.setOneway(method.getAnnotation(oneway.class) != null);
+		request.setOneway(method.getAnnotation(Oneway.class) != null);
 		Reply reply = null;
 		try {
 			try {
