@@ -34,7 +34,7 @@
     <item
         android:id="@+id/opt_chat"
         android:title="Chat" android:icon="@drawable/chat">
-    </item><item android:id="@+id/item3" android:title="@string/str_control" android:icon="@drawable/control">
+    </item><item android:id="@+id/opt_camera" android:title="@string/str_webcam" android:icon="@drawable/webcam">
         <menu>
             <item android:id="@+id/opt_light_on" android:title="@string/str_make_bright" android:icon="@drawable/light_on" /><item android:id="@+id/opt_light_off" android:title="@string/str_make_dark" android:icon="@drawable/light_off" />
             
@@ -45,7 +45,8 @@
                 <item android:id="@+id/opt_shuffle_on" android:title="Shuffle" />
                 <item android:id="@+id/opt_shuffle_off" android:title="No shuffle" /><item android:id="@+id/opt_shutdown" android:title="@string/str_shutdown" android:icon="@drawable/exit" />
         </menu>
-    </item><item android:id="@+id/opt_exit" android:title="@string/str_exit" android:icon="@drawable/exit">
+    </item><item android:id="@+id/item1"></item><item android:id="@+id/opt_exit" android:title="@string/str_exit" android:icon="@drawable/exit">
     </item>
+    
 
 </menu>

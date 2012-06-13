@@ -28,4 +28,5 @@
     <string name="str_clear_screen">Löschen</string>
     <string name="str_chat_name">Name ändern</string>
     <string name="str_download">Herunterladen</string>
+    <string name="str_webcam">Webcam</string>
 </resources>

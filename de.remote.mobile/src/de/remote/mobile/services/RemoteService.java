@@ -163,7 +163,8 @@ public class RemoteService extends RemoteBaseService {
 					} else
 						makePlayingNotification(title, msg);
 					for (IRemoteActionListener listener : actionListener)
-						listener.newPlayingFile(playing);
+						if (listener != null)
+							listener.newPlayingFile(playing);
 				}
 			});
 		}

@@ -40,6 +40,11 @@
             android:launchMode="singleTask" >
         </activity>
         <activity
+            android:name=".activies.WebcamActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
+        </activity>
+        <activity
             android:name=".activies.SelectServerActivity"
             android:label="@string/app_name" >
         </activity>

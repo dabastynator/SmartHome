@@ -27,12 +27,9 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
-import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
-import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
 
@@ -47,7 +44,7 @@ public class BrowserActivity extends BrowserBase {
 	/**
 	 * listener for remote actions
 	 */
-	protected MyRemoteListener remoteListener = new MyRemoteListener();
+	protected BrowserRemoteListener remoteListener;
 
 	/**
 	 * connection to the service
@@ -62,6 +59,8 @@ public class BrowserActivity extends BrowserBase {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			binder.addRemoteActionListener(remoteListener);
+			remoteListener = new BrowserRemoteListener(downloadLayout,
+					downloadProgress, playButton, binder);
 			remoteListener.newPlayingFile(binder.getPlayingFile());
 			disableScreen();
 			// if there is a server in extra -> connect with this server
@@ -103,9 +102,9 @@ public class BrowserActivity extends BrowserBase {
 		setProgressBarVisibility(true);
 
 		// set listener
-		searchText.addTextChangedListener(new MyTextWatcher());
-		listView.setOnItemClickListener(new MyClickListener());
-		listView.setOnItemLongClickListener(new MyLongClickListener());
+		searchText.addTextChangedListener(new SearchTextWatcher());
+		listView.setOnItemClickListener(new ListClickListener());
+		listView.setOnItemLongClickListener(new ListLongClickListener());
 
 		// bind service
 		Intent intent = new Intent(this, RemoteService.class);
@@ -603,7 +602,7 @@ public class BrowserActivity extends BrowserBase {
 	 * 
 	 * @author sebastian
 	 */
-	public class MyClickListener implements OnItemClickListener {
+	public class ListClickListener implements OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View view, int position,
 				long arg3) {
@@ -646,7 +645,7 @@ public class BrowserActivity extends BrowserBase {
 	 * 
 	 * @author sebastian
 	 */
-	public class MyLongClickListener implements OnItemLongClickListener {
+	public class ListLongClickListener implements OnItemLongClickListener {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> arg0, View view,
@@ -666,7 +665,7 @@ public class BrowserActivity extends BrowserBase {
 	 * 
 	 * @author sebastian
 	 */
-	public class MyTextWatcher implements TextWatcher {
+	public class SearchTextWatcher implements TextWatcher {
 
 		@Override
 		public void afterTextChanged(Editable s) {
@@ -690,51 +689,4 @@ public class BrowserActivity extends BrowserBase {
 		}
 	}
 
-	public class MyRemoteListener implements IRemoteActionListener {
-
-		private long max = 0;
-
-		@Override
-		public void newPlayingFile(PlayingBean bean) {
-			if (bean == null || bean.getState() == STATE.PLAY)
-				playButton.setImageResource(R.drawable.pause);
-			else if (bean.getState() == STATE.PAUSE)
-				playButton.setImageResource(R.drawable.play);
-		}
-
-		@Override
-		public void serverConnectionChanged(String serverName) {
-
-		}
-
-		@Override
-		public void startReceive(long size) {
-			max = size;
-			downloadLayout.setVisibility(View.VISIBLE);
-			downloadProgress.setProgress(0);
-		}
-
-		@Override
-		public void progressReceive(long size) {
-			if (max == 0)
-				max = binder.getReceiver().getFullSize();
-			downloadProgress.setProgress((int) ((100d * size) / max));
-		}
-
-		@Override
-		public void endReceive(long size) {
-			downloadLayout.setVisibility(View.GONE);
-		}
-
-		@Override
-		public void exceptionOccurred(Exception e) {
-			downloadLayout.setVisibility(View.GONE);
-		}
-
-		@Override
-		public void downloadCanceled() {
-			downloadLayout.setVisibility(View.GONE);
-		}
-
-	}
 }

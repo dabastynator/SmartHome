@@ -170,7 +170,8 @@ public abstract class RemoteBaseService extends Service {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(serverName);
+						if (listener != null)
+							listener.serverConnectionChanged(serverName);
 				}
 			});
 		} catch (final Exception e) {
@@ -220,15 +221,16 @@ public abstract class RemoteBaseService extends Service {
 	 */
 	protected void makeDonwloadingNotification(String file, float progress) {
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(R.drawable.download, "Download started",
-				System.currentTimeMillis());
-		notification.contentView = new RemoteViews(getPackageName(), R.layout.download_progress);
+		Notification notification = new Notification(R.drawable.download,
+				"Download started", System.currentTimeMillis());
+		notification.contentView = new RemoteViews(getPackageName(),
+				R.layout.download_progress);
 		notification.contentView.setImageViewResource(R.id.status_icon,
 				R.drawable.download);
-		notification.contentView.setTextViewText(R.id.status_text,
-				"download " + file);
+		notification.contentView.setTextViewText(R.id.status_text, "download "
+				+ file);
 		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				(int) (progress*100), false);
+				(int) (progress * 100), false);
 		Intent nIntent = new Intent(this, BrowserActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
@@ -270,8 +272,11 @@ public abstract class RemoteBaseService extends Service {
 		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
 		handler.post(new Runnable() {
 			public void run() {
+				if (actionListener == null)
+					actionListener = new ArrayList<IRemoteActionListener>();
 				for (IRemoteActionListener listener : actionListener)
-					listener.serverConnectionChanged(null);
+					if (listener != null)
+						listener.serverConnectionChanged(null);
 			}
 		});
 	}
@@ -279,6 +284,13 @@ public abstract class RemoteBaseService extends Service {
 	@Override
 	public PlayerBinder onBind(Intent intent) {
 		return binder;
+	}
+
+	/**
+	 * @return local server
+	 */
+	public Server getServer() {
+		return localServer;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.DirectoryReceiver;
@@ -266,5 +267,12 @@ public class PlayerBinder extends Binder {
 	 */
 	public AbstractReceiver getReceiver() {
 		return receiver;
+	}
+
+	/**
+	 * @return local server
+	 */
+	public Server getServer() {
+		return service.getServer();
 	}
 }
