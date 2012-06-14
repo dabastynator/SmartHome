@@ -1,5 +1,7 @@
 package de.remote.mobile.activies;
 
+import java.nio.IntBuffer;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -84,7 +86,13 @@ public class WebcamActivity extends Activity {
 		try {
 			IWebcam webcamServer = (IWebcam) s.find(IWebcam.WEBCAM_SERVER,
 					IWebcam.class);
-			webcamServer.addWebcamListener(listener, 80, 60);
+			int width = 320;
+			int height = 240;
+			double quality = 0.7f;
+			int w = (int) (width * quality);
+			int h = (int) (height * quality);
+			webcamServer.addWebcamListener(listener, w - w % 2, h - h % 2,
+					IWebcam.RGB_565);
 		} catch (RemoteException e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -102,20 +110,19 @@ public class WebcamActivity extends Activity {
 		public void onVideoFrame(int width, int height, int[] rgb)
 				throws RemoteException {
 			System.out.println("get frame");
-			bm = Bitmap.createBitmap(rgb, width, height,
-					Bitmap.Config.ARGB_8888);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			if (bm == null)
+				bm = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+			else if (bm.getWidth() != width || bm.getHeight() != height)
+				bm = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+			IntBuffer buf = IntBuffer.wrap(rgb); // data is my array
+			bm.copyPixelsFromBuffer(buf);
+
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					img_webcam.setImageBitmap(bm);
 				}
 			});
-
 		}
 
 	}
