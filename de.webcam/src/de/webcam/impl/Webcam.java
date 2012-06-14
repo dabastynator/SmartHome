@@ -6,6 +6,9 @@ import com.smaxe.uv.media.core.VideoFrame;
 import com.smaxe.uv.na.WebcamFactory;
 import com.smaxe.uv.na.webcam.IWebcam;
 
+import de.newsystem.rmi.protokol.RemoteException;
+import de.webcam.api.IWebcamListener;
+
 /**
  * the webcam handles the webcam functionality. it creates the camera and gets
  * new frames.
@@ -33,9 +36,14 @@ public class Webcam extends AbstractWebcam {
 	 */
 	private class WebcamListener implements IWebcam.IListener {
 
+		private int i = 0;
+
 		public void onVideoFrame(final VideoFrame frame) {
-			System.out.println(frame.width + "*" + frame.height + " [1,1]="
-					+ frame.rgb[0]);
+			if (i % 200 == 0)
+				System.out.println("\n" + frame.width + "*" + frame.height
+						+ " [1,1]=" + frame.rgb[0]);
+			if (++i % 5 == 0)
+				System.out.print(".");
 			fireVideoFrame(frame.width, frame.height, frame.rgb);
 			try {
 				Thread.sleep(500);
