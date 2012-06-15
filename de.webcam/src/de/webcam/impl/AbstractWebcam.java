@@ -164,7 +164,7 @@ public abstract class AbstractWebcam implements IWebcam {
 		@Override
 		public void run() {
 			while (informing) {
-				if (dirty) {
+				if (dirty && rgb != null) {
 					dirty = false;
 					try {
 						if (compress) {
