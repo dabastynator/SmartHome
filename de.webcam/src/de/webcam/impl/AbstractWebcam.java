@@ -119,13 +119,13 @@ public abstract class AbstractWebcam implements IWebcam {
 
 		public int[] compress(int[] rgb) {
 			if (quality == IWebcam.RGB_8888)
-				return compressRGB8888();
+				return compressRGB8888(rgb);
 			if (quality == IWebcam.RGB_565)
-				return compressRGB565();
+				return compressRGB565(rgb);
 			return null;
 		}
 
-		private int[] compressRGB565() {
+		private int[] compressRGB565(int[] rgb) {
 			int[] ret = new int[cWidth * cHeight / 2];
 			for (int j = 0; j < cHeight; j++)
 				for (int i = 0; i < cWidth; i += 2) {
@@ -150,7 +150,7 @@ public abstract class AbstractWebcam implements IWebcam {
 			return ret;
 		}
 
-		private int[] compressRGB8888() {
+		private int[] compressRGB8888(int[] rgb) {
 			int[] ret = new int[cWidth * cHeight];
 			for (int j = 0; j < cHeight; j++)
 				for (int i = 0; i < cWidth; i++) {
