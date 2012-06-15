@@ -133,6 +133,36 @@ public class Server {
 	}
 
 	/**
+	 * force connection to given registry. Retry after 500 ms, if network is not
+	 * available.
+	 * 
+	 * @param ip
+	 *            of registry
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
+	public void forceConnectToRegistry(String registry)
+			throws UnknownHostException, IOException {
+		boolean connected = false;
+		int counter = 1;
+		while (!connected) {
+			try {
+				connectToRegistry(registry);
+				connected = true;
+			} catch (SocketException e) {
+				connected = false;
+				System.err.println("socketexception " + (counter++)
+						+ ". time: " + e.getMessage());
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
 	 * start the server. the port must be initialized, otherwise the default
 	 * server port will be used. the server starts a new thread, so this method
 	 * is not blocking.
