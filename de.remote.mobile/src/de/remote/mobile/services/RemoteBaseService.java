@@ -181,7 +181,8 @@ public abstract class RemoteBaseService extends Service {
 					Toast.makeText(RemoteBaseService.this, e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(null);
+						if (listener != null)
+							listener.serverConnectionChanged(null);
 				}
 			});
 		}
