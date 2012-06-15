@@ -35,6 +35,8 @@ public class Webcam extends AbstractWebcam {
 			webcam.startCapture();
 			capturing = true;
 		} catch (Exception e) {
+			capturing = false;
+			webcam = null;
 			throw new WebcamException(e.getMessage());
 		}
 	}
