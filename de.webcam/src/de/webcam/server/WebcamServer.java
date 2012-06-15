@@ -14,11 +14,10 @@ public class WebcamServer {
 		
 		Server s = Server.getServer();
 		
-		s.connectToRegistry(args[0]);
+		s.forceConnectToRegistry(args[0]);
 		s.startServer(IWebcam.PORT);
 		Webcam webcam = new Webcam();
 		s.register(IWebcam.WEBCAM_SERVER, webcam);
-		webcam.startCapture();
 	}
 	
 }

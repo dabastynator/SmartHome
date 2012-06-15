@@ -20,6 +20,8 @@ public abstract class AbstractWebcam implements IWebcam {
 	 */
 	protected Map<IWebcamListener, ClientInformer> listeners = new HashMap<IWebcamListener, ClientInformer>();
 
+	protected boolean capturing = false;
+
 	private int width;
 	private int height;
 	private int[] rgb;

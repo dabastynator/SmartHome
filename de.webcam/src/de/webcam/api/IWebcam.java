@@ -32,6 +32,24 @@ public interface IWebcam {
 	public static final int RGB_8888 = 2;
 
 	/**
+	 * start capturing, if webcam is already not capturing, otherwise the method
+	 * does nothing. if capturing fails, webcam exception will be thrown.
+	 * 
+	 * @throws RemoteException
+	 * @throws WebcamException
+	 */
+	public void startCapture() throws RemoteException, WebcamException;
+	
+	/**
+	 * stop capturing, if webcam is already capturing, otherwise the method
+	 * does nothing. if stop capturing fails, webcam exception will be thrown.
+	 * 
+	 * @throws RemoteException
+	 * @throws WebcamException
+	 */
+	public void stopCapture() throws RemoteException, WebcamException;
+
+	/**
 	 * id of the webcam server
 	 */
 	public static final String WEBCAM_SERVER = "de.remote.webcamserver";

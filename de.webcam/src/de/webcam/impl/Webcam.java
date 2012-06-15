@@ -7,7 +7,7 @@ import com.smaxe.uv.na.WebcamFactory;
 import com.smaxe.uv.na.webcam.IWebcam;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.webcam.api.IWebcamListener;
+import de.webcam.api.WebcamException;
 
 /**
  * the webcam handles the webcam functionality. it creates the camera and gets
@@ -17,16 +17,33 @@ import de.webcam.api.IWebcamListener;
  */
 public class Webcam extends AbstractWebcam {
 
-	public void startCapture() throws Exception {
-		final JFrame frame = new JFrame();
+	private IWebcam webcam;
 
-		final IWebcam webcam = WebcamFactory.getWebcams(frame, "jitsi").get(0);
+	public void startCapture() throws WebcamException {
+		if (capturing)
+			return;
+		try {
+			if (webcam == null) {
+				final JFrame frame = new JFrame();
+
+				webcam = WebcamFactory.getWebcams(frame, "jitsi").get(0);
+				if (webcam == null)
+					throw new WebcamException("no camera device found");
+				webcam.open(new IWebcam.FrameFormat(320, 240),
+						new WebcamListener());
+			}
+			webcam.startCapture();
+			capturing = true;
+		} catch (Exception e) {
+			throw new WebcamException(e.getMessage());
+		}
+	}
+
+	@Override
+	public void stopCapture() throws RemoteException, WebcamException {
 		if (webcam == null)
-			throw new Exception("no camera");
-
-		webcam.open(new IWebcam.FrameFormat(320, 240), new WebcamListener());
-		webcam.startCapture();
-
+			throw new WebcamException("no camera device defined");
+		webcam.stopCapture();
 	}
 
 	/**
