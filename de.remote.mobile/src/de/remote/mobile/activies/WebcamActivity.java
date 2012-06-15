@@ -20,6 +20,7 @@ import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
+import de.webcam.api.WebcamException;
 
 public class WebcamActivity extends Activity {
 
@@ -93,7 +94,10 @@ public class WebcamActivity extends Activity {
 			int h = (int) (height * quality);
 			webcamServer.addWebcamListener(listener, w - w % 2, h - h % 2,
 					IWebcam.RGB_565);
+			webcamServer.startCapture();
 		} catch (RemoteException e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		} catch (WebcamException e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
