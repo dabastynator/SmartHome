@@ -32,7 +32,7 @@ public class RemoteServer {
 		IStation station = new StationImpl(place, plsDirecotry);
 
 		try {
-			forceConnectToRegistry(registry);
+			server.forceConnectToRegistry(registry);
 			server.startServer(ControlConstants.STATION_PORT + 2);
 			server.register(ControlConstants.STATION_ID, station);
 		} catch (UnknownHostException e) {
@@ -43,26 +43,5 @@ public class RemoteServer {
 
 	}
 
-	private static void forceConnectToRegistry(String registry)
-			throws UnknownHostException, IOException {
-		Server server = Server.getServer();
-		boolean connected = false;
-		int counter = 1;
-		while (!connected) {
-			try {
-				server.connectToRegistry(registry);
-				connected = true;
-			} catch (SocketException e) {
-				connected = false;
-				System.out.println("socketexception " + (counter++)
-						+ ". time: " + e.getMessage());
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
 
 }
