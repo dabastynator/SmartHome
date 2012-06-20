@@ -12,7 +12,6 @@ import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
-import de.webcam.server.WebcamServer;
 
 public class Client {
 
@@ -22,10 +21,10 @@ public class Client {
 
 		s.connectToRegistry("localhost");
 		s.startServer(IWebcam.PORT + 1);
-		IWebcam webcam = (IWebcam) s.find(IWebcam.WEBCAM_SERVER,
-				IWebcam.class);
+		IWebcam webcam = (IWebcam) s.find(IWebcam.WEBCAM_SERVER, IWebcam.class);
 
 		webcam.addWebcamListener(new WebListener());
+		webcam.startCapture();
 
 	}
 
@@ -38,6 +37,7 @@ public class Client {
 			frame = new JFrame();
 			image = new ViewComponent();
 			frame.add(image);
+			frame.setSize(100, 100);
 			frame.pack();
 			frame.setVisible(true);
 		}

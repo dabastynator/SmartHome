@@ -33,10 +33,13 @@ public class Webcam extends AbstractWebcam {
 						new WebcamListener());
 			}
 			webcam.startCapture();
+			System.out.println("capturing started");
 			capturing = true;
 		} catch (Exception e) {
 			capturing = false;
 			webcam = null;
+			System.out.println("capturing failed");
+			System.err.println(e.getMessage());
 			throw new WebcamException(e.getMessage());
 		}
 	}
@@ -65,7 +68,7 @@ public class Webcam extends AbstractWebcam {
 				System.out.print(".");
 			fireVideoFrame(frame.width, frame.height, frame.rgb);
 			try {
-				Thread.sleep(500);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
