@@ -28,6 +28,7 @@ import de.remote.desktop.panels.ChatPanel;
 import de.remote.desktop.panels.PlayListPanel;
 import de.remote.desktop.panels.PlayerPanel;
 import de.remote.desktop.panels.ServerPanel;
+import de.remote.desktop.panels.WebcamPanel;
 
 /**
  * The main frame for the gui. It creates all panels and menus that will be
@@ -66,9 +67,14 @@ public class ControlFrame extends JFrame {
 	private PlayListPanel plsBrowser;
 
 	/**
-	 * chat panel with textfiels do write and get messages
+	 * chat panel with textfields do write and get messages
 	 */
 	private ChatPanel chat;
+
+	/**
+	 * the webcam panel displays a remote webcam
+	 */
+	private WebcamPanel webcam;
 
 	/**
 	 * menu to choose different server to connect with
@@ -140,16 +146,17 @@ public class ControlFrame extends JFrame {
 	 */
 	public ControlFrame() {
 		setDefaultCloseOperation(3);
-		setSize(600, 400);
+		setSize(760, 400);
 		this.controlMenu = new ControlMenu();
 		this.serverMenu = new ServerMenu(this);
 		this.playerMenu = new PlayerMenu(this);
-		
+
 		this.playerControl = new PlayerPanel();
 		this.chat = new ChatPanel();
 		this.plsBrowser = new PlayListPanel();
 		this.fileBrowser = new BrowserPanel();
 		this.serverEditor = new ServerPanel(serverMenu);
+		this.webcam = new WebcamPanel();
 		this.playerListener = new DesktopPlayerListener();
 
 		setLayout(new BorderLayout());
@@ -161,6 +168,7 @@ public class ControlFrame extends JFrame {
 		tabs.add(this.plsBrowser);
 		tabs.add(this.chat);
 		tabs.add(this.serverEditor);
+		tabs.add(this.webcam);
 		setVisible(true);
 		addWindowListener(new DesktopWindowListener());
 
@@ -222,6 +230,7 @@ public class ControlFrame extends JFrame {
 			setPlayer(mPlayer);
 			playerMenu.setPlayer(totemPlayer, mPlayer);
 			controlMenu.setControl(station.getControl());
+			webcam.registerWebcamListener();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

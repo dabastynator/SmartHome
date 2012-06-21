@@ -26,39 +26,39 @@ import de.remote.api.PlayerException;
  * @author sebastian
  */
 public class BrowserPanel extends Panel {
-	
+
 	/**
 	 * generated id
 	 */
 	private static final long serialVersionUID = -4475675762287419881L;
-	
+
 	/**
-	 * remote browser object 
+	 * remote browser object
 	 */
 	private IBrowser browser;
-	
+
 	/**
-	 * remote player object 
+	 * remote player object
 	 */
 	private IPlayer player;
-	
+
 	/**
-	 * current directories 
+	 * current directories
 	 */
 	private String[] directories;
-	
+
 	/**
-	 * current files 
+	 * current files
 	 */
 	private String[] files;
-	
+
 	/**
 	 * swing list that contains all directories and files
 	 */
 	private List fileList;
-	
+
 	/**
-	 * remote playlist object 
+	 * remote playlist object
 	 */
 	private IPlayList pls;
 
@@ -164,6 +164,8 @@ public class BrowserPanel extends Panel {
 			for (String f : this.files)
 				this.fileList.add(f);
 		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

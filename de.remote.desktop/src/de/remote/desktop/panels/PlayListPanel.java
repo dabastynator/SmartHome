@@ -25,6 +25,7 @@ import de.remote.api.PlayerException;
  * @author sebastian
  */
 public class PlayListPanel extends Panel {
+	
 	/**
 	 * generated id
 	 */
