@@ -105,6 +105,11 @@ public class Server {
 	private String ip;
 
 	/**
+	 * is connected to registry
+	 */
+	private boolean isConnectedRegistry = false;
+
+	/**
 	 * create connection to the registry
 	 * 
 	 * @param registry
@@ -118,6 +123,7 @@ public class Server {
 		registryOut = new ObjectOutputStream(registrySocket.getOutputStream());
 		registryIn = new ObjectInputStream(registrySocket.getInputStream());
 		ip = registrySocket.getLocalAddress().getHostAddress();
+		isConnectedRegistry = true;
 	}
 
 	/**
@@ -384,6 +390,10 @@ public class Server {
 	 */
 	public ServerPort getServerPort() {
 		return new ServerPort(ip, port);
+	}
+
+	public boolean isConnectedToRegistry() {
+		return isConnectedRegistry;
 	}
 
 }
