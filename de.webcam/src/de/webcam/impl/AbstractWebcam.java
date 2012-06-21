@@ -1,7 +1,7 @@
 package de.webcam.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.webcam.api.IWebcam;
@@ -18,7 +18,7 @@ public abstract class AbstractWebcam implements IWebcam {
 	/**
 	 * list of all observer
 	 */
-	protected Map<IWebcamListener, ClientInformer> listeners = new HashMap<IWebcamListener, ClientInformer>();
+	protected Map<IWebcamListener, ClientInformer> listeners = new ConcurrentHashMap<IWebcamListener, ClientInformer>();
 
 	protected boolean capturing = false;
 
@@ -109,6 +109,9 @@ public abstract class AbstractWebcam implements IWebcam {
 			this.quality = quality;
 		}
 
+		/**
+		 * fire new frame to client
+		 */
 		public void newFrame() {
 			dirty = true;
 		}
@@ -163,25 +166,27 @@ public abstract class AbstractWebcam implements IWebcam {
 
 		@Override
 		public void run() {
-			while (informing) {
-				if (dirty && rgb != null) {
-					dirty = false;
-					try {
+			try {
+				while (informing) {
+					if (dirty && rgb != null) {
+						dirty = false;
+
 						if (compress) {
 							cRgb = compress(rgb);
 							listener.onVideoFrame(cWidth, cHeight, cRgb);
 						} else
 							listener.onVideoFrame(width, height, rgb);
-					} catch (RemoteException e1) {
-						return;
-					}
-				} else {
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					} else {
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}
+			} catch (RemoteException e1) {
+				listeners.remove(listener);
+				return;
 			}
 		}
 
