@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/de.newsystem.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/de.remote.api"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/de.webcam"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/de.newsystem.framework"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/de.remote.webcam"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -14,10 +14,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
-import de.newsystem.framework.bilderkennung.ImageAnalyzer;
-import de.newsystem.framework.bilderkennung.colorswell.BrightnessSwell;
-import de.newsystem.framework.bilderkennung.colorswell.DifferentialSwell;
-import de.newsystem.framework.bilderkennung.colorswell.IColorSwell;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.webcam.api.IWebcam;
@@ -48,11 +44,6 @@ public class WebcamPanel extends Panel {
 	private ViewComponent capturedPicture;
 
 	/**
-	 * analyzed picture
-	 */
-	private ViewComponent analyzedPicture;
-
-	/**
 	 * remote webcam object
 	 */
 	private IWebcam webcam;
@@ -71,12 +62,10 @@ public class WebcamPanel extends Panel {
 	private Component createPictures() {
 		webcamPicture = new ViewComponent();
 		capturedPicture = new ViewComponent();
-		analyzedPicture = new ViewComponent();
 		Panel p = new Panel();
-		p.setLayout(new GridLayout(1, 3));
+		p.setLayout(new GridLayout(1, 2));
 		p.add(webcamPicture);
 		p.add(capturedPicture);
-		p.add(analyzedPicture);
 		return p;
 	}
 
@@ -119,39 +108,11 @@ public class WebcamPanel extends Panel {
 				WebcamPanel.this.getParent().repaint();
 			}
 		});
-		Button count = new Button("count points");
-		count.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// get captured picture
-				int width = capturedPicture.image.getWidth();
-				int height = capturedPicture.image.getHeight();
-				int[] rgb = new int[width * height];
-				capturedPicture.image
-						.getRGB(0, 0, width, height, rgb, 0, width);
-
-				// // set picture & initialaize analyzer
-				analyzedPicture.setImage(width, height, rgb);
-				IColorSwell swell = new DifferentialSwell(10);
-				ImageAnalyzer ia = new ImageAnalyzer(analyzedPicture.image);
-				//
-				// make operations
-				ia.thresholding(swell);
-				ia.formBitmap();
-				int number = ia.countFigures();
-
-				// display result
-				ia.binaryToImage();
-				getParent().repaint();
-				System.out.println("counted objects: " + number);
-			}
-		});
 		Panel p = new Panel();
-		p.setLayout(new GridLayout(2, 2));
+		p.setLayout(new GridLayout(1, 3));
 		p.add(start);
 		p.add(stop);
 		p.add(take);
-		p.add(count);
 		return p;
 	}
 
@@ -162,7 +123,7 @@ public class WebcamPanel extends Panel {
 
 		try {
 			webcam = (IWebcam) s.find(IWebcam.WEBCAM_SERVER, IWebcam.class);
-			webcam.addWebcamListener(new WebListener(), 240, 180);
+			webcam.addWebcamListener(new WebListener());
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
