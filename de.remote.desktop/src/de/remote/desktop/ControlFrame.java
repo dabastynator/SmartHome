@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
@@ -145,8 +146,18 @@ public class ControlFrame extends JFrame {
 	 * allocate frame and create all panels and menus
 	 */
 	public ControlFrame() {
+		super("Remote Control");
 		setDefaultCloseOperation(3);
 		setSize(760, 400);
+
+		String path = getClass().getProtectionDomain().getCodeSource()
+				.getLocation().toString().substring(5);
+		if (path.endsWith("bin/"))
+			path = path.substring(0, path.length() - 4);
+		String url = path + "res/icon.png";
+		ImageIcon icon = new ImageIcon(url);
+		setIconImage(icon.getImage());
+
 		this.controlMenu = new ControlMenu();
 		this.serverMenu = new ServerMenu(this);
 		this.playerMenu = new PlayerMenu(this);
