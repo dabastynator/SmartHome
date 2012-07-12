@@ -60,6 +60,7 @@
 	<target name="jar_desktop" depends="compile_desktop">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
+			<fileset dir="./../de.remote.desktop/" includes="res/*.png" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.remote.desktop.RemoteControl" />
 			</manifest>
