@@ -4,10 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.MenuBar;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 
-import javax.swing.ImageIcon;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
@@ -150,13 +153,7 @@ public class ControlFrame extends JFrame {
 		setDefaultCloseOperation(3);
 		setSize(760, 400);
 
-		String path = getClass().getProtectionDomain().getCodeSource()
-				.getLocation().toString().substring(5);
-		if (path.endsWith("bin/"))
-			path = path.substring(0, path.length() - 4);
-		String url = path + "res/icon.png";
-		ImageIcon icon = new ImageIcon(url);
-		setIconImage(icon.getImage());
+		loadIcon();
 
 		this.controlMenu = new ControlMenu();
 		this.serverMenu = new ServerMenu(this);
@@ -188,6 +185,31 @@ public class ControlFrame extends JFrame {
 		menuBar.add(this.serverMenu);
 		menuBar.add(this.playerMenu);
 		setMenuBar(menuBar);
+	}
+
+	/**
+	 * load icon for program
+	 */
+	private void loadIcon() {
+		// first argument is location on local testing
+		// second argument is in jar file
+		String[] res = { "res/icon.png", "./icon.png" };
+
+		InputStream base = null;
+		for (String str : res) {
+			base = getClass().getClassLoader().getResourceAsStream(str);
+			if (base != null)
+				break;
+		}
+
+		try {
+			BufferedImage image = ImageIO.read(base);
+			setIconImage(image);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
