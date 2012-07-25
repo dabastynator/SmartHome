@@ -133,39 +133,34 @@ public class BrowserActivity extends BrowserBase {
 		return true;
 	}
 
-	private String[] loadItems() {
+	private String[] loadItems() throws RemoteException, PlayerException {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return new String[] {};
 		}
-		try {
-			switch (viewerState) {
-			case DIRECTORIES:
-				String[] directories = binder.getBrowser().getDirectories();
-				String[] files = binder.getBrowser().getFiles();
-				String[] all = new String[directories.length + files.length];
-				System.arraycopy(directories, 0, all, 0, directories.length);
-				System.arraycopy(files, 0, all, directories.length,
-						files.length);
-				return all;
-			case PLAYLISTS:
-				return binder.getPlayList().getPlayLists();
-			case PLS_ITEMS:
-				plsFileMap.clear();
-				for (String item : binder.getPlayList().listContent(
-						currentPlayList))
-					if (item.indexOf("/") >= 0)
-						plsFileMap
-								.put(item.substring(item.lastIndexOf("/") + 1),
-										item);
-					else
-						plsFileMap.put(item, item);
-				return plsFileMap.keySet().toArray(new String[] {});
-			}
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		switch (viewerState) {
+		case DIRECTORIES:
+			String[] directories = binder.getBrowser().getDirectories();
+			String[] files = binder.getBrowser().getFiles();
+			String[] all = new String[directories.length + files.length];
+			System.arraycopy(directories, 0, all, 0, directories.length);
+			System.arraycopy(files, 0, all, directories.length, files.length);
+			return all;
+		case PLAYLISTS:
+			return binder.getPlayList().getPlayLists();
+		case PLS_ITEMS:
+			plsFileMap.clear();
+			for (String item : binder.getPlayList()
+					.listContent(currentPlayList))
+				if (item.indexOf("/") >= 0)
+					plsFileMap.put(item.substring(item.lastIndexOf("/") + 1),
+							item);
+				else
+					plsFileMap.put(item, item);
+			return plsFileMap.keySet().toArray(new String[] {});
+		default:
+			return new String[] {};
 		}
-		return new String[] {};
 	}
 
 	/**
@@ -178,6 +173,8 @@ public class BrowserActivity extends BrowserBase {
 		}
 		new AsyncTask<Integer, Integer, String[]>() {
 
+			Exception exeption = null;
+
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
@@ -187,7 +184,13 @@ public class BrowserActivity extends BrowserBase {
 
 			@Override
 			protected String[] doInBackground(Integer... params) {
-				return loadItems();
+				try {
+					exeption = null;
+					return loadItems();
+				} catch (Exception e) {
+					exeption = e;
+					return new String[] {};
+				}
 			}
 
 			@Override
@@ -196,6 +199,7 @@ public class BrowserActivity extends BrowserBase {
 				setProgressBarVisibility(false);
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
 						binder.getBrowser(), result, viewerState));
+				listView.setSelection(selectedPosition);
 				switch (viewerState) {
 				case DIRECTORIES:
 					try {
@@ -211,6 +215,17 @@ public class BrowserActivity extends BrowserBase {
 				case PLS_ITEMS:
 					setTitle("Playlist: " + currentPlayList + "@"
 							+ binder.getServerName());
+				}
+				if (exeption != null) {
+					if (exeption.getMessage() != null
+							&& exeption.getMessage().length() > 0)
+						Toast.makeText(BrowserActivity.this,
+								exeption.getMessage(), Toast.LENGTH_SHORT)
+								.show();
+					else
+						Toast.makeText(BrowserActivity.this,
+								exeption.getClass().getSimpleName(),
+								Toast.LENGTH_SHORT).show();
 				}
 			}
 
@@ -537,6 +552,8 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		if (data == null)
+			return;
 		try {
 			if (requestCode == SelectPlaylistActivity.SELECT_PLS_CODE) {
 				if (data.getExtras() == null)

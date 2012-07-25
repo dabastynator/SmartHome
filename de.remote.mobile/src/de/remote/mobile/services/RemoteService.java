@@ -20,6 +20,8 @@ import de.remote.mobile.receivers.WLANReceiver;
  */
 public class RemoteService extends RemoteBaseService {
 
+	private WLANReceiver wlanReceiver;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -27,9 +29,14 @@ public class RemoteService extends RemoteBaseService {
 		playerListener = new PlayerListener();
 		progressListener = new MobileReceiverListener();
 		serverDB = new ServerDatabase(this);
-		registerReceiver(new WLANReceiver(this), new IntentFilter(
+		wlanReceiver = new WLANReceiver(this);
+		registerReceiver(wlanReceiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 	}
+
+	public void onDestroy() {
+		unregisterReceiver(wlanReceiver);
+	};
 
 	/**
 	 * the receiver gets information about the download progress and informs via
@@ -65,7 +72,8 @@ public class RemoteService extends RemoteBaseService {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						l.startReceive(size);
+						if (l != null)
+							l.startReceive(size);
 				}
 			});
 		}
@@ -77,7 +85,8 @@ public class RemoteService extends RemoteBaseService {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						l.progressReceive(size);
+						if (l != null)
+							l.progressReceive(size);
 				}
 			});
 		}
@@ -92,7 +101,8 @@ public class RemoteService extends RemoteBaseService {
 					Toast.makeText(RemoteService.this, file + " loaded",
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						l.endReceive(size);
+						if (l != null)
+							l.endReceive(size);
 				}
 			});
 		}
@@ -108,7 +118,8 @@ public class RemoteService extends RemoteBaseService {
 							"error occurred while loading: " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						l.exceptionOccurred(e);
+						if (l != null)
+							l.exceptionOccurred(e);
 				}
 			});
 		}
@@ -123,7 +134,8 @@ public class RemoteService extends RemoteBaseService {
 					Toast.makeText(RemoteService.this, "download cancled",
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						l.downloadCanceled();
+						if (l != null)
+							l.downloadCanceled();
 				}
 			});
 		}
