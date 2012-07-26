@@ -11,9 +11,9 @@ import org.junit.Test;
 import de.newsystem.rmi.api.Registry;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.api.ControlConstants;
 import de.remote.api.IChatListener;
 import de.remote.api.IChatServer;
-import de.remote.api.IStation;
 import de.remote.impl.StationImpl;
 
 public class RMIChatTest extends TestCase {
@@ -81,9 +81,8 @@ public class RMIChatTest extends TestCase {
 		try {
 			s.connectToRegistry("localhost", RMI_TEST_PORT_REGISTRY);
 			s.startServer(RMI_TEST_PORT_CLIENT);
-			IStation station = (IStation) s.find(RMI_TEST_OBJECT_ID,
-					IStation.class);
-			IChatServer chatServer = station.getChatServer();
+			IChatServer chatServer = (IChatServer) s.find(ControlConstants.CHAT_ID,
+					IChatServer.class);
 			chatServer.addChatListener(l);
 			System.out.println("post message");
 			chatServer.postMessage("me", "test message");
