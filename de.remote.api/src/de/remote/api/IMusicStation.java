@@ -7,7 +7,7 @@ import de.newsystem.rmi.protokol.RemoteException;
  * 
  * @author sebastian
  */
-public interface IStation {
+public interface IMusicStation {
 
 	/**
 	 * create new browser for the file system
@@ -48,12 +48,4 @@ public interface IStation {
 	 * @throws RemoteException
 	 */
 	public IPlayList getPlayList() throws RemoteException;
-
-	/**
-	 * get the chat object
-	 * 
-	 * @return chatServer
-	 * @throws RemoteException
-	 */
-	public IChatServer getChatServer() throws RemoteException;
 }
