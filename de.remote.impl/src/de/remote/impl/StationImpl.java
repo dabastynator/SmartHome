@@ -2,19 +2,17 @@ package de.remote.impl;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
 import de.remote.api.IControl;
+import de.remote.api.IMusicStation;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
-import de.remote.api.IStation;
 
-public class StationImpl implements IStation {
+public class StationImpl implements IMusicStation {
 
 	private TotemPlayer totem;
 	private MPlayer mplayer;
 	private ControlImpl control;
 	private PlayListImpl playlist;
-	private ChatServerImpl chatServer;
 	private String browserLocation;
 
 	public StationImpl(String browseLocation, String playlistLocation) {
@@ -23,7 +21,6 @@ public class StationImpl implements IStation {
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
-		chatServer = new ChatServerImpl();
 	}
 
 	@Override
@@ -50,10 +47,4 @@ public class StationImpl implements IStation {
 	public IPlayList getPlayList() throws RemoteException {
 		return playlist;
 	}
-
-	@Override
-	public IChatServer getChatServer() throws RemoteException {
-		return chatServer;
-	}
-
 }
