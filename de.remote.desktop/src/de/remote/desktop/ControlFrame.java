@@ -16,12 +16,13 @@ import javax.swing.JTabbedPane;
 
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.api.ControlConstants;
 import de.remote.api.IBrowser;
 import de.remote.api.IChatServer;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.IPlayerListener;
-import de.remote.api.IStation;
+import de.remote.api.IMusicStation;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.desktop.menus.ControlMenu;
@@ -108,7 +109,7 @@ public class ControlFrame extends JFrame {
 	/**
 	 * remote factory object to get all other remote objects
 	 */
-	public IStation station;
+	public IMusicStation station;
 
 	/**
 	 * remote mplayer
@@ -242,8 +243,8 @@ public class ControlFrame extends JFrame {
 			server = Server.getServer();
 			server.connectToRegistry(registry);
 			server.startServer(port);
-			station = ((IStation) server.find("de.newsystem.idefix.station",
-					IStation.class));
+			station = ((IMusicStation) server.find(ControlConstants.STATION_ID,
+					IMusicStation.class));
 			mPlayer = station.getMPlayer();
 			totemPlayer = station.getTotemPlayer();
 			IBrowser browser = station.createBrowser();
@@ -257,7 +258,8 @@ public class ControlFrame extends JFrame {
 			IPlayList playList = station.getPlayList();
 			fileBrowser.setPlayList(playList);
 			plsBrowser.setPlayList(playList);
-			chatServer = station.getChatServer();
+			chatServer = (IChatServer) server.find(ControlConstants.CHAT_ID,
+					IChatServer.class);
 			chat.setClientName(name);
 			chat.setChatServer(chatServer);
 			setPlayer(mPlayer);
