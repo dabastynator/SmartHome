@@ -11,7 +11,6 @@ import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
 import de.remote.api.IControl;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
@@ -145,15 +144,6 @@ public class PlayerBinder extends Binder {
 	 */
 	public IPlayList getPlayList() {
 		return service.playList;
-	}
-
-	/**
-	 * get remote chatserver object
-	 * 
-	 * @return chatserver
-	 */
-	public IChatServer getChatServer() {
-		return service.chatServer;
 	}
 
 	/**

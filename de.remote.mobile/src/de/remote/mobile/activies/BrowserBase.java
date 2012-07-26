@@ -143,14 +143,6 @@ public abstract class BrowserBase extends Activity {
 			Intent intent = new Intent(this, GetTextActivity.class);
 			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
 			break;
-		case R.id.opt_chat:
-			intent = new Intent(this, ChatActivity.class);
-			startActivity(intent);
-			break;
-		case R.id.opt_camera:
-			intent = new Intent(this, WebcamActivity.class);
-			startActivity(intent);
-			break;
 		case R.id.opt_server_select:
 			intent = new Intent(this, SelectServerActivity.class);
 			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);

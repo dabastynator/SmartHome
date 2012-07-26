@@ -33,16 +33,6 @@
         </menu>
     </item>
     <item
-        android:id="@+id/opt_chat"
-        android:icon="@drawable/chat"
-        android:title="Chat">
-    </item>
-    <item
-        android:id="@+id/opt_camera"
-        android:icon="@drawable/webcam"
-        android:title="@string/str_webcam">
-    </item>
-    <item
         android:id="@+id/opt_control"
         android:icon="@drawable/control"
         android:title="@string/str_control">

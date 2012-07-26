@@ -18,11 +18,10 @@ import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.ControlConstants;
 import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
 import de.remote.api.IControl;
+import de.remote.api.IMusicStation;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
-import de.remote.api.IStation;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.mobile.R;
@@ -78,7 +77,7 @@ public abstract class RemoteBaseService extends Service {
 	/**
 	 * remote station object
 	 */
-	protected IStation station;
+	protected IMusicStation station;
 
 	/**
 	 * remote browser object
@@ -109,11 +108,6 @@ public abstract class RemoteBaseService extends Service {
 	 * remote playlist object
 	 */
 	protected IPlayList playList;
-
-	/**
-	 * remote chatserver object
-	 */
-	protected IChatServer chatServer;
 
 	/**
 	 * current playing file
@@ -151,8 +145,8 @@ public abstract class RemoteBaseService extends Service {
 			}
 			localServer.startServer();
 
-			station = (IStation) localServer.find(ControlConstants.STATION_ID,
-					IStation.class);
+			station = (IMusicStation) localServer.find(ControlConstants.STATION_ID,
+					IMusicStation.class);
 
 			if (station == null)
 				throw new RemoteException(ControlConstants.STATION_ID,
@@ -162,7 +156,6 @@ public abstract class RemoteBaseService extends Service {
 			player = station.getMPlayer();
 			control = station.getControl();
 			playList = station.getPlayList();
-			chatServer = station.getChatServer();
 			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);
