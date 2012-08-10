@@ -162,6 +162,8 @@ public abstract class RemoteBaseService extends Service {
 			player = station.getMPlayer();
 			control = station.getControl();
 			playList = station.getPlayList();
+			chatServer = (IChatServer) localServer.find(
+					ControlConstants.CHAT_ID, IChatServer.class);
 			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);

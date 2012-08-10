@@ -19,7 +19,6 @@ import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
 import de.remote.mobile.R;
-import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.util.ChatAdapter;
 
 /**
@@ -60,11 +59,6 @@ public class ChatActivity extends BindedActivity {
 	 * textfield for new message
 	 */
 	private EditText chatInput;
-
-	/**
-	 * binder for connection with service
-	 */
-	private PlayerBinder binder;
 
 	/**
 	 * the chat listener will be informed about events on the chat server
@@ -119,7 +113,6 @@ public class ChatActivity extends BindedActivity {
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
-		unbindService(playerConnection);
 	}
 
 	/**
@@ -353,9 +346,16 @@ public class ChatActivity extends BindedActivity {
 	@Override
 	void remoteConnected() {
 		try {
-			if (binder.isConnected())
-				binder.getChatServer().addChatListener(new ChatListener());
-			else
+			if (binder != null && binder.isConnected()) {
+				if (binder.getChatServer() != null){
+					binder.getChatServer().addChatListener(new ChatListener());
+					enableArea();
+				}else{
+					Toast.makeText(this, "no chat server available",
+							Toast.LENGTH_SHORT).show();
+					disableScreen();
+				}
+			} else
 				disableScreen();
 		} catch (RemoteException e) {
 			e.printStackTrace();

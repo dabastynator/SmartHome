@@ -115,18 +115,14 @@ public abstract class BrowserBase extends BindedActivity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_create_playlist:
 			Intent intent = new Intent(this, GetTextActivity.class);
 			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
 			break;
-		case R.id.opt_server_select:
-			intent = new Intent(this, SelectServerActivity.class);
-			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
-			break;
 		}
-		return super.onOptionsItemSelected(item);
+		return super.onMenuItemSelected(featureId, item);
 	}
 
 	/**

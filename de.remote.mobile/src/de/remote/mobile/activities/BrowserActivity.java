@@ -25,7 +25,6 @@ import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.api.PlayerException;
 import de.remote.mobile.R;
-import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
 
@@ -378,7 +377,7 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
@@ -405,12 +404,6 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_right:
 				binder.getPlayer().moveRight();
 				break;
-			case R.id.opt_exit:
-				binder.disconnect(null);
-				Intent intent = new Intent(this, RemoteService.class);
-				stopService(intent);
-				finish();
-				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
 				showUpdateUI();
@@ -425,7 +418,7 @@ public class BrowserActivity extends BrowserBase {
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
-		return super.onOptionsItemSelected(item);
+		return super.onMenuItemSelected(featureId, item);
 	}
 
 	@Override
