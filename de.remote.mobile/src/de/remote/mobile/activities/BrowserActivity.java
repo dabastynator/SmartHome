@@ -1,12 +1,9 @@
-package de.remote.mobile.activies;
+package de.remote.mobile.activities;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
@@ -28,7 +25,6 @@ import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.api.PlayerException;
 import de.remote.mobile.R;
-import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
@@ -40,59 +36,6 @@ import de.remote.mobile.util.BufferBrowser;
  * @author sebastian
  */
 public class BrowserActivity extends BrowserBase {
-
-	/**
-	 * listener for remote actions
-	 */
-	protected BrowserRemoteListener remoteListener;
-
-	/**
-	 * connection to the service
-	 */
-	private ServiceConnection playerConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-		}
-
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			binder = (PlayerBinder) service;
-			binder.addRemoteActionListener(remoteListener);
-			remoteListener = new BrowserRemoteListener(downloadLayout,
-					downloadProgress, playButton, binder);
-			remoteListener.newPlayingFile(binder.getPlayingFile());
-			disableScreen();
-			// if there is a server in extra -> connect with this server
-			if (getIntent().getExtras() != null
-					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID))
-				serverID = getIntent().getExtras().getInt(EXTRA_SERVER_ID);
-			// else just connect if there is no connection
-			else if (!binder.isConnected()) {
-				serverID = serverDB.getFavoriteServer();
-				if (serverID == -1)
-					Toast.makeText(BrowserActivity.this,
-							"no server configurated", Toast.LENGTH_SHORT)
-							.show();
-			}
-
-			// if there is a server name to connect -> connect
-			if (serverID >= 0)
-				binder.connectToServer(serverID, new ShowFolderRunnable());
-			// else if there is still a connection update the gui
-			else if (binder.isConnected()) {
-				new ShowFolderRunnable().run();
-				if (binder.getReceiver() != null
-						&& binder.getReceiver().getState() == ReceiverState.LOADING) {
-					downloadLayout.setVisibility(View.VISIBLE);
-					downloadProgress.setProgress((int) ((100d * binder
-							.getReceiver().getDownloadProgress()) / binder
-							.getReceiver().getFullSize()));
-					System.out.println(downloadProgress.getProgress());
-				}
-			}
-		}
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,10 +49,6 @@ public class BrowserActivity extends BrowserBase {
 		listView.setOnItemClickListener(new ListClickListener());
 		listView.setOnItemLongClickListener(new ListLongClickListener());
 
-		// bind service
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
-		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -591,14 +530,20 @@ public class BrowserActivity extends BrowserBase {
 		}
 	}
 
-	/**
-	 * disable the gui elements. inform user about connecting status.
-	 */
-	private void disableScreen() {
+	@Override
+	protected void disableScreen() {
 		setTitle("connecting...");
 		setProgressBarVisibility(true);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
+	}
+
+	@Override
+	void remoteConnected() {
+		if (binder.isConnected())
+			showUpdateUI();
+		else
+			disableScreen();
 	}
 
 	/**
@@ -611,6 +556,13 @@ public class BrowserActivity extends BrowserBase {
 		@Override
 		public void run() {
 			showUpdateUI();
+			if (binder.getReceiver() != null
+					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
+				downloadLayout.setVisibility(View.VISIBLE);
+				downloadProgress.setProgress((int) ((100d * binder
+						.getReceiver().getDownloadProgress()) / binder
+						.getReceiver().getFullSize()));
+			}
 		}
 	}
 
@@ -705,5 +657,4 @@ public class BrowserActivity extends BrowserBase {
 			}
 		}
 	}
-
 }

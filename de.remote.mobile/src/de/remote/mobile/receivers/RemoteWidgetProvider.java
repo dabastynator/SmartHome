@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 import de.remote.mobile.R;
-import de.remote.mobile.activies.BrowserActivity;
+import de.remote.mobile.activities.BrowserActivity;
 import de.remote.mobile.services.WidgetService;
 
 /**

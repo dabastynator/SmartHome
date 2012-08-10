@@ -1,4 +1,4 @@
-package de.remote.mobile.activies;
+package de.remote.mobile.activities;
 
 import android.app.ListActivity;
 import android.content.Intent;

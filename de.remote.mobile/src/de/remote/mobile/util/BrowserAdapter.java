@@ -9,7 +9,7 @@ import android.widget.TextView;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 import de.remote.mobile.R;
-import de.remote.mobile.activies.BrowserBase.ViewerState;
+import de.remote.mobile.activities.BrowserBase.ViewerState;
 
 /**
  * the browser adapter sets the correct icon for the shown item.

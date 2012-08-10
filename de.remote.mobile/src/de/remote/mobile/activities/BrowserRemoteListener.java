@@ -1,4 +1,4 @@
-package de.remote.mobile.activies;
+package de.remote.mobile.activities;
 
 import android.view.View;
 import android.widget.ImageView;

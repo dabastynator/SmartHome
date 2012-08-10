@@ -1,9 +1,8 @@
-package de.remote.mobile.activies;
+package de.remote.mobile.activities;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -16,15 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import de.remote.mobile.R;
-import de.remote.mobile.database.ServerDatabase;
-import de.remote.mobile.services.PlayerBinder;
+import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 
-public abstract class BrowserBase extends Activity {
-
-	/**
-	 * name for extra data for server name
-	 */
-	public static final String EXTRA_SERVER_ID = "serverId";
+public abstract class BrowserBase extends BindedActivity {
 
 	/**
 	 * name of the viewer state field to store and restore the value
@@ -54,6 +47,11 @@ public abstract class BrowserBase extends Activity {
 	 * list view
 	 */
 	protected ListView listView;
+	
+	/**
+	 * listener for remote actions
+	 */
+	protected IRemoteActionListener remoteListener;
 
 	/**
 	 * search input field
@@ -71,16 +69,6 @@ public abstract class BrowserBase extends Activity {
 	protected LinearLayout searchLayout;
 
 	/**
-	 * area that contains the download progress and cancel button
-	 */
-	protected LinearLayout downloadLayout;
-
-	/**
-	 * binder object
-	 */
-	protected PlayerBinder binder;
-
-	/**
 	 * current viewer state
 	 */
 	protected ViewerState viewerState = ViewerState.DIRECTORIES;
@@ -94,16 +82,6 @@ public abstract class BrowserBase extends Activity {
 	 * current shown playlist
 	 */
 	protected String currentPlayList;
-
-	/**
-	 * database object
-	 */
-	protected ServerDatabase serverDB;
-
-	/**
-	 * id of connected server
-	 */
-	protected int serverID = -1;
 
 	/**
 	 * current selected item
@@ -128,7 +106,7 @@ public abstract class BrowserBase extends Activity {
 	    requestWindowFeature(Window.FEATURE_PROGRESS);
 		
 		setContentView(R.layout.main);
-		serverDB = new ServerDatabase(this);
+		
 		findComponents();
 		listView.setBackgroundResource(R.drawable.idefix_dark);
 		listView.setScrollingCacheEnabled(false);
@@ -193,6 +171,14 @@ public abstract class BrowserBase extends Activity {
 			if (s.length() > 0)
 				searchLayout.setVisibility(View.VISIBLE);
 		}
+	}
+	
+	@Override
+	void binderConnected() {
+		binder.addRemoteActionListener(remoteListener);
+		remoteListener = new BrowserRemoteListener(downloadLayout,
+				downloadProgress, playButton, binder);
+		remoteListener.newPlayingFile(binder.getPlayingFile());
 	}
 
 }

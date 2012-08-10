@@ -1,4 +1,4 @@
-package de.remote.mobile.activies;
+package de.remote.mobile.activities;
 
 import de.remote.mobile.R;
 import android.app.Activity;
