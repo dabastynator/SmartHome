@@ -179,6 +179,10 @@ public class ChatActivity extends BindedActivity {
 			intent.putExtra(GetTextActivity.DEFAULT_TEXT, clientName);
 			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
 			return true;
+		case R.id.opt_webcam:
+			intent = new Intent(this, WebcamActivity.class);
+			startActivity(intent);
+			return true;			
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
@@ -322,13 +326,29 @@ public class ChatActivity extends BindedActivity {
 		}
 
 		@Override
-		public void informNewClient(String client) throws RemoteException {
+		public void informNewClient(final String client) throws RemoteException {
+			handler.post(new Runnable() {
 
+				@Override
+				public void run() {
+					Toast.makeText(ChatActivity.this,
+							"The client '" + client + "' has join the chat",
+							Toast.LENGTH_LONG).show();
+				}
+			});
 		}
 
 		@Override
-		public void informLeftClient(String client) throws RemoteException {
+		public void informLeftClient(final String client) throws RemoteException {
+			handler.post(new Runnable() {
 
+				@Override
+				public void run() {
+					Toast.makeText(ChatActivity.this,
+							"The client '" + client + "' has left the chat",
+							Toast.LENGTH_LONG).show();
+				}
+			});			
 		}
 
 		@Override
@@ -347,10 +367,10 @@ public class ChatActivity extends BindedActivity {
 	void remoteConnected() {
 		try {
 			if (binder != null && binder.isConnected()) {
-				if (binder.getChatServer() != null){
+				if (binder.getChatServer() != null) {
 					binder.getChatServer().addChatListener(new ChatListener());
 					enableArea();
-				}else{
+				} else {
 					Toast.makeText(this, "no chat server available",
 							Toast.LENGTH_SHORT).show();
 					disableScreen();

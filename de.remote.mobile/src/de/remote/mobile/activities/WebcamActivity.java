@@ -2,52 +2,24 @@ package de.remote.mobile.activities;
 
 import java.nio.IntBuffer;
 
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.widget.ImageView;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
-import de.remote.mobile.services.PlayerBinder;
-import de.remote.mobile.services.RemoteService;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
 import de.webcam.api.WebcamException;
 
-public class WebcamActivity extends Activity {
+public class WebcamActivity extends BindedActivity {
 
 	private ImageView img_webcam;
 	private Handler handler = new Handler();
 	private IWebcamListener listener = new WebcamListener();
 
-	/**
-	 * binder for connection with service
-	 */
-	private PlayerBinder binder;
-
-	/**
-	 * connection with service
-	 */
-	private ServiceConnection playerConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-		}
-
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			binder = (PlayerBinder) service;
-			registerListener();
-		}
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,16 +31,14 @@ public class WebcamActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
-		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
+		if (binder != null && binder.isConnected())
+			registerListener();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		unregister();
-		unbindService(playerConnection);
 	}
 
 	private void unregister() {
@@ -132,6 +102,24 @@ public class WebcamActivity extends Activity {
 			});
 		}
 
+	}
+
+	@Override
+	void binderConnected() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	void remoteConnected() {
+		if (binder.isConnected())
+			registerListener();
+	}
+
+	@Override
+	void disableScreen() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
