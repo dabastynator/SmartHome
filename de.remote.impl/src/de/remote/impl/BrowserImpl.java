@@ -8,6 +8,7 @@ import java.util.List;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.DirectorySender;
+import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
 
@@ -93,6 +94,13 @@ public class BrowserImpl implements IBrowser {
 		DirectorySender sender = new DirectorySender(new File(location + directory), port, 1);
 		sender.sendAsync();
 		return Server.getServer().getServerPort().getIp();
+	}
+
+	@Override
+	public void updloadFile(String file, String serverIp, int port)
+			throws RemoteException {
+		FileReceiver receiver = new FileReceiver(serverIp, port, new File(location + file));
+		receiver.receiveAsync();
 	}
 
 }
