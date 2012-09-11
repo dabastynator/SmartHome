@@ -1,7 +1,9 @@
 package de.remote.mobile.services;
 
 import java.io.File;
+import java.io.IOException;
 
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;
@@ -10,6 +12,7 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
+import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
 import de.remote.api.IChatServer;
 import de.remote.api.IControl;
@@ -26,6 +29,11 @@ import de.remote.mobile.services.RemoteService.PlayerListener;
  * @author sebastian
  */
 public class PlayerBinder extends Binder {
+
+	/**
+	 * port for uploading files
+	 */
+	public static final int UPLOAD_PORT = 5034;
 
 	/**
 	 * the service of this binder
@@ -274,5 +282,29 @@ public class PlayerBinder extends Binder {
 	 */
 	public Server getServer() {
 		return service.getServer();
+	}
+
+	/**
+	 * upload of given file to connected server at current location
+	 * 
+	 * @param file
+	 */
+	public void uploadFile(File file) {
+		try {
+			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1);
+			fileSender.sendAsync();
+			service.browser.updloadFile(file.getName(), Server.getServer()
+					.getServerPort().getIp(), UPLOAD_PORT);
+			Toast.makeText(service, "upload started", Toast.LENGTH_SHORT)
+					.show();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(service, "upload error: " + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			Toast.makeText(service, "upload error: " + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 }

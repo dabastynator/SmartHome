@@ -1,9 +1,14 @@
 package de.remote.mobile.activities;
 
+import java.io.File;
+
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
@@ -408,6 +413,13 @@ public class BrowserActivity extends BrowserBase {
 				viewerState = ViewerState.PLAYLISTS;
 				showUpdateUI();
 				break;
+			case R.id.opt_upload:
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.setType("image/*");
+				startActivityForResult(
+						Intent.createChooser(intent, "File Chooser"),
+						FILE_REQUEST);
+				break;
 			case R.id.opt_shuffle_on:
 				binder.getPlayer().useShuffle(true);
 				break;
@@ -514,6 +526,10 @@ public class BrowserActivity extends BrowserBase {
 				disableScreen();
 				binder.connectToServer(serverID, new ShowFolderRunnable());
 			}
+			if (requestCode == FILE_REQUEST) {
+				Uri uri = data.getData();
+				binder.uploadFile(new File(getFilePathByUri(uri)));
+			}
 		} catch (RemoteException e) {
 			Toast.makeText(BrowserActivity.this, e.getMessage(),
 					Toast.LENGTH_SHORT).show();
@@ -521,6 +537,33 @@ public class BrowserActivity extends BrowserBase {
 			Toast.makeText(BrowserActivity.this, e.getMessage(),
 					Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	/**
+	 * convert given uri to file path.
+	 * 
+	 * @param uri
+	 * @return file path
+	 */
+	public String getFilePathByUri(Uri uri) {
+		String fileName = "unknown";// default fileName
+		Uri filePathUri = uri;
+		if (uri.getScheme().toString().compareTo("content") == 0) {
+			Cursor cursor = getContentResolver().query(uri, null, null, null,
+					null);
+			if (cursor.moveToFirst()) {
+				int column_index = cursor
+						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				filePathUri = Uri.parse(cursor.getString(column_index));
+				fileName = filePathUri.getPath();
+			}
+		} else if (uri.getScheme().compareTo("file") == 0) {
+			fileName = filePathUri.getPath();
+		} else {
+			fileName = fileName + "_"
+					+ filePathUri.getLastPathSegment().toString();
+		}
+		return fileName;
 	}
 
 	@Override

@@ -28,7 +28,12 @@ public abstract class BrowserBase extends BindedActivity {
 	 * name of the playlist field to store and restore the value
 	 */
 	public static final String PLAYLIST = "playlist";
-
+	
+	/**
+	 * request code for file search
+	 */
+	public static final int FILE_REQUEST = 3;
+	
 	/**
 	 * name of the position in the list view
 	 */

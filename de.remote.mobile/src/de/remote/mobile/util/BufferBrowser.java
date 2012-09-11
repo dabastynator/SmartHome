@@ -145,4 +145,10 @@ public class BufferBrowser implements IBrowser{
 		return browser.publishDirectory(directory, port);
 	}
 
+	@Override
+	public void updloadFile(String file, String serverIp, int port)
+			throws RemoteException {
+		browser.updloadFile(file, serverIp, port);
+	}
+
 }
