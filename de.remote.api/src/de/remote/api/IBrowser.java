@@ -73,6 +73,19 @@ public interface IBrowser extends RemoteAble {
 			IOException;
 
 	/**
+	 * start download from published file. The implementation must connect to
+	 * given ip and port to load the file.
+	 * 
+	 * @param file
+	 * @param ip
+	 *            of the server
+	 * @param port
+	 * @throws RemoteException
+	 */
+	void updloadFile(String file, String serverIp, int port)
+			throws RemoteException;
+
+	/**
 	 * publish given directory, so a client can connect to the given port and
 	 * download the directory. the implementation must return the ip of the
 	 * server on witch the directory can be download.
