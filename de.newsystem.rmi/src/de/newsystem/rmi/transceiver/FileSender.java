@@ -43,7 +43,7 @@ public class FileSender extends AbstractSender {
 	 * @throws IOException
 	 */
 	public FileSender(File file, int port) throws IOException {
-		this(file, port, -1);
+		this(file, port, 1);
 	}
 
 	@Override

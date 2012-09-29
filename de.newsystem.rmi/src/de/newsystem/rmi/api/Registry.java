@@ -17,7 +17,7 @@ import de.newsystem.rmi.protokol.GlobalObject;
  * r.init(PORT);<br>
  * r.run();<br>
  * </code> <br>
- * the run method listens on the port and blocks
+ * the run method listens on the initialized port and is blocking
  * 
  * @author sebastian
  */
@@ -59,6 +59,8 @@ public class Registry {
 	}
 
 	/**
+	 * Insert object into the registry by id
+	 * 
 	 * @param id
 	 * @param object
 	 */
@@ -67,6 +69,8 @@ public class Registry {
 	}
 
 	/**
+	 * find object in the registry by id
+	 * 
 	 * @param id
 	 * @return globalObject
 	 */
@@ -75,6 +79,8 @@ public class Registry {
 	}
 
 	/**
+	 * remove object with id from the registry
+	 * 
 	 * @param id
 	 */
 	public void unRegister(String id) {
@@ -82,6 +88,8 @@ public class Registry {
 	}
 
 	/**
+	 * set registry port
+	 * 
 	 * @param port
 	 */
 	public void init(int port) {

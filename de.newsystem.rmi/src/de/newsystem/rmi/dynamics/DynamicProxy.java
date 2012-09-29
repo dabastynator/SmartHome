@@ -1,13 +1,13 @@
 package de.newsystem.rmi.dynamics;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.handler.ServerConnection;
+import de.newsystem.rmi.handler.ServerConnection.ConnectionSocket;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
@@ -28,38 +28,29 @@ public class DynamicProxy implements InvocationHandler {
 	private String id;
 
 	/**
-	 * outputstream
+	 * server connection of this global object id
 	 */
-	private ObjectOutputStream out;
-
-	/**
-	 * inputstream
-	 */
-	private ObjectInputStream in;
-
-	/**
-	 * serverport
-	 */
-	private ServerPort serverPort;
+	private ServerConnection serverConnection;
 
 	/**
 	 * server on witch provides the proxy
 	 */
 	private Server server;
 
+	/**
+	 * the static counter counts new global objects to number them.
+	 */
 	private static int counter = 0;
 
 	/**
-	 * allocates new proxy
+	 * Allocates new proxy with given id, server connection and server.
 	 * 
 	 * @param id
-	 * @param serverPort
+	 * @param sc
 	 */
-	public DynamicProxy(String id, ServerPort serverPort, Server server) {
+	public DynamicProxy(String id, ServerConnection sc, Server server) {
 		this.id = id;
-		in = serverPort.getInput();
-		out = serverPort.getOutput();
-		this.serverPort = serverPort;
+		this.serverConnection = sc;
 		this.server = server;
 	}
 
@@ -77,34 +68,48 @@ public class DynamicProxy implements InvocationHandler {
 		checkParameter(vals);
 		request.setParams(vals);
 		request.setOneway(method.getAnnotation(Oneway.class) != null);
+		return performeRequest(request);
+	}
+
+	/**
+	 * perform the given request.
+	 * 
+	 * @param request
+	 * @return result of the request
+	 * @throws Throwable
+	 */
+	private Object performeRequest(Request request) throws Throwable {
 		Reply reply = null;
+		ConnectionSocket socket = serverConnection.getFreeConnectionSocket();
 		try {
 			try {
-				out.writeObject(request);
+				socket.getOutput().writeObject(request);
 				if (request.isOneway())
 					return null;
-				reply = (Reply) in.readObject();
+				reply = (Reply) socket.getInput().readObject();
 			} catch (IOException e) {
-				serverPort.close();
-				serverPort = server.connectToServer(serverPort);
-				in = serverPort.getInput();
-				out = serverPort.getOutput();
-				out.writeObject(request);
+				socket.disconnect();
+				socket.free();
+				socket = serverConnection.getFreeConnectionSocket();
+				socket.getOutput().writeObject(request);
 				if (request.isOneway())
 					return null;
-				reply = (Reply) in.readObject();
+				reply = (Reply) socket.getInput().readObject();
 			}
 		} catch (Exception e) {
 			throw new RemoteException(id, e.getMessage());
+		} finally {
+			socket.free();
 		}
-		if (reply.getError() == null) {
-			if (reply.getReturnType() != null && reply.getNewId() != null)
-				return server.createProxy(reply.getNewId(), serverPort,
-						reply.getReturnType());
-			else
-				return reply.getResult();
-		} else
+		if (reply == null)
+			throw new RemoteException(id, "null returned");
+		if (reply.getError() != null)
 			throw reply.getError();
+		if (reply.getReturnType() != null && reply.getNewId() != null)
+			return server.createProxy(reply.getNewId(), serverConnection,
+					reply.getReturnType());
+		else
+			return reply.getResult();
 	}
 
 	/**
@@ -126,7 +131,7 @@ public class DynamicProxy implements InvocationHandler {
 						server.getAdapterObjectIdMap().put(paramters[i], objId);
 					}
 					Reply r = new Reply();
-					r.setNewId(objId);
+					r.addNewId(objId);
 					r.setServerPort(new ServerPort(server.getServerPort()));
 					r.setReturnType(paramters[i].getClass().getInterfaces()[0]);
 					paramters[i] = r;

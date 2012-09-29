@@ -44,7 +44,7 @@ public abstract class AbstractSender {
 	 * @param port
 	 */
 	public AbstractSender(int port) {
-		this(port, -1);
+		this(port, 1);
 	}
 
 	/**

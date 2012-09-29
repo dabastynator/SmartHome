@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.handler.ServerConnection;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
 import de.newsystem.rmi.protokol.Request;
-import de.newsystem.rmi.protokol.ServerPort;
 
 /**
  * adapter
@@ -124,8 +124,8 @@ public class DynamicAdapter {
 			if (request.getParams()[i] instanceof Reply) {
 				Reply r = ((Reply) request.getParams()[i]);
 				types[i] = r.getReturnType();
-				ServerPort sp = server.connectToServer(r.getServerPort());
-				request.getParams()[i] = server.createProxy(r.getNewId(), sp,
+				ServerConnection sc = server.connectToServer(r.getServerPort());
+				request.getParams()[i] = server.createProxy(r.getNewId(), sc,
 						r.getReturnType());
 			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();

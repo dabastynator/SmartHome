@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Collection;
 
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
@@ -15,7 +16,7 @@ import de.newsystem.rmi.protokol.Reply;
 import de.newsystem.rmi.protokol.Request;
 
 /**
- * handles a client connection
+ * handles a client connection.
  * 
  * @author sebastian
  */
@@ -57,7 +58,7 @@ public class ConnectionHandler {
 	private Server server;
 
 	/**
-	 * Die Kathi hat den Basti lieb!!!!!
+	 * Allocate new connection handler.
 	 * 
 	 * @param ip
 	 * @param socket
@@ -86,21 +87,10 @@ public class ConnectionHandler {
 						request.getObject());
 				if (adapter != null) {
 					Reply reply = adapter.performeRequest(request);
-					if (reply.getResult() instanceof RemoteAble) {
-						if (server.getAdapterObjectIdMap().containsKey(
-								reply.getResult())) {
-							reply.setNewId(server.getAdapterObjectIdMap().get(
-									reply.getResult()));
-							reply.setResult(null);
-						} else {
-							DynamicAdapter dynamicAdapter = new DynamicAdapter(
-									reply.getResult(), server);
-							String id = getNextId();
-							server.getAdapterMap().put(id, dynamicAdapter);
-							reply.setNewId(id);
-							reply.setResult(null);
-						}
-					}
+					if (reply.getResult() instanceof RemoteAble)
+						configureReply(reply, reply.getResult());
+					// if (reply.getResult() instanceof Collection)
+					// configureReplyCollection(reply);
 					if (!request.isOneway())
 						out.writeObject(reply);
 				} else {
@@ -125,6 +115,32 @@ public class ConnectionHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void configureReplyCollection(Reply reply) {
+		Collection c = (Collection) reply.getResult();
+		for (Object o : c)
+			configureReply(reply, o);
+	}
+
+	/**
+	 * set id for remoteable result. if there is already an adapter use the old
+	 * one.
+	 * 
+	 * @param reply
+	 */
+	private void configureReply(Reply reply, Object result) {
+		if (server.getAdapterObjectIdMap().containsKey(result)) {
+			reply.addNewId(server.getAdapterObjectIdMap().get(result));
+			reply.setResult(null);
+		} else {
+			DynamicAdapter dynamicAdapter = new DynamicAdapter(result, server);
+			String id = getNextId();
+			server.getAdapterMap().put(id, dynamicAdapter);
+			server.getAdapterObjectIdMap().put(result, id);
+			reply.addNewId(id);
+			reply.setResult(null);
 		}
 	}
 

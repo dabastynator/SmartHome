@@ -17,6 +17,7 @@ import java.util.Map;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.handler.ConnectionHandler;
+import de.newsystem.rmi.handler.ServerConnection;
 import de.newsystem.rmi.protokol.GlobalObject;
 import de.newsystem.rmi.protokol.RegistryReply;
 import de.newsystem.rmi.protokol.RegistryRequest;
@@ -45,9 +46,19 @@ public class Server {
 	public static int PORT = 5003;
 
 	/**
-	 * singleton
+	 * default count of sockets per connection
+	 */
+	public static int DEFAULT_CONNECTION_SOCKETCOUNT = 5;
+
+	/**
+	 * singleton server object
 	 */
 	private static Server server;
+
+	/**
+	 * maximum sockets per connection
+	 */
+	private int connectionSocketCount = DEFAULT_CONNECTION_SOCKETCOUNT;
 
 	/**
 	 * registry socket
@@ -87,10 +98,10 @@ public class Server {
 	/**
 	 * list of all connections to other servers
 	 */
-	private HashMap<ServerPort, ServerPort> serverConnections = new HashMap<ServerPort, ServerPort>();
+	private HashMap<ServerPort, ServerConnection> serverConnections = new HashMap<ServerPort, ServerConnection>();
 
 	/**
-	 * list of all connection of the server
+	 * list of all connections of the server
 	 */
 	private List<ConnectionHandler> handlers = new ArrayList<ConnectionHandler>();
 
@@ -110,7 +121,8 @@ public class Server {
 	private boolean isConnectedRegistry = false;
 
 	/**
-	 * create connection to the registry
+	 * create connection to the registry. enables to register, find and
+	 * unregister global objects.
 	 * 
 	 * @param registry
 	 * @param port
@@ -127,7 +139,8 @@ public class Server {
 	}
 
 	/**
-	 * create connection to the registry
+	 * create connection to the registry. enables to register, find and
+	 * unregister global objects.
 	 * 
 	 * @param registry
 	 * @throws UnknownHostException
@@ -199,8 +212,8 @@ public class Server {
 	}
 
 	/**
-	 * register a object in the registry. the registry must be initialized
-	 * before.
+	 * register a object in the registry. the registry must be initialized and
+	 * connected before.
 	 * 
 	 * @param id
 	 * @param object
@@ -226,8 +239,8 @@ public class Server {
 	}
 
 	/**
-	 * remove a object from the registry. the registry must be initialized
-	 * before.
+	 * remove a object from the registry. the registry must be initialized and
+	 * connected before.
 	 * 
 	 * @param id
 	 */
@@ -247,7 +260,7 @@ public class Server {
 
 	/**
 	 * search a remote object in the registry. the registry must be initialized
-	 * before.
+	 * and connected before.
 	 * 
 	 * @param id
 	 * @param template
@@ -263,9 +276,10 @@ public class Server {
 			if (reply.getObject() == null)
 				return null;
 			// connect to server
-			ServerPort sp = connectToServer(reply.getObject().getServerPort());
+			ServerConnection sc = connectToServer(reply.getObject()
+					.getServerPort());
 			// create proxy
-			return createProxy(id, sp, template);
+			return createProxy(id, sc, template);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {
@@ -276,32 +290,45 @@ public class Server {
 	}
 
 	/**
+	 * Create new Proxy with given id, server connection and class template.
+	 * 
 	 * @param id
-	 * @param sp
+	 * @param sc
 	 * @param template
 	 * @return proxy
 	 */
-	public Object createProxy(String id, ServerPort sp, Class template) {
+	public Object createProxy(String id, ServerConnection sc, Class template) {
 		Object p = proxyMap.get(id);
 		if (p != null)
 			return p;
-		p = new DynamicProxy(id, sp, this);
+		p = new DynamicProxy(id, sc, this);
 		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),
 				new Class[] { template }, (InvocationHandler) p);
 		proxyMap.put(id, object);
 		return object;
 	}
 
+	/**
+	 * Get the adapter map that maps the id to the adapter.
+	 * 
+	 * @return id adapter map
+	 */
 	public Map<String, DynamicAdapter> getAdapterMap() {
 		return adapterMap;
 	}
 
+	/**
+	 * Get the id map that maps the adapter to the id.
+	 * 
+	 * @return adapter id map
+	 */
 	public Map<Object, String> getAdapterObjectIdMap() {
 		return adapterObjectId;
 	}
 
 	/**
-	 * the server thread handles the connection handler
+	 * The server thread handles connections from other server. It creates new
+	 * Threads to handle all connections parallel.
 	 * 
 	 * @author sebastian
 	 */
@@ -346,8 +373,8 @@ public class Server {
 	 */
 	public void close() throws IOException {
 		// close connections
-		for (ServerPort sp : serverConnections.keySet())
-			sp.close();
+		for (ServerConnection sc : serverConnections.values())
+			sc.disconnect();
 		for (ConnectionHandler handler : handlers)
 			handler.close();
 		// close sockets
@@ -366,25 +393,26 @@ public class Server {
 	}
 
 	/**
-	 * checks connections for given connection
+	 * Create connection to given server ip and port. If there is already a
+	 * connection, the existing one will be returned.
 	 * 
 	 * @param serverPort
-	 * @return serverPort
+	 * @return server connection
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public ServerPort connectToServer(ServerPort serverPort)
+	public ServerConnection connectToServer(ServerPort serverPort)
 			throws UnknownHostException, IOException {
-		ServerPort sp = serverConnections.get(serverPort);
-		if (sp != null && !sp.getSocket().isClosed())
-			return sp;
-		serverPort.connect();
-		serverConnections.put(serverPort, serverPort);
-		return serverPort;
+		ServerConnection serverConnection = serverConnections.get(serverPort);
+		if (serverConnection != null)
+			return serverConnection;
+		serverConnection = new ServerConnection(serverPort);
+		serverConnections.put(serverPort, serverConnection);
+		return serverConnection;
 	}
 
 	/**
-	 * returns the serverPort for this server
+	 * returns the serverPort of this server
 	 * 
 	 * @return serverPort
 	 */
@@ -392,8 +420,28 @@ public class Server {
 		return new ServerPort(ip, port);
 	}
 
+	/**
+	 * @return true if server is connected to the registry
+	 */
 	public boolean isConnectedToRegistry() {
 		return isConnectedRegistry;
+	}
+
+	/**
+	 * @return maximum number of sockets per connection
+	 */
+	public int getConnectionSocketCount() {
+		return connectionSocketCount;
+	}
+
+	/**
+	 * set maximum number of sockets per connection. the sockets will be build
+	 * dynamically, if they are needed.
+	 * 
+	 * @param connectionSocketCount
+	 */
+	public void setConnectionSocketCount(int connectionSocketCount) {
+		this.connectionSocketCount = connectionSocketCount;
 	}
 
 }

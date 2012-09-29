@@ -42,7 +42,7 @@ public class DirectorySender extends FileSender {
 	 * @throws IOException
 	 */
 	public DirectorySender(File directory, int port) throws IOException {
-		this(directory, port, -1);
+		this(directory, port, 1);
 	}
 
 	@Override

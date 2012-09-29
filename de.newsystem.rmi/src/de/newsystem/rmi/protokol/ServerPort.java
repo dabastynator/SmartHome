@@ -1,11 +1,6 @@
 package de.newsystem.rmi.protokol;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * server port holds connection and streams
@@ -27,21 +22,6 @@ public class ServerPort implements Serializable{
 	 * port of server
 	 */
 	private int port;
-	
-	/**
-	 * socket of connection 
-	 */
-	private Socket socket;
-	
-	/**
-	 * inputstream of connection 
-	 */
-	private ObjectOutputStream out;
-	
-	/**
-	 * outputstream of connection
-	 */
-	private ObjectInputStream in;
 
 	/**
 	 * counter for parameter ids
@@ -56,17 +36,6 @@ public class ServerPort implements Serializable{
 	public ServerPort(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
-	}
-
-	/**
-	 * allocate new server port with connection and streams
-	 * @param socket
-	 * @throws IOException
-	 */
-	public ServerPort(Socket socket) throws IOException {
-		this.socket = socket;
-		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
 	}
 
 	/**
@@ -107,33 +76,6 @@ public class ServerPort implements Serializable{
 	}
 
 	/**
-	 * create connection to server
-	 * @throws UnknownHostException
-	 * @throws IOException
-	 */
-	public void connect() throws UnknownHostException, IOException {
-		socket = new Socket(ip, port);
-		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
-	}
-	
-	/**
-	 * close connection
-	 * @throws IOException
-	 */
-	public void disconnect() throws IOException{
-		socket.close();
-	}
-
-	public ObjectInputStream getInput() {
-		return in;
-	}
-
-	public ObjectOutputStream getOutput() {
-		return out;
-	}
-
-	/**
 	 * generate new id for parameter
 	 * @return id
 	 */
@@ -141,15 +83,6 @@ public class ServerPort implements Serializable{
 		String id = "newsystem.parameter(" + ip + ":" + port + "/" + (counter ++) + ")";
 		System.out.println(id);
 		return id;
-	}
-
-	public void close() throws IOException {
-		if (socket != null)
-			socket.close();
-	}
-
-	public Socket getSocket() {
-		return socket;
 	}
 
 	@Override
