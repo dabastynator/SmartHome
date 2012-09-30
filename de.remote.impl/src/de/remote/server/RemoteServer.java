@@ -3,7 +3,10 @@ package de.remote.server;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import de.newsystem.rmi.api.RMILogger;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.remote.api.ControlConstants;
 import de.remote.api.IChatServer;
 import de.remote.api.IMusicStation;
@@ -31,6 +34,13 @@ public class RemoteServer {
 		System.out.println("Playlists at " + plsDirecotry);
 
 		Server server = Server.getServer();
+		RMILogger.addLogListener(new RMILogListener() {
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				System.out.println(priority + ": " + message + " (" + id + ")");
+			}
+		});
 
 		IMusicStation station = new StationImpl(place, plsDirecotry);
 		IChatServer chat = new ChatServerImpl();
