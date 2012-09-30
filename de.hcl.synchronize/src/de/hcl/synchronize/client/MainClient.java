@@ -5,12 +5,29 @@ import java.net.UnknownHostException;
 
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
+import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.protokol.RemoteException;
 
 public class MainClient {
 
 	public static void main(String args[]) {
+		RMILogger.addLogListener(new RMILogListener() {
+
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				if (priority == LogPriority.INFORMATION)
+					System.out.println(priority + ": " + message + " (" + id
+							+ ")");
+				else
+					System.err.println(priority + ": " + message + " (" + id
+							+ ")");
+			}
+		});
+
 		try {
 			if (args.length < 3) {
 				System.err
@@ -26,7 +43,7 @@ public class MainClient {
 
 			Server s = Server.getServer();
 			s.forceConnectToRegistry(args[0]);
-			s.startServer(IHCLClient.CLIENT_PORT+1);
+			s.startServer(IHCLClient.CLIENT_PORT + 1);
 
 			IHCLServer server = (IHCLServer) s.find(IHCLServer.SERVER_ID,
 					IHCLServer.class);

@@ -5,13 +5,28 @@ import java.io.IOException;
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.client.HCLClient;
+import de.newsystem.rmi.api.RMILogger;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.protokol.RemoteException;
 
 public class SynchMain {
 
 	public static void main(String[] args) {
+		RMILogger.addLogListener(new RMILogListener() {
 
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				if (priority == LogPriority.INFORMATION)
+					System.out.println(priority + ": " + message + " (" + id
+							+ ")");
+				else
+					System.err.println(priority + ": " + message + " (" + id
+							+ ")");
+			}
+		});
 		try {
 			if (args.length < 1) {
 				System.err
@@ -27,7 +42,7 @@ public class SynchMain {
 			Synchronizer synchronizer = new Synchronizer(server);
 			synchronizer.synchronize();
 
-//			simulateClient();
+			// simulateClient();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
