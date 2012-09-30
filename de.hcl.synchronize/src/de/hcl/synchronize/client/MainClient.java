@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
+import de.hcl.synchronize.log.HCLLogger;
+import de.hcl.synchronize.log.IHCLLog.HCLType;
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
@@ -50,6 +52,13 @@ public class MainClient {
 
 			IHCLClient client = new HCLClient(args[2], args[3]);
 
+			while (server == null){
+				server = (IHCLServer) s.find(IHCLServer.SERVER_ID,
+						IHCLServer.class);
+				HCLLogger.performLog("no hcl server in registry", HCLType.ERROR, client);
+				Thread.sleep(1000);
+			}
+			
 			server.addClient(args[1], client);
 
 		} catch (RemoteException e) {
@@ -57,6 +66,8 @@ public class MainClient {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
