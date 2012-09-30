@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 
@@ -25,6 +27,21 @@ public abstract class AbstractSender {
 	 * times the data will be send, -1 equals infinite
 	 */
 	private int times;
+
+	/**
+	 * list of progress listener
+	 */
+	protected List<SenderProgress> progressListener = new ArrayList<SenderProgress>();
+
+	/**
+	 * size of sending data (in bytes)
+	 */
+	private long sendingSize;
+
+	/**
+	 * current send progress (size of send data in bytes)
+	 */
+	private long sendingProgress;
 
 	/**
 	 * allocate new sender on given port, the data will be send given times
@@ -75,10 +92,19 @@ public abstract class AbstractSender {
 				writeData(socket.getOutputStream());
 				socket.close();
 			} catch (IOException e) {
-
+				informException(e);
 			}
 		}
 		serverPort.close();
+	}
+
+	/**
+	 * get the list of progress listener
+	 * 
+	 * @return progress listener list
+	 */
+	public List<SenderProgress> getProgressListener() {
+		return progressListener;
 	}
 
 	/**
@@ -112,5 +138,68 @@ public abstract class AbstractSender {
 			}
 		}
 
+	}
+
+	/**
+	 * inform listeners about receive start
+	 * 
+	 * @param size
+	 */
+	protected void informStart(long size) {
+		sendingSize = size;
+		for (SenderProgress listener : progressListener)
+			listener.startSending(size);
+	}
+
+	/**
+	 * inform listeners about receive progress
+	 * 
+	 * @param size
+	 */
+	protected void informProgress(long size) {
+		sendingProgress = size;
+		for (SenderProgress listener : progressListener)
+			listener.progressSending(size);
+	}
+
+	/**
+	 * inform listeners about receive end
+	 * 
+	 * @param size
+	 */
+	protected void informEnd(long size) {
+		for (SenderProgress listener : progressListener)
+			listener.endSending(size);
+	}
+
+	/**
+	 * inform all listener about occurred exception
+	 * 
+	 * @param e
+	 */
+	protected void informException(Exception e) {
+		for (SenderProgress progress : progressListener)
+			progress.exceptionOccurred(e);
+	}
+
+	/**
+	 * get full size of sending data
+	 * 
+	 * @return size of sending data
+	 */
+	public long getFullSize() {
+		return sendingSize;
+	}
+
+	/**
+	 * get size of data already send
+	 * 
+	 * @return size of send data
+	 */
+	/**
+	 * @return
+	 */
+	public long getCurrentProgress() {
+		return sendingProgress;
 	}
 }

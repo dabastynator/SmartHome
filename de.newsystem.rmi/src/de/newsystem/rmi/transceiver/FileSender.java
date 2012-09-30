@@ -56,6 +56,7 @@ public class FileSender extends AbstractSender {
 			l[3 - i] = (byte) (length >>> (i * 8));
 		}
 		output.write(l);
+		informStart(length);
 
 		// send data
 		byte[] data = new byte[(int) length];
@@ -63,6 +64,7 @@ public class FileSender extends AbstractSender {
 		output.write(data, 0, data.length);
 		output.flush();
 		input.close();
+		informEnd(length);
 	}
 
 }
