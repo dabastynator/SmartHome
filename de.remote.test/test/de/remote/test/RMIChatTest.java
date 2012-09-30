@@ -8,8 +8,11 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.newsystem.rmi.api.RMILogger;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Registry;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
 import de.remote.api.IChatServer;
@@ -60,6 +63,13 @@ public class RMIChatTest extends TestCase {
 	 */
 	@Test
 	public void testRMI() {
+		RMILogger.addLogListener(new RMILogListener() {
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				System.out.println(priority + ": " + message + " (" + id + ")");
+			}
+		});
 		startRegistry();
 		startServer();
 		startClient();
