@@ -13,37 +13,40 @@ public class SynchMain {
 	public static void main(String[] args) {
 
 		try {
-			IHCLClient c2 = new HCLClient("/home/sebastian/temp/cl2/", "cl2");
-			IHCLClient c1 = new HCLClient("/home/sebastian/temp/cl1/", "cl1");
-
+			if (args.length < 1) {
+				System.err
+						.println("1. argument must be the ip of the registry");
+				System.exit(1);
+			}
 			IHCLServer server = new HCLServer();
-			server.addClient("Bastis Dokumente", c1);
-			server.addClient("Bastis Dokumente", c2);
-
 			Server s = Server.getServer();
-			s.connectToRegistry("localhost");
-			s.startServer(5056);
+			s.forceConnectToRegistry(args[0]);
+			s.startServer(IHCLServer.SERVER_PORT);
 			s.register(IHCLServer.SERVER_ID, server);
 
-			simulateClient();
+			Synchronizer synchronizer = new Synchronizer(server);
+			synchronizer.synchronize();
+
+//			simulateClient();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
-	private static void simulateClient() throws RemoteException {
+	private static void simulateClient() throws RemoteException, IOException {
 		Server s = Server.getServer();
-		IHCLServer hcl = (IHCLServer) s.find(IHCLServer.SERVER_ID,
+		IHCLServer server = (IHCLServer) s.find(IHCLServer.SERVER_ID,
 				IHCLServer.class);
 
-		Synchronizer synchronizer = new Synchronizer(hcl);
-		synchronizer.synchronize();
+		IHCLClient c2 = new HCLClient("/home/sebastian/temp/cl2/", "cl2");
+		IHCLClient c1 = new HCLClient("/home/sebastian/temp/cl1/", "cl1");
+
+		server.addClient("Bastis Dokumente", c1);
+		server.addClient("Bastis Dokumente", c2);
+
 	}
 
 }

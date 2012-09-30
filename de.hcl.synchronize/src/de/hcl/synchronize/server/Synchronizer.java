@@ -11,6 +11,8 @@ import java.util.Set;
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLClient.FileBean;
 import de.hcl.synchronize.api.IHCLServer;
+import de.hcl.synchronize.log.HCLLogger;
+import de.hcl.synchronize.log.IHCLLog.HCLType;
 import de.hcl.synchronize.server.TransferQueue.TransferJob;
 
 public class Synchronizer {
@@ -35,6 +37,8 @@ public class Synchronizer {
 		new Thread() {
 			@Override
 			public void run() {
+				HCLLogger.performLog("synchronization started", HCLType.CREATE,
+						Synchronizer.this);
 				while (true) {
 					synchronizeSynch();
 					try {

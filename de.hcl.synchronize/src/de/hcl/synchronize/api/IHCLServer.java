@@ -16,6 +16,11 @@ public interface IHCLServer extends RemoteAble {
 	 * Id of the server object in the registry
 	 */
 	public static final String SERVER_ID = "de.hcl.server";
+	
+	/**
+	 * Port of the synchronizing server
+	 */
+	public static final int SERVER_PORT = 5056;
 
 	/**
 	 * Get all session ids

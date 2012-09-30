@@ -16,6 +16,11 @@ import de.newsystem.rmi.protokol.RemoteAble;
 public interface IHCLClient extends RemoteAble {
 
 	/**
+	 * The port of a client server
+	 */
+	public static final int CLIENT_PORT = IHCLServer.SERVER_PORT + 1;
+
+	/**
 	 * Delete given file.
 	 * 
 	 * @param file
