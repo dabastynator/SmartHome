@@ -4,20 +4,21 @@ import java.io.Serializable;
 
 /**
  * server port holds connection and streams
+ * 
  * @author sebastian
  */
-public class ServerPort implements Serializable{
+public class ServerPort implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3507479097260925399L;
-	
+
 	/**
 	 * ip of server
 	 */
 	private String ip;
-	
+
 	/**
 	 * port of server
 	 */
@@ -30,6 +31,7 @@ public class ServerPort implements Serializable{
 
 	/**
 	 * allocate new server port
+	 * 
 	 * @param ip
 	 * @param port
 	 */
@@ -40,6 +42,7 @@ public class ServerPort implements Serializable{
 
 	/**
 	 * allocate new server
+	 * 
 	 * @param serverPort
 	 */
 	public ServerPort(ServerPort serverPort) {
@@ -77,11 +80,12 @@ public class ServerPort implements Serializable{
 
 	/**
 	 * generate new id for parameter
+	 * 
 	 * @return id
 	 */
 	public String getNextId() {
-		String id = "newsystem.parameter(" + ip + ":" + port + "/" + (counter ++) + ")";
-		System.out.println(id);
+		String id = "newsystem.parameter(" + ip + ":" + port + "/"
+				+ (counter++) + ")";
 		return id;
 	}
 
@@ -89,5 +93,5 @@ public class ServerPort implements Serializable{
 	public String toString() {
 		return ip + ":" + port;
 	}
-	
+
 }

@@ -6,7 +6,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Registry;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.protokol.RegistryReply;
 import de.newsystem.rmi.protokol.RegistryRequest;
 
@@ -48,7 +50,8 @@ public class RegistryHandler {
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
-			System.out.println("registry connection created");
+			RMILogger.performLog(LogPriority.INFORMATION,
+					"registry connection created", null);
 			Registry registry = Registry.getRegistry();
 			while (true) {
 				RegistryRequest request = (RegistryRequest) in.readObject();
@@ -69,7 +72,8 @@ public class RegistryHandler {
 
 		} catch (IOException e) {
 			if (e instanceof EOFException)
-				System.out.println("registry connection closed");
+				RMILogger.performLog(LogPriority.INFORMATION,
+						"registry connection closed", null);
 			else
 				e.printStackTrace();
 		} catch (ClassNotFoundException e) {

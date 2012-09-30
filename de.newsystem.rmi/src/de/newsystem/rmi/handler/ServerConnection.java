@@ -8,7 +8,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.protokol.ServerPort;
 
 /**
@@ -54,6 +56,9 @@ public class ServerConnection {
 				ConnectionSocket socket = serverConnections.get(i);
 				if (socket.socket.isClosed()) {
 					serverConnections.remove(i);
+					RMILogger.performLog(LogPriority.WARNING,
+							"connection closed from: " + serverPort.getIp()
+									+ ":" + serverPort.getPort(), null);
 					continue;
 				}
 				if (!socket.isInUse()) {
@@ -75,6 +80,9 @@ public class ServerConnection {
 						input, output);
 				newSocket.setInUse(true);
 				serverConnections.add(newSocket);
+				RMILogger.performLog(LogPriority.INFORMATION,
+						"create new connection to: " + serverPort.getIp() + ":"
+								+ serverPort.getPort(), null);
 				return newSocket;
 			}
 			try {

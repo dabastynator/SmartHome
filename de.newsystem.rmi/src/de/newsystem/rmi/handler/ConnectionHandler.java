@@ -8,7 +8,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
 
+import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -78,7 +80,8 @@ public class ConnectionHandler {
 	 * handle the connection
 	 */
 	public void handle() {
-		System.out.println("client connection started");
+		RMILogger.performLog(LogPriority.INFORMATION,
+				"incoming connection from client started", null);
 		try {
 			while (true) {
 				Object object = in.readObject();
@@ -102,9 +105,11 @@ public class ConnectionHandler {
 			}
 		} catch (IOException e) {
 			if (e instanceof EOFException)
-				System.out.println("client connection closed by client");
+				RMILogger.performLog(LogPriority.WARNING,
+						"client connection closed by client", null);
 			else if (e instanceof SocketException)
-				System.out.println("client connection closed by server");
+				RMILogger.performLog(LogPriority.WARNING,
+						"client connection closed by server", null);
 			else
 				e.printStackTrace();
 		} catch (ClassNotFoundException e) {

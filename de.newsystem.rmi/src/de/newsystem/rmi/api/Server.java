@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.handler.ConnectionHandler;
@@ -136,6 +137,8 @@ public class Server {
 		registryIn = new ObjectInputStream(registrySocket.getInputStream());
 		ip = registrySocket.getLocalAddress().getHostAddress();
 		isConnectedRegistry = true;
+		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry",
+				null);
 	}
 
 	/**
@@ -163,15 +166,15 @@ public class Server {
 	public void forceConnectToRegistry(String registry)
 			throws UnknownHostException, IOException {
 		boolean connected = false;
-		int counter = 1;
 		while (!connected) {
 			try {
 				connectToRegistry(registry);
 				connected = true;
 			} catch (SocketException e) {
 				connected = false;
-				System.err.println("socketexception " + (counter++)
-						+ ". time: " + e.getMessage());
+				RMILogger.performLog(LogPriority.WARNING,
+						"connection to registry refused: " + e.getMessage(),
+						null);
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e1) {
@@ -231,10 +234,16 @@ public class Server {
 		try {
 			registryOut.writeObject(request);
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
+			RMILogger
+					.performLog(LogPriority.INFORMATION, "register object", id);
 		} catch (IOException e) {
 			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR,
+					"register object " + e.getMessage(), id);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR,
+					"register object " + e.getMessage(), id);
 		}
 	}
 
@@ -251,10 +260,16 @@ public class Server {
 		try {
 			registryOut.writeObject(request);
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
+			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ",
+					id);
 		} catch (IOException e) {
 			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR,
+					"unregister object " + e.getMessage(), id);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR,
+					"unregister object " + e.getMessage(), id);
 		}
 	}
 
@@ -338,7 +353,8 @@ public class Server {
 		public void run() {
 			try {
 				serverSocket = new ServerSocket(port);
-				System.out.println("server is listening on port: " + port);
+				RMILogger.performLog(LogPriority.INFORMATION,
+						"server is listening on port: " + port, null);
 				while (serverSocket != null) {
 					final Socket socket = serverSocket.accept();
 					new Thread(new Runnable() {
@@ -357,8 +373,8 @@ public class Server {
 				}
 			} catch (IOException e1) {
 				if (e1 instanceof SocketException)
-					System.out.println("server closed " + "(" + e1.getMessage()
-							+ ")");
+					RMILogger.performLog(LogPriority.WARNING, "server closed "
+							+ "(" + e1.getMessage() + ")", null);
 				else
 					e1.printStackTrace();
 			}
@@ -390,6 +406,7 @@ public class Server {
 		proxyMap.clear();
 		adapterMap.clear();
 		adapterObjectId.clear();
+		RMILogger.performLog(LogPriority.INFORMATION, "close server", null);
 	}
 
 	/**

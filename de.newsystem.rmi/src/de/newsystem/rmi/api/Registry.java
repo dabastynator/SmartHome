@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 
+import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.handler.RegistryHandler;
 import de.newsystem.rmi.protokol.GlobalObject;
 
@@ -66,6 +68,7 @@ public class Registry {
 	 */
 	public void register(String id, GlobalObject object) {
 		globalObjects.put(id, object);
+		RMILogger.performLog(LogPriority.INFORMATION, "register object", id);
 	}
 
 	/**
@@ -85,6 +88,7 @@ public class Registry {
 	 */
 	public void unRegister(String id) {
 		globalObjects.remove(id);
+		RMILogger.performLog(LogPriority.INFORMATION, "unregister object", id);
 	}
 
 	/**
@@ -103,7 +107,8 @@ public class Registry {
 	public void run() {
 		try {
 			ServerSocket server = new ServerSocket(port);
-			System.out.println("registry is listening on port: " + port);
+			RMILogger.performLog(LogPriority.INFORMATION,
+					"registry is listening on port: " + port, null);
 			while (true) {
 				final Socket socket = server.accept();
 
@@ -126,6 +131,13 @@ public class Registry {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		RMILogger.addLogListener(new RMILogListener() {
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				System.out.println(priority + ": " + message + " (" + id + ")");
+			}
+		});
 		Registry registry = getRegistry();
 		registry.init(PORT);
 		registry.run();
