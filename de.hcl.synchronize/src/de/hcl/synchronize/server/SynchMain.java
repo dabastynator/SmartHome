@@ -17,8 +17,8 @@ public class SynchMain {
 			IHCLClient c1 = new HCLClient("/home/sebastian/temp/cl1/", "cl1");
 
 			IHCLServer server = new HCLServer();
-			server.addClient(c1);
-			server.addClient(c2);
+			server.addClient("Bastis Dokumente", c1);
+			server.addClient("Bastis Dokumente", c2);
 
 			Server s = Server.getServer();
 			s.connectToRegistry("localhost");

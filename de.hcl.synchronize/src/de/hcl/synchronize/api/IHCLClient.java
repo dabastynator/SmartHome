@@ -76,7 +76,7 @@ public interface IHCLClient extends RemoteAble {
 			throws RemoteException, IOException;
 
 	/**
-	 * The client reads given directory and returns all files.
+	 * The client reads given directory and returns all files and directories.
 	 * 
 	 * @param path
 	 * @return list of files
@@ -84,18 +84,6 @@ public interface IHCLClient extends RemoteAble {
 	 * @throws IOException
 	 */
 	public FileBean[] listFiles(String path) throws RemoteException,
-			IOException;
-
-	/**
-	 * The client reads given directory and returns directories. Return just
-	 * visible directories, no .*.
-	 * 
-	 * @param path
-	 * @return list of directories
-	 * @throws RemoteException
-	 * @throws IOException
-	 */
-	public String[] listDirectories(String path) throws RemoteException,
 			IOException;
 
 	/**
@@ -136,19 +124,31 @@ public interface IHCLClient extends RemoteAble {
 		 * @param isDeleted
 		 */
 		public FileBean(String subfolder, String file, long lastDate,
-				String md5, long size, boolean isDeleted) {
+				String md5, long size, boolean isDirectory, boolean isDeleted) {
 			this.subfolder = subfolder;
 			this.file = file;
 			this.lastDate = lastDate;
 			this.md5 = md5;
 			this.size = size;
 			this.isDeleted = isDeleted;
+			this.creation = System.currentTimeMillis();
+			this.isDirectory = isDirectory;
 		}
 
 		public FileBean(FileBean bean) {
 			this(bean.subfolder, bean.file, bean.lastDate, bean.md5, bean.size,
-					bean.isDeleted);
+					bean.isDirectory, bean.isDeleted);
 		}
+
+		/**
+		 * true if file bean is directory
+		 */
+		public boolean isDirectory;
+
+		/**
+		 * creation date of the bean
+		 */
+		public long creation;
 
 		/**
 		 * name of the file
@@ -183,7 +183,8 @@ public interface IHCLClient extends RemoteAble {
 		@Override
 		public String toString() {
 			return subfolder + SEPARATOR + file + SEPARATOR + size + SEPARATOR
-					+ lastDate + SEPARATOR + md5 + SEPARATOR + isDeleted;
+					+ lastDate + SEPARATOR + md5 + SEPARATOR + isDeleted
+					+ SEPARATOR + isDirectory;
 		}
 
 		@Override
@@ -194,7 +195,7 @@ public interface IHCLClient extends RemoteAble {
 			boolean result = file.equals(bean.file)
 					&& subfolder.equals(bean.subfolder)
 					&& lastDate == bean.lastDate && isDeleted == bean.isDeleted
-					&& size == bean.size;
+					&& size == bean.size && isDirectory == bean.isDirectory;
 			if (md5 == null)
 				result &= bean.md5 == null;
 			else
@@ -212,7 +213,7 @@ public interface IHCLClient extends RemoteAble {
 			String[] split = line.split(";");
 			String filePath = "";
 			int offset = -1;
-			for (int i = 0; i < split.length - 5; i++) {
+			for (int i = 0; i < split.length - 6; i++) {
 				filePath += split[i];
 				offset++;
 			}
@@ -220,9 +221,10 @@ public interface IHCLClient extends RemoteAble {
 			long size = Long.parseLong(split[offset + 2]);
 			long lastDate = Long.parseLong(split[offset + 3]);
 			String md5 = split[offset + 4];
-			boolean isDeleted = split[offset + 5].equals("true");
+			boolean isDirectoy = split[offset + 5].equals("true");
+			boolean isDeleted = split[offset + 6].equals("true");
 			FileBean bean = new FileBean(filePath, file, lastDate, md5, size,
-					isDeleted);
+					isDirectoy, isDeleted);
 			return bean;
 		}
 

@@ -48,6 +48,12 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	public static final String CACHE_MD5 = CACHE_DIRECTORY + "size_md5_cache";
 
 	/**
+	 * maximum data knowledge determines the oldest file bean. The oldest bean
+	 * is 200 days old.
+	 */
+	public static final int MAXIMUM_KNOWLEGDE = 1000 * 3600 * 24 * 200;
+
+	/**
 	 * the log file lists all actions
 	 */
 	public static final String LOG_FILE = CACHE_DIRECTORY + "log";
@@ -135,8 +141,34 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	public boolean deleteDirectory(String directory) throws RemoteException,
 			IOException {
 		File f = new File(basePath + directory);
+		deleteDirectory(f);
 		HCLLogger.performLog(directory, HCLType.DELETE, this);
 		return f.delete();
+	}
+
+	/**
+	 * deletes given directory. the directory can not be empty, all files will
+	 * be deleted.
+	 * 
+	 * @param file
+	 * @return true if directory was deleted
+	 */
+	private boolean deleteDirectory(File file) {
+		for (File fi : file.listFiles())
+			if (fi.isDirectory())
+				deleteDirectory(fi);
+			else
+				deleteFile(fi);
+		return file.delete();
+	}
+
+	/**
+	 * delete given file
+	 * 
+	 * @param file
+	 */
+	private void deleteFile(File file) {
+		file.delete();
 	}
 
 	@Override
@@ -146,7 +178,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 		FileSender fileSender = new FileSender(file, port);
 		fileSender.sendAsync();
 		try {
-			Thread.sleep(500);
+			Thread.sleep(10);
 		} catch (InterruptedException e) {
 		}
 		HCLLogger.performLog(filePath, HCLType.SEND, this);
@@ -166,15 +198,13 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 		} else
 			HCLLogger.performLog(fileName, HCLType.CREATE, this);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
-//		receiver.getProgressListener().add(this);
+		// receiver.getProgressListener().add(this);
 		try {
 			receiver.receiveSync();
 		} catch (IOException e) {
 			file.delete();
 			if (fileMap.containsKey(subfolder)) {
-				FileBean fileBean = fileMap.get(subfolder).get(fileName);
-				if (fileBean != null)
-					fileBean.lastDate = 0;
+				fileMap.get(subfolder).remove(fileName);
 				isDirty = true;
 			}
 			HCLLogger.performLog(fileName + ' ' + e.getMessage(),
@@ -206,10 +236,8 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 		List<FileBean> list = new ArrayList<FileBean>();
 		for (String str : new File(basePath + path).list()) {
 			File file = new File(basePath + path + str);
-			if (file.isFile()) {
-				if (str.length() > 0 && str.charAt(0) != '.')
-					list.add(getFileBean(file, subfolder));
-			}
+			if (str.length() > 0 && str.charAt(0) != '.')
+				list.add(getFileBean(file, subfolder));
 		}
 		if (fileMap.containsKey(subfolder)) {
 			Map<String, FileBean> map = fileMap.get(subfolder);
@@ -225,7 +253,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 				} else if (bean.isDeleted)
 					list.add(bean);
 			}
-			for (FileBean bean: deletedBean)
+			for (FileBean bean : deletedBean)
 				map.put(bean.file, bean);
 		}
 		if (isDirty) {
@@ -247,11 +275,14 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 			BufferedWriter writer = new BufferedWriter(fileWriter);
 			String newLine = System.getProperty("line.separator");
 			writer.append("file_path;size;last_modified;md5" + newLine);
+			long now = System.currentTimeMillis();
 			for (String filePath : map.keySet()) {
 				Map<String, FileBean> submap = map.get(filePath);
 				for (String fileName : submap.keySet()) {
 					FileBean bean = submap.get(fileName);
-					writer.append(bean.toString() + newLine);
+					if (!bean.isDeleted
+							|| (now - bean.lastDate) > MAXIMUM_KNOWLEGDE)
+						writer.append(bean.toString() + newLine);
 				}
 			}
 			writer.close();
@@ -279,7 +310,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 			return bean;
 		isDirty = true;
 		bean = new FileBean(subfolder, file.getName(), file.lastModified(),
-				buildMD5(file), file.length(), false);
+				buildMD5(file), file.length(), file.isDirectory(), false);
 		if (!fileMap.containsKey(subfolder))
 			fileMap.put(subfolder, new HashMap<String, FileBean>());
 		fileMap.get(subfolder).put(file.getName(), bean);
@@ -293,6 +324,8 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	 * @return md5 of file
 	 */
 	private String buildMD5(File file) {
+		if (file.isDirectory())
+			return "";
 		try {
 			MessageDigest md = MessageDigest.getInstance("md5");
 			InputStream is = new FileInputStream(file);
@@ -311,17 +344,6 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 			e.printStackTrace();
 		}
 		return "";
-	}
-
-	@Override
-	public String[] listDirectories(String path) throws RemoteException,
-			IOException {
-		List<String> list = new ArrayList<String>();
-		for (String str : new File(basePath + path).list())
-			if (new File(basePath + path + str).isDirectory())
-				if (str.length() > 0 && str.charAt(0) != '.')
-					list.add(str);
-		return list.toArray(new String[] {});
 	}
 
 	@Override

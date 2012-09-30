@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 
 import de.hcl.synchronize.server.TransferQueue.TransferJob;
-import de.hcl.synchronize.server.TransferQueue.TransferJob.TransferType;
 
 public class TransferWorker {
 
@@ -42,7 +41,7 @@ public class TransferWorker {
 		while (true) {
 			try {
 				wait();
-				if (job.type == TransferType.FILE) {
+				if (!job.object.isDirectory) {
 					if (job.object.isDeleted) {
 						job.receiver.deleteFile(job.object.subfolder
 								+ job.object.file);
@@ -53,14 +52,18 @@ public class TransferWorker {
 								job.object.subfolder, ip, port);
 					}
 				} else {
-					job.receiver.createDirectory(job.object.subfolder,
-							job.object.file);
+					if (job.object.isDeleted) {
+						job.receiver.deleteDirectory(job.object.subfolder
+								+ job.object.file);
+					} else
+						job.receiver.createDirectory(job.object.subfolder,
+								job.object.file);
 				}
 
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} finally {
@@ -73,8 +76,8 @@ public class TransferWorker {
 		this.job = job;
 		notify();
 	}
-	
-	public TransferJob getJob(){
+
+	public TransferJob getJob() {
 		return job;
 	}
 

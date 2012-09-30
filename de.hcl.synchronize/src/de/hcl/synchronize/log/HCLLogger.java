@@ -1,11 +1,9 @@
 package de.hcl.synchronize.log;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.log.IHCLLog.HCLType;
 import de.hcl.synchronize.log.IHCLLog.IHCLMessage;
 
@@ -35,15 +33,12 @@ public class HCLLogger {
 	}
 
 	public static void performLog(String message, HCLType type,
-			IHCLClient author) {
+			Object author) {
 		IHCLMessage hclMessage = new IHCLLog.IHCLMessage(message, type,
 				new Date(), author);
-		try {
-			System.out.println(hclMessage.type.toString() + ": "
-					+ hclMessage.message + " (" + author.getName() + "/"
-					+ hclMessage.time.toString() + ")");
-		} catch (RemoteException e) {
-		}
+		System.out.println(hclMessage.type.toString() + ": "
+				+ hclMessage.message + " (" + author.toString() + "/"
+				+ hclMessage.time.toString() + ")");
 		for (IHCLLog listener : listeners)
 			listener.hclLog(hclMessage);
 	}

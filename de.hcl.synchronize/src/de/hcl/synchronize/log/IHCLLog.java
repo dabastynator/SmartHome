@@ -2,8 +2,6 @@ package de.hcl.synchronize.log;
 
 import java.util.Date;
 
-import de.hcl.synchronize.api.IHCLClient;
-
 /**
  * The IHCLLog interface enable listening on home cloud activities.
  * 
@@ -43,7 +41,7 @@ public interface IHCLLog {
 		 * @param date
 		 */
 		public IHCLMessage(String message, HCLType type, Date date,
-				IHCLClient author) {
+				Object author) {
 			this.message = message;
 			this.type = type;
 			time = date;
@@ -68,7 +66,7 @@ public interface IHCLLog {
 		/**
 		 * author of the message
 		 */
-		public IHCLClient client;
+		public Object client;
 
 	}
 }

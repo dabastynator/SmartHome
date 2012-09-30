@@ -16,16 +16,6 @@ import de.hcl.synchronize.api.IHCLClient.FileBean;
 public class TransferQueue {
 
 	/**
-	 * starting file port
-	 */
-	public static final int FILE_PORT = 5080;
-
-	/**
-	 * count of worker
-	 */
-	public static final int WORKER_COUNT = 1;
-
-	/**
 	 * job queue
 	 */
 	private List<TransferJob> jobQueue;
@@ -48,15 +38,15 @@ public class TransferQueue {
 	/**
 	 * Allocate new queue. The worker will be created.
 	 */
-	public TransferQueue() {
+	public TransferQueue(int startPort, int workerCount) {
 		workerQueue = new ArrayList<TransferWorker>();
 
 		jobQueue = Collections
 				.synchronizedList(new ArrayList<TransferQueue.TransferJob>());
 		activeJob = Collections
 				.synchronizedList(new ArrayList<TransferQueue.TransferJob>());
-		for (int i = 0; i < WORKER_COUNT; i++)
-			workerQueue.add(new TransferWorker(this, FILE_PORT + i));
+		for (int i = 0; i < workerCount; i++)
+			workerQueue.add(new TransferWorker(this, startPort + i));
 	}
 
 	/**
@@ -122,24 +112,16 @@ public class TransferQueue {
 	 */
 	public static class TransferJob {
 
-		public enum TransferType {
-			FILE, DIRECTORY
-		};
-
 		public IHCLClient sender;
 
 		public IHCLClient receiver;
 
 		public FileBean object;
 
-		public TransferType type;
-
-		public TransferJob(IHCLClient sender, IHCLClient receiver,
-				FileBean file, TransferType type) {
+		public TransferJob(IHCLClient sender, IHCLClient receiver, FileBean file) {
 			this.sender = sender;
 			this.receiver = receiver;
 			this.object = file;
-			this.type = type;
 		}
 
 		@Override
