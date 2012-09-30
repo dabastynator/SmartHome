@@ -50,6 +50,25 @@
 			</manifest>
 		</jar>
 	</target>
+	
+	<target name="compile_synch">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" />
+	</target>
+
+	<target name="jar_synch" depends="compile_synch">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/synchronize_server.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.de.hcl.synchronize.server.SynchMain" />
+			</manifest>
+		</jar>
+		<jar destfile="${jar.dir}/synchronize_client.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.de.hcl.synchronize.client.MainClient" />
+			</manifest>
+		</jar>
+	</target>
 
 	<target name="compile_desktop">
 		<mkdir dir="${classes.dir}" />
