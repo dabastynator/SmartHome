@@ -14,17 +14,18 @@ import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.log.HCLLogger;
-import de.hcl.synchronize.log.IHCLLog;
+import de.hcl.synchronize.log.IHCLLogListener;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
-import de.newsystem.rmi.transceiver.ReceiverProgress;
 
 /**
  * the HCLClient implements the client and receives and sends files.
@@ -32,7 +33,12 @@ import de.newsystem.rmi.transceiver.ReceiverProgress;
  * @author sebastian
  * 
  */
-public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
+public class HCLClient implements IHCLClient, IHCLLogListener {
+
+	/**
+	 * Set the maximum VM size in byte. (50 MB)
+	 */
+	public static final long MAXIMUM_VM_SIZE = 50 * 1000 * 1000l;
 
 	/**
 	 * the cache directory contains meta info to cache information about the
@@ -45,7 +51,8 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	 * structured by following:<br>
 	 * subfolder;file;size;last_modified;md5
 	 */
-	public static final String CACHE_MD5 = CACHE_DIRECTORY + "size_md5_cache";
+	public static final String CACHE_SUBFOLDER_DIRECTORY = CACHE_DIRECTORY
+			+ "cache" + File.separator;
 
 	/**
 	 * maximum data knowledge determines the oldest file bean. The oldest bean
@@ -72,12 +79,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	/**
 	 * the file map contains information about the file, to increase the speed
 	 */
-	private Map<String, Map<String, IHCLClient.FileBean>> fileMap;
-
-	/**
-	 * true if the fileMap contains new information about the file system.
-	 */
-	private boolean isDirty;
+	private Map<String, Subfolder> fileMap;
 
 	/**
 	 * Output stream for log data.
@@ -89,45 +91,54 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	 */
 	private String name;
 
+	/**
+	 * Allocate new home cloud client. The client operates on given base path.
+	 * 
+	 * @param basePath
+	 * @param name
+	 * @throws IOException
+	 */
 	public HCLClient(String basePath, String name) throws IOException {
+		// initialize fields
+		if (!basePath.endsWith(File.separator))
+			basePath += File.separator;
 		this.name = name;
 		this.basePath = basePath;
+		this.fileMap = new HashMap<String, Subfolder>();
+
+		// check given base path
 		if (!new File(basePath).exists())
-			throw new IOException("directory does not exist");
+			throw new IOException("directory does not exist: " + basePath);
 		if (!new File(basePath).isDirectory())
 			throw new IOException("base path is no directory");
+
+		// initialize cache structure
 		File cachDirectory = new File(basePath + CACHE_DIRECTORY);
 		if (!cachDirectory.exists())
 			cachDirectory.mkdir();
 		File backupDirectory = new File(basePath + BACKUP_DIRECTORY);
 		if (!backupDirectory.exists())
 			backupDirectory.mkdir();
-		fileMap = readMD5Cache(new File(basePath + CACHE_MD5));
+		File md5Directory = new File(basePath + CACHE_SUBFOLDER_DIRECTORY);
+		if (!md5Directory.exists())
+			md5Directory.mkdir();
 		logOutput = new BufferedWriter(new FileWriter(new File(basePath
 				+ LOG_FILE)));
 		HCLLogger.addListener(this);
 	}
 
-	private Map<String, Map<String, FileBean>> readMD5Cache(File file) {
-		Map<String, Map<String, FileBean>> map = new HashMap<String, Map<String, FileBean>>();
-		try {
-			FileReader fileReader = new FileReader(file);
-			BufferedReader reader = new BufferedReader(fileReader);
-			String line = reader.readLine();
-			while ((line = reader.readLine()) != null) {
-				FileBean bean = FileBean.parse(line);
-				if (!map.containsKey(bean.subfolder))
-					map.put(bean.subfolder,
-							new HashMap<String, IHCLClient.FileBean>());
-				map.get(bean.subfolder).put(bean.file, bean);
-			}
-			reader.close();
-			fileReader.close();
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return map;
+	/**
+	 * Get the subfolder manager of given subfolder.
+	 * 
+	 * @param subfolder
+	 * @return subFileMap
+	 */
+	protected Subfolder getSubFileMap(String subfolder) {
+		if (fileMap.containsKey(subfolder))
+			return fileMap.get(subfolder);
+		Subfolder subManager = new Subfolder(subfolder);
+		fileMap.put(subfolder, subManager);
+		return subManager;
 	}
 
 	@Override
@@ -147,7 +158,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	}
 
 	/**
-	 * deletes given directory. the directory can not be empty, all files will
+	 * Deletes given directory. the directory can not be empty, all files will
 	 * be deleted.
 	 * 
 	 * @param file
@@ -163,7 +174,7 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	}
 
 	/**
-	 * delete given file
+	 * Delete given file
 	 * 
 	 * @param file
 	 */
@@ -198,15 +209,11 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 		} else
 			HCLLogger.performLog(fileName, HCLType.CREATE, this);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
-		// receiver.getProgressListener().add(this);
 		try {
 			receiver.receiveSync();
 		} catch (IOException e) {
 			file.delete();
-			if (fileMap.containsKey(subfolder)) {
-				fileMap.get(subfolder).remove(fileName);
-				isDirty = true;
-			}
+			getSubFileMap(subfolder).remove(fileName);
 			HCLLogger.performLog(fileName + ' ' + e.getMessage(),
 					HCLType.ERROR, this);
 			throw e;
@@ -227,68 +234,42 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	}
 
 	@Override
-	public FileBean[] listFiles(String path) throws RemoteException,
+	public FileBean[] listFiles(String subfolder) throws RemoteException,
 			IOException {
-		isDirty = false;
-		String subfolder = "";
-		if (path.contains(File.separator))
-			subfolder = path.substring(0, path.lastIndexOf(File.separator) + 1);
 		List<FileBean> list = new ArrayList<FileBean>();
-		for (String str : new File(basePath + path).list()) {
-			File file = new File(basePath + path + str);
+		Subfolder subManager = getSubFileMap(subfolder);
+		for (String str : new File(basePath + subfolder).list()) {
+			File file = new File(basePath + subfolder + str);
 			if (str.length() > 0 && str.charAt(0) != '.')
-				list.add(getFileBean(file, subfolder));
+				list.add(getFileBean(file, subManager));
 		}
-		if (fileMap.containsKey(subfolder)) {
-			Map<String, FileBean> map = fileMap.get(subfolder);
-			List<FileBean> deletedBean = new ArrayList<IHCLClient.FileBean>();
-			for (FileBean bean : map.values()) {
-				if (!list.contains(bean) && !bean.isDeleted) {
-					bean.isDeleted = true;
-					bean.lastDate = System.currentTimeMillis();
-					FileBean newBean = new FileBean(bean);
-					list.add(newBean);
-					deletedBean.add(newBean);
-					isDirty = true;
-				} else if (bean.isDeleted)
-					list.add(bean);
-			}
-			for (FileBean bean : deletedBean)
-				map.put(bean.file, bean);
+		List<FileBean> deletedBean = new ArrayList<IHCLClient.FileBean>();
+		for (FileBean bean : subManager.getFileBeans()) {
+			if (!list.contains(bean) && !bean.isDeleted) {
+				bean.isDeleted = true;
+				bean.lastDate = System.currentTimeMillis();
+				FileBean newBean = new FileBean(bean);
+				list.add(newBean);
+				deletedBean.add(newBean);
+			} else if (bean.isDeleted)
+				list.add(bean);
 		}
-		if (isDirty) {
-			isDirty = false;
-			saveFileMap(new File(basePath + CACHE_MD5), fileMap);
-		}
+		for (FileBean bean : deletedBean)
+			subManager.push(bean);
+		subManager.write();
+		checkVMSize();
 		return list.toArray(new FileBean[] {});
 	}
 
 	/**
-	 * save the file map to given file in csv format.
-	 * 
-	 * @param file
-	 * @param map
+	 * If current mv size is bigger or equal to the maximum size, delete the
+	 * first file map entry.
 	 */
-	private void saveFileMap(File file, Map<String, Map<String, FileBean>> map) {
-		try {
-			FileWriter fileWriter = new FileWriter(file);
-			BufferedWriter writer = new BufferedWriter(fileWriter);
-			String newLine = System.getProperty("line.separator");
-			writer.append("file_path;size;last_modified;md5" + newLine);
-			long now = System.currentTimeMillis();
-			for (String filePath : map.keySet()) {
-				Map<String, FileBean> submap = map.get(filePath);
-				for (String fileName : submap.keySet()) {
-					FileBean bean = submap.get(fileName);
-					if (!bean.isDeleted
-							|| (now - bean.lastDate) > MAXIMUM_KNOWLEGDE)
-						writer.append(bean.toString() + newLine);
-				}
-			}
-			writer.close();
-			fileWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	private void checkVMSize() {
+		long totalMemory = Runtime.getRuntime().totalMemory();
+		if (totalMemory >= MAXIMUM_VM_SIZE) {
+			fileMap.remove(fileMap.keySet().iterator().next());
+			System.gc();
 		}
 	}
 
@@ -296,24 +277,20 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 	 * create file bean of given file and subfolder.
 	 * 
 	 * @param file
-	 * @param subfolder
+	 * @param subManager
 	 * @return file bean
 	 * @throws IOException
 	 */
-	private FileBean getFileBean(File file, String subfolder)
+	private FileBean getFileBean(File file, Subfolder subManager)
 			throws IOException {
-		FileBean bean = null;
-		if (fileMap.containsKey(subfolder))
-			bean = fileMap.get(subfolder).get(file.getName());
+		FileBean bean = subManager.getFileBean(file.getName());
 		if (bean != null && bean.lastDate == file.lastModified()
 				&& !bean.isDeleted)
 			return bean;
-		isDirty = true;
-		bean = new FileBean(subfolder, file.getName(), file.lastModified(),
-				buildMD5(file), file.length(), file.isDirectory(), false);
-		if (!fileMap.containsKey(subfolder))
-			fileMap.put(subfolder, new HashMap<String, FileBean>());
-		fileMap.get(subfolder).put(file.getName(), bean);
+		bean = new FileBean(subManager.getSubfolder(), file.getName(),
+				file.lastModified(), buildMD5(file), file.length(),
+				file.isDirectory(), false);
+		subManager.push(bean);
 		return bean;
 	}
 
@@ -359,29 +336,189 @@ public class HCLClient implements IHCLClient, IHCLLog, ReceiverProgress {
 		}
 	}
 
-	@Override
-	public void downloadCanceled() {
-		System.out.println("receive canceled");
-	}
+	/**
+	 * The subfolder class manages the knowledge of a subfolder with files,
+	 * directories, size, md5 and deletion.
+	 * 
+	 * @author sebastian
+	 */
+	protected class Subfolder {
 
-	@Override
-	public void endReceive(long size) {
-		System.out.println("receive done");
-	}
+		/**
+		 * the sub file map contains all beans by their name
+		 */
+		private Map<String, FileBean> subFileMap = new HashMap<String, IHCLClient.FileBean>();
 
-	@Override
-	public void exceptionOccurred(Exception e) {
-		System.out.println("receive exception: " + e.getMessage());
-	}
+		/**
+		 * the file map file caches the knowledge
+		 */
+		private File fileMapFile;
 
-	@Override
-	public void progressReceive(long size) {
-		System.out.println("prog: " + size);
-	}
+		/**
+		 * relative subfolder ot this subfolder
+		 */
+		private String subfolder;
 
-	@Override
-	public void startReceive(long size) {
-		System.out.println("start receive : " + size);
+		/**
+		 * true, is some changes on the file map are not saved.
+		 */
+		private boolean isDirty;
+
+		/**
+		 * Allocate new subfolder at given path
+		 * 
+		 * @param subfolder
+		 */
+		public Subfolder(String subfolder) {
+			fileMapFile = new File(basePath + CACHE_SUBFOLDER_DIRECTORY
+					+ subfolderToCache(subfolder));
+			if (!fileMapFile.exists())
+				try {
+					fileMapFile.createNewFile();
+				} catch (IOException e) {
+				}
+			subFileMap = new HashMap<String, IHCLClient.FileBean>();
+			this.subfolder = subfolder;
+			isDirty = false;
+			read();
+		}
+
+		/**
+		 * Remove given fileName from the file map.
+		 * 
+		 * @param fileName
+		 */
+		public void remove(String fileName) {
+			subFileMap.remove(fileName);
+			isDirty = true;
+		}
+
+		/**
+		 * Get the file names of this subfolder.
+		 * 
+		 * @return filenames
+		 */
+		public Set<String> getSubFileMap() {
+			return subFileMap.keySet();
+		}
+
+		/**
+		 * Get the subfolder string of this subfolder.
+		 * 
+		 * @return subfolder
+		 */
+		public String getSubfolder() {
+			return subfolder;
+		}
+
+		/**
+		 * Get the file bean in this subfolder for given file name.
+		 * 
+		 * @param file
+		 * @return filebean
+		 */
+		public FileBean getFileBean(String file) {
+			return subFileMap.get(file);
+		}
+
+		/**
+		 * Get file bean collection of this subfolder.
+		 * 
+		 * @return filebeans
+		 */
+		public Collection<FileBean> getFileBeans() {
+			return subFileMap.values();
+		}
+
+		/**
+		 * Insert new filebean to this subfolder.
+		 * 
+		 * @param fileBean
+		 */
+		public void push(FileBean fileBean) {
+			subFileMap.put(fileBean.file, fileBean);
+			isDirty = true;
+		}
+
+		/**
+		 * Change subfolder string to cache name of the subfilemap.
+		 * 
+		 * @param subfolder
+		 * @return String
+		 */
+		private String subfolderToCache(String subfolder) {
+			String splash = "_";
+			String cacheName = subfolder.replaceAll(File.separator, splash)
+					+ ".cache";
+			if (subfolder.contains(splash))
+				for (String folder : subfolder.split(File.separator)) {
+					cacheName += "$" + countString(folder, splash);
+				}
+			return cacheName;
+		}
+
+		private int countString(String string, String sequence) {
+			int ret = 0;
+			while (string.contains(sequence)) {
+				ret++;
+				string = string.substring(string.indexOf(sequence)
+						+ sequence.length());
+			}
+			return ret;
+		}
+
+		/**
+		 * Read cache file map and parse the line to file beans.
+		 * 
+		 * @param file
+		 * @return fileMap
+		 */
+		private void read() {
+			try {
+				FileReader fileReader = new FileReader(fileMapFile);
+				BufferedReader reader = new BufferedReader(fileReader);
+				String line = reader.readLine();
+				while ((line = reader.readLine()) != null) {
+					FileBean bean = FileBean.parse(line);
+					subFileMap.put(bean.file, bean);
+				}
+				reader.close();
+				fileReader.close();
+			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		/**
+		 * save the file map to cache file map in csv format.
+		 * 
+		 * @param file
+		 * @param map
+		 */
+		private void write() {
+			if (!isDirty)
+				return;
+			try {
+				FileWriter fileWriter = new FileWriter(fileMapFile);
+				BufferedWriter writer = new BufferedWriter(fileWriter);
+				String newLine = System.getProperty("line.separator");
+				writer.append("file_path;size;last_modified;md5" + newLine);
+				long now = System.currentTimeMillis();
+				for (String fileName : subFileMap.keySet()) {
+					FileBean bean = subFileMap.get(fileName);
+					if (!bean.isDeleted
+							|| (now - bean.lastDate) < MAXIMUM_KNOWLEGDE)
+						writer.append(bean.toString() + newLine);
+				}
+				writer.close();
+				fileWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			isDirty = false;
+		}
+
 	}
 
 }

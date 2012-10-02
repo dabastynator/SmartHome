@@ -8,7 +8,7 @@ import java.util.Date;
  * @author sebastian
  * 
  */
-public interface IHCLLog {
+public interface IHCLLogListener {
 
 	/**
 	 * There are several type of actions on files available.

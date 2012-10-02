@@ -12,7 +12,7 @@ import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLClient.FileBean;
 import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.log.HCLLogger;
-import de.hcl.synchronize.log.IHCLLog.HCLType;
+import de.hcl.synchronize.log.IHCLLogListener.HCLType;
 import de.hcl.synchronize.server.TransferQueue.TransferJob;
 
 public class Synchronizer {
@@ -67,6 +67,20 @@ public class Synchronizer {
 			for (int j = i + 1; j < size; j++) {
 				IHCLClient client1 = server.getClient(sessionID, i);
 				IHCLClient client2 = server.getClient(sessionID, j);
+				try {
+					client1.getName();
+				} catch (RemoteException e) {
+					HCLLogger.performLog("client does not respond. id: "
+							+ sessionID, HCLType.ERROR, this);
+					server.removeClient(sessionID, client1);
+				}
+				try {
+					client2.getName();
+				} catch (RemoteException e) {
+					HCLLogger.performLog("client does not respond. id: "
+							+ sessionID, HCLType.ERROR, this);
+					server.removeClient(sessionID, client2);
+				}
 				if (client1 != null && client2 != null)
 					synchronizeClients(client1, client2);
 			}

@@ -83,12 +83,12 @@ public interface IHCLClient extends RemoteAble {
 	/**
 	 * The client reads given directory and returns all files and directories.
 	 * 
-	 * @param path
+	 * @param subfolder
 	 * @return list of files
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public FileBean[] listFiles(String path) throws RemoteException,
+	public FileBean[] listFiles(String subfolder) throws RemoteException,
 			IOException;
 
 	/**

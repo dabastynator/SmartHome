@@ -9,7 +9,7 @@ import java.util.Map;
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.log.HCLLogger;
-import de.hcl.synchronize.log.IHCLLog.HCLType;
+import de.hcl.synchronize.log.IHCLLogListener.HCLType;
 
 /**
  * the implementation of the server interface holds the list of clients.
