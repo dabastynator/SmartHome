@@ -90,7 +90,6 @@ public abstract class AbstractSender {
 				Socket socket = serverPort.accept();
 				new UploadObserver(socket).start();
 				writeData(socket.getOutputStream());
-				socket.close();
 			} catch (IOException e) {
 				informException(e);
 			}
@@ -128,7 +127,8 @@ public abstract class AbstractSender {
 				InputStream input = socket.getInputStream();
 				int msg;
 				while ((msg = input.read()) != -1) {
-					if (msg == ReceiverState.CANCELD.ordinal()) {
+					if (msg == ReceiverState.CANCELD.ordinal()
+							|| msg == ReceiverState.FINISHED.ordinal()) {
 						socket.getOutputStream().close();
 						socket.getInputStream().close();
 						socket.close();

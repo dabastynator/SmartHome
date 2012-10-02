@@ -134,8 +134,9 @@ public abstract class AbstractReceiver {
 			state = ReceiverState.LOADING;
 			output.write(ReceiverState.LOADING.ordinal());
 			receiveData(input);
+			output.write(ReceiverState.FINISHED.ordinal());
 			state = ReceiverState.FINISHED;
-		} else if (state == ReceiverState.CANCELD){
+		} else if (state == ReceiverState.CANCELD) {
 			output.write(ReceiverState.CANCELD.ordinal());
 		}
 		socket.close();

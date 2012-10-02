@@ -137,8 +137,8 @@ public class Server {
 		registryIn = new ObjectInputStream(registrySocket.getInputStream());
 		ip = registrySocket.getLocalAddress().getHostAddress();
 		isConnectedRegistry = true;
-		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry",
-				null);
+		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry: "
+				+ registry + ":" + port, null);
 	}
 
 	/**
