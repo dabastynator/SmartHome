@@ -58,14 +58,14 @@
 
 	<target name="jar_synch" depends="compile_synch">
 		<mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/synchronizer_server.jar" basedir="${classes.dir}">
+		<jar destfile="${jar.dir}/synch_server.jar" basedir="${classes.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="de.hcl.synchronize.server.SynchMain" />
+				<attribute name="Main-Class" value="de.hcl.synchronize.server.MainSynchServer" />
 			</manifest>
 		</jar>
-		<jar destfile="${jar.dir}/synchronizer_client.jar" basedir="${classes.dir}">
+		<jar destfile="${jar.dir}/synch_client.jar" basedir="${classes.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="de.hcl.synchronize.client.MainClient" />
+				<attribute name="Main-Class" value="de.hcl.synchronize.client.MainSynchClient" />
 			</manifest>
 		</jar>
 	</target>
