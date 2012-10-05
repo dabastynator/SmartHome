@@ -64,6 +64,7 @@
 			</manifest>
 		</jar>
 		<jar destfile="${jar.dir}/synch_client.jar" basedir="${classes.dir}">
+			<fileset dir="./../de.hcl.synchronize/" includes="icons/*.png" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.hcl.synchronize.client.MainSynchClient" />
 			</manifest>
@@ -80,6 +81,7 @@
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
 			<fileset dir="./../de.remote.desktop/" includes="res/*.png" excludes="" />
+			<zipgroupfileset dir="${lib.dir2}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.remote.desktop.RemoteControl" />
 			</manifest>
