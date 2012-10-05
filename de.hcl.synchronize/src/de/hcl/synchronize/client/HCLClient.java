@@ -130,7 +130,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			path = path.substring(0, path.length() - 4);
 		InputStream input = null;
 		if (path.toLowerCase().endsWith(".jar"))
-			input = owner.getClass().getResourceAsStream(source);
+			input = owner.getClass().getResourceAsStream("/" + source);
 		else
 			input = owner.getClass().getResourceAsStream(path + source);
 		if (input == null)
