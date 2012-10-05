@@ -57,7 +57,7 @@ public class ServerConnection {
 				if (socket.socket.isClosed()) {
 					serverConnections.remove(i);
 					RMILogger.performLog(LogPriority.WARNING,
-							"connection closed from: " + serverPort.getIp()
+							"Connection closed from: " + serverPort.getIp()
 									+ ":" + serverPort.getPort(), null);
 					continue;
 				}
@@ -154,10 +154,11 @@ public class ServerConnection {
 		 * 
 		 * @throws IOException
 		 */
-		public void disconnect() throws IOException {
-			input.close();
-			output.close();
-			socket.close();
+		public void disconnect() {
+			try {
+				socket.close();
+			} catch (IOException e) {
+			}
 		}
 
 		/**

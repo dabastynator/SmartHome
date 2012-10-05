@@ -166,6 +166,9 @@ public class Server {
 	public void forceConnectToRegistry(String registry)
 			throws UnknownHostException, IOException {
 		boolean connected = false;
+		long waitTime = 500;
+		long maxTime = 1000 * 60 * 10;
+		double waitFactor = 1.5;
 		while (!connected) {
 			try {
 				connectToRegistry(registry);
@@ -176,7 +179,10 @@ public class Server {
 						"connection to registry refused: " + e.getMessage(),
 						null);
 				try {
-					Thread.sleep(500);
+					Thread.sleep(waitTime);
+					waitTime = (long) (waitTime * waitFactor);
+					if (waitTime > maxTime)
+						waitTime = maxTime;
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}

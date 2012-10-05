@@ -80,36 +80,41 @@ public class DynamicProxy implements InvocationHandler {
 	 */
 	private Object performeRequest(Request request) throws Throwable {
 		Reply reply = null;
-		ConnectionSocket socket = serverConnection.getFreeConnectionSocket();
-		try {
+		ConnectionSocket socket = null;
+		RemoteException remoteException = null;
+		for (int i = 0; i < server.getConnectionSocketCount(); i++) {
 			try {
-				socket.getOutput().writeObject(request);
-				if (request.isOneway())
-					return null;
-				reply = (Reply) socket.getInput().readObject();
-			} catch (IOException e) {
-				socket.disconnect();
-				socket.free();
 				socket = serverConnection.getFreeConnectionSocket();
-				socket.getOutput().writeObject(request);
-				if (request.isOneway())
-					return null;
-				reply = (Reply) socket.getInput().readObject();
+			} catch (IOException e) {
+				throw new RemoteException(id, e.getMessage());
 			}
-		} catch (Exception e) {
-			throw new RemoteException(id, e.getMessage());
-		} finally {
-			socket.free();
+			try {
+				try {
+					socket.getOutput().writeObject(request);
+					if (request.isOneway())
+						return null;
+					reply = (Reply) socket.getInput().readObject();
+					if (reply == null)
+						throw new RemoteException(id, "null returned");
+					if (reply.getError() != null)
+						throw reply.getError();
+					if (reply.getReturnType() != null
+							&& reply.getNewId() != null)
+						return server.createProxy(reply.getNewId(),
+								serverConnection, reply.getReturnType());
+					else
+						return reply.getResult();
+				} catch (IOException e) {
+					socket.disconnect();
+					remoteException = new RemoteException(id, e.getMessage());
+				}
+			} catch (Exception e) {
+				throw new RemoteException(id, e.getMessage());
+			} finally {
+				socket.free();
+			}
 		}
-		if (reply == null)
-			throw new RemoteException(id, "null returned");
-		if (reply.getError() != null)
-			throw reply.getError();
-		if (reply.getReturnType() != null && reply.getNewId() != null)
-			return server.createProxy(reply.getNewId(), serverConnection,
-					reply.getReturnType());
-		else
-			return reply.getResult();
+		throw remoteException;
 	}
 
 	/**
