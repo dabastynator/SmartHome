@@ -128,7 +128,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 				.getLocation().toString().substring(5);
 		if (path.endsWith("bin/"))
 			path = path.substring(0, path.length() - 4);
-		InputStream input = owner.getClass().getResourceAsStream(path + source);
+		InputStream input = null;
+		if (path.toLowerCase().endsWith(",jar"))
+			input = owner.getClass().getResourceAsStream(source);
+		else
+			input = owner.getClass().getResourceAsStream(path + source);
 		if (input == null)
 			input = new FileInputStream(new File(path + source));
 		FileOutputStream output = new FileOutputStream(destiny);
