@@ -1,29 +1,22 @@
 package de.hcl.synchronize.client;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
 
@@ -72,6 +65,37 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			+ File.separator;
 
 	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String ICON_DIRECTORY = CACHE_DIRECTORY + "icons"
+			+ File.separator;
+
+	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String CREATE_ICON = ICON_DIRECTORY + "create.png";
+
+	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String DELETE_ICON = ICON_DIRECTORY + "delete.png";
+
+	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String ERROR_ICON = ICON_DIRECTORY + "error.png";
+
+	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String SYNCH_ICON = ICON_DIRECTORY + "synch.png";
+
+	/**
+	 * the icon folder contains all icons for the gui
+	 */
+	public static final String INFORM_ICON = ICON_DIRECTORY + "inform.png";
+
+	/**
 	 * the base directory on witch the file system should be synchronized
 	 */
 	private String basePath;
@@ -90,6 +114,32 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	 * name of the client
 	 */
 	private String name;
+
+	/**
+	 * Reads given object from owner and save read data to given destiny file.
+	 * 
+	 * @param source
+	 * @param destiny
+	 * @throws IOException
+	 */
+	public static void copyFileFromJar(Object owner, String source, File destiny)
+			throws IOException {
+		String path = owner.getClass().getProtectionDomain().getCodeSource()
+				.getLocation().toString().substring(5);
+		if (path.endsWith("bin/"))
+			path = path.substring(0, path.length() - 4);
+		InputStream input = owner.getClass().getResourceAsStream(path + source);
+		if (input == null)
+			input = new FileInputStream(new File(path + source));
+		FileOutputStream output = new FileOutputStream(destiny);
+		byte[] data = new byte[2048];
+		int read = 0;
+		while ((read = input.read(data)) > -1) {
+			output.write(data, 0, read);
+		}
+		output.close();
+		input.close();
+	}
 
 	/**
 	 * Allocate new home cloud client. The client operates on given base path.
@@ -112,6 +162,17 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		if (!new File(basePath).isDirectory())
 			throw new IOException("base path is no directory");
 
+		initializeCacheStructure();
+
+		logOutput = new BufferedWriter(new FileWriter(new File(basePath
+				+ LOG_FILE)));
+		HCLLogger.addListener(this);
+	}
+
+	/**
+	 * Create cache structure with all necessary folder and files.
+	 */
+	private void initializeCacheStructure() {
 		// initialize cache structure
 		File cachDirectory = new File(basePath + CACHE_DIRECTORY);
 		if (!cachDirectory.exists())
@@ -122,9 +183,26 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		File md5Directory = new File(basePath + CACHE_SUBFOLDER_DIRECTORY);
 		if (!md5Directory.exists())
 			md5Directory.mkdir();
-		logOutput = new BufferedWriter(new FileWriter(new File(basePath
-				+ LOG_FILE)));
-		HCLLogger.addListener(this);
+		File iconDirectory = new File(basePath + ICON_DIRECTORY);
+		if (!iconDirectory.exists()) {
+			iconDirectory.mkdir();
+			try {
+				copyFileFromJar(this, "icons/create.png", new File(basePath
+						+ CREATE_ICON));
+				copyFileFromJar(this, "icons/delete.png", new File(basePath
+						+ DELETE_ICON));
+				copyFileFromJar(this, "icons/synch.png", new File(basePath
+						+ SYNCH_ICON));
+				copyFileFromJar(this, "icons/error.png", new File(basePath
+						+ ERROR_ICON));
+				copyFileFromJar(this, "icons/inform.png", new File(basePath
+						+ INFORM_ICON));
+			} catch (IOException e) {
+				HCLLogger.performLog(
+						"Initialize icons error: " + e.getMessage(),
+						HCLType.ERROR, this);
+			}
+		}
 	}
 
 	/**
@@ -136,7 +214,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	protected Subfolder getSubFileMap(String subfolder) {
 		if (fileMap.containsKey(subfolder))
 			return fileMap.get(subfolder);
-		Subfolder subManager = new Subfolder(subfolder);
+		Subfolder subManager = new Subfolder(subfolder, basePath);
 		fileMap.put(subfolder, subManager);
 		return subManager;
 	}
@@ -144,7 +222,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public boolean deleteFile(String file) throws RemoteException, IOException {
 		File f = new File(basePath + file);
-		HCLLogger.performLog(file, HCLType.DELETE, this);
+		HCLLogger.performLog("Delete file: '" + file + "'", HCLType.DELETE,
+				this);
 		return f.delete();
 	}
 
@@ -153,7 +232,9 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			IOException {
 		File f = new File(basePath + directory);
 		deleteDirectory(f);
-		HCLLogger.performLog(directory, HCLType.DELETE, this);
+		fileMap.remove(directory);
+		HCLLogger.performLog("Delete directory: '" + directory + "'",
+				HCLType.DELETE, this);
 		return f.delete();
 	}
 
@@ -192,7 +273,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
 		}
-		HCLLogger.performLog(filePath, HCLType.SEND, this);
+		HCLLogger.performLog("Send file: '" + filePath + "'", HCLType.SEND,
+				this);
 		return Server.getServer().getServerPort().getIp();
 	}
 
@@ -205,9 +287,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 					+ fileName + "." + file.lastModified());
 			file.renameTo(destination);
 			file = new File(basePath + subfolder + fileName);
-			HCLLogger.performLog(fileName, HCLType.UPDATE, this);
+			HCLLogger.performLog("Update file: '" + fileName + "'",
+					HCLType.UPDATE, this);
 		} else
-			HCLLogger.performLog(fileName, HCLType.CREATE, this);
+			HCLLogger.performLog("Create file: '" + fileName + "'",
+					HCLType.CREATE, this);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
 		try {
 			receiver.receiveSync();
@@ -224,7 +308,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	public boolean createDirectory(String subfolder, String directoryName)
 			throws RemoteException, IOException {
 		File file = new File(basePath + subfolder + directoryName);
-		HCLLogger.performLog(directoryName, HCLType.CREATE, this);
+		HCLLogger.performLog("Create new directory: '" + directoryName + "'",
+				HCLType.CREATE, this);
 		return file.mkdir();
 	}
 
@@ -236,29 +321,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public FileBean[] listFiles(String subfolder) throws RemoteException,
 			IOException {
-		List<FileBean> list = new ArrayList<FileBean>();
 		Subfolder subManager = getSubFileMap(subfolder);
-		for (String str : new File(basePath + subfolder).list()) {
-			File file = new File(basePath + subfolder + str);
-			if (str.length() > 0 && str.charAt(0) != '.')
-				list.add(getFileBean(file, subManager));
-		}
-		List<FileBean> deletedBean = new ArrayList<IHCLClient.FileBean>();
-		for (FileBean bean : subManager.getFileBeans()) {
-			if (!list.contains(bean) && !bean.isDeleted) {
-				bean.isDeleted = true;
-				bean.lastDate = System.currentTimeMillis();
-				FileBean newBean = new FileBean(bean);
-				list.add(newBean);
-				deletedBean.add(newBean);
-			} else if (bean.isDeleted)
-				list.add(bean);
-		}
-		for (FileBean bean : deletedBean)
-			subManager.push(bean);
-		subManager.write();
+		FileBean[] listFiles = subManager.listFiles()
+				.toArray(new FileBean[] {});
 		checkVMSize();
-		return list.toArray(new FileBean[] {});
+		return listFiles;
 	}
 
 	/**
@@ -270,57 +337,25 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		if (totalMemory >= MAXIMUM_VM_SIZE) {
 			fileMap.remove(fileMap.keySet().iterator().next());
 			System.gc();
+			HCLLogger.performLog("Reduce heap size", HCLType.INFORMATION, this);
 		}
 	}
 
-	/**
-	 * create file bean of given file and subfolder.
-	 * 
-	 * @param file
-	 * @param subManager
-	 * @return file bean
-	 * @throws IOException
-	 */
-	private FileBean getFileBean(File file, Subfolder subManager)
-			throws IOException {
-		FileBean bean = subManager.getFileBean(file.getName());
-		if (bean != null && bean.lastDate == file.lastModified()
-				&& !bean.isDeleted)
-			return bean;
-		bean = new FileBean(subManager.getSubfolder(), file.getName(),
-				file.lastModified(), buildMD5(file), file.length(),
-				file.isDirectory(), false);
-		subManager.push(bean);
-		return bean;
+	@Override
+	public String getHash(String subfolder) throws RemoteException {
+		Subfolder subFileMap = getSubFileMap(subfolder);
+		String hash = subFileMap.getDirectoryHash();
+		return hash;
 	}
 
-	/**
-	 * create md5 code of given file.
-	 * 
-	 * @param file
-	 * @return md5 of file
-	 */
-	private String buildMD5(File file) {
-		if (file.isDirectory())
-			return "";
-		try {
-			MessageDigest md = MessageDigest.getInstance("md5");
-			InputStream is = new FileInputStream(file);
-			byte[] buffer = new byte[8192];
-			int read = 0;
-			while ((read = is.read(buffer)) > 0)
-				md.update(buffer, 0, read);
-			byte[] md5 = md.digest();
-			BigInteger bi = new BigInteger(1, md5);
-			return bi.toString(16);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public String[] listDirectories(String subfolder) throws IOException {
+		List<String> folder = new ArrayList<String>();
+		for (FileBean bean : getSubFileMap(subfolder).listFiles()) {
+			if (bean.isDirectory && !bean.isDeleted)
+				folder.add(bean.file + File.separator);
 		}
-		return "";
+		return folder.toArray(new String[] {});
 	}
 
 	@Override
@@ -335,190 +370,4 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			e.printStackTrace();
 		}
 	}
-
-	/**
-	 * The subfolder class manages the knowledge of a subfolder with files,
-	 * directories, size, md5 and deletion.
-	 * 
-	 * @author sebastian
-	 */
-	protected class Subfolder {
-
-		/**
-		 * the sub file map contains all beans by their name
-		 */
-		private Map<String, FileBean> subFileMap = new HashMap<String, IHCLClient.FileBean>();
-
-		/**
-		 * the file map file caches the knowledge
-		 */
-		private File fileMapFile;
-
-		/**
-		 * relative subfolder ot this subfolder
-		 */
-		private String subfolder;
-
-		/**
-		 * true, is some changes on the file map are not saved.
-		 */
-		private boolean isDirty;
-
-		/**
-		 * Allocate new subfolder at given path
-		 * 
-		 * @param subfolder
-		 */
-		public Subfolder(String subfolder) {
-			fileMapFile = new File(basePath + CACHE_SUBFOLDER_DIRECTORY
-					+ subfolderToCache(subfolder));
-			if (!fileMapFile.exists())
-				try {
-					fileMapFile.createNewFile();
-				} catch (IOException e) {
-				}
-			subFileMap = new HashMap<String, IHCLClient.FileBean>();
-			this.subfolder = subfolder;
-			isDirty = false;
-			read();
-		}
-
-		/**
-		 * Remove given fileName from the file map.
-		 * 
-		 * @param fileName
-		 */
-		public void remove(String fileName) {
-			subFileMap.remove(fileName);
-			isDirty = true;
-		}
-
-		/**
-		 * Get the file names of this subfolder.
-		 * 
-		 * @return filenames
-		 */
-		public Set<String> getSubFileMap() {
-			return subFileMap.keySet();
-		}
-
-		/**
-		 * Get the subfolder string of this subfolder.
-		 * 
-		 * @return subfolder
-		 */
-		public String getSubfolder() {
-			return subfolder;
-		}
-
-		/**
-		 * Get the file bean in this subfolder for given file name.
-		 * 
-		 * @param file
-		 * @return filebean
-		 */
-		public FileBean getFileBean(String file) {
-			return subFileMap.get(file);
-		}
-
-		/**
-		 * Get file bean collection of this subfolder.
-		 * 
-		 * @return filebeans
-		 */
-		public Collection<FileBean> getFileBeans() {
-			return subFileMap.values();
-		}
-
-		/**
-		 * Insert new filebean to this subfolder.
-		 * 
-		 * @param fileBean
-		 */
-		public void push(FileBean fileBean) {
-			subFileMap.put(fileBean.file, fileBean);
-			isDirty = true;
-		}
-
-		/**
-		 * Change subfolder string to cache name of the subfilemap.
-		 * 
-		 * @param subfolder
-		 * @return String
-		 */
-		private String subfolderToCache(String subfolder) {
-			String splash = "_";
-			String cacheName = subfolder.replaceAll(File.separator, splash)
-					+ ".cache";
-			if (subfolder.contains(splash))
-				for (String folder : subfolder.split(File.separator)) {
-					cacheName += "$" + countString(folder, splash);
-				}
-			return cacheName;
-		}
-
-		private int countString(String string, String sequence) {
-			int ret = 0;
-			while (string.contains(sequence)) {
-				ret++;
-				string = string.substring(string.indexOf(sequence)
-						+ sequence.length());
-			}
-			return ret;
-		}
-
-		/**
-		 * Read cache file map and parse the line to file beans.
-		 * 
-		 * @param file
-		 * @return fileMap
-		 */
-		private void read() {
-			try {
-				FileReader fileReader = new FileReader(fileMapFile);
-				BufferedReader reader = new BufferedReader(fileReader);
-				String line = reader.readLine();
-				while ((line = reader.readLine()) != null) {
-					FileBean bean = FileBean.parse(line);
-					subFileMap.put(bean.file, bean);
-				}
-				reader.close();
-				fileReader.close();
-			} catch (FileNotFoundException e) {
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		/**
-		 * save the file map to cache file map in csv format.
-		 * 
-		 * @param file
-		 * @param map
-		 */
-		private void write() {
-			if (!isDirty)
-				return;
-			try {
-				FileWriter fileWriter = new FileWriter(fileMapFile);
-				BufferedWriter writer = new BufferedWriter(fileWriter);
-				String newLine = System.getProperty("line.separator");
-				writer.append("file_path;size;last_modified;md5" + newLine);
-				long now = System.currentTimeMillis();
-				for (String fileName : subFileMap.keySet()) {
-					FileBean bean = subFileMap.get(fileName);
-					if (!bean.isDeleted
-							|| (now - bean.lastDate) < MAXIMUM_KNOWLEGDE)
-						writer.append(bean.toString() + newLine);
-				}
-				writer.close();
-				fileWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			isDirty = false;
-		}
-
-	}
-
 }

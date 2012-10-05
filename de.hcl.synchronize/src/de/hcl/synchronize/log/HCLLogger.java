@@ -32,6 +32,13 @@ public class HCLLogger {
 		listeners.remove(listener);
 	}
 
+	/**
+	 * Perform log with specified message type and author.
+	 * 
+	 * @param message
+	 * @param type
+	 * @param author
+	 */
 	public static void performLog(String message, HCLType type, Object author) {
 		if (author == null)
 			author = "unknown";

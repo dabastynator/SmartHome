@@ -1,6 +1,5 @@
 package de.hcl.synchronize.server;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +9,7 @@ import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
+import de.newsystem.rmi.protokol.RemoteException;
 
 /**
  * the implementation of the server interface holds the list of clients.
@@ -39,7 +39,7 @@ public class HCLServer extends Thread implements IHCLServer {
 			throws RemoteException {
 		if (!sessions.containsKey(synchronizationID)) {
 			sessions.put(synchronizationID, new ArrayList<IHCLClient>());
-			HCLLogger.performLog("create new session: " + synchronizationID, HCLType.CREATE, this);
+			HCLLogger.performLog("Create new session: " + synchronizationID, HCLType.INFORMATION, this);
 		}
 		return sessions.get(synchronizationID).add(client);
 	}

@@ -2,7 +2,6 @@ package de.hcl.synchronize.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +13,7 @@ import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
 import de.hcl.synchronize.server.TransferQueue.TransferJob;
+import de.newsystem.rmi.protokol.RemoteException;
 
 public class Synchronizer {
 
@@ -37,8 +37,8 @@ public class Synchronizer {
 		new Thread() {
 			@Override
 			public void run() {
-				HCLLogger.performLog("synchronization started", HCLType.CREATE,
-						Synchronizer.this);
+				HCLLogger.performLog("Synchronization started",
+						HCLType.INFORMATION, Synchronizer.this);
 				while (true) {
 					synchronizeSynch();
 					try {
@@ -57,7 +57,6 @@ public class Synchronizer {
 			for (String session : sessionIDs)
 				synchronizeSession(session);
 		} catch (RemoteException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -70,19 +69,25 @@ public class Synchronizer {
 				try {
 					client1.getName();
 				} catch (RemoteException e) {
-					HCLLogger.performLog("client does not respond. id: "
-							+ sessionID, HCLType.ERROR, this);
+					HCLLogger.performLog(
+							"Client does not respond at session: '" + sessionID
+									+ "'", HCLType.WARNING, this);
 					server.removeClient(sessionID, client1);
+					client1 = null;
 				}
 				try {
 					client2.getName();
 				} catch (RemoteException e) {
-					HCLLogger.performLog("client does not respond. id: "
-							+ sessionID, HCLType.ERROR, this);
+					HCLLogger.performLog(
+							"Client does not respond at session: '" + sessionID
+									+ "'", HCLType.WARNING, this);
 					server.removeClient(sessionID, client2);
+					client2 = null;
 				}
 				if (client1 != null && client2 != null)
 					synchronizeClients(client1, client2);
+				else
+					return;
 			}
 		}
 	}
@@ -90,12 +95,22 @@ public class Synchronizer {
 	private void synchronizeClients(IHCLClient client1, IHCLClient client2) {
 		try {
 			Set<String> synchFolder = new HashSet<String>();
-			synronizeFiles(client1, client2, "", synchFolder);
-
+			if (!client1.getHash("").equals(client2.getHash("")))
+				synronizeFiles(client1, client2, "", synchFolder);
+			else {
+				for (String subfolder : client1.listDirectories(""))
+					synchFolder.add(subfolder);
+			}
 			while (!synchFolder.isEmpty()) {
 				String folder = synchFolder.iterator().next();
 				synchFolder.remove(folder);
-				synronizeFiles(client1, client2, folder, synchFolder);
+
+				if (!client1.getHash(folder).equals(client2.getHash(folder)))
+					synronizeFiles(client1, client2, folder, synchFolder);
+				else {
+					for (String subfolder : client1.listDirectories(folder))
+						synchFolder.add(folder + subfolder);
+				}
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();

@@ -16,7 +16,7 @@ public interface IHCLLogListener {
 	 * @author sebastian
 	 */
 	public enum HCLType {
-		CREATE, UPDATE, DELETE, SEND, ERROR
+		CREATE, UPDATE, DELETE, SEND, ERROR, INFORMATION, WARNING
 	};
 
 	/**

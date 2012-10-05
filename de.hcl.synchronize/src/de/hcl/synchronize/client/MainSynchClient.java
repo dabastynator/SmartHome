@@ -21,7 +21,6 @@ public class MainSynchClient {
 	public static void main(String args[]) {
 		configureRMILogOutput();
 		configureHCLLogOutput();
-
 		try {
 			checkParameter(args);
 
@@ -32,17 +31,19 @@ public class MainSynchClient {
 			IHCLServer server = forceGetHCLServer(s);
 
 			IniFile iniFile = new IniFile(new File(args[1]));
-
+			String location = null;
 			for (String sessionId : iniFile.getSections()) {
 				for (String clientName : iniFile.getKeySet(sessionId)) {
-					String location = iniFile.getPropertyString(sessionId,
-							clientName, "/dev/null");
+					location = iniFile.getPropertyString(sessionId, clientName,
+							"/dev/null");
 					IHCLClient client = new HCLClient(location, clientName);
-					HCLLogger.performLog("add client synch: " + clientName
-							+ " at " + location, HCLType.CREATE, null);
+					HCLLogger.performLog("Add client synchronization: '"
+							+ clientName + "'", HCLType.INFORMATION, null);
 					server.addClient(sessionId, client);
 				}
 			}
+			HCLLogger.addListener(new HCLNotificator("Home Cloud Client",
+					location + File.separator));
 
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -72,13 +73,17 @@ public class MainSynchClient {
 
 		IHCLServer server = (IHCLServer) s.find(IHCLServer.SERVER_ID,
 				IHCLServer.class);
-
+		long waitTime = 1000;
+		long maxTime = 1000 * 60 * 10;
 		while (server == null) {
 			server = (IHCLServer) s
 					.find(IHCLServer.SERVER_ID, IHCLServer.class);
-			HCLLogger.performLog("no hcl server in registry", HCLType.ERROR,
+			HCLLogger.performLog("No hcl server in registry", HCLType.WARNING,
 					null);
-			Thread.sleep(1000);
+			Thread.sleep(waitTime);
+			waitTime *= 2;
+			if (waitTime > maxTime)
+				waitTime = maxTime;
 		}
 		return server;
 	}
@@ -133,7 +138,7 @@ public class MainSynchClient {
 				if (message.client instanceof IHCLClient)
 					try {
 						author = ((IHCLClient) message.client).getName();
-					} catch (java.rmi.RemoteException e) {
+					} catch (RemoteException e) {
 					}
 				if (message.client instanceof String)
 					author = (String) message.client;

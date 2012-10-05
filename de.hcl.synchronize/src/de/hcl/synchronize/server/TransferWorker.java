@@ -1,9 +1,9 @@
 package de.hcl.synchronize.server;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 
 import de.hcl.synchronize.server.TransferQueue.TransferJob;
+import de.newsystem.rmi.protokol.RemoteException;
 
 public class TransferWorker {
 

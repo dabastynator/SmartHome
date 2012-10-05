@@ -2,9 +2,9 @@ package de.hcl.synchronize.api;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 
 import de.newsystem.rmi.protokol.RemoteAble;
+import de.newsystem.rmi.protokol.RemoteException;
 
 /**
  * The home cloud client executes all possible file activities. It enables
@@ -98,6 +98,25 @@ public interface IHCLClient extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public String getName() throws RemoteException;
+
+	/**
+	 * Get the hash code of the given subfolder to avoid to transfer big file
+	 * bean lists.
+	 * 
+	 * @param subfolder
+	 * @return hashcode
+	 * @throws RemoteException
+	 */
+	public String getHash(String subfolder) throws RemoteException;
+
+	/**
+	 * Get array of directories under giben subfolder.
+	 * 
+	 * @param subfolder
+	 * @return array of directory names
+	 * @throws RemoteException
+	 */
+	public String[] listDirectories(String subfolder) throws RemoteException, IOException;
 
 	/**
 	 * Use file bean to transfer necessary file information.
