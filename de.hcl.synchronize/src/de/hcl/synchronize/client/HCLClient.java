@@ -29,9 +29,9 @@ import de.newsystem.rmi.transceiver.FileSender;
 public class HCLClient implements IHCLClient, IHCLLogListener {
 
 	/**
-	 * Set the maximum VM size in byte. (50 MB)
+	 * Set the maximum VM size in byte. (100 MB)
 	 */
-	public static final long MAXIMUM_VM_SIZE = 50 * 1000 * 1000l;
+	public static final long MAXIMUM_VM_SIZE = 100 * 1000 * 1000l;
 
 	/**
 	 * the cache directory contains meta info to cache information about the
@@ -228,6 +228,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		File f = new File(basePath + file);
 		HCLLogger.performLog("Delete file: '" + file + "'", HCLType.DELETE,
 				this);
+		// TODO: tell subfolder
 		return f.delete();
 	}
 
@@ -268,24 +269,42 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	}
 
 	@Override
-	public String sendFile(String filePath, int port) throws RemoteException,
+	public String sendFile(FileBean bean, int port) throws RemoteException,
 			IOException {
-		File file = new File(basePath + filePath);
+		FileBean mapBean = getSubFileMap(bean.subfolder).getFileBean(bean.file);
+		if (mapBean == null || mapBean.isReceiving()) {
+			HCLLogger.performLog("Can not send receiving file", HCLType.ERROR,
+					this);
+			throw new IOException("Can not send receiving file");
+		}
+		File file = new File(basePath + bean.subfolder + bean.file);
 		FileSender fileSender = new FileSender(file, port);
 		fileSender.sendAsync();
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
 		}
-		HCLLogger.performLog("Send file: '" + filePath + "'", HCLType.SEND,
+		HCLLogger.performLog("Send file: '" + bean.file + "'", HCLType.SEND,
 				this);
 		return Server.getServer().getServerPort().getIp();
 	}
 
 	@Override
-	public void receiveFile(String fileName, String subfolder, String ip,
-			int port) throws RemoteException, IOException {
+	public void receiveFile(FileBean fileBean, String ip, int port)
+			throws RemoteException, IOException {
+		// initialize objects
+		String fileName = fileBean.file;
+		String subfolder = fileBean.subfolder;
 		File file = new File(basePath + subfolder + fileName);
+		Subfolder subManager = getSubFileMap(subfolder);
+		FileBean oldBean = subManager.getFileBean(fileName);
+		// check existing beans and files
+		if (oldBean != null && oldBean.isReceiving()) {
+			HCLLogger.performLog("File: '" + fileName
+					+ "' is already receiving.", HCLType.UPDATE, this);
+			throw new IOException("File '" + fileName
+					+ "' is already receiving.");
+		}
 		if (file.exists()) {
 			File destination = new File(basePath + BACKUP_DIRECTORY + subfolder
 					+ fileName + "." + file.lastModified());
@@ -296,9 +315,17 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		} else
 			HCLLogger.performLog("Create file: '" + fileName + "'",
 					HCLType.CREATE, this);
+		file.createNewFile();
+		file.setLastModified(fileBean.lastDate - 1);
+		// tell subfolder about receiving file
+		FileBean bean = new FileBean(subfolder, fileName, file.lastModified(),
+				"", 0, FileBean.EXISTS | FileBean.FILE);
+		subManager.push(bean);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
 		try {
 			receiver.receiveSync();
+			file.setLastModified(fileBean.lastDate - 1);
+			getSubFileMap(subfolder).remove(fileName);
 		} catch (IOException e) {
 			file.delete();
 			getSubFileMap(subfolder).remove(fileName);
@@ -356,7 +383,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	public String[] listDirectories(String subfolder) throws IOException {
 		List<String> folder = new ArrayList<String>();
 		for (FileBean bean : getSubFileMap(subfolder).listFiles()) {
-			if (bean.isDirectory && !bean.isDeleted)
+			if (bean.isDirectory() && !bean.isDeleted())
 				folder.add(bean.file + File.separator);
 		}
 		return folder.toArray(new String[] {});

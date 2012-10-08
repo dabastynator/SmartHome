@@ -41,18 +41,16 @@ public class TransferWorker {
 		while (true) {
 			try {
 				wait();
-				if (!job.object.isDirectory) {
-					if (job.object.isDeleted) {
+				if (!job.object.isDirectory()) {
+					if (job.object.isDeleted()) {
 						job.receiver.deleteFile(job.object.subfolder
 								+ job.object.file);
 					} else {
-						String ip = job.sender.sendFile(job.object.subfolder
-								+ job.object.file, port);
-						job.receiver.receiveFile(job.object.file,
-								job.object.subfolder, ip, port);
+						String ip = job.sender.sendFile(job.object, port);
+						job.receiver.receiveFile(job.object, ip, port);
 					}
 				} else {
-					if (job.object.isDeleted) {
+					if (job.object.isDeleted()) {
 						job.receiver.deleteDirectory(job.object.subfolder
 								+ job.object.file);
 					} else

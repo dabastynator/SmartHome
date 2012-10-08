@@ -9,7 +9,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -66,6 +70,28 @@ public class Subfolder {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	/**
+	 * Check given file if it is locked.
+	 * 
+	 * @param file
+	 * @return ture, if file is locked and false otherwise
+	 * @throws IOException
+	 */
+	public static boolean fileIsLocked(File file) throws IOException {
+		FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
+		// Get an exclusive lock on the whole file
+		FileLock lock = channel.lock();
+		try {
+			lock = channel.tryLock();
+			// Ok. You get the lock
+		} catch (OverlappingFileLockException e) {
+			return true;
+		} finally {
+			lock.release();
+		}
+		return false;
 	}
 
 	/**
@@ -243,9 +269,11 @@ public class Subfolder {
 			long now = System.currentTimeMillis();
 			for (String fileName : subFileMap.keySet()) {
 				FileBean bean = subFileMap.get(fileName);
-				if (!bean.isDeleted
-						|| (now - bean.lastDate) < HCLClient.MAXIMUM_KNOWLEGDE)
-					writer.append(bean.toString() + newLine);
+				if (!bean.isDeleted()
+						|| (now - bean.lastDate) < HCLClient.MAXIMUM_KNOWLEGDE) {
+					if (!bean.isReceiving())
+						writer.append(bean.toString() + newLine);
+				}
 			}
 			writer.close();
 			fileWriter.close();
@@ -266,11 +294,17 @@ public class Subfolder {
 	public FileBean getFileBean(File file) throws IOException {
 		FileBean bean = getFileBean(file.getName());
 		if (bean != null && bean.lastDate == file.lastModified()
-				&& !bean.isDeleted)
+				&& !bean.isDeleted())
 			return bean;
+		if (bean != null && bean.isDeleted())
+			file.setLastModified(bean.lastDate + 1000);
+		int flags = FileBean.DONE | FileBean.EXISTS | FileBean.DONE;
+		if (file.isFile())
+			flags |= FileBean.FILE;
+		if ((!file.canWrite()))
+			flags &= ~FileBean.DONE;
 		bean = new FileBean(getSubfolder(), file.getName(),
-				file.lastModified(), buildMD5(file), file.length(),
-				file.isDirectory(), false);
+				file.lastModified(), buildMD5(file), file.length(), flags);
 		push(bean);
 		return bean;
 	}
@@ -297,13 +331,13 @@ public class Subfolder {
 		}
 		List<FileBean> deletedBean = new ArrayList<IHCLClient.FileBean>();
 		for (FileBean bean : getFileBeans()) {
-			if (!list.contains(bean) && !bean.isDeleted) {
-				bean.isDeleted = true;
+			if (!list.contains(bean) && !bean.isDeleted()) {
+				bean.flags &= ~FileBean.EXISTS;
 				bean.lastDate = System.currentTimeMillis();
 				FileBean newBean = new FileBean(bean);
 				list.add(newBean);
 				deletedBean.add(newBean);
-			} else if (bean.isDeleted)
+			} else if (bean.isDeleted())
 				list.add(bean);
 		}
 		for (FileBean bean : deletedBean)
@@ -324,10 +358,10 @@ public class Subfolder {
 			MessageDigest md = MessageDigest.getInstance("md5");
 
 			for (FileBean bean : sortFiles(listFiles())) {
-				if (bean.isDeleted)
+				if (bean.isDeleted())
 					continue;
 				md.update(bean.file.getBytes());
-				if (!bean.isDirectory)
+				if (!bean.isDirectory())
 					md.update(bean.md5.getBytes());
 			}
 			byte[] md5 = md.digest();
@@ -347,9 +381,9 @@ public class Subfolder {
 		Collections.sort(list, new Comparator<FileBean>() {
 			@Override
 			public int compare(FileBean o1, FileBean o2) {
-				if (o1.isDirectory && !o2.isDirectory)
+				if (o1.isDirectory() && !o2.isDirectory())
 					return 1;
-				if (!o1.isDirectory && o2.isDirectory)
+				if (!o1.isDirectory() && o2.isDirectory())
 					return -1;
 				return o1.file.compareTo(o2.file);
 			}

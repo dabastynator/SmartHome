@@ -110,52 +110,52 @@ public class HCLNotificator implements IHCLLogListener {
 		switch (message.type) {
 		case CREATE:
 			if (actionTime == 0 || currentAction == Action.CREATE) {
-				actionTime++;
 				currentAction = Action.CREATE;
+				actionTime++;
 			} else if (currentAction == Action.SYNCH
 					|| currentAction == Action.DELETE
 					|| currentAction == Action.SEND) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			}
 			break;
 		case DELETE:
 			if (actionTime == 0 || currentAction == Action.DELETE) {
-				actionTime++;
 				currentAction = Action.DELETE;
+				actionTime++;
 			} else if (currentAction == Action.SYNCH
 					|| currentAction == Action.CREATE
 					|| currentAction == Action.SEND) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			}
 			break;
 		case UPDATE:
 			if (actionTime == 0 || currentAction == Action.SYNCH) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			} else if (currentAction == Action.CREATE
 					|| currentAction == Action.DELETE
 					|| currentAction == Action.SEND) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			}
 			break;
 		case SEND:
 			if (actionTime == 0 || currentAction == Action.SYNCH) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			} else if (currentAction == Action.CREATE
 					|| currentAction == Action.DELETE
 					|| currentAction == Action.SYNCH) {
-				actionTime++;
 				currentAction = Action.SYNCH;
+				actionTime++;
 			}
 			break;
 		case INFORMATION:
 			if (actionTime == 0 || currentAction == Action.INFORM) {
-				actionTime++;
 				currentAction = Action.INFORM;
+				actionTime++;
 			}
 			break;
 		case WARNING:

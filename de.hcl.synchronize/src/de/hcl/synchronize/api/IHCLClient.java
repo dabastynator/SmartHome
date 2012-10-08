@@ -45,13 +45,13 @@ public interface IHCLClient extends RemoteAble {
 	 * Publish given file. Implementation must use FileSender for publishing.
 	 * The Receiver must use FileReceiver to receive the file.
 	 * 
-	 * @param filePath
+	 * @param fileBean
 	 * @param port
 	 * @return ip for published file
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public String sendFile(String filePath, int port) throws RemoteException,
+	public String sendFile(FileBean bean, int port) throws RemoteException,
 			IOException;
 
 	/**
@@ -70,14 +70,13 @@ public interface IHCLClient extends RemoteAble {
 	 * The client receives a file from given ip and port by FileReceiver. The
 	 * file will created at given file path and name.
 	 * 
-	 * @param file
-	 * @param subfolder
+	 * @param fileBean
 	 * @param ip
 	 * @param port
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public void receiveFile(String file, String subfolder, String ip, int port)
+	public void receiveFile(FileBean fileBean, String ip, int port)
 			throws RemoteException, IOException;
 
 	/**
@@ -116,7 +115,8 @@ public interface IHCLClient extends RemoteAble {
 	 * @return array of directory names
 	 * @throws RemoteException
 	 */
-	public String[] listDirectories(String subfolder) throws RemoteException, IOException;
+	public String[] listDirectories(String subfolder) throws RemoteException,
+			IOException;
 
 	/**
 	 * Use file bean to transfer necessary file information.
@@ -131,6 +131,21 @@ public interface IHCLClient extends RemoteAble {
 		 * the separator is used.
 		 */
 		public static final String SEPARATOR = ";";
+
+		/**
+		 * flag file is 1 for file and 0 for directory
+		 */
+		public static final int FILE = 1;
+
+		/**
+		 * flag exists is 1 if the file exists and 0 otherwise
+		 */
+		public static final int EXISTS = 2;
+
+		/**
+		 * flag done is 1 if the file is stable and 0 if the file is receiving.
+		 */
+		public static final int DONE = 4;
 
 		/**
 		 * Generated serial id
@@ -148,26 +163,25 @@ public interface IHCLClient extends RemoteAble {
 		 * @param isDeleted
 		 */
 		public FileBean(String subfolder, String file, long lastDate,
-				String md5, long size, boolean isDirectory, boolean isDeleted) {
+				String md5, long size, int flags) {
 			this.subfolder = subfolder;
 			this.file = file;
 			this.lastDate = lastDate;
 			this.md5 = md5;
 			this.size = size;
-			this.isDeleted = isDeleted;
 			this.creation = System.currentTimeMillis();
-			this.isDirectory = isDirectory;
+			this.flags = flags;
 		}
 
 		public FileBean(FileBean bean) {
 			this(bean.subfolder, bean.file, bean.lastDate, bean.md5, bean.size,
-					bean.isDirectory, bean.isDeleted);
+					bean.flags);
 		}
 
 		/**
-		 * true if file bean is directory
+		 * flags for information about existent, folder directory, status
 		 */
-		public boolean isDirectory;
+		public int flags;
 
 		/**
 		 * creation date of the bean
@@ -199,16 +213,10 @@ public interface IHCLClient extends RemoteAble {
 		 */
 		public String subfolder;
 
-		/**
-		 * true if the file is deleted
-		 */
-		public boolean isDeleted;
-
 		@Override
 		public String toString() {
 			return subfolder + SEPARATOR + file + SEPARATOR + size + SEPARATOR
-					+ lastDate + SEPARATOR + md5 + SEPARATOR + isDeleted
-					+ SEPARATOR + isDirectory;
+					+ lastDate + SEPARATOR + md5 + SEPARATOR + flags;
 		}
 
 		@Override
@@ -218,13 +226,34 @@ public interface IHCLClient extends RemoteAble {
 			FileBean bean = (FileBean) obj;
 			boolean result = file.equals(bean.file)
 					&& subfolder.equals(bean.subfolder)
-					&& lastDate == bean.lastDate && isDeleted == bean.isDeleted
-					&& size == bean.size && isDirectory == bean.isDirectory;
+					&& lastDate == bean.lastDate && flags == bean.flags
+					&& size == bean.size;
 			if (md5 == null)
 				result &= bean.md5 == null;
 			else
 				result &= md5.equals(bean.md5);
 			return result;
+		}
+
+		/**
+		 * @return true if file is directory, false otherwise
+		 */
+		public boolean isDirectory() {
+			return (flags & FILE) == 0;
+		}
+
+		/**
+		 * @return true if file is deleted, false otherwise
+		 */
+		public boolean isDeleted() {
+			return (flags & EXISTS) == 0;
+		}
+
+		/**
+		 * @return true if file is receiving, false otherwise
+		 */
+		public boolean isReceiving() {
+			return (flags & DONE) == 0;
 		}
 
 		/**
@@ -237,7 +266,7 @@ public interface IHCLClient extends RemoteAble {
 			String[] split = line.split(";");
 			String filePath = "";
 			int offset = -1;
-			for (int i = 0; i < split.length - 6; i++) {
+			for (int i = 0; i < split.length - 5; i++) {
 				filePath += split[i];
 				offset++;
 			}
@@ -245,10 +274,9 @@ public interface IHCLClient extends RemoteAble {
 			long size = Long.parseLong(split[offset + 2]);
 			long lastDate = Long.parseLong(split[offset + 3]);
 			String md5 = split[offset + 4];
-			boolean isDirectoy = split[offset + 5].equals("true");
-			boolean isDeleted = split[offset + 6].equals("true");
+			int flags = Integer.parseInt(split[offset + 5]);
 			FileBean bean = new FileBean(filePath, file, lastDate, md5, size,
-					isDirectoy, isDeleted);
+					flags);
 			return bean;
 		}
 

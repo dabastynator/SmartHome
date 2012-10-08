@@ -112,10 +112,10 @@ public class Synchronizer {
 						synchFolder.add(folder + subfolder);
 				}
 			}
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			HCLLogger.performLog(
+					e.getClass().getSimpleName() + " " + e.getMessage(),
+					HCLType.ERROR, this);
 		}
 	}
 
@@ -148,9 +148,10 @@ public class Synchronizer {
 
 		// get synchronized subsubfolder
 		for (FileBean file1 : files1.values()) {
-			if (file1.isDirectory) {
+			if (file1.isDirectory()) {
 				FileBean fileBean = files2.get(file1.file);
-				if (fileBean != null && !file1.isDeleted && !fileBean.isDeleted)
+				if (fileBean != null && !file1.isDeleted()
+						&& !fileBean.isDeleted())
 					synchFolder.add(subfolder + file1.file + File.separator);
 			}
 		}
@@ -159,17 +160,21 @@ public class Synchronizer {
 	private void synchronizeFromTo(IHCLClient client1, IHCLClient client2,
 			Map<String, FileBean> files1, Map<String, FileBean> files2) {
 		for (FileBean file1 : files1.values()) {
+			if (file1.isReceiving())
+				continue;
 			Update update;
 			FileBean file2 = files2.get(file1.file);
 			if (file2 == null)
-				update = (file1.isDeleted) ? Update.NONE : Update.CLIENT2;
-			else if ((file1.md5.equals(file2.md5) && file1.isDeleted == file2.isDeleted)
-					|| file1.isDeleted && file2.isDeleted)
+				update = (file1.isDeleted()) ? Update.NONE : Update.CLIENT2;
+			else if ((file1.md5.equals(file2.md5) && file1.isDeleted() == file2
+					.isDeleted()) || file1.isDeleted() && file2.isDeleted())
 				update = Update.NONE;
 			else if (file1.lastDate > file2.lastDate)
 				update = Update.CLIENT2;
 			else
 				update = Update.CLIENT1;
+			if (file2 != null && file2.isReceiving())
+				update = Update.NONE;
 
 			if (update == Update.CLIENT2) {
 				transferQueue.pushJob(new TransferJob(client1, client2, file1));
