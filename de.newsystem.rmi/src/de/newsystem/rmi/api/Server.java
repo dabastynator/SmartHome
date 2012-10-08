@@ -19,6 +19,7 @@ import de.newsystem.rmi.dynamics.DynamicAdapter;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.handler.ConnectionHandler;
 import de.newsystem.rmi.handler.ServerConnection;
+import de.newsystem.rmi.handler.ShutdownHandler;
 import de.newsystem.rmi.protokol.GlobalObject;
 import de.newsystem.rmi.protokol.RegistryReply;
 import de.newsystem.rmi.protokol.RegistryRequest;
@@ -82,6 +83,16 @@ public class Server {
 	private ServerSocket serverSocket;
 
 	/**
+	 * shutdown handler of the server
+	 */
+	private ShutdownHandler shutdownHandler;
+
+	/**
+	 * List of all registered ids in the registry.
+	 */
+	private List<String> registeredIDList = new ArrayList<String>();
+
+	/**
 	 * list of all proxies
 	 */
 	private Map<String, Object> proxyMap = new HashMap<String, Object>();
@@ -139,6 +150,8 @@ public class Server {
 		isConnectedRegistry = true;
 		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry: "
 				+ registry + ":" + port, null);
+		shutdownHandler = new ShutdownHandler(this);
+		Runtime.getRuntime().addShutdownHook(shutdownHandler);
 	}
 
 	/**
@@ -240,6 +253,7 @@ public class Server {
 		try {
 			registryOut.writeObject(request);
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
+			registeredIDList.add(id);
 			RMILogger
 					.performLog(LogPriority.INFORMATION, "register object", id);
 		} catch (IOException e) {
@@ -266,6 +280,7 @@ public class Server {
 		try {
 			registryOut.writeObject(request);
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
+			registeredIDList.remove(id);
 			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ",
 					id);
 		} catch (IOException e) {
@@ -465,6 +480,10 @@ public class Server {
 	 */
 	public void setConnectionSocketCount(int connectionSocketCount) {
 		this.connectionSocketCount = connectionSocketCount;
+	}
+
+	public List<String> getRegisteredIDs() {
+		return registeredIDList;
 	}
 
 }
