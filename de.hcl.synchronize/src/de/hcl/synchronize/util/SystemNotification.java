@@ -1,4 +1,4 @@
-package de.hcl.synchronize.client;
+package de.hcl.synchronize.util;
 
 import java.awt.AWTException;
 import java.awt.SystemTray;

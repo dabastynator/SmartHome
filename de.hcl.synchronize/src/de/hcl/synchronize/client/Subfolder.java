@@ -28,6 +28,9 @@ import java.util.Set;
 
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLClient.FileBean;
+import de.hcl.synchronize.log.HCLLogger;
+import de.hcl.synchronize.log.IHCLLogListener.HCLType;
+import de.hcl.synchronize.util.IniFile;
 
 /**
  * The subfolder class manages the knowledge of a subfolder with files,
@@ -41,17 +44,40 @@ public class Subfolder {
 	 * MINIMAL_REFRESH_TIME specifies the minimal time between two directory
 	 * scans. This avoids too often scans.
 	 */
-	public static final int MINIMAL_REFRESH_TIME = 1000 * 5;
+	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 2;
+
+	/**
+	 * MINIMAL_REFRESH_TIME_HACH specifies the minimal time between two builds
+	 * of the hash for this directory. This avoids too often builds of hashes.
+	 */
+	public static final int MINIMAL_REFRESH_TIME_HASH = 1000 * 2;
+
+	/**
+	 * Section name in the ini file for cache.
+	 */
+	public static final String SECTION_DIRECTIY_HASH = "directory_hash";
+
+	/**
+	 * The cache file contains hashes of every subfolder.
+	 */
+	public static final String CACHE_FILE = HCLClient.CACHE_SUBFOLDER_DIRECTORY
+			+ File.separator + "subolder.hash";
+
+	/**
+	 * The cache file contains hashes of every subfolder.
+	 */
+	private static IniFile cacheFile;
 
 	/**
 	 * create md5 code of given file.
 	 * 
 	 * @param file
 	 * @return md5 of file
+	 * @throws IOException
 	 */
-	public static String buildMD5(File file) {
+	public static byte[] buildMD5(File file) throws IOException {
 		if (file.isDirectory())
-			return "";
+			return null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("md5");
 			InputStream is = new FileInputStream(file);
@@ -59,17 +85,11 @@ public class Subfolder {
 			int read = 0;
 			while ((read = is.read(buffer)) > 0)
 				md.update(buffer, 0, read);
-			byte[] md5 = md.digest();
-			BigInteger bi = new BigInteger(1, md5);
-			return bi.toString(16);
+			return md.digest();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		return "";
+		return null;
 	}
 
 	/**
@@ -125,6 +145,17 @@ public class Subfolder {
 	private long lastScan;
 
 	/**
+	 * The time stamp at the last directory hash build.
+	 */
+	private long lastHashBuild;
+
+	/**
+	 * The hash value of this directory with files, directories and their
+	 * hashes.
+	 */
+	private String directoryHash;
+
+	/**
 	 * Allocate new subfolder at given path
 	 * 
 	 * @param subfolder
@@ -132,16 +163,23 @@ public class Subfolder {
 	public Subfolder(String subfolder, String basePath) {
 		fileMapFile = new File(basePath + HCLClient.CACHE_SUBFOLDER_DIRECTORY
 				+ subfolderToCache(subfolder));
-		if (!fileMapFile.exists())
-			try {
-				fileMapFile.createNewFile();
-			} catch (IOException e) {
+		try {
+			if (cacheFile == null) {
+				File file = new File(basePath + CACHE_FILE);
+				if (!file.exists())
+					file.createNewFile();
+				cacheFile = new IniFile(file);
 			}
+			if (!fileMapFile.exists())
+				fileMapFile.createNewFile();
+		} catch (IOException e) {
+		}
 		subFileMap = new HashMap<String, IHCLClient.FileBean>();
 		this.basePath = basePath;
 		this.subfolder = subfolder;
 		isDirty = false;
 		lastScan = 0;
+		lastHashBuild = 0;
 		read();
 	}
 
@@ -153,6 +191,7 @@ public class Subfolder {
 	public void remove(String fileName) {
 		subFileMap.remove(fileName);
 		isDirty = true;
+		directoryHash = null;
 	}
 
 	/**
@@ -200,6 +239,7 @@ public class Subfolder {
 	public void push(FileBean fileBean) {
 		subFileMap.put(fileBean.file, fileBean);
 		isDirty = true;
+		directoryHash = null;
 	}
 
 	/**
@@ -208,7 +248,7 @@ public class Subfolder {
 	 * @param subfolder
 	 * @return String
 	 */
-	private String subfolderToCache(String subfolder) {
+	private static String subfolderToCache(String subfolder) {
 		String splash = "_";
 		String cacheName = subfolder.replaceAll(File.separator, splash)
 				+ ".cache";
@@ -219,7 +259,7 @@ public class Subfolder {
 		return cacheName;
 	}
 
-	private int countString(String string, String sequence) {
+	private static int countString(String string, String sequence) {
 		int ret = 0;
 		while (string.contains(sequence)) {
 			ret++;
@@ -236,6 +276,8 @@ public class Subfolder {
 	 * @return fileMap
 	 */
 	private void read() {
+		directoryHash = cacheFile.getPropertyString(SECTION_DIRECTIY_HASH,
+				subfolder, null);
 		try {
 			FileReader fileReader = new FileReader(fileMapFile);
 			BufferedReader reader = new BufferedReader(fileReader);
@@ -262,6 +304,9 @@ public class Subfolder {
 		if (!isDirty)
 			return;
 		try {
+			cacheFile.setPropertyString(SECTION_DIRECTIY_HASH, basePath,
+					directoryHash);
+			cacheFile.writeFile();
 			FileWriter fileWriter = new FileWriter(fileMapFile);
 			BufferedWriter writer = new BufferedWriter(fileWriter);
 			String newLine = System.getProperty("line.separator");
@@ -278,7 +323,8 @@ public class Subfolder {
 			writer.close();
 			fileWriter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			HCLLogger.performLog("Write cache data: " + e.getMessage(),
+					HCLType.ERROR, this);
 		}
 		isDirty = false;
 	}
@@ -292,13 +338,15 @@ public class Subfolder {
 	 * @throws IOException
 	 */
 	public FileBean getFileBean(File file) throws IOException {
+		if (!file.exists())
+			throw new FileNotFoundException("File :'" + file + "' not found.");
 		FileBean bean = getFileBean(file.getName());
 		if (bean != null && bean.lastDate == file.lastModified()
 				&& !bean.isDeleted())
 			return bean;
 		if (bean != null && bean.isDeleted())
 			file.setLastModified(bean.lastDate + 1000);
-		int flags = FileBean.DONE | FileBean.EXISTS | FileBean.DONE;
+		byte flags = FileBean.DONE | FileBean.EXISTS | FileBean.DONE;
 		if (file.isFile())
 			flags |= FileBean.FILE;
 		if ((!file.canWrite()))
@@ -318,10 +366,12 @@ public class Subfolder {
 	 */
 	public List<FileBean> listFiles() throws RemoteException, IOException {
 		long startTime = System.currentTimeMillis();
-		if (startTime < lastScan + MINIMAL_REFRESH_TIME)
+		if (startTime < lastScan + MINIMAL_REFRESH_TIME_DIRECTORY)
 			return new ArrayList<IHCLClient.FileBean>(subFileMap.values());
 		List<FileBean> list = new ArrayList<FileBean>();
 		File directory = new File(basePath + subfolder);
+		if (!directory.exists())
+			return list;
 		for (String str : directory.list()) {
 			File file = new File(basePath + subfolder + str);
 			if (str.length() > 0 && str.charAt(0) != '.')
@@ -348,12 +398,28 @@ public class Subfolder {
 	}
 
 	/**
-	 * Get hash code of this directory. All Files, Directories and their md5
+	 * Get the hash code of this directory. All Files, Directories and their
 	 * hash.
+	 * 
+	 * @return hash of this directory
+	 */
+	public String getDirectoryHash() {
+		if (lastHashBuild < System.currentTimeMillis()
+				+ MINIMAL_REFRESH_TIME_HASH
+				|| directoryHash == null) {
+			directoryHash = calculateDirectoryHash();
+			lastHashBuild = System.currentTimeMillis();
+		}
+		return directoryHash;
+	}
+
+	/**
+	 * Calculate hash code of this directory. All Files, Directories and their
+	 * md5 hash.
 	 * 
 	 * @return md5 hash
 	 */
-	public String getDirectoryHash() {
+	private String calculateDirectoryHash() {
 		try {
 			MessageDigest md = MessageDigest.getInstance("md5");
 
@@ -362,7 +428,7 @@ public class Subfolder {
 					continue;
 				md.update(bean.file.getBytes());
 				if (!bean.isDirectory())
-					md.update(bean.md5.getBytes());
+					md.update(bean.md5);
 			}
 			byte[] md5 = md.digest();
 			BigInteger bi = new BigInteger(1, md5);
@@ -389,6 +455,25 @@ public class Subfolder {
 			}
 		});
 		return list;
+	}
+
+	/**
+	 * Set given file name to deleted. If there is such a file bean it will be
+	 * returned.
+	 * 
+	 * @param file
+	 * @return Filebean
+	 */
+	public FileBean setDeletedFile(String file) {
+		FileBean fileBean = getFileBean(file);
+		if (fileBean != null) {
+			FileBean newBean = new FileBean(fileBean);
+			newBean.flags &= ~FileBean.EXISTS;
+			newBean.lastDate = System.currentTimeMillis();
+			push(newBean);
+			return newBean;
+		}
+		return null;
 	}
 
 }

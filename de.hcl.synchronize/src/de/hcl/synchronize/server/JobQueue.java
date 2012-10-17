@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.hcl.synchronize.api.IHCLClient;
-import de.hcl.synchronize.api.IHCLClient.FileBean;
+import de.hcl.synchronize.jobs.HCLJob;
 
 /**
  * The transfer queue handles multiple transfer jobs with a pool of worker.
@@ -13,17 +12,17 @@ import de.hcl.synchronize.api.IHCLClient.FileBean;
  * @author sebastian
  * 
  */
-public class TransferQueue {
+public class JobQueue {
 
 	/**
 	 * job queue
 	 */
-	private List<TransferJob> jobQueue;
+	private List<HCLJob> jobQueue;
 
 	/**
 	 * active jobs
 	 */
-	private List<TransferJob> activeJob;
+	private List<HCLJob> activeJob;
 
 	/**
 	 * queue of worker
@@ -38,13 +37,11 @@ public class TransferQueue {
 	/**
 	 * Allocate new queue. The worker will be created.
 	 */
-	public TransferQueue(int startPort, int workerCount) {
+	public JobQueue(int startPort, int workerCount) {
 		workerQueue = new ArrayList<TransferWorker>();
 
-		jobQueue = Collections
-				.synchronizedList(new ArrayList<TransferQueue.TransferJob>());
-		activeJob = Collections
-				.synchronizedList(new ArrayList<TransferQueue.TransferJob>());
+		jobQueue = Collections.synchronizedList(new ArrayList<HCLJob>());
+		activeJob = Collections.synchronizedList(new ArrayList<HCLJob>());
 		for (int i = 0; i < workerCount; i++)
 			workerQueue.add(new TransferWorker(this, startPort + i));
 	}
@@ -78,7 +75,7 @@ public class TransferQueue {
 	 */
 	private boolean handleQueue() {
 		if (jobQueue.size() > 0 && workerQueue.size() > 0) {
-			TransferJob job = jobQueue.get(0);
+			HCLJob job = jobQueue.get(0);
 			TransferWorker worker = workerQueue.remove(0);
 			activeJob.add(job);
 			jobQueue.remove(0);
@@ -100,41 +97,9 @@ public class TransferQueue {
 	 * 
 	 * @param job
 	 */
-	public void pushJob(TransferJob job) {
+	public void pushJob(HCLJob job) {
 		if (!jobQueue.contains(job) && !activeJob.contains(job))
 			jobQueue.add(job);
-	}
-
-	/**
-	 * the transfer job contains infromation about the job.
-	 * 
-	 * @author sebastian
-	 */
-	public static class TransferJob {
-
-		public IHCLClient sender;
-
-		public IHCLClient receiver;
-
-		public FileBean object;
-
-		public TransferJob(IHCLClient sender, IHCLClient receiver, FileBean file) {
-			this.sender = sender;
-			this.receiver = receiver;
-			this.object = file;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof TransferJob) {
-				TransferJob job = (TransferJob) obj;
-				boolean equal = object.equals(job.object)
-						&& sender == job.sender && receiver == job.receiver;
-				return equal;
-			}
-			return false;
-		}
-
 	}
 
 	public void pushWorker(TransferWorker transferWorker) {

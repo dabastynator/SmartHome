@@ -1,7 +1,8 @@
 package de.hcl.synchronize.client;
 
-import de.hcl.synchronize.client.SystemNotification.Urgency;
 import de.hcl.synchronize.log.IHCLLogListener;
+import de.hcl.synchronize.util.SystemNotification;
+import de.hcl.synchronize.util.SystemNotification.Urgency;
 
 /**
  * the home cloud notificator gets logs and displays them on the screen.

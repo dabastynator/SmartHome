@@ -2,6 +2,7 @@ package de.hcl.synchronize.api;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigInteger;
 
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -28,7 +29,8 @@ public interface IHCLClient extends RemoteAble {
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public boolean deleteFile(String file) throws RemoteException, IOException;
+	public boolean deleteFile(String subfolder, String file)
+			throws RemoteException, IOException;
 
 	/**
 	 * Delete given directory.
@@ -80,6 +82,17 @@ public interface IHCLClient extends RemoteAble {
 			throws RemoteException, IOException;
 
 	/**
+	 * Rename given file to new file name under subfolder.
+	 * 
+	 * @param subfolder
+	 * @param oldName
+	 * @param newName
+	 * @throws RemoteException
+	 */
+	public void renameFile(String subfolder, String oldName, String newName)
+			throws RemoteException;
+
+	/**
 	 * The client reads given directory and returns all files and directories.
 	 * 
 	 * @param subfolder
@@ -109,6 +122,17 @@ public interface IHCLClient extends RemoteAble {
 	public String getHash(String subfolder) throws RemoteException;
 
 	/**
+	 * Get the file bean of specified file and subfolde.
+	 * 
+	 * @param subfolder
+	 * @param file
+	 * @return
+	 * @throws RemoteException
+	 */
+	public FileBean getFileBean(String subfolder, String file)
+			throws RemoteException;
+
+	/**
 	 * Get array of directories under giben subfolder.
 	 * 
 	 * @param subfolder
@@ -135,17 +159,17 @@ public interface IHCLClient extends RemoteAble {
 		/**
 		 * flag file is 1 for file and 0 for directory
 		 */
-		public static final int FILE = 1;
+		public static final byte FILE = 1;
 
 		/**
 		 * flag exists is 1 if the file exists and 0 otherwise
 		 */
-		public static final int EXISTS = 2;
+		public static final byte EXISTS = 2;
 
 		/**
 		 * flag done is 1 if the file is stable and 0 if the file is receiving.
 		 */
-		public static final int DONE = 4;
+		public static final byte DONE = 4;
 
 		/**
 		 * Generated serial id
@@ -163,7 +187,7 @@ public interface IHCLClient extends RemoteAble {
 		 * @param isDeleted
 		 */
 		public FileBean(String subfolder, String file, long lastDate,
-				String md5, long size, int flags) {
+				byte[] md5, long size, byte flags) {
 			this.subfolder = subfolder;
 			this.file = file;
 			this.lastDate = lastDate;
@@ -181,7 +205,7 @@ public interface IHCLClient extends RemoteAble {
 		/**
 		 * flags for information about existent, folder directory, status
 		 */
-		public int flags;
+		public byte flags;
 
 		/**
 		 * creation date of the bean
@@ -201,7 +225,7 @@ public interface IHCLClient extends RemoteAble {
 		/**
 		 * md5 code of the file
 		 */
-		public String md5;
+		public byte[] md5;
 
 		/**
 		 * file size
@@ -215,8 +239,13 @@ public interface IHCLClient extends RemoteAble {
 
 		@Override
 		public String toString() {
+			String md5S = "";
+			if (md5 != null) {
+				BigInteger bi = new BigInteger(1, md5);
+				md5S = bi.toString(16);
+			}
 			return subfolder + SEPARATOR + file + SEPARATOR + size + SEPARATOR
-					+ lastDate + SEPARATOR + md5 + SEPARATOR + flags;
+					+ lastDate + SEPARATOR + md5S + SEPARATOR + flags;
 		}
 
 		@Override
@@ -273,8 +302,13 @@ public interface IHCLClient extends RemoteAble {
 			String file = split[offset + 1];
 			long size = Long.parseLong(split[offset + 2]);
 			long lastDate = Long.parseLong(split[offset + 3]);
-			String md5 = split[offset + 4];
-			int flags = Integer.parseInt(split[offset + 5]);
+			byte[] md5 = new byte[16];
+			if (split[offset + 4].length() > 0) {
+				byte[] parse = new BigInteger(split[offset + 4], 16)
+						.toByteArray();
+				System.arraycopy(parse, parse.length - 16, md5, 0, 16);
+			}
+			byte flags = Byte.parseByte(split[offset + 5]);
 			FileBean bean = new FileBean(filePath, file, lastDate, md5, size,
 					flags);
 			return bean;

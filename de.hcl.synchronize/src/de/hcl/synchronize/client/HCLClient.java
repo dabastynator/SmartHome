@@ -3,6 +3,7 @@ package de.hcl.synchronize.client;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -98,7 +99,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	/**
 	 * the base directory on witch the file system should be synchronized
 	 */
-	private String basePath;
+	protected String basePath;
 
 	/**
 	 * the file map contains information about the file, to increase the speed
@@ -116,6 +117,30 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	private String name;
 
 	/**
+	 * Get input stream from resource in the current project or jar file.
+	 * 
+	 * @param owner
+	 * @param resource
+	 * @return inputstream
+	 * @throws FileNotFoundException
+	 */
+	public static InputStream inputStreamFromResource(Object owner,
+			String resource) throws FileNotFoundException {
+		String path = owner.getClass().getProtectionDomain().getCodeSource()
+				.getLocation().toString().substring(5);
+		if (path.endsWith("bin/"))
+			path = path.substring(0, path.length() - 4);
+		InputStream input = null;
+		if (path.toLowerCase().endsWith(".jar"))
+			input = owner.getClass().getResourceAsStream("/" + resource);
+		else
+			input = owner.getClass().getResourceAsStream(path + resource);
+		if (input == null)
+			input = new FileInputStream(new File(path + resource));
+		return input;
+	}
+
+	/**
 	 * Reads given object from owner and save read data to given destiny file.
 	 * 
 	 * @param source
@@ -124,17 +149,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	 */
 	public static void copyFileFromJar(Object owner, String source, File destiny)
 			throws IOException {
-		String path = owner.getClass().getProtectionDomain().getCodeSource()
-				.getLocation().toString().substring(5);
-		if (path.endsWith("bin/"))
-			path = path.substring(0, path.length() - 4);
-		InputStream input = null;
-		if (path.toLowerCase().endsWith(".jar"))
-			input = owner.getClass().getResourceAsStream("/" + source);
-		else
-			input = owner.getClass().getResourceAsStream(path + source);
-		if (input == null)
-			input = new FileInputStream(new File(path + source));
+		InputStream input = inputStreamFromResource(owner, source);
 		FileOutputStream output = new FileOutputStream(destiny);
 		byte[] data = new byte[2048];
 		int read = 0;
@@ -224,11 +239,17 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	}
 
 	@Override
-	public boolean deleteFile(String file) throws RemoteException, IOException {
-		File f = new File(basePath + file);
+	public boolean deleteFile(String subfolder, String file)
+			throws RemoteException, IOException {
+		// Tell subfolder
+		Subfolder subFileMap = getSubFileMap(subfolder);
+		subFileMap.setDeletedFile(file);
+		// Delete
+		File f = new File(basePath + subfolder + file);
+		if (!f.exists())
+			return false;
 		HCLLogger.performLog("Delete file: '" + file + "'", HCLType.DELETE,
 				this);
-		// TODO: tell subfolder
 		return f.delete();
 	}
 
@@ -236,10 +257,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	public boolean deleteDirectory(String directory) throws RemoteException,
 			IOException {
 		File f = new File(basePath + directory);
-		deleteDirectory(f);
+		boolean deleted = deleteDirectory(f);
 		fileMap.remove(directory);
-		HCLLogger.performLog("Delete directory: '" + directory + "'",
-				HCLType.DELETE, this);
+		if (deleted)
+			HCLLogger.performLog("Delete directory: '" + directory + "'",
+					HCLType.DELETE, this);
 		return f.delete();
 	}
 
@@ -251,6 +273,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	 * @return true if directory was deleted
 	 */
 	private boolean deleteDirectory(File file) {
+		if (!file.exists())
+			return false;
 		for (File fi : file.listFiles())
 			if (fi.isDirectory())
 				deleteDirectory(fi);
@@ -273,9 +297,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			IOException {
 		FileBean mapBean = getSubFileMap(bean.subfolder).getFileBean(bean.file);
 		if (mapBean == null || mapBean.isReceiving()) {
-			HCLLogger.performLog("Can not send receiving file", HCLType.ERROR,
-					this);
-			throw new IOException("Can not send receiving file");
+			String message = (mapBean != null) ? "Can not send receiving"
+					: "Can not send not existing";
+			message += " file: '" + bean.file + "'.";
+			HCLLogger.performLog(message, HCLType.ERROR, this);
+			throw new IOException(message);
 		}
 		File file = new File(basePath + bean.subfolder + bean.file);
 		FileSender fileSender = new FileSender(file, port);
@@ -301,7 +327,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		// check existing beans and files
 		if (oldBean != null && oldBean.isReceiving()) {
 			HCLLogger.performLog("File: '" + fileName
-					+ "' is already receiving.", HCLType.UPDATE, this);
+					+ "' is already receiving.", HCLType.ERROR, this);
 			throw new IOException("File '" + fileName
 					+ "' is already receiving.");
 		}
@@ -316,19 +342,20 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 			HCLLogger.performLog("Create file: '" + fileName + "'",
 					HCLType.CREATE, this);
 		file.createNewFile();
-		file.setLastModified(fileBean.lastDate - 1);
+		file.setLastModified(fileBean.lastDate - 1000);
 		// tell subfolder about receiving file
 		FileBean bean = new FileBean(subfolder, fileName, file.lastModified(),
-				"", 0, FileBean.EXISTS | FileBean.FILE);
+				new byte[] {}, 0, (byte) (FileBean.EXISTS | FileBean.FILE));
 		subManager.push(bean);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
 		try {
 			receiver.receiveSync();
-			file.setLastModified(fileBean.lastDate - 1);
-			getSubFileMap(subfolder).remove(fileName);
+			file.setLastModified(fileBean.lastDate - 1000);
+			subManager.remove(fileName);
+			subManager.getFileBean(file);
 		} catch (IOException e) {
 			file.delete();
-			getSubFileMap(subfolder).remove(fileName);
+			subManager.remove(fileName);
 			HCLLogger.performLog(fileName + ' ' + e.getMessage(),
 					HCLType.ERROR, this);
 			throw e;
@@ -342,6 +369,26 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		HCLLogger.performLog("Create new directory: '" + directoryName + "'",
 				HCLType.CREATE, this);
 		return file.mkdir();
+	}
+
+	@Override
+	public void renameFile(String subfolder, String oldName, String newName)
+			throws RemoteException {
+		File file = new File(basePath + subfolder + oldName);
+		if (!file.exists())
+			return;
+		File newFile = new File(basePath + subfolder + newName);
+		file.renameTo(newFile);
+		Subfolder subFileMap = getSubFileMap(subfolder);
+		FileBean oldBean = subFileMap.getFileBean(oldName);
+		subFileMap.remove(oldName);
+		if (oldBean != null) {
+			FileBean newBean = new FileBean(oldBean);
+			newBean.file = newName;
+			subFileMap.push(newBean);
+		}
+		HCLLogger.performLog("Rename file '" + oldName + "' to '" + newName
+				+ "'.", HCLType.UPDATE, this);
 	}
 
 	@Override
@@ -377,6 +424,23 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		Subfolder subFileMap = getSubFileMap(subfolder);
 		String hash = subFileMap.getDirectoryHash();
 		return hash;
+	}
+
+	@Override
+	public FileBean getFileBean(String subfolder, String file)
+			throws RemoteException {
+		Subfolder subFileMap = getSubFileMap(subfolder);
+		FileBean bean = subFileMap.getFileBean(file);
+		if (bean != null)
+			return bean;
+		try {
+			bean = subFileMap
+					.getFileBean(new File(basePath + subfolder + file));
+		} catch (IOException e) {
+		}
+		if (bean != null)
+			return bean;
+		return null;
 	}
 
 	@Override

@@ -10,30 +10,30 @@ import java.util.Set;
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLClient.FileBean;
 import de.hcl.synchronize.api.IHCLServer;
+import de.hcl.synchronize.api.IHCLSession;
+import de.hcl.synchronize.jobs.TransferJob;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
-import de.hcl.synchronize.server.TransferQueue.TransferJob;
 import de.newsystem.rmi.protokol.RemoteException;
 
 public class Synchronizer {
 
 	private IHCLServer server;
-	private TransferQueue transferQueue;
+	private JobQueue jobQueue;
 
 	private enum Update {
 		NONE, CLIENT1, CLIENT2
 	};
 
-	public Synchronizer(IHCLServer server) {
+	public Synchronizer(IHCLServer server, JobQueue queue) {
 		this.server = server;
-		transferQueue = new TransferQueue(5080, 5);
+		jobQueue = queue;
 	}
 
 	/**
 	 * start synchronization in own thread.
 	 */
 	public void synchronize() {
-		transferQueue.startTransfering();
 		new Thread() {
 			@Override
 			public void run() {
@@ -42,7 +42,7 @@ public class Synchronizer {
 				while (true) {
 					synchronizeSynch();
 					try {
-						Thread.sleep(1000 * 5);
+						Thread.sleep(1000 * 2);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -55,24 +55,25 @@ public class Synchronizer {
 		try {
 			String[] sessionIDs = server.getSessionIDs();
 			for (String session : sessionIDs)
-				synchronizeSession(session);
+				synchronizeSession(server.getSession(session));
 		} catch (RemoteException e) {
 		}
 	}
 
-	private void synchronizeSession(String sessionID) throws RemoteException {
-		int size = server.getClientSize(sessionID);
+	private void synchronizeSession(IHCLSession session) throws RemoteException {
+		int size = session.getClientSize();
+		String sessionID = session.getSessionID();
 		for (int i = 0; i < size - 1; i++) {
 			for (int j = i + 1; j < size; j++) {
-				IHCLClient client1 = server.getClient(sessionID, i);
-				IHCLClient client2 = server.getClient(sessionID, j);
+				IHCLClient client1 = session.getClient(i);
+				IHCLClient client2 = session.getClient(j);
 				try {
 					client1.getName();
 				} catch (RemoteException e) {
 					HCLLogger.performLog(
 							"Client does not respond at session: '" + sessionID
 									+ "'", HCLType.WARNING, this);
-					server.removeClient(sessionID, client1);
+					session.removeClient(client1);
 					client1 = null;
 				}
 				try {
@@ -81,7 +82,7 @@ public class Synchronizer {
 					HCLLogger.performLog(
 							"Client does not respond at session: '" + sessionID
 									+ "'", HCLType.WARNING, this);
-					server.removeClient(sessionID, client2);
+					session.removeClient(client2);
 					client2 = null;
 				}
 				if (client1 != null && client2 != null)
@@ -116,6 +117,7 @@ public class Synchronizer {
 			HCLLogger.performLog(
 					e.getClass().getSimpleName() + " " + e.getMessage(),
 					HCLType.ERROR, this);
+			e.printStackTrace();
 		}
 	}
 
@@ -166,7 +168,7 @@ public class Synchronizer {
 			FileBean file2 = files2.get(file1.file);
 			if (file2 == null)
 				update = (file1.isDeleted()) ? Update.NONE : Update.CLIENT2;
-			else if ((file1.md5.equals(file2.md5) && file1.isDeleted() == file2
+			else if ((sameArray(file1.md5, file2.md5) && file1.isDeleted() == file2
 					.isDeleted()) || file1.isDeleted() && file2.isDeleted())
 				update = Update.NONE;
 			else if (file1.lastDate > file2.lastDate)
@@ -177,12 +179,31 @@ public class Synchronizer {
 				update = Update.NONE;
 
 			if (update == Update.CLIENT2) {
-				transferQueue.pushJob(new TransferJob(client1, client2, file1));
+				jobQueue.pushJob(new TransferJob(client1, client2, file1));
 			}
 			if (update == Update.CLIENT1) {
-				transferQueue.pushJob(new TransferJob(client2, client1, file2));
+				jobQueue.pushJob(new TransferJob(client2, client1, file2));
 			}
 		}
 	}
 
+	/**
+	 * Check arrays if they have the same content.
+	 * 
+	 * @param a1
+	 * @param a2
+	 * @return true if arrays have same content
+	 */
+	public static boolean sameArray(byte[] a1, byte[] a2) {
+		if (a1 == null && a2 == null)
+			return true;
+		if (a1 == null || a2 == null)
+			return false;
+		if (a1.length != a2.length)
+			return false;
+		for (int i = 0; i < a1.length; i++)
+			if (a1[i] != a2[i])
+				return false;
+		return true;
+	}
 }

@@ -1,14 +1,10 @@
 package de.hcl.synchronize.server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLServer;
-import de.hcl.synchronize.log.HCLLogger;
-import de.hcl.synchronize.log.IHCLLogListener.HCLType;
+import de.hcl.synchronize.api.IHCLSession;
 import de.newsystem.rmi.protokol.RemoteException;
 
 /**
@@ -19,9 +15,18 @@ import de.newsystem.rmi.protokol.RemoteException;
 public class HCLServer extends Thread implements IHCLServer {
 
 	/**
-	 * list of all clients
+	 * list of all sessions
 	 */
-	private Map<String, List<IHCLClient>> sessions = new HashMap<String, List<IHCLClient>>();
+	private Map<String, IHCLSession> sessions = new HashMap<String, IHCLSession>();
+
+	/**
+	 * The queue executes jobs.
+	 */
+	private JobQueue queue;
+
+	public HCLServer(JobQueue queue) {
+		this.queue = queue;
+	}
 
 	@Override
 	public String[] getSessionIDs() throws RemoteException {
@@ -29,30 +34,10 @@ public class HCLServer extends Thread implements IHCLServer {
 	}
 
 	@Override
-	public IHCLClient getClient(String synchronizationID, int index)
-			throws RemoteException {
-		return sessions.get(synchronizationID).get(index);
-	}
-
-	@Override
-	public boolean addClient(String synchronizationID, IHCLClient client)
-			throws RemoteException {
-		if (!sessions.containsKey(synchronizationID)) {
-			sessions.put(synchronizationID, new ArrayList<IHCLClient>());
-			HCLLogger.performLog("Create new session: " + synchronizationID, HCLType.INFORMATION, this);
-		}
-		return sessions.get(synchronizationID).add(client);
-	}
-
-	@Override
-	public boolean removeClient(String synchronizationID, IHCLClient client)
-			throws RemoteException {
-		return sessions.get(synchronizationID).remove(client);
-	}
-
-	@Override
-	public int getClientSize(String synchronizationID) throws RemoteException {
-		return sessions.get(synchronizationID).size();
+	public IHCLSession getSession(String sessionID) throws RemoteException {
+		if (!sessions.containsKey(sessionID))
+			sessions.put(sessionID, new HCLSession(sessionID, queue));
+		return sessions.get(sessionID);
 	}
 
 }
