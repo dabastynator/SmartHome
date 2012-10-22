@@ -27,12 +27,12 @@ import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.desktop.menus.ControlMenu;
 import de.remote.desktop.menus.PlayerMenu;
-import de.remote.desktop.menus.ServerMenu;
+import de.remote.desktop.menus.RegistryMenu;
 import de.remote.desktop.panels.BrowserPanel;
 import de.remote.desktop.panels.ChatPanel;
 import de.remote.desktop.panels.PlayListPanel;
 import de.remote.desktop.panels.PlayerPanel;
-import de.remote.desktop.panels.ServerPanel;
+import de.remote.desktop.panels.RegistryPanel;
 import de.remote.desktop.panels.WebcamPanel;
 
 /**
@@ -49,7 +49,7 @@ import de.remote.desktop.panels.WebcamPanel;
  * @author sebastian
  * 
  */
-public class ControlFrame extends JFrame {
+public class ControlFrame extends JFrame implements Connectable {
 
 	/**
 	 * generated id
@@ -84,7 +84,7 @@ public class ControlFrame extends JFrame {
 	/**
 	 * menu to choose different server to connect with
 	 */
-	private ServerMenu serverMenu;
+	private RegistryMenu serverMenu;
 
 	/**
 	 * menu to choose different player
@@ -144,7 +144,7 @@ public class ControlFrame extends JFrame {
 	/**
 	 * the server editor provides functionality to edit the server list.
 	 */
-	private ServerPanel serverEditor;
+	private RegistryPanel serverEditor;
 
 	/**
 	 * allocate frame and create all panels and menus
@@ -157,22 +157,22 @@ public class ControlFrame extends JFrame {
 		loadIcon();
 
 		this.controlMenu = new ControlMenu();
-		this.serverMenu = new ServerMenu(this);
+		this.serverMenu = new RegistryMenu(this);
 		this.playerMenu = new PlayerMenu(this);
 
 		this.playerControl = new PlayerPanel();
 		this.chat = new ChatPanel();
 		this.plsBrowser = new PlayListPanel();
 		this.fileBrowser = new BrowserPanel();
-		this.serverEditor = new ServerPanel(serverMenu);
+		this.serverEditor = new RegistryPanel(serverMenu);
 		this.webcam = new WebcamPanel();
 		this.playerListener = new DesktopPlayerListener();
 
 		setLayout(new BorderLayout());
-		add("South", this.playerControl);
+		add(BorderLayout.SOUTH, this.playerControl);
 
 		JTabbedPane tabs = new JTabbedPane();
-		add(tabs);
+		add(BorderLayout.CENTER, tabs);
 		tabs.add(this.fileBrowser);
 		tabs.add(this.plsBrowser);
 		tabs.add(this.chat);
@@ -294,6 +294,7 @@ public class ControlFrame extends JFrame {
 		}
 	}
 
+	@Override
 	public void connectToServer(String registry) {
 		connectToServer(registry, this.port, this.clientName);
 	}

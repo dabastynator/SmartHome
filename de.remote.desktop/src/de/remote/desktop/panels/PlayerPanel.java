@@ -1,10 +1,11 @@
 package de.remote.desktop.panels;
 
-import java.awt.Button;
 import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IPlayer;
@@ -30,74 +31,74 @@ public class PlayerPanel extends Panel {
 	/**
 	 * play button
 	 */
-	private Button play;
+	private JButton play;
 
 	/**
 	 * next button
 	 */
-	private Button next;
+	private JButton next;
 
 	/**
 	 * previous button
 	 */
-	private Button prev;
+	private JButton prev;
 
 	/**
 	 * fullscreen button
 	 */
-	private Button fullscreen;
+	private JButton fullscreen;
 
 	/**
 	 * volume up button
 	 */
-	private Button volUp;
+	private JButton volUp;
 
 	/**
 	 * volume down button
 	 */
-	private Button volDown;
+	private JButton volDown;
 
 	/**
 	 * quit player button
 	 */
-	private Button quit;
+	private JButton quit;
 
 	/**
 	 * seek forward button
 	 */
-	private Button seekFWB;
+	private JButton seekFWB;
 
 	/**
 	 * seek backward button
 	 */
-	private Button seekBWB;
-	
+	private JButton seekBWB;
+
 	/**
 	 * shuffle button
 	 */
-	private Button shuffle;
-	
+	private JButton shuffle;
+
 	/**
 	 * true if shuffle is active, otherwise false
 	 */
 	private boolean isShuffle = false;
-	
+
 	/**
 	 * allocate playerpanel, create and initialize all buttons
 	 */
 	public PlayerPanel() {
 		setName("Player control");
 		setLayout(new GridLayout());
-		this.play = new Button("|>");
-		this.next = new Button(">>|");
-		this.prev = new Button("|<<");
-		this.seekFWB = new Button(">>");
-		this.seekBWB = new Button("<<");
-		this.fullscreen = new Button("Fullscreen");
-		this.volUp = new Button("Vol+");
-		this.volDown = new Button("Vol-");
-		this.quit = new Button("Quit");
-		this.shuffle = new Button("Shuffle");
+		this.play = new JButton("|>");
+		this.next = new JButton(">>|");
+		this.prev = new JButton("|<<");
+		this.seekFWB = new JButton(">>");
+		this.seekBWB = new JButton("<<");
+		this.fullscreen = new JButton("Fullscreen");
+		this.volUp = new JButton("Vol+");
+		this.volDown = new JButton("Vol-");
+		this.quit = new JButton("Quit");
+		this.shuffle = new JButton("Shuffle");
 		add(this.prev);
 		add(this.seekBWB);
 		add(this.play);

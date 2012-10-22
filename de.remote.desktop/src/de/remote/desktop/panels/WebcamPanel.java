@@ -1,7 +1,6 @@
 package de.remote.desktop.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -11,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
@@ -70,7 +70,7 @@ public class WebcamPanel extends Panel {
 	}
 
 	private Component createButtons() {
-		Button start = new Button("start");
+		JButton start = new JButton("start");
 		start.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -83,7 +83,7 @@ public class WebcamPanel extends Panel {
 				}
 			}
 		});
-		Button stop = new Button("stop");
+		JButton stop = new JButton("stop");
 		stop.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -96,7 +96,7 @@ public class WebcamPanel extends Panel {
 				}
 			}
 		});
-		Button take = new Button("take picture");
+		JButton take = new JButton("take picture");
 		take.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

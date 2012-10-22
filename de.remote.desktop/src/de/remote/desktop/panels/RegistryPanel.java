@@ -1,7 +1,6 @@
 package de.remote.desktop.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -21,16 +20,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import de.remote.desktop.menus.ServerMenu;
+import de.remote.desktop.menus.RegistryMenu;
 
 /**
  * the server panel enables to edit all servers.
  * 
  * @author sebastian
  */
-public class ServerPanel extends Panel {
+public class RegistryPanel extends Panel {
 
 	/**
 	 * location of the server file, that contains all server in CSV format.
@@ -70,15 +70,15 @@ public class ServerPanel extends Panel {
 	/**
 	 * the menu must be updated.
 	 */
-	private ServerMenu serverMenu;
+	private RegistryMenu serverMenu;
 
 	/**
 	 * allocate and initialize tab to edit all available server.
 	 * 
 	 * @param serverMenu
 	 */
-	public ServerPanel(ServerMenu serverMenu) {
-		setName("Servers");
+	public RegistryPanel(RegistryMenu serverMenu) {
+		setName("Registries");
 		this.serverMenu = serverMenu;
 		setLayout(new BorderLayout());
 		add(BorderLayout.CENTER, createServerArea());
@@ -93,10 +93,10 @@ public class ServerPanel extends Panel {
 	 * @return component
 	 */
 	private Component createButtons() {
-		Button showButton = new Button("Show details");
-		Button newButton = new Button("Create new server");
-		Button editButton = new Button("Apply changes");
-		Button deleteButton = new Button("Delete server");
+		JButton showButton = new JButton("Show details");
+		JButton newButton = new JButton("Create new server");
+		JButton editButton = new JButton("Apply changes");
+		JButton deleteButton = new JButton("Delete server");
 		showButton.addActionListener(new ShowDetailListener());
 		newButton.addActionListener(new ActionListener() {
 			@Override
@@ -198,19 +198,33 @@ public class ServerPanel extends Panel {
 	private Component createServerArea() {
 		serverList = new List();
 		serverList.addActionListener(new ShowDetailListener());
-		name = new TextField();
-		ip = new TextField();
-		Panel detail = new Panel();
-		detail.setLayout(new GridLayout(2, 2));
-		detail.add(new Label("Name: "));
-		detail.add(name);
-		detail.add(new Label("IP: "));
-		detail.add(ip);
+		Panel detail = createDetailArea();
 		Panel area = new Panel();
 		area.setLayout(new GridLayout());
 		area.add(serverList);
 		area.add(detail);
 		return area;
+	}
+
+	/**
+	 * Create and initialize area to show and edit details of selected registry
+	 * entry.
+	 * 
+	 * @return component
+	 */
+	private Panel createDetailArea() {
+		Panel holder = new Panel();
+		holder.setLayout(new FlowLayout());
+		Panel detail = new Panel();
+		name = new TextField(15);
+		ip = new TextField(15);
+		detail.setLayout(new GridLayout(2, 2, 10, 10));
+		detail.add(new Label("Name: "));
+		detail.add(name);
+		detail.add(new Label("IP: "));
+		detail.add(ip);
+		holder.add(detail);
+		return holder;
 	}
 
 	/**

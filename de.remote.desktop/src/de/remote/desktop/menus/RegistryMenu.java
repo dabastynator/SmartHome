@@ -6,16 +6,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 
-import de.remote.desktop.ControlFrame;
-import de.remote.desktop.panels.ServerPanel;
+import de.remote.desktop.Connectable;
+import de.remote.desktop.panels.RegistryPanel;
 
 /**
- * Menu to switch the current server. All server are listed in a map of the main
- * frame.
+ * Menu to switch the current registry. All registers are listed in a map of the
+ * main frame.
  * 
  * @author sebastian
  */
-public class ServerMenu extends Menu {
+public class RegistryMenu extends Menu {
 
 	/**
 	 * generated id
@@ -25,7 +25,7 @@ public class ServerMenu extends Menu {
 	/**
 	 * main frame to inform about new server to connect with
 	 */
-	private ControlFrame mainFrame;
+	private Connectable mainFrame;
 
 	/**
 	 * the map contains all server as key with ip as value
@@ -37,8 +37,8 @@ public class ServerMenu extends Menu {
 	 * 
 	 * @param mainFrame
 	 */
-	public ServerMenu(ControlFrame mainFrame) {
-		super("Server");
+	public RegistryMenu(Connectable mainFrame) {
+		super("Registries");
 		this.mainFrame = mainFrame;
 		updateServers();
 	}
@@ -48,14 +48,14 @@ public class ServerMenu extends Menu {
 	 */
 	public void updateServers() {
 		removeAll();
-		serverMap = ServerPanel.loadServers(ServerPanel.SERVER_FILE);
+		serverMap = RegistryPanel.loadServers(RegistryPanel.SERVER_FILE);
 		for (String name : serverMap.keySet()) {
 			MenuItem item = new MenuItem(name);
 			item.addActionListener(new ServerActionListener(serverMap.get(name)));
 			add(item);
 		}
 	}
-	
+
 	/**
 	 * listener to inform the main frame about the selected server.
 	 * 
@@ -69,7 +69,7 @@ public class ServerMenu extends Menu {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			ServerMenu.this.mainFrame.connectToServer(this.newServerIp);
+			RegistryMenu.this.mainFrame.connectToServer(this.newServerIp);
 		}
 	}
 }

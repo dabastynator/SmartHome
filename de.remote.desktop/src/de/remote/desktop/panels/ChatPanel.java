@@ -1,7 +1,6 @@
 package de.remote.desktop.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.List;
@@ -12,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.JButton;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IChatListener;
@@ -85,7 +86,7 @@ public class ChatPanel extends Panel {
 		Panel p = new Panel();
 		p.setLayout(new GridLayout());
 		this.inputText = new TextField();
-		Button b = new Button("Post");
+		JButton b = new JButton("Post");
 		p.add(this.inputText);
 		p.add(b);
 		b.addActionListener(new ActionListener() {

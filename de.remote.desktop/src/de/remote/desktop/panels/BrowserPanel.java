@@ -1,7 +1,6 @@
 package de.remote.desktop.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
@@ -10,6 +9,7 @@ import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import de.newsystem.rmi.protokol.RemoteException;
@@ -100,7 +100,7 @@ public class BrowserPanel extends Panel {
 	}
 
 	private Component createButtons() {
-		Button startFrom = new Button("Play selected element");
+		JButton startFrom = new JButton("Play selected element");
 		startFrom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -112,7 +112,7 @@ public class BrowserPanel extends Panel {
 				}
 			}
 		});
-		Button addPls = new Button("Add to Playlist");
+		JButton addPls = new JButton("Add to Playlist");
 		addPls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Component source = (Component) e.getSource();

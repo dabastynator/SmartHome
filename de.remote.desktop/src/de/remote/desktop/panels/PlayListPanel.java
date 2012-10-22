@@ -1,7 +1,6 @@
 package de.remote.desktop.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.List;
@@ -11,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import de.newsystem.rmi.protokol.RemoteException;
@@ -94,7 +94,7 @@ public class PlayListPanel extends Panel {
 	 * @return buttonarea
 	 */
 	private Component createButtons() {
-		Button playPls = new Button("Play Playlist");
+		JButton playPls = new JButton("Play Playlist");
 		playPls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -108,7 +108,7 @@ public class PlayListPanel extends Panel {
 				}
 			}
 		});
-		Button removePls = new Button("Delete PlayList");
+		JButton removePls = new JButton("Delete PlayList");
 		removePls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -121,7 +121,7 @@ public class PlayListPanel extends Panel {
 				}
 			}
 		});
-		Button createPls = new Button("Create new PlayList");
+		JButton createPls = new JButton("Create new PlayList");
 		createPls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -137,7 +137,7 @@ public class PlayListPanel extends Panel {
 				}
 			}
 		});
-		Button playItem = new Button("Play Item");
+		JButton playItem = new JButton("Play Item");
 		playItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -150,7 +150,7 @@ public class PlayListPanel extends Panel {
 				}
 			}
 		});
-		Button removeItem = new Button("Remove item from Playlist");
+		JButton removeItem = new JButton("Remove item from Playlist");
 		removeItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String item = PlayListPanel.this.itemList.getSelectedItem();
