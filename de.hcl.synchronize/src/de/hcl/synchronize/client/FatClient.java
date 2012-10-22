@@ -49,9 +49,9 @@ public class FatClient extends HCLClient implements JNotifyListener {
 	 * @param session
 	 * @throws IOException
 	 */
-	public FatClient(String basePath, String name, IHCLSession session)
-			throws IOException {
-		super(basePath, name);
+	public FatClient(String basePath, String name, IHCLSession session,
+			boolean readOnly) throws IOException {
+		super(basePath, name, readOnly);
 		configureLIBFolder();
 		this.session = session;
 		startWatch();
@@ -279,18 +279,19 @@ public class FatClient extends HCLClient implements JNotifyListener {
 		try {
 			FileBean bean = subFileMap.getFileBean(new File(basePath
 					+ subFileMap.getSubfolder() + name));
-			if (bean.isReceiving())
+			if (bean.isReceiving() || bean.isCopying())
 				return;
 			session.createFile(this, bean);
 		} catch (Exception e) {
 			HCLLogger.performLog("Error handling new file: " + e.getMessage(),
 					HCLType.ERROR, this);
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void renameFile(String subfolder, String oldName, String newName)
-			throws RemoteException {
+			throws RemoteException, IOException {
 		super.renameFile(subfolder, oldName, newName);
 		File file = new File(basePath + subfolder + newName);
 		if (file != null && file.exists() && file.isDirectory()) {
@@ -323,7 +324,7 @@ public class FatClient extends HCLClient implements JNotifyListener {
 	public void stopWatch() {
 		try {
 			JNotify.removeWatch(watchID);
-		} catch (JNotifyException e) {
+		} catch (Exception e) {
 			HCLLogger.performLog("Error stopping watcher for directory.",
 					HCLType.ERROR, this);
 		}

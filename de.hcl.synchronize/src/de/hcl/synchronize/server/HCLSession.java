@@ -100,6 +100,8 @@ public class HCLSession implements IHCLSession {
 	 * @param bean
 	 */
 	private void sendFileBeanToClients(IHCLClient sender, FileBean bean) {
+		if (bean.isReceiving() || bean.isCopying())
+			return;
 		for (int i = 0; i < clients.size(); i++) {
 			IHCLClient client = clients.get(i);
 			if (client.equals(sender))
@@ -108,13 +110,14 @@ public class HCLSession implements IHCLSession {
 				FileBean clientBean = client.getFileBean(bean.subfolder,
 						bean.file);
 				if (clientBean == null)
-					queue.pushJob(new TransferJob(sender, client, bean));
+					queue.pushJob(new TransferJob(sender, client, bean, this));
 				else {
 					boolean equals = Synchronizer.sameArray(clientBean.md5,
 							bean.md5);
 					boolean exists = clientBean.isDeleted() == bean.isDeleted();
-					if (!equals || !exists)
-						queue.pushJob(new TransferJob(sender, client, bean));
+					if ((!equals || !exists) && !clientBean.isReceiving()  && !clientBean.isCopying())
+						queue.pushJob(new TransferJob(sender, client, bean,
+								this));
 				}
 			} catch (RemoteException e) {
 				clients.remove(i);

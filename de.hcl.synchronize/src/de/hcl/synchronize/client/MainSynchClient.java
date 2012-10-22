@@ -15,6 +15,16 @@ import de.newsystem.rmi.protokol.RemoteException;
 
 public class MainSynchClient {
 
+	public static final String SESSION_ID = "session";
+
+	public static final String LOCATION = "location";
+
+	public static final String READ_ONLY = "readonly";
+
+	public static final String REGISTER_LISTENER = "registerlistener";
+
+	public static final String CLIENT_NAME = "clientname";
+
 	public static void main(String registry, String config_file) {
 		try {
 			Server s = Server.getServer();
@@ -25,16 +35,31 @@ public class MainSynchClient {
 
 			IniFile iniFile = new IniFile(new File(config_file));
 			String location = null;
-			for (String sessionId : iniFile.getSections()) {
-				for (String clientName : iniFile.getKeySet(sessionId)) {
-					location = iniFile.getPropertyString(sessionId, clientName,
-							"/dev/null");
-					IHCLSession session = server.getSession(sessionId);
-					IHCLClient client = new FatClient(location, clientName,
-							session);
+			for (String clientID : iniFile.getSections()) {
+				String sessionID = iniFile.getPropertyString(clientID,
+						SESSION_ID, "null");
+				location = iniFile.getPropertyString(clientID, LOCATION,
+						"/dev/null");
+				IHCLSession session = server.getSession(sessionID);
+				boolean readOnly = iniFile.getPropertyBool(clientID, READ_ONLY,
+						true);
+				boolean listener = iniFile.getPropertyBool(clientID,
+						REGISTER_LISTENER, false);
+				String clientName = iniFile.getPropertyString(clientID,
+						CLIENT_NAME, "null");
+				IHCLClient client = null;
+				try {
+					if (listener)
+						client = new FatClient(location, clientName, session,
+								readOnly);
+					else
+						client = new HCLClient(location, clientName, readOnly);
+
 					HCLLogger.performLog("Add client synchronization: '"
 							+ clientName + "'", HCLType.INFORMATION, null);
 					session.addClient(client);
+				} catch (IOException e) {
+					continue;
 				}
 			}
 			HCLLogger.addListener(new HCLNotificator("Home Cloud Client",

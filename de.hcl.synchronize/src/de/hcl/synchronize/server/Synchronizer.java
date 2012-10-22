@@ -42,7 +42,7 @@ public class Synchronizer {
 				while (true) {
 					synchronizeSynch();
 					try {
-						Thread.sleep(1000 * 2);
+						Thread.sleep(1000 * 5);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -67,8 +67,9 @@ public class Synchronizer {
 			for (int j = i + 1; j < size; j++) {
 				IHCLClient client1 = session.getClient(i);
 				IHCLClient client2 = session.getClient(j);
+				boolean cl1write = false, cl2write = false;
 				try {
-					client1.getName();
+					cl1write = !client1.isReadOnly();
 				} catch (RemoteException e) {
 					HCLLogger.performLog(
 							"Client does not respond at session: '" + sessionID
@@ -77,7 +78,7 @@ public class Synchronizer {
 					client1 = null;
 				}
 				try {
-					client2.getName();
+					cl2write = !client2.isReadOnly();
 				} catch (RemoteException e) {
 					HCLLogger.performLog(
 							"Client does not respond at session: '" + sessionID
@@ -85,19 +86,22 @@ public class Synchronizer {
 					session.removeClient(client2);
 					client2 = null;
 				}
-				if (client1 != null && client2 != null)
-					synchronizeClients(client1, client2);
-				else
+				if (client1 != null && client2 != null) {
+					if (cl1write || cl2write)
+						synchronizeClients(client1, client2, cl1write, cl2write);
+				} else
 					return;
 			}
 		}
 	}
 
-	private void synchronizeClients(IHCLClient client1, IHCLClient client2) {
+	private void synchronizeClients(IHCLClient client1, IHCLClient client2,
+			boolean cl1write, boolean cl2write) {
 		try {
 			Set<String> synchFolder = new HashSet<String>();
 			if (!client1.getHash("").equals(client2.getHash("")))
-				synronizeFiles(client1, client2, "", synchFolder);
+				synronizeFiles(client1, client2, "", synchFolder, cl1write,
+						cl2write);
 			else {
 				for (String subfolder : client1.listDirectories(""))
 					synchFolder.add(subfolder);
@@ -107,7 +111,8 @@ public class Synchronizer {
 				synchFolder.remove(folder);
 
 				if (!client1.getHash(folder).equals(client2.getHash(folder)))
-					synronizeFiles(client1, client2, folder, synchFolder);
+					synronizeFiles(client1, client2, folder, synchFolder,
+							cl1write, cl2write);
 				else {
 					for (String subfolder : client1.listDirectories(folder))
 						synchFolder.add(folder + subfolder);
@@ -128,12 +133,14 @@ public class Synchronizer {
 	 * @param client2
 	 * @param subfolder
 	 * @param synchFolder
+	 * @param cl2write
+	 * @param cl1write
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
 	private void synronizeFiles(IHCLClient client1, IHCLClient client2,
-			String subfolder, Set<String> synchFolder) throws RemoteException,
-			IOException {
+			String subfolder, Set<String> synchFolder, boolean cl1write,
+			boolean cl2write) throws RemoteException, IOException {
 		// list files
 		Map<String, FileBean> files1 = new HashMap<String, IHCLClient.FileBean>();
 		FileBean[] filearray = client1.listFiles(subfolder);
@@ -145,8 +152,10 @@ public class Synchronizer {
 			files2.put(fb.file, fb);
 
 		// synchronize each other
-		synchronizeFromTo(client1, client2, files1, files2);
-		synchronizeFromTo(client2, client1, files2, files1);
+		if (cl2write)
+			synchronizeFromTo(client1, client2, files1, files2, cl1write);
+		if (cl1write)
+			synchronizeFromTo(client2, client1, files2, files1, cl2write);
 
 		// get synchronized subsubfolder
 		for (FileBean file1 : files1.values()) {
@@ -160,9 +169,10 @@ public class Synchronizer {
 	}
 
 	private void synchronizeFromTo(IHCLClient client1, IHCLClient client2,
-			Map<String, FileBean> files1, Map<String, FileBean> files2) {
+			Map<String, FileBean> files1, Map<String, FileBean> files2,
+			boolean cl1write) {
 		for (FileBean file1 : files1.values()) {
-			if (file1.isReceiving())
+			if (file1.isReceiving() || file1.isCopying())
 				continue;
 			Update update;
 			FileBean file2 = files2.get(file1.file);
@@ -175,14 +185,14 @@ public class Synchronizer {
 				update = Update.CLIENT2;
 			else
 				update = Update.CLIENT1;
-			if (file2 != null && file2.isReceiving())
+			if (file2 != null && (file2.isReceiving() || file2.isCopying()))
 				update = Update.NONE;
 
 			if (update == Update.CLIENT2) {
-				jobQueue.pushJob(new TransferJob(client1, client2, file1));
+				jobQueue.pushJob(new TransferJob(client1, client2, file1, this));
 			}
-			if (update == Update.CLIENT1) {
-				jobQueue.pushJob(new TransferJob(client2, client1, file2));
+			if (update == Update.CLIENT1 && cl1write) {
+				jobQueue.pushJob(new TransferJob(client2, client1, file2, this));
 			}
 		}
 	}

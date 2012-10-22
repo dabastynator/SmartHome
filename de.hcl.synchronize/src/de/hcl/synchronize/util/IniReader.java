@@ -121,5 +121,9 @@ public class IniReader {
 			e.printStackTrace();
 		}
 	}
+	
+	public void removeSection(String section) {
+		sections.remove(section);
+	}
 
 }

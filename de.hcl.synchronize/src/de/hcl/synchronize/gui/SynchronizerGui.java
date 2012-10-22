@@ -37,6 +37,9 @@ public class SynchronizerGui extends JFrame implements Connectable {
 	 */
 	private RegistryPanel registryConfig;
 
+	/**
+	 * The configure panel edits the configure ini file.
+	 */
 	private SynchConfigure configure;
 
 	public SynchronizerGui() {

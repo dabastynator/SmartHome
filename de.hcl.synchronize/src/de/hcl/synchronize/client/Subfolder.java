@@ -44,13 +44,13 @@ public class Subfolder {
 	 * MINIMAL_REFRESH_TIME specifies the minimal time between two directory
 	 * scans. This avoids too often scans.
 	 */
-	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 2;
+	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 5;
 
 	/**
 	 * MINIMAL_REFRESH_TIME_HACH specifies the minimal time between two builds
 	 * of the hash for this directory. This avoids too often builds of hashes.
 	 */
-	public static final int MINIMAL_REFRESH_TIME_HASH = 1000 * 2;
+	public static final int MINIMAL_REFRESH_TIME_HASH = 1000 * 5;
 
 	/**
 	 * Section name in the ini file for cache.
@@ -115,9 +115,27 @@ public class Subfolder {
 	}
 
 	/**
+	 * Check whether the file size is increasing in 200 ms or not.
+	 * 
+	 * @param file
+	 * @return true, if file size was increased in 200 ms.
+	 */
+	public static boolean fileIsIncreasing(File file) {
+		long length1 = file.length();
+		try {
+			Thread.sleep(125);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		boolean result = length1 != file.length();
+		return result;
+	}
+
+	/**
 	 * the sub file map contains all beans by their name
 	 */
-	private Map<String, FileBean> subFileMap = new HashMap<String, IHCLClient.FileBean>();
+	private Map<String, FileBean> subFileMap = Collections
+			.synchronizedMap(new HashMap<String, IHCLClient.FileBean>());
 
 	/**
 	 * the file map file caches the knowledge
@@ -337,22 +355,31 @@ public class Subfolder {
 	 * @return file bean
 	 * @throws IOException
 	 */
-	public FileBean getFileBean(File file) throws IOException {
+	public synchronized FileBean getFileBean(File file) throws IOException {
 		if (!file.exists())
 			throw new FileNotFoundException("File :'" + file + "' not found.");
 		FileBean bean = getFileBean(file.getName());
 		if (bean != null && bean.lastDate == file.lastModified()
-				&& !bean.isDeleted())
+				&& !bean.isDeleted() && !bean.isCopying())
 			return bean;
-		if (bean != null && bean.isDeleted())
-			file.setLastModified(bean.lastDate + 1000);
-		byte flags = FileBean.DONE | FileBean.EXISTS | FileBean.DONE;
+		byte flags = FileBean.DONE | FileBean.EXISTS;
+		byte[] md5 = new byte[16];
+		long lastDate = file.lastModified();
+		if (bean != null && bean.isDeleted()) {
+			lastDate = bean.lastDate + 1000;
+		} else if (bean != null)
+			lastDate = Math.max(bean.lastDate, lastDate);
 		if (file.isFile())
 			flags |= FileBean.FILE;
-		if ((!file.canWrite()))
-			flags &= ~FileBean.DONE;
-		bean = new FileBean(getSubfolder(), file.getName(),
-				file.lastModified(), buildMD5(file), file.length(), flags);
+		if ((!file.canWrite()) || fileIsIncreasing(file)) {
+			flags |= FileBean.COPY;
+		} else
+			md5 = buildMD5(file);
+		if (lastDate != file.lastModified())
+			file.setLastModified(lastDate);
+		lastDate = file.lastModified();
+		bean = new FileBean(getSubfolder(), file.getName(), lastDate, md5,
+				file.length(), flags);
 		push(bean);
 		return bean;
 	}

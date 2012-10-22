@@ -117,6 +117,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	private String name;
 
 	/**
+	 * true if the client must not do changes on the file system.
+	 */
+	private boolean readOnly;
+
+	/**
 	 * Get input stream from resource in the current project or jar file.
 	 * 
 	 * @param owner
@@ -167,13 +172,15 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	 * @param name
 	 * @throws IOException
 	 */
-	public HCLClient(String basePath, String name) throws IOException {
+	public HCLClient(String basePath, String name, boolean readOnly)
+			throws IOException {
 		// initialize fields
 		if (!basePath.endsWith(File.separator))
 			basePath += File.separator;
 		this.name = name;
 		this.basePath = basePath;
 		this.fileMap = new HashMap<String, Subfolder>();
+		this.readOnly = readOnly;
 
 		// check given base path
 		if (!new File(basePath).exists())
@@ -241,6 +248,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public boolean deleteFile(String subfolder, String file)
 			throws RemoteException, IOException {
+		checkReadOnly();
 		// Tell subfolder
 		Subfolder subFileMap = getSubFileMap(subfolder);
 		subFileMap.setDeletedFile(file);
@@ -256,6 +264,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public boolean deleteDirectory(String directory) throws RemoteException,
 			IOException {
+		checkReadOnly();
 		File f = new File(basePath + directory);
 		boolean deleted = deleteDirectory(f);
 		fileMap.remove(directory);
@@ -296,9 +305,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	public String sendFile(FileBean bean, int port) throws RemoteException,
 			IOException {
 		FileBean mapBean = getSubFileMap(bean.subfolder).getFileBean(bean.file);
-		if (mapBean == null || mapBean.isReceiving()) {
+		if (mapBean == null || mapBean.isReceiving() || mapBean.isCopying()) {
 			String message = (mapBean != null) ? "Can not send receiving"
 					: "Can not send not existing";
+			if (mapBean.isCopying())
+				message = "Can not send changing";
 			message += " file: '" + bean.file + "'.";
 			HCLLogger.performLog(message, HCLType.ERROR, this);
 			throw new IOException(message);
@@ -318,6 +329,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public void receiveFile(FileBean fileBean, String ip, int port)
 			throws RemoteException, IOException {
+		checkReadOnly();
 		// initialize objects
 		String fileName = fileBean.file;
 		String subfolder = fileBean.subfolder;
@@ -325,7 +337,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		Subfolder subManager = getSubFileMap(subfolder);
 		FileBean oldBean = subManager.getFileBean(fileName);
 		// check existing beans and files
-		if (oldBean != null && oldBean.isReceiving()) {
+		if (oldBean != null && (oldBean.isReceiving() || oldBean.isCopying())) {
 			HCLLogger.performLog("File: '" + fileName
 					+ "' is already receiving.", HCLType.ERROR, this);
 			throw new IOException("File '" + fileName
@@ -362,9 +374,23 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		}
 	}
 
+	/**
+	 * Check read only state and throw exception if so.
+	 * 
+	 * @throws IOException
+	 */
+	private void checkReadOnly() throws IOException {
+		if (readOnly) {
+			String msg = "Can not make changes at read only client.";
+			HCLLogger.performLog(msg, HCLType.ERROR, this);
+			throw new IOException(msg);
+		}
+	}
+
 	@Override
 	public boolean createDirectory(String subfolder, String directoryName)
 			throws RemoteException, IOException {
+		checkReadOnly();
 		File file = new File(basePath + subfolder + directoryName);
 		HCLLogger.performLog("Create new directory: '" + directoryName + "'",
 				HCLType.CREATE, this);
@@ -373,7 +399,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 
 	@Override
 	public void renameFile(String subfolder, String oldName, String newName)
-			throws RemoteException {
+			throws RemoteException, IOException {
+		checkReadOnly();
 		File file = new File(basePath + subfolder + oldName);
 		if (!file.exists())
 			return;
@@ -464,5 +491,10 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean isReadOnly() throws RemoteException {
+		return readOnly;
 	}
 }

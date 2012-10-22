@@ -90,7 +90,7 @@ public interface IHCLClient extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public void renameFile(String subfolder, String oldName, String newName)
-			throws RemoteException;
+			throws RemoteException, IOException;
 
 	/**
 	 * The client reads given directory and returns all files and directories.
@@ -143,6 +143,14 @@ public interface IHCLClient extends RemoteAble {
 			IOException;
 
 	/**
+	 * Check if the client is just read only client and can not write.
+	 * 
+	 * @return true, if client can not write.
+	 * @throws RemoteException
+	 */
+	public boolean isReadOnly() throws RemoteException;
+
+	/**
 	 * Use file bean to transfer necessary file information.
 	 * 
 	 * @author sebastian
@@ -170,6 +178,11 @@ public interface IHCLClient extends RemoteAble {
 		 * flag done is 1 if the file is stable and 0 if the file is receiving.
 		 */
 		public static final byte DONE = 4;
+
+		/**
+		 * flag copy is 1 if the file is already copying and changes its size.
+		 */
+		public static final byte COPY = 8;
 
 		/**
 		 * Generated serial id
@@ -285,6 +298,10 @@ public interface IHCLClient extends RemoteAble {
 			return (flags & DONE) == 0;
 		}
 
+		public boolean isCopying() {
+			return (flags & COPY) != 0;
+		}
+
 		/**
 		 * parse file bean by csv line
 		 * 
@@ -292,26 +309,32 @@ public interface IHCLClient extends RemoteAble {
 		 * @return bean
 		 */
 		public static FileBean parse(String line) {
-			String[] split = line.split(";");
-			String filePath = "";
-			int offset = -1;
-			for (int i = 0; i < split.length - 5; i++) {
-				filePath += split[i];
-				offset++;
+			try {
+				String[] split = line.split(";");
+				String filePath = "";
+				int offset = -1;
+				for (int i = 0; i < split.length - 5; i++) {
+					filePath += split[i];
+					offset++;
+				}
+				String file = split[offset + 1];
+				long size = Long.parseLong(split[offset + 2]);
+				long lastDate = Long.parseLong(split[offset + 3]);
+				byte[] md5 = new byte[16];
+				if (split[offset + 4].length() > 0) {
+					byte[] parse = new BigInteger(split[offset + 4], 16)
+							.toByteArray();
+					System.arraycopy(parse, Math.max(parse.length - 16, 0),
+							md5, 0, Math.min(16, parse.length));
+				}
+				byte flags = Byte.parseByte(split[offset + 5]);
+				FileBean bean = new FileBean(filePath, file, lastDate, md5,
+						size, flags);
+				return bean;
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+				return null;
 			}
-			String file = split[offset + 1];
-			long size = Long.parseLong(split[offset + 2]);
-			long lastDate = Long.parseLong(split[offset + 3]);
-			byte[] md5 = new byte[16];
-			if (split[offset + 4].length() > 0) {
-				byte[] parse = new BigInteger(split[offset + 4], 16)
-						.toByteArray();
-				System.arraycopy(parse, parse.length - 16, md5, 0, 16);
-			}
-			byte flags = Byte.parseByte(split[offset + 5]);
-			FileBean bean = new FileBean(filePath, file, lastDate, md5, size,
-					flags);
-			return bean;
 		}
 
 	}
