@@ -90,7 +90,7 @@ public class MainSynchClient {
 				} catch (IOException e) {
 					HCLLogger.performLog(
 							"Error create client synchronization: '"
-									+ clientName + "'", HCLType.ERROR, null);
+									+ clientName + "': " + e.getMessage(), HCLType.ERROR, null);
 					continue;
 				}
 			}
