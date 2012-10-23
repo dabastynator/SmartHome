@@ -56,9 +56,14 @@ public class ServerConnection {
 				ConnectionSocket socket = serverConnections.get(i);
 				if (socket.socket.isClosed()) {
 					serverConnections.remove(i);
-					RMILogger.performLog(LogPriority.WARNING,
-							"Connection closed from: " + serverPort.getIp()
-									+ ":" + serverPort.getPort(), null);
+					RMILogger
+							.performLog(
+									LogPriority.WARNING,
+									"Connection closed from: "
+											+ serverPort.getIp() + ":"
+											+ serverPort.getPort() + "("
+											+ serverConnections.size()
+											+ " left)", null);
 					continue;
 				}
 				if (!socket.isInUse()) {
@@ -80,9 +85,11 @@ public class ServerConnection {
 						input, output);
 				newSocket.setInUse(true);
 				serverConnections.add(newSocket);
-				RMILogger.performLog(LogPriority.INFORMATION,
-						"create new connection to: " + serverPort.getIp() + ":"
-								+ serverPort.getPort(), null);
+				RMILogger
+						.performLog(LogPriority.INFORMATION, "create "
+								+ serverConnections.size()
+								+ ". connection to: " + serverPort.getIp()
+								+ ":" + serverPort.getPort(), null);
 				return newSocket;
 			}
 			try {

@@ -65,7 +65,7 @@ public class DynamicProxy implements InvocationHandler {
 		if (method.getName().equals("toString") && vals == null)
 			return toString();
 		Request request = new Request(id, method.getName());
-		checkParameter(vals);
+		checkParameter(vals, method);
 		request.setParams(vals);
 		request.setOneway(method.getAnnotation(Oneway.class) != null);
 		return performeRequest(request);
@@ -81,7 +81,7 @@ public class DynamicProxy implements InvocationHandler {
 	private Object performeRequest(Request request) throws Throwable {
 		Reply reply = null;
 		ConnectionSocket socket = null;
-		RemoteException remoteException = null;
+		Throwable resultException = null;
 		for (int i = 0; i < server.getConnectionSocketCount(); i++) {
 			try {
 				socket = serverConnection.getFreeConnectionSocket();
@@ -95,26 +95,28 @@ public class DynamicProxy implements InvocationHandler {
 						return null;
 					reply = (Reply) socket.getInput().readObject();
 					if (reply == null)
-						throw new RemoteException(id, "null returned");
-					if (reply.getError() != null)
-						throw reply.getError();
-					if (reply.getReturnType() != null
+						resultException = new RemoteException(id,
+								"null returned");
+					else if (reply.getError() != null)
+						resultException = reply.getError();
+					else if (reply.getReturnType() != null
 							&& reply.getNewId() != null)
 						return server.createProxy(reply.getNewId(),
 								serverConnection, reply.getReturnType());
 					else
 						return reply.getResult();
+					i = server.getConnectionSocketCount();
 				} catch (IOException e) {
 					socket.disconnect();
-					remoteException = new RemoteException(id, e.getMessage());
+					resultException = new RemoteException(id, e.getMessage());
 				}
 			} catch (Exception e) {
-				throw new RemoteException(id, e.getMessage());
+				resultException = new RemoteException(id, e.getMessage());
 			} finally {
 				socket.free();
 			}
 		}
-		throw remoteException;
+		throw resultException;
 	}
 
 	/**
@@ -122,7 +124,7 @@ public class DynamicProxy implements InvocationHandler {
 	 * 
 	 * @param paramters
 	 */
-	private void checkParameter(Object[] paramters) {
+	private void checkParameter(Object[] paramters, Method method) {
 		if (paramters != null)
 			for (int i = 0; i < paramters.length; i++) {
 				if (paramters[i] instanceof RemoteAble) {
@@ -138,7 +140,7 @@ public class DynamicProxy implements InvocationHandler {
 					Reply r = new Reply();
 					r.addNewId(objId);
 					r.setServerPort(new ServerPort(server.getServerPort()));
-					r.setReturnType(paramters[i].getClass().getInterfaces()[0]);
+					r.setReturnType(method.getParameterTypes()[i]);
 					paramters[i] = r;
 
 				}

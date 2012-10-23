@@ -81,7 +81,7 @@ public class ConnectionHandler {
 	 */
 	public void handle() {
 		RMILogger.performLog(LogPriority.INFORMATION,
-				"incoming connection from client started", null);
+				"Incoming connection from client started", null);
 		try {
 			while (true) {
 				Object object = in.readObject();
@@ -106,10 +106,10 @@ public class ConnectionHandler {
 		} catch (IOException e) {
 			if (e instanceof EOFException)
 				RMILogger.performLog(LogPriority.WARNING,
-						"client connection closed by client", null);
+						"Client connection closed by client", null);
 			else if (e instanceof SocketException)
 				RMILogger.performLog(LogPriority.WARNING,
-						"client connection closed by server", null);
+						"Client connection closed by server", null);
 			else
 				e.printStackTrace();
 		} catch (ClassNotFoundException e) {
