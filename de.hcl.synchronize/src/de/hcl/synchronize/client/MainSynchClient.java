@@ -13,17 +13,43 @@ import de.hcl.synchronize.util.IniFile;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 
+/**
+ * The main synchronization client reads the configuration file and creates the
+ * clients.
+ * 
+ * @author sebastian
+ */
 public class MainSynchClient {
 
+	/**
+	 * Property name for session id
+	 */
 	public static final String SESSION_ID = "session";
 
+	/**
+	 * Property name for location
+	 */
 	public static final String LOCATION = "location";
 
+	/**
+	 * Property name for read only flag
+	 */
 	public static final String READ_ONLY = "readonly";
 
+	/**
+	 * Property name for register at file system flag
+	 */
 	public static final String REGISTER_LISTENER = "registerlistener";
 
+	/**
+	 * Property name for client name
+	 */
 	public static final String CLIENT_NAME = "clientname";
+
+	/**
+	 * Property name for refresh rate in seconds
+	 */
+	public static final String REFRESH_RATE = "prefreshrate";
 
 	public static void main(String registry, String config_file) {
 		try {
@@ -47,13 +73,16 @@ public class MainSynchClient {
 						REGISTER_LISTENER, false);
 				String clientName = iniFile.getPropertyString(clientID,
 						CLIENT_NAME, "null");
+				int refreshRate = iniFile.getPropertyInt(clientID,
+						REFRESH_RATE, Subfolder.MINIMAL_REFRESH_TIME_DIRECTORY);
 				IHCLClient client = null;
 				try {
 					if (listener)
 						client = new FatClient(location, clientName, session,
-								readOnly);
+								readOnly, refreshRate);
 					else
-						client = new HCLClient(location, clientName, readOnly);
+						client = new HCLClient(location, clientName, readOnly,
+								refreshRate);
 
 					HCLLogger.performLog("Add client synchronization: '"
 							+ clientName + "'", HCLType.INFORMATION, null);

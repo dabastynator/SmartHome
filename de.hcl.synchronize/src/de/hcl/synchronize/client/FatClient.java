@@ -47,11 +47,12 @@ public class FatClient extends HCLClient implements JNotifyListener {
 	 * @param basePath
 	 * @param name
 	 * @param session
+	 * @param refreshRate 
 	 * @throws IOException
 	 */
 	public FatClient(String basePath, String name, IHCLSession session,
-			boolean readOnly) throws IOException {
-		super(basePath, name, readOnly);
+			boolean readOnly, int refreshRate) throws IOException {
+		super(basePath, name, readOnly, refreshRate);
 		configureLIBFolder();
 		this.session = session;
 		startWatch();

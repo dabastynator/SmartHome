@@ -47,12 +47,6 @@ public class Subfolder {
 	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 5;
 
 	/**
-	 * MINIMAL_REFRESH_TIME_HACH specifies the minimal time between two builds
-	 * of the hash for this directory. This avoids too often builds of hashes.
-	 */
-	public static final int MINIMAL_REFRESH_TIME_HASH = 1000 * 5;
-
-	/**
 	 * Section name in the ini file for cache.
 	 */
 	public static final String SECTION_DIRECTIY_HASH = "directory_hash";
@@ -174,11 +168,16 @@ public class Subfolder {
 	private String directoryHash;
 
 	/**
+	 * Minimal buffered directory cache.
+	 */
+	private int refreshRate;
+
+	/**
 	 * Allocate new subfolder at given path
 	 * 
 	 * @param subfolder
 	 */
-	public Subfolder(String subfolder, String basePath) {
+	public Subfolder(String subfolder, String basePath, int refreshRate) {
 		fileMapFile = new File(basePath + HCLClient.CACHE_SUBFOLDER_DIRECTORY
 				+ subfolderToCache(subfolder));
 		try {
@@ -195,6 +194,7 @@ public class Subfolder {
 		subFileMap = new HashMap<String, IHCLClient.FileBean>();
 		this.basePath = basePath;
 		this.subfolder = subfolder;
+		this.refreshRate = refreshRate;
 		isDirty = false;
 		lastScan = 0;
 		lastHashBuild = 0;
@@ -393,7 +393,7 @@ public class Subfolder {
 	 */
 	public List<FileBean> listFiles() throws RemoteException, IOException {
 		long startTime = System.currentTimeMillis();
-		if (startTime < lastScan + MINIMAL_REFRESH_TIME_DIRECTORY)
+		if (startTime < lastScan + refreshRate)
 			return new ArrayList<IHCLClient.FileBean>(subFileMap.values());
 		List<FileBean> list = new ArrayList<FileBean>();
 		File directory = new File(basePath + subfolder);
@@ -431,8 +431,7 @@ public class Subfolder {
 	 * @return hash of this directory
 	 */
 	public String getDirectoryHash() {
-		if (lastHashBuild < System.currentTimeMillis()
-				+ MINIMAL_REFRESH_TIME_HASH
+		if (lastHashBuild < System.currentTimeMillis() + refreshRate
 				|| directoryHash == null) {
 			directoryHash = calculateDirectoryHash();
 			lastHashBuild = System.currentTimeMillis();

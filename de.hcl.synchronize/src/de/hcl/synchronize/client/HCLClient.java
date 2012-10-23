@@ -122,6 +122,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	private boolean readOnly;
 
 	/**
+	 * Minimal buffered directory cache.
+	 */
+	private int refreshRate;
+
+	/**
 	 * Get input stream from resource in the current project or jar file.
 	 * 
 	 * @param owner
@@ -170,10 +175,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	 * 
 	 * @param basePath
 	 * @param name
+	 * @param refreshRate
 	 * @throws IOException
 	 */
-	public HCLClient(String basePath, String name, boolean readOnly)
-			throws IOException {
+	public HCLClient(String basePath, String name, boolean readOnly,
+			int refreshRate) throws IOException {
 		// initialize fields
 		if (!basePath.endsWith(File.separator))
 			basePath += File.separator;
@@ -181,6 +187,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		this.basePath = basePath;
 		this.fileMap = new HashMap<String, Subfolder>();
 		this.readOnly = readOnly;
+		this.refreshRate = refreshRate;
 
 		// check given base path
 		if (!new File(basePath).exists())
@@ -240,7 +247,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	protected Subfolder getSubFileMap(String subfolder) {
 		if (fileMap.containsKey(subfolder))
 			return fileMap.get(subfolder);
-		Subfolder subManager = new Subfolder(subfolder, basePath);
+		Subfolder subManager = new Subfolder(subfolder, basePath, refreshRate);
 		fileMap.put(subfolder, subManager);
 		return subManager;
 	}

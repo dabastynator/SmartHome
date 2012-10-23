@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import de.hcl.synchronize.client.MainSynchClient;
+import de.hcl.synchronize.client.Subfolder;
 import de.hcl.synchronize.util.IniFile;
 
 /**
@@ -71,27 +72,9 @@ public class SynchConfigure extends Panel {
 					if (row == -1 || col == -1)
 						return;
 					String client = (String) iniFile.getSections().toArray()[row];
-					System.out.println(client);
-					String oldValue = "null";
-					switch (col) {
-					case 0:
-						oldValue = "Session ID";
-						break;
-					case 1:
-						oldValue = "Client Name";
-						break;
-					case 2:
-						oldValue = "Location";
-						break;
-					case 3:
-						oldValue = "Read only";
-						break;
-					case 4:
-						oldValue = "Listen";
-						break;
-					}
+					String property = sessionTableModel.getColumnName(col);
 					String value = JOptionPane.showInputDialog(null,
-							"Enter new value: ", oldValue, 1);
+							"Enter new value: ", property, 1);
 					if (value == null)
 						return;
 					switch (col) {
@@ -116,6 +99,14 @@ public class SynchConfigure extends Panel {
 						iniFile.setPropertyBool(client,
 								MainSynchClient.REGISTER_LISTENER,
 								value.equalsIgnoreCase("true"));
+						break;
+					case 5:
+						try {
+							iniFile.setPropertyInt(client,
+									MainSynchClient.REFRESH_RATE,
+									Integer.parseInt(value));
+						} catch (Exception e1) {
+						}
 						break;
 					}
 				}
@@ -191,6 +182,8 @@ public class SynchConfigure extends Panel {
 				return "Read only";
 			if (column == 4)
 				return "File system listen";
+			if (column == 5)
+				return "Refresh rate";
 
 			return super.getColumnName(column);
 		}
@@ -213,6 +206,10 @@ public class SynchConfigure extends Panel {
 			case 4:
 				return iniFile.getPropertyBool(clientID,
 						MainSynchClient.REGISTER_LISTENER, false);
+			case 5:
+				return iniFile.getPropertyInt(clientID,
+						MainSynchClient.REFRESH_RATE,
+						Subfolder.MINIMAL_REFRESH_TIME_DIRECTORY);
 			default:
 				return "";
 			}
@@ -223,7 +220,7 @@ public class SynchConfigure extends Panel {
 		}
 
 		public int getColumnCount() {
-			return 5;
+			return 6;
 		}
 	}
 
