@@ -88,6 +88,9 @@ public class MainSynchClient {
 							+ clientName + "'", HCLType.INFORMATION, null);
 					session.addClient(client);
 				} catch (IOException e) {
+					HCLLogger.performLog(
+							"Error create client synchronization: '"
+									+ clientName + "'", HCLType.ERROR, null);
 					continue;
 				}
 			}
