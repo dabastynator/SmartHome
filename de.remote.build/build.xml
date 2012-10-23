@@ -2,12 +2,14 @@
 
 	<property name="lib.dir" value="./../de.remote.impl/lib" />
 	<property name="lib.dir2" value="./../de.webcam/lib" />
+	<property name="lib.dir3" value="./../de.hcl.synchronize/lib" />
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 		<fileset dir="${lib.dir2}" includes="**/*.jar" />
+		<fileset dir="${lib.dir3}" includes="**/*.jar" />
 	</path>
 
 	<target name="clean">
@@ -53,12 +55,14 @@
 	
 	<target name="compile_synch">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" />
+		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath" />
 	</target>
 
 	<target name="jar_synch" depends="compile_synch">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/synchronizer.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.dir3}" includes="*.jar" excludes="" />
+			<zipgroupfileset dir="${lib.dir3}" includes="*.zip" excludes="" />
 			<fileset dir="./../de.hcl.synchronize/" includes="icons/*.png" excludes="" />
 			<fileset dir="./../de.hcl.synchronize/" includes="lib/*" excludes="" />
 			<manifest>
