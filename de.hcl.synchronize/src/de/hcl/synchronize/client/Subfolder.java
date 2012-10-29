@@ -509,7 +509,7 @@ public class Subfolder {
 	
 	public boolean reduceStoreage(){
 		boolean reduce = false;
-		if (subFileMap.size() > 0)
+		if (subFileMap != null && subFileMap.size() > 0)
 			reduce = true;
 		subFileMap = null;
 		return reduce;
