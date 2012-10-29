@@ -42,7 +42,7 @@ public class Synchronizer {
 				while (true) {
 					synchronizeSynch();
 					try {
-						Thread.sleep(1000 * 5);
+						Thread.sleep(1000 * 2);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

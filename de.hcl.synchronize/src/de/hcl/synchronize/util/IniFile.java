@@ -33,7 +33,11 @@ public class IniFile extends IniReader {
 			map = new HashMap<String, String>();
 			sections.put(section.toLowerCase(), map);
 		}
-		map.put(key, value);
+		if (value != null)
+			map.put(key, value);
+		else
+			map.remove(key);
+
 	}
 
 	public void setPropertyInt(String section, String key, int value) {

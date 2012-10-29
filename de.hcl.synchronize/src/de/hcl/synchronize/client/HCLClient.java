@@ -447,7 +447,8 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	private void checkVMSize() {
 		long totalMemory = Runtime.getRuntime().totalMemory();
 		if (totalMemory >= MAXIMUM_VM_SIZE) {
-			fileMap.remove(fileMap.keySet().iterator().next());
+			for (Subfolder sub : fileMap.values())
+				sub.reduceStoreage();
 			System.gc();
 			HCLLogger.performLog("Reduce heap size", HCLType.INFORMATION, this);
 		}
@@ -503,5 +504,10 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	@Override
 	public boolean isReadOnly() throws RemoteException {
 		return readOnly;
+	}
+
+	@Override
+	public long getMinimalRefreshRate() throws RemoteException {
+		return refreshRate;
 	}
 }

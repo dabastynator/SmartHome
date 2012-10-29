@@ -44,7 +44,7 @@ public class Subfolder {
 	 * MINIMAL_REFRESH_TIME specifies the minimal time between two directory
 	 * scans. This avoids too often scans.
 	 */
-	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 5;
+	public static final int MINIMAL_REFRESH_TIME_DIRECTORY = 1000 * 2;
 
 	/**
 	 * Section name in the ini file for cache.
@@ -79,6 +79,7 @@ public class Subfolder {
 			int read = 0;
 			while ((read = is.read(buffer)) > 0)
 				md.update(buffer, 0, read);
+			is.close();
 			return md.digest();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -94,7 +95,8 @@ public class Subfolder {
 	 * @throws IOException
 	 */
 	public static boolean fileIsLocked(File file) throws IOException {
-		FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
+		RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
+		FileChannel channel = accessFile.getChannel();
 		// Get an exclusive lock on the whole file
 		FileLock lock = channel.lock();
 		try {
@@ -103,6 +105,7 @@ public class Subfolder {
 		} catch (OverlappingFileLockException e) {
 			return true;
 		} finally {
+			accessFile.close();
 			lock.release();
 		}
 		return false;
@@ -157,11 +160,6 @@ public class Subfolder {
 	private long lastScan;
 
 	/**
-	 * The time stamp at the last directory hash build.
-	 */
-	private long lastHashBuild;
-
-	/**
 	 * The hash value of this directory with files, directories and their
 	 * hashes.
 	 */
@@ -191,14 +189,13 @@ public class Subfolder {
 				fileMapFile.createNewFile();
 		} catch (IOException e) {
 		}
-		subFileMap = new HashMap<String, IHCLClient.FileBean>();
 		this.basePath = basePath;
 		this.subfolder = subfolder;
 		this.refreshRate = refreshRate;
 		isDirty = false;
 		lastScan = 0;
-		lastHashBuild = 0;
-		read();
+		directoryHash = cacheFile.getPropertyString(SECTION_DIRECTIY_HASH,
+				subfolder, null);
 	}
 
 	/**
@@ -293,9 +290,8 @@ public class Subfolder {
 	 * @param file
 	 * @return fileMap
 	 */
-	private void read() {
-		directoryHash = cacheFile.getPropertyString(SECTION_DIRECTIY_HASH,
-				subfolder, null);
+	private Map<String, FileBean> read() {
+		Map<String, IHCLClient.FileBean> subFileMap = new HashMap<String, IHCLClient.FileBean>();
 		try {
 			FileReader fileReader = new FileReader(fileMapFile);
 			BufferedReader reader = new BufferedReader(fileReader);
@@ -310,6 +306,7 @@ public class Subfolder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return subFileMap;
 	}
 
 	/**
@@ -322,9 +319,6 @@ public class Subfolder {
 		if (!isDirty)
 			return;
 		try {
-			cacheFile.setPropertyString(SECTION_DIRECTIY_HASH, basePath,
-					directoryHash);
-			cacheFile.writeFile();
 			FileWriter fileWriter = new FileWriter(fileMapFile);
 			BufferedWriter writer = new BufferedWriter(fileWriter);
 			String newLine = System.getProperty("line.separator");
@@ -392,6 +386,8 @@ public class Subfolder {
 	 * @throws IOException
 	 */
 	public List<FileBean> listFiles() throws RemoteException, IOException {
+		if (subFileMap == null)
+			subFileMap = read();
 		long startTime = System.currentTimeMillis();
 		if (startTime < lastScan + refreshRate)
 			return new ArrayList<IHCLClient.FileBean>(subFileMap.values());
@@ -431,10 +427,19 @@ public class Subfolder {
 	 * @return hash of this directory
 	 */
 	public String getDirectoryHash() {
-		if (lastHashBuild < System.currentTimeMillis() + refreshRate
-				|| directoryHash == null) {
+		if (System.currentTimeMillis() > lastScan + refreshRate)
+			try {
+				listFiles();
+			} catch (Exception e) {
+			}
+		if (directoryHash == null) {
 			directoryHash = calculateDirectoryHash();
-			lastHashBuild = System.currentTimeMillis();
+			cacheFile.setPropertyString(SECTION_DIRECTIY_HASH, subfolder,
+					directoryHash);
+			try {
+				cacheFile.writeFile();
+			} catch (IOException e) {
+			}
 		}
 		return directoryHash;
 	}
@@ -500,6 +505,14 @@ public class Subfolder {
 			return newBean;
 		}
 		return null;
+	}
+	
+	public boolean reduceStoreage(){
+		boolean reduce = false;
+		if (subFileMap.size() > 0)
+			reduce = true;
+		subFileMap = null;
+		return reduce;
 	}
 
 }

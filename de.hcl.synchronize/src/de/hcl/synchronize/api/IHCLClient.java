@@ -151,6 +151,14 @@ public interface IHCLClient extends RemoteAble {
 	public boolean isReadOnly() throws RemoteException;
 
 	/**
+	 * Get the minimal refresh rate of the file system.
+	 * 
+	 * @return minimal refresh rate of the file system.
+	 * @throws RemoteException
+	 */
+	public long getMinimalRefreshRate() throws RemoteException;
+
+	/**
 	 * Use file bean to transfer necessary file information.
 	 * 
 	 * @author sebastian
