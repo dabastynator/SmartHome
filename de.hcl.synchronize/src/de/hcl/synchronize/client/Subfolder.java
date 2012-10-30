@@ -234,6 +234,8 @@ public class Subfolder {
 	 * @return filebean
 	 */
 	public FileBean getFileBean(String file) {
+		if (subFileMap == null)
+			read();
 		return subFileMap.get(file);
 	}
 
