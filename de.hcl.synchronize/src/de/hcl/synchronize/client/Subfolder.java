@@ -350,7 +350,7 @@ public class Subfolder {
 	 * @throws IOException
 	 */
 	public synchronized FileBean getFileBean(File file) throws IOException {
-		if (!file.exists())
+		if (file == null || !file.exists())
 			throw new FileNotFoundException("File :'" + file + "' not found.");
 		FileBean bean = getFileBean(file.getName());
 		if (bean != null && bean.lastDate == file.lastModified()
