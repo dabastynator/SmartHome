@@ -56,7 +56,7 @@ public class FileSender extends AbstractSender {
 	 * 
 	 * @param maxSize
 	 */
-	public void setMaximalBufferSize(long maxSize) {
+	public void setBufferSize(long maxSize) {
 		this.maxSize = maxSize;
 	}
 
@@ -64,7 +64,7 @@ public class FileSender extends AbstractSender {
 	protected void writeData(OutputStream output) throws IOException {
 		InputStream input = new FileInputStream(file);
 		// send file length (long -> byte array)
-		long length = Math.min(file.length(), maxSize);
+		long length = file.length();
 		byte[] l = new byte[4];
 		for (int i = 0; i < 4; i++) {
 			l[3 - i] = (byte) (length >>> (i * 8));
@@ -73,9 +73,10 @@ public class FileSender extends AbstractSender {
 		informStart(length);
 
 		// send data
-		byte[] data = new byte[(int) length];
+		int bufferSize = (int) Math.min(length, maxSize);
+		byte[] data = new byte[bufferSize];
 		int read = 0;
-		while ((read = input.read(data, 0, data.length)) > 0) {
+		while ((read = input.read(data, 0, bufferSize)) >= 0) {
 			output.write(data, 0, read);
 		}
 
