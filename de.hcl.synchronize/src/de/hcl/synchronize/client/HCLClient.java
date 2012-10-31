@@ -328,7 +328,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		}
 		File file = new File(basePath + bean.subfolder + bean.file);
 		FileSender fileSender = new FileSender(file, port);
-		fileSender.setMaximalBufferSize(MAXIMAL_BUFFER_SIZE);
+		fileSender.setBufferSize(MAXIMAL_BUFFER_SIZE);
 		fileSender.sendAsync();
 		try {
 			Thread.sleep(10);
