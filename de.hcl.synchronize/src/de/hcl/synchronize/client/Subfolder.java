@@ -55,7 +55,7 @@ public class Subfolder {
 	 * The cache file contains hashes of every subfolder.
 	 */
 	public static final String CACHE_FILE = HCLClient.CACHE_SUBFOLDER_DIRECTORY
-			+ File.separator + "subolder.hash";
+			+ "subolder.hash";
 
 	/**
 	 * The cache file contains hashes of every subfolder.
@@ -235,7 +235,13 @@ public class Subfolder {
 	 */
 	public FileBean getFileBean(String file) {
 		if (subFileMap == null)
-			read();
+			try {
+				listFiles();
+			} catch (Exception e) {
+				HCLLogger.performLog("Error get file bean:" + e.getMessage(),
+						HCLType.ERROR, this);
+				return null;
+			}
 		return subFileMap.get(file);
 	}
 
@@ -245,6 +251,14 @@ public class Subfolder {
 	 * @return filebeans
 	 */
 	public Collection<FileBean> getFileBeans() {
+		if (subFileMap == null)
+			try {
+				listFiles();
+			} catch (Exception e) {
+				HCLLogger.performLog("Error get file beans:" + e.getMessage(),
+						HCLType.ERROR, this);
+				return null;
+			}
 		return subFileMap.values();
 	}
 
@@ -254,6 +268,14 @@ public class Subfolder {
 	 * @param fileBean
 	 */
 	public void push(FileBean fileBean) {
+		if (subFileMap == null)
+			try {
+				listFiles();
+			} catch (Exception e) {
+				HCLLogger.performLog("Error push file bean:" + e.getMessage(),
+						HCLType.ERROR, this);
+				return;
+			}
 		subFileMap.put(fileBean.file, fileBean);
 		isDirty = true;
 		directoryHash = null;
@@ -276,6 +298,13 @@ public class Subfolder {
 		return cacheName;
 	}
 
+	/**
+	 * Count number of sequences in string.
+	 * 
+	 * @param string
+	 * @param sequence
+	 * @return number of sequences in string
+	 */
 	private static int countString(String string, String sequence) {
 		int ret = 0;
 		while (string.contains(sequence)) {
@@ -441,6 +470,9 @@ public class Subfolder {
 			try {
 				cacheFile.writeFile();
 			} catch (IOException e) {
+				HCLLogger.performLog(
+						"Error write directory hash: " + e.getMessage(),
+						HCLType.ERROR, this);
 			}
 		}
 		return directoryHash;
@@ -508,8 +540,8 @@ public class Subfolder {
 		}
 		return null;
 	}
-	
-	public boolean reduceStoreage(){
+
+	public boolean reduceStoreage() {
 		boolean reduce = false;
 		if (subFileMap != null && subFileMap.size() > 0)
 			reduce = true;
