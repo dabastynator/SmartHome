@@ -19,6 +19,11 @@ public class FileSender extends AbstractSender {
 	protected File file;
 
 	/**
+	 * maximal buffer size in byte.
+	 */
+	protected long maxSize = Long.MAX_VALUE;
+
+	/**
 	 * allocate new file sender. the sender creates a server socket on specified
 	 * port. the file will be send to times clients.
 	 * 
@@ -46,11 +51,20 @@ public class FileSender extends AbstractSender {
 		this(file, port, 1);
 	}
 
+	/**
+	 * Set maximal buffer size in byte.
+	 * 
+	 * @param maxSize
+	 */
+	public void setMaximalBufferSize(long maxSize) {
+		this.maxSize = maxSize;
+	}
+
 	@Override
 	protected void writeData(OutputStream output) throws IOException {
 		InputStream input = new FileInputStream(file);
 		// send file length (long -> byte array)
-		long length = file.length();
+		long length = Math.min(file.length(), maxSize);
 		byte[] l = new byte[4];
 		for (int i = 0; i < 4; i++) {
 			l[3 - i] = (byte) (length >>> (i * 8));
@@ -60,8 +74,11 @@ public class FileSender extends AbstractSender {
 
 		// send data
 		byte[] data = new byte[(int) length];
-		input.read(data, 0, data.length);
-		output.write(data, 0, data.length);
+		int read = 0;
+		while ((read = input.read(data, 0, data.length)) > 0) {
+			output.write(data, 0, read);
+		}
+
 		output.flush();
 		input.close();
 		informEnd(length);

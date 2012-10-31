@@ -22,7 +22,7 @@ public class FileReceiver extends AbstractReceiver {
 	/**
 	 * maximum size of the array to buffer read bytes
 	 */
-	private int maxSize = Integer.MAX_VALUE;
+	private long maxSize = Long.MAX_VALUE;
 
 	/**
 	 * allocate new file receiver with given specifications. the file must not
@@ -65,7 +65,7 @@ public class FileReceiver extends AbstractReceiver {
 		informStart(size);
 
 		// receive file data from stream
-		byte[] data = new byte[Math.min((int) Math.min(size, progressStep),
+		byte[] data = new byte[(int) Math.min(Math.min(size, progressStep),
 				maxSize)];
 		int i;
 		long currentSize = 0, count = 0;
@@ -92,12 +92,12 @@ public class FileReceiver extends AbstractReceiver {
 	}
 
 	/**
-	 * set the maximum buffer size for reading from the stream and writing to
-	 * the file
+	 * set the maximum buffer size in byte for reading from the stream and
+	 * writing to the file
 	 * 
 	 * @param maxSize
 	 */
-	public void setBufferSize(int maxSize) {
+	public void setBufferSize(long maxSize) {
 		this.maxSize = maxSize;
 	}
 
