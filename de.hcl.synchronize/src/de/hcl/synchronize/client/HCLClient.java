@@ -35,6 +35,11 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 	public static final long MAXIMUM_VM_SIZE = 100 * 1000 * 1000l;
 
 	/**
+	 * Maximal buffer size for sending and receiving is 2 MB.
+	 */
+	public static final long MAXIMAL_BUFFER_SIZE = 1024 * 1024 * 2;
+
+	/**
 	 * the cache directory contains meta info to cache information about the
 	 * directory.
 	 */
@@ -323,6 +328,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 		}
 		File file = new File(basePath + bean.subfolder + bean.file);
 		FileSender fileSender = new FileSender(file, port);
+		fileSender.setMaximalBufferSize(MAXIMAL_BUFFER_SIZE);
 		fileSender.sendAsync();
 		try {
 			Thread.sleep(10);
@@ -367,6 +373,7 @@ public class HCLClient implements IHCLClient, IHCLLogListener {
 				new byte[] {}, 0, (byte) (FileBean.EXISTS | FileBean.FILE));
 		subManager.push(bean);
 		FileReceiver receiver = new FileReceiver(ip, port, file);
+		receiver.setBufferSize(MAXIMAL_BUFFER_SIZE);
 		try {
 			receiver.receiveSync();
 			file.setLastModified(fileBean.lastDate - 1000);

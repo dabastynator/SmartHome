@@ -204,6 +204,14 @@ public class Subfolder {
 	 * @param fileName
 	 */
 	public void remove(String fileName) {
+		if (subFileMap == null)
+			try {
+				listFiles();
+			} catch (Exception e) {
+				HCLLogger.performLog("Error push file bean:" + e.getMessage(),
+						HCLType.ERROR, this);
+				return;
+			}
 		subFileMap.remove(fileName);
 		isDirty = true;
 		directoryHash = null;
@@ -545,6 +553,7 @@ public class Subfolder {
 		boolean reduce = false;
 		if (subFileMap != null && subFileMap.size() > 0)
 			reduce = true;
+		write();
 		subFileMap = null;
 		return reduce;
 	}
