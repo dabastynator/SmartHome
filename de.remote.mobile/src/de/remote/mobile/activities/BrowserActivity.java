@@ -560,8 +560,7 @@ public class BrowserActivity extends BrowserBase {
 		} else if (uri.getScheme().compareTo("file") == 0) {
 			fileName = filePathUri.getPath();
 		} else {
-			fileName = fileName + "_"
-					+ filePathUri.getLastPathSegment().toString();
+			fileName = filePathUri.getPath();
 		}
 		return fileName;
 	}
