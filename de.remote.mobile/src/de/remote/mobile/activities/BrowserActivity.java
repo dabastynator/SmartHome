@@ -413,6 +413,9 @@ public class BrowserActivity extends BrowserBase {
 				viewerState = ViewerState.PLAYLISTS;
 				showUpdateUI();
 				break;
+			case R.id.opt_record:
+				ai.record();
+				break;				
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("image/*");
@@ -579,6 +582,7 @@ public class BrowserActivity extends BrowserBase {
 			showUpdateUI();
 		else
 			disableScreen();
+		ai.setPlayerBinder(binder);
 	}
 
 	/**

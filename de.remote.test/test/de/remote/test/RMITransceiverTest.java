@@ -46,8 +46,10 @@ public class RMITransceiverTest extends TestCase {
 				+ MPlayerTest.TEST_FILE);
 		try {
 			FileSender sender = new FileSender(src, TRANSCEIVER_FILE_PORT, 1);
+			sender.setBufferSize(50000);
 			FileReceiver receiver = new FileReceiver("localhost",
 					TRANSCEIVER_FILE_PORT, 50000, dest);
+			receiver.setBufferSize(50000);
 			receiver.getProgressListener().add(new MyListener());
 			sender.sendAsync();
 			Thread.sleep(100);

@@ -3,7 +3,6 @@ package de.remote.mobile.services;
 import java.io.File;
 import java.io.IOException;
 
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;

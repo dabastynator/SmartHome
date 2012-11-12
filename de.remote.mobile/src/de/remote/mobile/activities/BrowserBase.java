@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
+import de.remote.mobile.util.AI;
 
 public abstract class BrowserBase extends BindedActivity {
 
@@ -103,6 +104,11 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	protected ProgressBar downloadProgress;
 
+	/**
+	 * The artificial intelligence recognize speech
+	 */
+	protected AI ai;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -117,6 +123,8 @@ public abstract class BrowserBase extends BindedActivity {
 		listView.setScrollingCacheEnabled(false);
 		listView.setCacheColorHint(0);
 		registerForContextMenu(listView);
+		
+		ai = new AI(this);
 	}
 
 	@Override

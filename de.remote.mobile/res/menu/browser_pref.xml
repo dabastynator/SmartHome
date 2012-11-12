@@ -32,16 +32,16 @@
                 android:title="@string/str_create_playlist"/>
         </menu>
     </item>
-        <item
-        android:id="@+id/opt_upload"
-        android:icon="@drawable/upload"
-        android:title="@string/str_upload">
-    </item>
-    <item
+    <item android:id="@+id/opt_record" android:title="@string/str_record" android:icon="@drawable/mic_32"></item><item
         android:id="@+id/opt_control"
         android:icon="@drawable/control"
         android:title="@string/str_control">
         <menu>
+            <item
+                android:id="@+id/opt_upload"
+                android:icon="@drawable/upload"
+                android:title="@string/str_upload">
+            </item>
             <item
                 android:id="@+id/opt_light_on"
                 android:icon="@drawable/light_on"
@@ -79,5 +79,6 @@
         android:icon="@drawable/exit"
         android:title="@string/str_exit">
     </item>
+    
 
 </menu>
