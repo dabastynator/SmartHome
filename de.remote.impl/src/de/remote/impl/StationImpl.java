@@ -17,7 +17,7 @@ public class StationImpl implements IMusicStation {
 
 	public StationImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
-		mplayer = new MPlayer();
+		mplayer = new MPlayer(playlistLocation);
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);

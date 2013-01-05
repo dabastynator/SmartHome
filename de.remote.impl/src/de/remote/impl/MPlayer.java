@@ -20,6 +20,11 @@ public class MPlayer extends AbstractPlayer {
 	private boolean shuffle = false;
 	private int volume = 50;
 	private int seekValue;
+	private Object playListfolder;
+
+	public MPlayer(String playListfolder) {
+		this.playListfolder = playListfolder;
+	}
 
 	@Override
 	public void play(String file) {
@@ -28,7 +33,7 @@ public class MPlayer extends AbstractPlayer {
 
 		if (new File(file).isDirectory()) {
 			createPlayList(file);
-			mplayerIn.print("loadlist /home/sebastian/temp/playlist.pls\n");
+			mplayerIn.print("loadlist " + playListfolder + "/playlist.pls\n");
 			mplayerIn.flush();
 		} else {
 			mplayerIn.print("loadfile \"" + file + "\" 0\n");
@@ -42,7 +47,7 @@ public class MPlayer extends AbstractPlayer {
 			Process exec = Runtime.getRuntime().exec(
 					new String[] { "/usr/bin/find", file + "/" });
 			PrintStream output = new PrintStream(new FileOutputStream(
-					"/home/sebastian/temp/playlist.pls"));
+					playListfolder + "/playlist.pls"));
 			BufferedReader input = new BufferedReader(new InputStreamReader(
 					exec.getInputStream()));
 			BufferedReader error = new BufferedReader(new InputStreamReader(
@@ -235,16 +240,17 @@ public class MPlayer extends AbstractPlayer {
 			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
-					if (line.startsWith("Playing")){
+					if (line.startsWith("Playing")) {
 						try {
 							String file = line.substring(8);
-							file = file.substring(0,file.length()-1);
+							file = file.substring(0, file.length() - 1);
 							bean = readFileInformations(new File(file));
 						} catch (IOException e) {
 							bean = new PlayingBean();
 						}
-						String file = line.substring(line.lastIndexOf(File.separator)+1);
-						file = file.substring(0, file.length()-1);
+						String file = line.substring(line
+								.lastIndexOf(File.separator) + 1);
+						file = file.substring(0, file.length() - 1);
 						bean.setFile(file.trim());
 					}
 					if (line.startsWith(" Title: "))
