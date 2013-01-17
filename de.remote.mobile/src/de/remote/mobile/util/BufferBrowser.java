@@ -1,63 +1,67 @@
 package de.remote.mobile.util;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
+import de.remote.api.IThumbnailListener;
 
 /**
  * this proxy buffers temporary information about the current directory.
+ * 
  * @author sebastian
  */
-public class BufferBrowser implements IBrowser{
+public class BufferBrowser implements IBrowser {
 
 	/**
 	 * browser object
 	 */
 	private IBrowser browser;
-	
+
 	/**
-	 * state of directory 
+	 * state of directory
 	 */
 	private boolean isDirtyDirectory;
-	
+
 	/**
-	 * state of file 
+	 * state of file
 	 */
 	private boolean isDirtyFile;
-	
+
 	/**
 	 * temporary directories
 	 */
 	private String[] directories;
-	
+
 	/**
-	 * temporary files 
+	 * temporary files
 	 */
 	private String[] files;
-	
+
 	/**
-	 * state of location 
+	 * state of location
 	 */
 	private boolean isDirtyLocation;
-	
+
 	/**
-	 * temporary location 
+	 * temporary location
 	 */
 	private String location;
-	
+
 	/**
-	 * state of full location 
+	 * state of full location
 	 */
 	private boolean isDirtyFullLocation;
-	
+
 	/**
-	 * temporary full location 
+	 * temporary full location
 	 */
 	private String fullLocation;
 
 	/**
 	 * allocates new buffered browser.
+	 * 
 	 * @param browser
 	 */
 	public BufferBrowser(IBrowser browser) {
@@ -67,7 +71,7 @@ public class BufferBrowser implements IBrowser{
 		isDirtyLocation = true;
 		isDirtyFullLocation = true;
 	}
-	
+
 	@Override
 	public boolean goBack() throws RemoteException {
 		isDirtyDirectory = true;
@@ -88,16 +92,20 @@ public class BufferBrowser implements IBrowser{
 
 	@Override
 	public String[] getDirectories() throws RemoteException {
-		if (isDirtyDirectory)
+		if (isDirtyDirectory) {
 			directories = browser.getDirectories();
+			Arrays.sort(directories);
+		}
 		isDirtyDirectory = false;
 		return directories;
 	}
 
 	@Override
 	public String[] getFiles() throws RemoteException {
-		if (isDirtyFile)
+		if (isDirtyFile) {
 			files = browser.getFiles();
+			Arrays.sort(files);
+		}
 		isDirtyFile = false;
 		return files;
 	}
@@ -124,7 +132,8 @@ public class BufferBrowser implements IBrowser{
 	}
 
 	/**
-	 * set buffered browser dirty. to force to get all information from the remote browser
+	 * set buffered browser dirty. to force to get all information from the
+	 * remote browser
 	 */
 	public void setDirty() {
 		isDirtyDirectory = true;
@@ -149,6 +158,18 @@ public class BufferBrowser implements IBrowser{
 	public void updloadFile(String file, String serverIp, int port)
 			throws RemoteException {
 		browser.updloadFile(file, serverIp, port);
+	}
+
+	@Override
+	public void addThumbnailListener(IThumbnailListener listener)
+			throws RemoteException {
+		browser.addThumbnailListener(listener);
+	}
+
+	@Override
+	public void removeThumbnailListener(IThumbnailListener listener)
+			throws RemoteException {
+		browser.removeThumbnailListener(listener);		
 	}
 
 }

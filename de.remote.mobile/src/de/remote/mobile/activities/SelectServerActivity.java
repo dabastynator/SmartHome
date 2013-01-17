@@ -1,6 +1,6 @@
 package de.remote.mobile.activities;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
 import de.remote.mobile.R;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.database.ServerTable;
@@ -26,7 +27,7 @@ import de.remote.mobile.util.ServerCursorAdapter;
  * 
  * @author sebastian
  */
-public class SelectServerActivity extends ListActivity {
+public class SelectServerActivity extends Activity {
 
 	/**
 	 * request code for this activity
@@ -48,6 +49,8 @@ public class SelectServerActivity extends ListActivity {
 	 */
 	private ServerDatabase serverDB;
 
+	private ListView serverList;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,15 +59,20 @@ public class SelectServerActivity extends ListActivity {
 		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
 				null, null, null, null, null);
 		startManagingCursor(c);
+		
+		setContentView(R.layout.server);
+		
+		findComponents();
 
-		setListAdapter(new ServerCursorAdapter(this, c));
+		serverList.setAdapter(new ServerCursorAdapter(this, c));
+		
 		db.close();
-		getListView().setOnItemClickListener(new OnItemClickListener() {
+		serverList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
 				Intent i = new Intent();
-				SQLiteCursor c = (SQLiteCursor) getListAdapter().getItem(
+				SQLiteCursor c = (SQLiteCursor) serverList.getAdapter().getItem(
 						position);
 				selectedItem = c.getInt(ServerTable.INDEX_ID);
 				i.putExtra(SERVER_ID, selectedItem);
@@ -73,17 +81,21 @@ public class SelectServerActivity extends ListActivity {
 			}
 
 		});
-		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+		serverList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View view,
 					int position, long arg3) {
-				SQLiteCursor c = (SQLiteCursor) getListAdapter().getItem(
+				SQLiteCursor c = (SQLiteCursor) serverList.getAdapter().getItem(
 						position);
 				selectedItem = c.getInt(ServerTable.INDEX_ID);
 				return false;
 			}
 		});
-		registerForContextMenu(getListView());
+		registerForContextMenu(serverList);
+	}
+
+	private void findComponents() {
+		serverList = (ListView)findViewById(R.id.server_list);
 	}
 
 	@Override
@@ -120,7 +132,7 @@ public class SelectServerActivity extends ListActivity {
 	 * update the list view
 	 */
 	private void updateList() {
-		ServerCursorAdapter adapter = (ServerCursorAdapter) getListAdapter();
+		ServerCursorAdapter adapter = (ServerCursorAdapter) serverList.getAdapter();
 		SQLiteDatabase db = serverDB.getReadableDatabase();
 		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
 				null, null, null, null, null);
@@ -140,11 +152,15 @@ public class SelectServerActivity extends ListActivity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_select_server_add:
-			Intent intent = new Intent(this, NewServerActivity.class);
-			startActivity(intent);
+			addNewServer(null);
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
+	}
+
+	public void addNewServer(View view) {
+		Intent intent = new Intent(this, NewServerActivity.class);
+		startActivity(intent);		
 	}
 
 	@Override

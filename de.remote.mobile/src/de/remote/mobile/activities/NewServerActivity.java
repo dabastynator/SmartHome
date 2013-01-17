@@ -77,9 +77,7 @@ public class NewServerActivity extends Activity {
 		int id = (int) serverDB.insertServer(serverName, ip.getText().toString());
 		Toast.makeText(this, "server '" + serverName + "' added",
 				Toast.LENGTH_SHORT).show();
-		Intent i = new Intent(this, BrowserActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		i.putExtra(BrowserActivity.EXTRA_SERVER_ID, id);
+		Intent i = new Intent(this, SelectServerActivity.class);
 		startActivity(i);
 		finish();
 	}

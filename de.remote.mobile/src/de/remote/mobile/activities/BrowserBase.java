@@ -119,9 +119,9 @@ public abstract class BrowserBase extends BindedActivity {
 		setContentView(R.layout.main);
 		
 		findComponents();
-		listView.setBackgroundResource(R.drawable.idefix_dark);
-		listView.setScrollingCacheEnabled(false);
-		listView.setCacheColorHint(0);
+//		listView.setBackgroundResource(R.drawable.idefix_dark);
+//		listView.setScrollingCacheEnabled(false);
+//		listView.setCacheColorHint(0);
 		registerForContextMenu(listView);
 		
 		ai = new AI(this);

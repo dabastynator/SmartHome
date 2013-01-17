@@ -30,4 +30,5 @@
     <string name="str_download">Download</string>
     <string name="str_webcam">Webcam</string>
     <string name="str_upload">Upload</string>
+    <string name="add_new_server">add new server</string>
 </resources>

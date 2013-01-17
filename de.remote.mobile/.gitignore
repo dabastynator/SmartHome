@@ -1,3 +1,5 @@
 /src_webcam
 /src_rmi
 /src_api
+/bin
+.gitignore

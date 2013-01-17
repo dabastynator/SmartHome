@@ -64,17 +64,21 @@ public abstract class BindedActivity extends Activity {
 			binderConnected();
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
-					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)){
+					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
 				serverID = getIntent().getExtras().getInt(EXTRA_SERVER_ID);
 				newConnection = true;
 			}
 			// else just connect if there is no connection
 			else if (newConnection) {
 				serverID = serverDB.getFavoriteServer();
-				if (serverID == -1)
-					Toast.makeText(BindedActivity.this,
-							"no server configurated", Toast.LENGTH_SHORT)
-							.show();
+				if (serverID == -1) {
+					Toast.makeText(BindedActivity.this, "no favorite server",
+							Toast.LENGTH_SHORT).show();
+					Intent intent = new Intent(BindedActivity.this,
+							SelectServerActivity.class);
+					startActivityForResult(intent,
+							SelectServerActivity.RESULT_CODE);
+				}
 			}
 			// if there is a server id to connect -> connect
 			if (serverID >= 0 && newConnection)
@@ -99,7 +103,7 @@ public abstract class BindedActivity extends Activity {
 
 		serverDB = new ServerDatabase(this);
 	};
-	
+
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
@@ -112,7 +116,7 @@ public abstract class BindedActivity extends Activity {
 			intent = new Intent(this, RemoteService.class);
 			stopService(intent);
 			finish();
-			break;			
+			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
