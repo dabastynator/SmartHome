@@ -111,4 +111,16 @@ public interface IBrowser extends RemoteAble {
 	 */
 	boolean delete(String file) throws RemoteException;
 
+	/**
+	 * Read current directory and distribute thumbnails with specified
+	 * dimension. The recall object gets the thumbnails.
+	 * 
+	 * @param listener
+	 * @param width
+	 * @param height
+	 * @throws RemoteException
+	 */
+	public void fireThumbnails(IThumbnailListener listener, int width,
+			int height) throws RemoteException;
+
 }
