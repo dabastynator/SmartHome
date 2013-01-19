@@ -161,15 +161,9 @@ public class BufferBrowser implements IBrowser {
 	}
 
 	@Override
-	public void addThumbnailListener(IThumbnailListener listener)
-			throws RemoteException {
-		browser.addThumbnailListener(listener);
-	}
-
-	@Override
-	public void removeThumbnailListener(IThumbnailListener listener)
-			throws RemoteException {
-		browser.removeThumbnailListener(listener);		
+	public void fireThumbnails(IThumbnailListener listener, int width,
+			int height) throws RemoteException {
+		browser.fireThumbnails(listener, width, height);
 	}
 
 }

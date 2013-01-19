@@ -1,14 +1,20 @@
 package de.remote.mobile.util;
 
+import java.nio.IntBuffer;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 import de.remote.api.IThumbnailListener;
@@ -23,6 +29,8 @@ import de.remote.mobile.activities.BrowserBase.ViewerState;
 public class BrowserAdapter extends ArrayAdapter<String> implements
 		IThumbnailListener {
 
+	public static final int PREVIEW_SIZE = 64;
+
 	/**
 	 * current viewer state
 	 */
@@ -33,15 +41,27 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	 */
 	private IBrowser browser;
 
+	private Handler handler;
+
+	private Map<String, Bitmap> thumbnails = Collections
+			.synchronizedMap(new HashMap<String, Bitmap>());
+
 	public BrowserAdapter(Context context, IBrowser browser, String[] all,
 			ViewerState state) {
 		super(context, R.layout.browser_row, R.id.lbl_item_name, all);
+		handler = new Handler();
 		this.browser = browser;
-		try {
-			this.browser.addThumbnailListener(this);
-		} catch (RemoteException e) {
-		}
+		new Thread() {
+			public void run() {
+				try {
+					BrowserAdapter.this.browser.fireThumbnails(
+							BrowserAdapter.this, PREVIEW_SIZE, PREVIEW_SIZE);
+				} catch (RemoteException e) {
+				}
+			}
+		}.start();
 		this.viewerState = state;
+		this.setNotifyOnChange(true);
 	}
 
 	@Override
@@ -49,38 +69,40 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 		View v = super.getView(position, convertView, parent);
 		try {
 			ImageView image = (ImageView) v.findViewById(R.id.img_item);
-			switch (viewerState) {
-			case DIRECTORIES:
-				if (position < browser.getDirectories().length)
-					image.setImageResource(R.drawable.folder);
-				else {
-					String file = ((TextView) v
-							.findViewById(R.id.lbl_item_name)).getText()
-							.toString();
-					if (file.toUpperCase(Locale.US).endsWith("MP3")
-							|| file.toUpperCase(Locale.US).endsWith("OGG")
-							|| file.toUpperCase(Locale.US).endsWith("WAV"))
-						image.setImageResource(R.drawable.music);
-					else if (file.toUpperCase(Locale.US).endsWith("AVI")
-							|| file.toUpperCase(Locale.US).endsWith("MPEG")
-							|| file.toUpperCase(Locale.US).endsWith("MPG"))
-						image.setImageResource(R.drawable.movie);
-					else if (file.toUpperCase(Locale.US).endsWith("JPG")
-							|| file.toUpperCase(Locale.US).endsWith("GIF")
-							|| file.toUpperCase(Locale.US).endsWith("BMP")
-							|| file.toUpperCase(Locale.US).endsWith("PNG"))
-						image.setImageResource(R.drawable.camera);
-					else
-						image.setImageResource(R.drawable.file);
+			String file = ((TextView) v.findViewById(R.id.lbl_item_name))
+					.getText().toString();
+			if (thumbnails.containsKey(file))
+				image.setImageBitmap(thumbnails.get(file));
+			else
+				switch (viewerState) {
+				case DIRECTORIES:
+					if (position < browser.getDirectories().length)
+						image.setImageResource(R.drawable.folder);
+					else {
+						if (file.toUpperCase(Locale.US).endsWith("MP3")
+								|| file.toUpperCase(Locale.US).endsWith("OGG")
+								|| file.toUpperCase(Locale.US).endsWith("WAV"))
+							image.setImageResource(R.drawable.music);
+						else if (file.toUpperCase(Locale.US).endsWith("AVI")
+								|| file.toUpperCase(Locale.US).endsWith("MPEG")
+								|| file.toUpperCase(Locale.US).endsWith("MPG"))
+							image.setImageResource(R.drawable.movie);
+						else if (file.toUpperCase(Locale.US).endsWith("JPG")
+								|| file.toUpperCase(Locale.US).endsWith("GIF")
+								|| file.toUpperCase(Locale.US).endsWith("BMP")
+								|| file.toUpperCase(Locale.US).endsWith("PNG"))
+							image.setImageResource(R.drawable.camera);
+						else
+							image.setImageResource(R.drawable.file);
+					}
+					break;
+				case PLAYLISTS:
+					image.setImageResource(R.drawable.pls);
+					break;
+				case PLS_ITEMS:
+					image.setImageResource(R.drawable.music);
+					break;
 				}
-				break;
-			case PLAYLISTS:
-				image.setImageResource(R.drawable.pls);
-				break;
-			case PLS_ITEMS:
-				image.setImageResource(R.drawable.music);
-				break;
-			}
 		} catch (RemoteException e) {
 
 		}
@@ -88,11 +110,20 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	}
 
 	@Override
-	@Oneway
-	public void setThumbnail(String file, byte[] thumbnail)
+	public void setThumbnail(final String file, final int[] thumbnail)
 			throws RemoteException {
-		// TODO Auto-generated method stub
-
+		Log.e("get thumbnail",file);
+		Bitmap bm = Bitmap.createBitmap(PREVIEW_SIZE, PREVIEW_SIZE,
+				Bitmap.Config.RGB_565);
+		IntBuffer buf = IntBuffer.wrap(thumbnail); // data is my array
+		bm.copyPixelsFromBuffer(buf);
+		thumbnails.put(file, bm);
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				BrowserAdapter.super.notifyDataSetChanged();
+			}
+		});
 	}
 
 }
