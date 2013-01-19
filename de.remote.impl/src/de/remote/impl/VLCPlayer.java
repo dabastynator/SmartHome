@@ -66,5 +66,11 @@ public class VLCPlayer extends AbstractPlayer{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void play(String file) {
+		// TODO Auto-generated method stub
+		super.play(file);
+	}
 
 }

@@ -54,9 +54,11 @@ public class PlayListImpl implements IPlayList {
 			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF,
 					true));
 			File fileF = new File(file);
-			if (!fileF.exists())
+			if (!fileF.exists()){
+				fileStream.close();
 				throw new PlayerException("the file '" + file
 						+ "' does not exist");
+			}
 			if (fileF.isDirectory()) {
 				for (File f : fileF.listFiles())
 					fileStream.println(f.getAbsolutePath());

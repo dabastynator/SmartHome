@@ -1,16 +1,27 @@
 package de.remote.impl;
 
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.DirectorySender;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
+import de.remote.api.IThumbnailListener;
 
 public class BrowserImpl implements IBrowser {
 
@@ -91,7 +102,8 @@ public class BrowserImpl implements IBrowser {
 	@Override
 	public String publishDirectory(String directory, int port)
 			throws RemoteException, IOException {
-		DirectorySender sender = new DirectorySender(new File(location + directory), port, 1);
+		DirectorySender sender = new DirectorySender(new File(location
+				+ directory), port, 1);
 		sender.sendAsync();
 		return Server.getServer().getServerPort().getIp();
 	}
@@ -99,8 +111,95 @@ public class BrowserImpl implements IBrowser {
 	@Override
 	public void updloadFile(String file, String serverIp, int port)
 			throws RemoteException {
-		FileReceiver receiver = new FileReceiver(serverIp, port, new File(location + file));
+		FileReceiver receiver = new FileReceiver(serverIp, port, new File(
+				location + file));
 		receiver.receiveAsync();
 	}
 
+	private BufferedImage scale(BufferedImage source, int width, int high) {
+		int w = width;
+		int h = high;
+		BufferedImage bi = getCompatibleImage(w, h);
+		Graphics2D g2d = bi.createGraphics();
+		double xScale = (double) w / source.getWidth();
+		double yScale = (double) h / source.getHeight();
+		AffineTransform at = AffineTransform.getScaleInstance(xScale, yScale);
+		g2d.drawRenderedImage(source, at);
+		g2d.dispose();
+		return bi;
+	}
+
+	private BufferedImage getCompatibleImage(int w, int h) {
+		GraphicsEnvironment ge = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice gd = ge.getDefaultScreenDevice();
+		GraphicsConfiguration gc = gd.getDefaultConfiguration();
+		BufferedImage image = gc.createCompatibleImage(w, h);
+		return image;
+	}
+
+	@Override
+	public void fireThumbnails(IThumbnailListener listener, int width, int high)
+			throws RemoteException {
+		for (String fileName : new File(location).list()) {
+			File file = new File(location + fileName);
+			if (file.isFile() && fileName.length() > 3) {
+				String extension = fileName.toUpperCase().substring(
+						fileName.length() - 3);
+				if (extension.equals("JPG") || extension.equals("PNG")
+						|| extension.equals("GIF")) {
+					try {
+						BufferedImage src = ImageIO.read(file);
+						BufferedImage thumbnail = scale(src, width, high);
+						int[] rgb = ((DataBufferInt) thumbnail.getData()
+								.getDataBuffer()).getData();
+						rgb = compressRGB565(rgb, width, high);
+						System.out.println("send thumbnail: " + fileName);
+						listener.setThumbnail(fileName, rgb);
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+	}
+
+	private int compressRGB565(int i) {
+		int ret = 0;
+		// blue 5 bit
+		ret |= (0x000000F8 & i) >> 3;
+		// green 6 bit
+		ret |= (0x0000FC00 & i) >> 2 + 3;
+		// red 5 bit
+		ret |= (0x00F80000 & i) >> 3 + 2 + 3;
+		return ret;
+	}
+
+	private int[] compressRGB565(int[] rgb, int width, int height) {
+		int[] ret = new int[width * height / 2];
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i += 2) {
+				int px1 = compressRGB565(rgb[j * width + i]);
+				int px2 = compressRGB565(rgb[j * width + i + 1]);
+				ret[j * width / 2 + i / 2] = px1 | (px2 << 16);
+			}
+		return ret;
+	}
+
+	public static void main(String[] args) {
+		try {
+			BrowserImpl impl = new BrowserImpl("/home/sebastian/temp");
+			impl.fireThumbnails(new IThumbnailListener() {
+				@Override
+				@Oneway
+				public void setThumbnail(String file, int[] thumbnail)
+						throws RemoteException {
+					System.out.println(thumbnail.length);
+				}
+			}, 10, 10);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }
