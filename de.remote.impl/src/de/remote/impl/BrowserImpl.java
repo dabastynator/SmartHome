@@ -139,8 +139,8 @@ public class BrowserImpl implements IBrowser {
 	}
 
 	@Override
-	public void fireThumbnails(IThumbnailListener listener, int width, int high)
-			throws RemoteException {
+	public void fireThumbnails(IThumbnailListener listener, int width,
+			int height) throws RemoteException {
 		for (String fileName : new File(location).list()) {
 			File file = new File(location + fileName);
 			if (file.isFile() && fileName.length() > 3) {
@@ -150,13 +150,21 @@ public class BrowserImpl implements IBrowser {
 						|| extension.equals("GIF")) {
 					try {
 						BufferedImage src = ImageIO.read(file);
-						BufferedImage thumbnail = scale(src, width, high);
+						double radio = Math.min(
+								width / (double) src.getWidth(), height
+										/ (double) src.getHeight());
+						int w = (int) (radio * src.getWidth());
+						int h = (int) (radio * src.getHeight());
+						if (w%2!=0)
+							w++;
+						BufferedImage thumbnail = scale(src, w, h);
 						int[] rgb = ((DataBufferInt) thumbnail.getData()
 								.getDataBuffer()).getData();
-						rgb = compressRGB565(rgb, width, high);
+						rgb = compressRGB565(rgb, w, h);
 						System.out.println("send thumbnail: " + fileName);
-						listener.setThumbnail(fileName, rgb);
-					} catch (IOException e) {
+						listener.setThumbnail(fileName, w, h, rgb);
+					} catch (Exception e) {
+						file.getName();
 					}
 				}
 			}
@@ -191,8 +199,8 @@ public class BrowserImpl implements IBrowser {
 			impl.fireThumbnails(new IThumbnailListener() {
 				@Override
 				@Oneway
-				public void setThumbnail(String file, int[] thumbnail)
-						throws RemoteException {
+				public void setThumbnail(String file, int w, int h,
+						int[] thumbnail) throws RemoteException {
 					System.out.println(thumbnail.length);
 				}
 			}, 10, 10);
