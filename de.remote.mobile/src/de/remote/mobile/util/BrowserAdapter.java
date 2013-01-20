@@ -43,13 +43,14 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 
 	private Handler handler;
 
-	private Map<String, Bitmap> thumbnails = Collections
+	private static Map<String, Bitmap> thumbnails = Collections
 			.synchronizedMap(new HashMap<String, Bitmap>());
 
 	public BrowserAdapter(Context context, IBrowser browser, String[] all,
 			ViewerState state) {
 		super(context, R.layout.browser_row, R.id.lbl_item_name, all);
 		handler = new Handler();
+		thumbnails.clear();
 		this.browser = browser;
 		new Thread() {
 			public void run() {
