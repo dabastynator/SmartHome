@@ -29,7 +29,7 @@ import de.remote.mobile.activities.BrowserBase.ViewerState;
 public class BrowserAdapter extends ArrayAdapter<String> implements
 		IThumbnailListener {
 
-	public static final int PREVIEW_SIZE = 64;
+	public static final int PREVIEW_SIZE = 80;
 
 	/**
 	 * current viewer state
@@ -110,11 +110,10 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	}
 
 	@Override
-	public void setThumbnail(final String file, final int[] thumbnail)
+	public void setThumbnail(String file, int width, int height, int[] thumbnail)
 			throws RemoteException {
-		Log.e("get thumbnail",file);
-		Bitmap bm = Bitmap.createBitmap(PREVIEW_SIZE, PREVIEW_SIZE,
-				Bitmap.Config.RGB_565);
+		Log.e("get thumbnail", file);
+		Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 		IntBuffer buf = IntBuffer.wrap(thumbnail); // data is my array
 		bm.copyPixelsFromBuffer(buf);
 		thumbnails.put(file, bm);
