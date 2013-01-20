@@ -12,14 +12,16 @@ import de.newsystem.rmi.protokol.RemoteException;
 public interface IThumbnailListener extends RemoteAble {
 
 	/**
-	 * Set the thumbnail for specified entity.
+	 * Set the thumbnail for specified entity, with width and height.
 	 * 
 	 * @param file
+	 * @param width
+	 * @param height
 	 * @param thumbnail
 	 * @throws RemoteException
 	 */
 	@Oneway
-	public void setThumbnail(String file, int[] thumbnail)
+	public void setThumbnail(String file, int width, int height, int[] thumbnail)
 			throws RemoteException;
 
 }
