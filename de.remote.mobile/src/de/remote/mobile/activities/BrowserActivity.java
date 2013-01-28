@@ -429,6 +429,10 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_shuffle_off:
 				binder.getPlayer().useShuffle(false);
 				break;
+			case R.id.opt_mousepad:
+				intent = new Intent(this, MouseActivity.class);
+				startActivity(intent);
+				break;
 			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();

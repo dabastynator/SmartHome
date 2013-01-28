@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="str_record">Record</string>
+    <string name="str_left">Left</string>
+    <string name="str_right">Right</string>
 </resources>
