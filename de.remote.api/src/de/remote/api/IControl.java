@@ -11,6 +11,16 @@ import de.newsystem.rmi.protokol.RemoteException;
 public interface IControl extends RemoteAble {
 
 	/**
+	 * Code for left Click
+	 */
+	public static final int LEFT_CLICK = 0;
+
+	/**
+	 * Code for right Click
+	 */
+	public static final int RIGHT_CLICK = 1;
+
+	/**
 	 * switch the display off
 	 * 
 	 * @throws RemoteException
