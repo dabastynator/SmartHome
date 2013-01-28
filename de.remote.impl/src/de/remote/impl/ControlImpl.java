@@ -2,6 +2,7 @@ package de.remote.impl;
 
 import java.awt.AWTException;
 import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.io.IOException;
 
 import de.newsystem.rmi.protokol.RemoteException;
@@ -16,6 +17,8 @@ public class ControlImpl implements IControl {
 	public static final String SHUTDOWN = "shutdown -h now";
 
 	private Robot robot;
+	private int x = 0;
+	private int y = 0;
 
 	@Override
 	public void shutdown() {
@@ -58,12 +61,19 @@ public class ControlImpl implements IControl {
 
 	@Override
 	public void mouseMove(int x, int y) throws RemoteException {
-		getRobot().mouseMove(x, y);
+		getRobot().mouseMove(this.x += x, this.y += y);
 	}
 
 	@Override
 	public void mousePress(int button) throws RemoteException {
-		getRobot().mousePress(button);
+		if (button == IControl.LEFT_CLICK){
+			getRobot().mousePress(InputEvent.BUTTON1_MASK);
+			getRobot().mouseRelease(InputEvent.BUTTON1_MASK);
+		}
+		if (button == IControl.RIGHT_CLICK){
+			getRobot().mousePress(InputEvent.BUTTON3_MASK);
+			getRobot().mouseRelease(InputEvent.BUTTON3_MASK);
+		}
 	}
 
 	@Override
