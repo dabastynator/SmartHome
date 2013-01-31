@@ -1,6 +1,12 @@
 package de.remote.mobile.activities;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.protokol.ServerPort;
 import de.remote.api.IControl;
 import de.remote.mobile.R;
 import android.os.Bundle;
@@ -13,6 +19,8 @@ public class MouseActivity extends BindedActivity {
 
 	private float startX;
 	private float startY;
+	private DataOutputStream mouseMoveOutput;
+	private Socket socket;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +46,14 @@ public class MouseActivity extends BindedActivity {
 			int y = (int) (event.getY() - startY);
 			startX = event.getX();
 			startY = event.getY();
-			IControl control = binder.getControl();
-			if (control != null)
+			if (mouseMoveOutput != null)
 				try {
-					control.mouseMove(x, y);
-				} catch (RemoteException e) {
+					mouseMoveOutput.writeInt(x * 2);
+					mouseMoveOutput.writeInt(y * 2);
+				} catch (IOException e) {
 					Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT)
 							.show();
+					mouseMoveOutput = null;
 				}
 		}
 		return true;
@@ -71,15 +80,29 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	void remoteConnected() {
-		// TODO Auto-generated method stub
+	protected void onDestroy() {
+		try {
+			socket.close();
+		} catch (IOException e) {
+		}
+		super.onDestroy();
+	}
 
+	@Override
+	void remoteConnected() {
+		try {
+			ServerPort sp = binder.getControl().openMouseMoveStream();
+			socket = new Socket(sp.getIp(), sp.getPort());
+			mouseMoveOutput = new DataOutputStream(socket.getOutputStream());
+		} catch (Exception e) {
+			mouseMoveOutput = null;
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
 	void disableScreen() {
-		// TODO Auto-generated method stub
-
+		mouseMoveOutput = null;
 	}
 
 }
