@@ -3,13 +3,20 @@ package de.remote.impl;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.protokol.ServerPort;
 import de.remote.api.ControlConstants;
 import de.remote.api.IControl;
 
 public class ControlImpl implements IControl {
+
+	public static final int MOUSE_MOVE_PORT = 5066;
 
 	public static final String MAKE_DARK = "xset dpms force off";
 	public static final String MAKE_BRIDE = "xset dpms force on";
@@ -66,19 +73,65 @@ public class ControlImpl implements IControl {
 
 	@Override
 	public void mousePress(int button) throws RemoteException {
-		if (button == IControl.LEFT_CLICK){
+		if (button == IControl.LEFT_CLICK) {
 			getRobot().mousePress(InputEvent.BUTTON1_MASK);
 			getRobot().mouseRelease(InputEvent.BUTTON1_MASK);
 		}
-		if (button == IControl.RIGHT_CLICK){
+		if (button == IControl.RIGHT_CLICK) {
 			getRobot().mousePress(InputEvent.BUTTON3_MASK);
 			getRobot().mouseRelease(InputEvent.BUTTON3_MASK);
 		}
 	}
 
 	@Override
-	public void keyPress(int keycode) throws RemoteException {
-		getRobot().keyPress(keycode);
+	public void keyPress(String charachters) throws RemoteException {
+		charachters = charachters.toLowerCase();
+		while (charachters.length() > 0) {
+			char c = charachters.charAt(0);
+			charachters = charachters.substring(1);
+			// for (int i = 0; i < 26; i++)
+			// if (c - 'a' == i)
+			// getRobot().keyPress(c - 'a' + 65);
+			getRobot().keyPress(c);
+		}
 	}
 
+	@Override
+	public ServerPort openMouseMoveStream() throws RemoteException, IOException {
+		ServerSocket server = new ServerSocket(MOUSE_MOVE_PORT);
+		MouseMoveStream stream = new MouseMoveStream(server);
+		stream.start();
+		ServerPort sp = new ServerPort(Server.getServer().getServerPort().getIp(), MOUSE_MOVE_PORT);
+		return sp;
+	}
+
+	private class MouseMoveStream extends Thread {
+
+		private ServerSocket server;
+
+		public MouseMoveStream(ServerSocket server) {
+			this.server = server;
+		}
+
+		@Override
+		public void run() {
+			try {
+				Socket socket = server.accept();
+				DataInputStream input = new DataInputStream(socket.getInputStream());
+				while(true){
+					int x = input.readInt();
+					int y = input.readInt();
+					mouseMove(x, y);
+				}
+			} catch (IOException e) {
+			} catch (RemoteException e) {
+			} finally {
+				try {
+					server.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+	}
 }
