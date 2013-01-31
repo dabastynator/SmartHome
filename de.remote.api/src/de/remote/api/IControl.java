@@ -1,7 +1,10 @@
 package de.remote.api;
 
+import java.io.IOException;
+
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.newsystem.rmi.protokol.ServerPort;
 
 /**
  * control the computer
@@ -51,6 +54,14 @@ public interface IControl extends RemoteAble {
 	public void mouseMove(int x, int y) throws RemoteException;
 
 	/**
+	 * Create a stream for mouse move actions.
+	 * 
+	 * @return port of the socket with the stream
+	 * @throws RemoteException, IOException
+	 */
+	public ServerPort openMouseMoveStream() throws RemoteException, IOException;
+
+	/**
 	 * Performe specified mouse action.
 	 * 
 	 * @param button
@@ -61,9 +72,9 @@ public interface IControl extends RemoteAble {
 	/**
 	 * Press specified key.
 	 * 
-	 * @param keycode
+	 * @param charachters
 	 * @throws RemoteException
 	 */
-	public void keyPress(int keycode) throws RemoteException;
+	public void keyPress(String charachters) throws RemoteException;
 
 }
