@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <TableRow
@@ -18,7 +17,7 @@
     </TableRow>
 
     <TableRow
-        android:id="@+id/tableRow1"
+        android:id="@+id/tableRow2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
@@ -32,13 +31,12 @@
         <ToggleButton
             android:id="@+id/switch_a"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ToggleButton" />
+            android:layout_height="wrap_content"/>
 
     </TableRow>
 
     <TableRow
-        android:id="@+id/tableRow2"
+        android:id="@+id/tableRow3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
@@ -52,12 +50,11 @@
         <ToggleButton
             android:id="@+id/switch_b"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ToggleButton" />
+            android:layout_height="wrap_content"/>
     </TableRow>
 
     <TableRow
-        android:id="@+id/tableRow3"
+        android:id="@+id/tableRow4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
@@ -71,12 +68,11 @@
         <ToggleButton
             android:id="@+id/switch_c"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ToggleButton" />
+            android:layout_height="wrap_content"/>
     </TableRow>
 
     <TableRow
-        android:id="@+id/tableRow4"
+        android:id="@+id/tableRow5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
@@ -90,8 +86,7 @@
         <ToggleButton
             android:id="@+id/switch_d"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ToggleButton" />
+            android:layout_height="wrap_content"/>
     </TableRow>
 
     <ProgressBar

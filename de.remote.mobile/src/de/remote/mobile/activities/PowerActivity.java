@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
@@ -14,6 +15,7 @@ import de.remote.gpiopower.api.IGPIOPower;
 import de.remote.gpiopower.api.IGPIOPower.State;
 import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
+import de.remote.mobile.util.AI;
 import de.remote.mobile.util.BrowserAdapter;
 
 public class PowerActivity extends BindedActivity {
@@ -24,6 +26,11 @@ public class PowerActivity extends BindedActivity {
 	private ToggleButton buttonD;
 	private IGPIOPower powerObject;
 	private ProgressBar progress;
+
+	/**
+	 * The artificial intelligence recognize speech
+	 */
+	protected AI ai;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,16 +49,20 @@ public class PowerActivity extends BindedActivity {
 		buttonD = (ToggleButton) findViewById(R.id.switch_d);
 		progress = (ProgressBar) findViewById(R.id.power_progress);
 
-		buttonA.setOnCheckedChangeListener(new SwitchChangeListener(Switch.A));
-		buttonB.setOnCheckedChangeListener(new SwitchChangeListener(Switch.B));
-		buttonC.setOnCheckedChangeListener(new SwitchChangeListener(Switch.C));
-		buttonD.setOnCheckedChangeListener(new SwitchChangeListener(Switch.D));
+		buttonA.setOnCheckedChangeListener(new SwitchChangeListener(Switch.A,
+				buttonA));
+		buttonB.setOnCheckedChangeListener(new SwitchChangeListener(Switch.B,
+				buttonB));
+		buttonC.setOnCheckedChangeListener(new SwitchChangeListener(Switch.C,
+				buttonC));
+		buttonD.setOnCheckedChangeListener(new SwitchChangeListener(Switch.D,
+				buttonD));
 
 		buttonA.setEnabled(false);
 		buttonB.setEnabled(false);
 		buttonC.setEnabled(false);
 		buttonD.setEnabled(false);
-		
+
 		progress.setVisibility(View.GONE);
 	}
 
@@ -60,6 +71,7 @@ public class PowerActivity extends BindedActivity {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater mi = new MenuInflater(getApplication());
 		mi.inflate(R.menu.power_pref, menu);
+		ai = new AI(this);
 		return true;
 	}
 
@@ -74,8 +86,10 @@ public class PowerActivity extends BindedActivity {
 		powerObject = null;
 		IGPIOPower power = binder.getPower();
 
+		setTitle("Power@" + binder.getServerName());
+
 		try {
-			
+
 			buttonA.setChecked(power.getState(Switch.A) == State.ON);
 			buttonB.setChecked(power.getState(Switch.B) == State.ON);
 			buttonC.setChecked(power.getState(Switch.C) == State.ON);
@@ -100,13 +114,25 @@ public class PowerActivity extends BindedActivity {
 		buttonD.setEnabled(false);
 	}
 
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.opt_record:
+			ai.record();
+			break;
+		}
+		return super.onMenuItemSelected(featureId, item);
+	}
+
 	public class SwitchChangeListener implements
 			CompoundButton.OnCheckedChangeListener {
 
 		private Switch powerSwitch;
+		private ToggleButton button;
 
-		public SwitchChangeListener(Switch powerSwitch) {
+		public SwitchChangeListener(Switch powerSwitch, ToggleButton button) {
 			this.powerSwitch = powerSwitch;
+			this.button = button;
 		}
 
 		@Override
@@ -123,6 +149,7 @@ public class PowerActivity extends BindedActivity {
 					super.onPreExecute();
 					setProgressBarVisibility(true);
 					progress.setVisibility(View.VISIBLE);
+					button.setEnabled(false);
 				}
 
 				@Override
@@ -144,6 +171,7 @@ public class PowerActivity extends BindedActivity {
 					super.onPostExecute(result);
 					setProgressBarVisibility(false);
 					progress.setVisibility(View.GONE);
+					button.setEnabled(true);
 					if (result != null && result.length > 0)
 						Toast.makeText(PowerActivity.this, result[0],
 								Toast.LENGTH_LONG).show();

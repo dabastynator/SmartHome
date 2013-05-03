@@ -78,7 +78,7 @@
                 android:title="Mousepad"/>
             <item
                 android:id="@+id/opt_power"
-                android:title="Powersystem"/>
+                android:title="@string/str_power"/>
             <item
                 android:id="@+id/opt_shutdown"
                 android:icon="@drawable/exit"
