@@ -1,0 +1,119 @@
+package de.remote.gpiopower;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.gpiopower.api.IGPIOPower;
+
+/**
+ * Implements the gpio power by executing gpio commands
+ * 
+ * @author sebastian
+ */
+public class GPIOPower implements IGPIOPower {
+
+	// match gpio numbers in constans
+	private static final int PIN_ON = 24;
+	private static final int PIN_OFF = 23;
+
+	private static final int PIN_A = 14;
+	private static final int PIN_B = 15;
+	private static final int PIN_C = 18;
+	private static final int PIN_D = 25;
+
+	// match constants in state and switch map
+	private static final Map<Switch, Integer> switches = new HashMap<Switch, Integer>();
+	private static final Map<State, Integer> states = new HashMap<State, Integer>();
+
+	static {
+		switches.put(Switch.SWITCH_A, PIN_A);
+		switches.put(Switch.SWITCH_B, PIN_B);
+		switches.put(Switch.SWITCH_C, PIN_C);
+		switches.put(Switch.SWITCH_D, PIN_D);
+
+		states.put(State.ON, PIN_ON);
+		states.put(State.OFF, PIN_OFF);
+	}
+	
+	/**
+	 * singelton object
+	 */
+	private static GPIOPower singelton;
+
+	/**
+	 * The gpio power is a singelton.
+	 */
+	private GPIOPower() {
+		setAsOutput(PIN_ON);
+		setAsOutput(PIN_OFF);
+		setAsOutput(PIN_A);
+		setAsOutput(PIN_B);
+		setAsOutput(PIN_C);
+		setAsOutput(PIN_D);
+		writeGPIO(PIN_ON, 0);
+		writeGPIO(PIN_OFF, 0);
+		writeGPIO(PIN_A, 0);
+		writeGPIO(PIN_B, 0);
+		writeGPIO(PIN_C, 0);
+		writeGPIO(PIN_D, 0);
+	}
+	
+	/**
+	 * @return static singelton gpio power
+	 */
+	public static GPIOPower getGPIOPower(){
+		if(singelton == null)
+			singelton = new GPIOPower();
+		return singelton;
+	}
+
+	/**
+	 * Write specified value on specified gpio pin.
+	 * 
+	 * @param pin
+	 * @param value
+	 */
+	private synchronized void writeGPIO(int pin, int value) {
+		try {
+			Runtime.getRuntime()
+					.exec(new String[] { "gpio", "-g", "write", pin + "",
+							value + "" });
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	/**
+	 * Set specified pin as output.
+	 * 
+	 * @param pin
+	 */
+	private void setAsOutput(int pin) {
+		try {
+			Runtime.getRuntime().exec(
+					new String[] { "gpio", "-g", "mode", pin + "", "out" });
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+	
+	@Override
+	public synchronized void setState(State state, Switch powerSwitch)
+			throws RemoteException {
+		writeGPIO(states.get(state), 1);
+		writeGPIO(switches.get(powerSwitch), 1);
+		try {
+			Thread.sleep(700);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		writeGPIO(states.get(state), 0);
+		writeGPIO(switches.get(powerSwitch), 0);
+		
+		System.out.println("Set switch " + powerSwitch + " to " + state);
+	}
+
+}
