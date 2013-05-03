@@ -88,7 +88,7 @@
 		</jar>
 	</target>
 	
-	<target name="gpio_power" depends="clean">
+	<target name="gpio_power">
 	    <javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}" />
 	    <mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">			
