@@ -87,4 +87,14 @@
 			</manifest>
 		</jar>
 	</target>
+	
+	<target name="gpio_power" depends="clean">
+	    <javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}" />
+	    <mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">			
+			<manifest>
+				<attribute name="Main-Class" value="de.remote.gpiopower.GPIOMain" />
+			</manifest>
+		</jar>
+	</target>
 </project>
