@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/opt_server_select"
+        android:icon="@drawable/server"
+        android:title="@string/str_server_name">
+    </item>
+    <item
+        android:id="@+id/opt_exit"
+        android:icon="@drawable/exit"
+        android:title="@string/str_exit">
+    </item>
+
+</menu>

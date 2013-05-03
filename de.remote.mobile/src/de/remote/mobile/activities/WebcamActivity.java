@@ -68,9 +68,7 @@ public class WebcamActivity extends BindedActivity {
 			webcamServer.addWebcamListener(listener, w - w % 2, h - h % 2,
 					IWebcam.RGB_565);
 			webcamServer.startCapture();
-		} catch (RemoteException e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		} catch (WebcamException e) {
+		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}

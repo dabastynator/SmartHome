@@ -433,6 +433,10 @@ public class BrowserActivity extends BrowserBase {
 				intent = new Intent(this, MouseActivity.class);
 				startActivity(intent);
 				break;
+			case R.id.opt_power:
+				intent = new Intent(this, PowerActivity.class);
+				startActivity(intent);
+				break;
 			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();

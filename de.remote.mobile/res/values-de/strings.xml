@@ -30,4 +30,5 @@
     <string name="str_download">Herunterladen</string>
     <string name="str_webcam">Webcam</string>
     <string name="str_upload">Hochladen</string>
+    <string name="str_power">Steckdosen-Schalter</string>
 </resources>

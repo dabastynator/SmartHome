@@ -32,6 +32,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>gpio_power</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/remote/de.remote.gpiopower/src</locationURI>
+		</link>
+		<link>
 			<name>src_api</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/remote/de.remote.api/src</locationURI>

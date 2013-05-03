@@ -25,6 +25,7 @@ import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
+import de.remote.gpiopower.api.IGPIOPower;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
@@ -84,6 +85,11 @@ public abstract class RemoteBaseService extends Service {
 	 * remote browser object
 	 */
 	protected IBrowser browser;
+	
+	/**
+	 * gpio power point
+	 */
+	protected IGPIOPower power;
 
 	/**
 	 * current selected remote player object
@@ -164,6 +170,7 @@ public abstract class RemoteBaseService extends Service {
 			playList = station.getPlayList();
 			chatServer = (IChatServer) localServer.find(
 					ControlConstants.CHAT_ID, IChatServer.class);
+			power = (IGPIOPower) localServer.find(IGPIOPower.ID, IGPIOPower.class);
 			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);

@@ -18,6 +18,7 @@ import de.remote.api.IControl;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.PlayingBean;
+import de.remote.gpiopower.api.IGPIOPower;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
 
@@ -305,5 +306,9 @@ public class PlayerBinder extends Binder {
 			Toast.makeText(service, "upload error: " + e.getMessage(),
 					Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	public IGPIOPower getPower() {
+		return service.power;
 	}
 }
