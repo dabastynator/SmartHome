@@ -22,7 +22,7 @@ public interface IGPIOPower extends RemoteAble {
 	public static final int PORT = 5034;
 	
 	public enum Switch {
-		SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D
+		A, B, C, D
 	}
 
 	public enum State {
@@ -38,5 +38,12 @@ public interface IGPIOPower extends RemoteAble {
 	 */
 	public void setState(State state, Switch powerSwitch)
 			throws RemoteException;
+	
+	/**
+	 * @param powerSwitch
+	 * @return state of the power switch
+	 * @throws RemoteException
+	 */
+	public State getState(Switch powerSwitch) throws RemoteException;
 
 }

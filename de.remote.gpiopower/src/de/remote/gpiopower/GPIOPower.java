@@ -27,16 +27,23 @@ public class GPIOPower implements IGPIOPower {
 	private static final Map<Switch, Integer> switches = new HashMap<Switch, Integer>();
 	private static final Map<State, Integer> states = new HashMap<State, Integer>();
 
+	private static final Map<Switch, State> actualState = new HashMap<IGPIOPower.Switch, IGPIOPower.State>();
+
 	static {
-		switches.put(Switch.SWITCH_A, PIN_A);
-		switches.put(Switch.SWITCH_B, PIN_B);
-		switches.put(Switch.SWITCH_C, PIN_C);
-		switches.put(Switch.SWITCH_D, PIN_D);
+		switches.put(Switch.A, PIN_A);
+		switches.put(Switch.B, PIN_B);
+		switches.put(Switch.C, PIN_C);
+		switches.put(Switch.D, PIN_D);
 
 		states.put(State.ON, PIN_ON);
 		states.put(State.OFF, PIN_OFF);
+		
+		actualState.put(Switch.A, State.OFF);
+		actualState.put(Switch.B, State.OFF);
+		actualState.put(Switch.C, State.OFF);
+		actualState.put(Switch.D, State.OFF);
 	}
-	
+
 	/**
 	 * singelton object
 	 */
@@ -59,12 +66,12 @@ public class GPIOPower implements IGPIOPower {
 		writeGPIO(PIN_C, 0);
 		writeGPIO(PIN_D, 0);
 	}
-	
+
 	/**
 	 * @return static singelton gpio power
 	 */
-	public static GPIOPower getGPIOPower(){
-		if(singelton == null)
+	public static GPIOPower getGPIOPower() {
+		if (singelton == null)
 			singelton = new GPIOPower();
 		return singelton;
 	}
@@ -98,7 +105,7 @@ public class GPIOPower implements IGPIOPower {
 			System.err.println(e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public synchronized void setState(State state, Switch powerSwitch)
 			throws RemoteException {
@@ -112,8 +119,14 @@ public class GPIOPower implements IGPIOPower {
 		}
 		writeGPIO(states.get(state), 0);
 		writeGPIO(switches.get(powerSwitch), 0);
-		
+
+		actualState.put(powerSwitch, state);
 		System.out.println("Set switch " + powerSwitch + " to " + state);
+	}
+
+	@Override
+	public State getState(Switch powerSwitch) throws RemoteException {
+		return actualState.get(powerSwitch);
 	}
 
 }
