@@ -16,77 +16,96 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </TableRow>
 
-    <TableRow
-        android:id="@+id/tableRow2"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
             android:text="A"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ToggleButton
             android:id="@+id/switch_a"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true" />
+        
+    </RelativeLayout>
 
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow3"
-        android:layout_width="wrap_content"
+      <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
             android:text="B"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-        
+
         <ToggleButton
             android:id="@+id/switch_b"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow4"
-        android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true" />
+        
+    </RelativeLayout>
+    
+          <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
             android:text="C"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-        
+
         <ToggleButton
             android:id="@+id/switch_c"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow5"
-        android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true" />
+        
+    </RelativeLayout>
+    
+              <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
             android:text="D"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-        
+
         <ToggleButton
             android:id="@+id/switch_d"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </TableRow>
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true" />
+        
+    </RelativeLayout>
 
 </TableLayout>

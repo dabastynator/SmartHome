@@ -62,16 +62,24 @@ public class AI implements IVoiceRecognition {
 		for (int i = 0; i < split.length; i++)
 			split[i] = split[i].toLowerCase();
 		String cmd = split[0];
-		if (cmd.equals("pause"))
+		if (cmd.equals("pause")) {
 			binder.getPlayer().playPause();
-		else if (cmd.equals("stop"))
+			Toast.makeText(context, "success pause", Toast.LENGTH_SHORT).show();
+		} else if (cmd.equals("stop")) {
 			binder.getPlayer().quit();
-		else if (cmd.equals("fullscreen"))
+			Toast.makeText(context, "success stop", Toast.LENGTH_SHORT).show();
+		} else if (cmd.equals("fullscreen")) {
 			binder.getPlayer().fullScreen();
-		else if (cmd.equals("next"))
+			Toast.makeText(context, "success fullscreen", Toast.LENGTH_SHORT)
+					.show();
+		} else if (cmd.equals("next")){
 			binder.getPlayer().next();
-		else if (cmd.equals("previous"))
+			Toast.makeText(context, "success next", Toast.LENGTH_SHORT).show();
+		}
+		else if (cmd.equals("previous")){
 			binder.getPlayer().previous();
+			Toast.makeText(context, "success previous", Toast.LENGTH_SHORT).show();
+		}
 		else if (cmd.startsWith("play")) {
 			if (split.length < 2)
 				throw new AIException("can not play empty string");
@@ -82,6 +90,7 @@ public class AI implements IVoiceRecognition {
 				playPlayList(split[2]);
 			} else
 				binder.getPlayer().play(play);
+			Toast.makeText(context, "success play", Toast.LENGTH_SHORT).show();
 		} else if (cmd.startsWith("licht")) {
 			if (split.length < 2)
 				throw new AIException("what to do with light?");
@@ -89,18 +98,36 @@ public class AI implements IVoiceRecognition {
 				binder.getPower().setState(State.ON, Switch.A);
 			else if (split[1].equals("aus"))
 				binder.getPower().setState(State.OFF, Switch.A);
-			else if (split[1].equals("schlafzimmer")){
+			else if (split[1].equals("schlafzimmer")) {
 				if (split.length < 3)
 					throw new AIException("what to do with schlafzimmer?");
-				if (split[2].equals("an")){
+				if (split[2].equals("an")) {
 					binder.getPower().setState(State.ON, Switch.B);
 					binder.getPower().setState(State.ON, Switch.C);
-				}else if (split[2].equals("aus")){
+				} else if (split[2].equals("aus")) {
 					binder.getPower().setState(State.OFF, Switch.B);
 					binder.getPower().setState(State.OFF, Switch.C);
-				}else throw new AIException("can't make schlafzimmer " + split[1]);
-			}else
+				} else
+					throw new AIException("can't make schlafzimmer " + split[1]);
+			} else
 				throw new AIException("can't make light " + split[1]);
+			Toast.makeText(context, "success light", Toast.LENGTH_SHORT).show();
+		} else if (cmd.startsWith("bildschirm")) {
+			if (split.length < 2)
+				throw new AIException("what to do with bildschirm?");
+			if (split[1].equals("an"))
+				binder.getControl().displayBride();
+			else if (split[1].equals("aus"))
+				binder.getControl().displayDark();
+			else
+				throw new AIException("can't make bildschirm " + split[1]);
+			Toast.makeText(context, "success bildschirm", Toast.LENGTH_SHORT).show();
+		} else if (cmd.startsWith("tastatur")) {
+			String keypress = "";
+			for (int i = 1; i < split.length; i++)
+				keypress = keypress + split[i] + " ";
+			binder.getControl().keyPress(keypress);
+			Toast.makeText(context, "success tastatur", Toast.LENGTH_SHORT).show();
 		} else
 			throw new AIException("what is '" + cmd + "'");
 	}

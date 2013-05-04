@@ -5,10 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.widget.CompoundButton;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -17,7 +15,6 @@ import de.remote.gpiopower.api.IGPIOPower.State;
 import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
 import de.remote.mobile.util.AI;
-import de.remote.mobile.util.BrowserAdapter;
 
 public class PowerActivity extends BindedActivity {
 
