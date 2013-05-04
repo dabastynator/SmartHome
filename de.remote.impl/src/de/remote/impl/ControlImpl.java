@@ -3,10 +3,13 @@ package de.remote.impl;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import javax.swing.KeyStroke;
 
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -84,15 +87,18 @@ public class ControlImpl implements IControl {
 	}
 
 	@Override
-	public void keyPress(String charachters) throws RemoteException {
-		charachters = charachters.toLowerCase();
-		while (charachters.length() > 0) {
-			char c = charachters.charAt(0);
-			charachters = charachters.substring(1);
-			// for (int i = 0; i < 26; i++)
-			// if (c - 'a' == i)
-			// getRobot().keyPress(c - 'a' + 65);
-			getRobot().keyPress(c);
+	public void keyPress(String string) throws RemoteException {
+		for (int i = 0; i < string.length(); i++) {
+			char c = string.charAt(i);
+            if (Character.isUpperCase(c)) {
+                getRobot().keyPress(KeyEvent.VK_SHIFT);
+            }
+            getRobot().keyPress(Character.toUpperCase(c));
+            getRobot().keyRelease(Character.toUpperCase(c));
+ 
+            if (Character.isUpperCase(c)) {
+            	getRobot().keyRelease(KeyEvent.VK_SHIFT);
+            }
 		}
 	}
 
@@ -101,7 +107,8 @@ public class ControlImpl implements IControl {
 		ServerSocket server = new ServerSocket(MOUSE_MOVE_PORT);
 		MouseMoveStream stream = new MouseMoveStream(server);
 		stream.start();
-		ServerPort sp = new ServerPort(Server.getServer().getServerPort().getIp(), MOUSE_MOVE_PORT);
+		ServerPort sp = new ServerPort(Server.getServer().getServerPort()
+				.getIp(), MOUSE_MOVE_PORT);
 		return sp;
 	}
 
@@ -117,8 +124,9 @@ public class ControlImpl implements IControl {
 		public void run() {
 			try {
 				Socket socket = server.accept();
-				DataInputStream input = new DataInputStream(socket.getInputStream());
-				while(true){
+				DataInputStream input = new DataInputStream(
+						socket.getInputStream());
+				while (true) {
 					int x = input.readInt();
 					int y = input.readInt();
 					mouseMove(x, y);
