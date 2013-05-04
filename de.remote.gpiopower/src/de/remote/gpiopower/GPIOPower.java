@@ -121,7 +121,7 @@ public class GPIOPower implements IGPIOPower {
 		writeGPIO(switches.get(powerSwitch), 0);
 
 		actualState.put(powerSwitch, state);
-		System.out.println("Set switch " + powerSwitch + " to " + state);
+//		System.out.println("Set switch " + powerSwitch + " to " + state);
 	}
 
 	@Override
