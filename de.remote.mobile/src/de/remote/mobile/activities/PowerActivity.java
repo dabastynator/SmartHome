@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -25,7 +26,6 @@ public class PowerActivity extends BindedActivity {
 	private ToggleButton buttonC;
 	private ToggleButton buttonD;
 	private IGPIOPower powerObject;
-	private ProgressBar progress;
 
 	/**
 	 * The artificial intelligence recognize speech
@@ -34,11 +34,14 @@ public class PowerActivity extends BindedActivity {
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.powerpoint);
 
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+	    requestWindowFeature(Window.FEATURE_PROGRESS);
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(false);
 
+		setContentView(R.layout.powerpoint);
+		
 		findComponents();
 	};
 
@@ -47,7 +50,6 @@ public class PowerActivity extends BindedActivity {
 		buttonB = (ToggleButton) findViewById(R.id.switch_b);
 		buttonC = (ToggleButton) findViewById(R.id.switch_c);
 		buttonD = (ToggleButton) findViewById(R.id.switch_d);
-		progress = (ProgressBar) findViewById(R.id.power_progress);
 
 		buttonA.setOnCheckedChangeListener(new SwitchChangeListener(Switch.A,
 				buttonA));
@@ -63,7 +65,6 @@ public class PowerActivity extends BindedActivity {
 		buttonC.setEnabled(false);
 		buttonD.setEnabled(false);
 
-		progress.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -148,7 +149,6 @@ public class PowerActivity extends BindedActivity {
 				protected void onPreExecute() {
 					super.onPreExecute();
 					setProgressBarVisibility(true);
-					progress.setVisibility(View.VISIBLE);
 					button.setEnabled(false);
 				}
 
@@ -170,7 +170,6 @@ public class PowerActivity extends BindedActivity {
 				protected void onPostExecute(String[] result) {
 					super.onPostExecute(result);
 					setProgressBarVisibility(false);
-					progress.setVisibility(View.GONE);
 					button.setEnabled(true);
 					if (result != null && result.length > 0)
 						Toast.makeText(PowerActivity.this, result[0],
