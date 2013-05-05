@@ -111,4 +111,13 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}
 	}
+	
+	
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		super.onReceive(context, intent);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		onUpdate(context, manager, null);
+	}
+	
 }
