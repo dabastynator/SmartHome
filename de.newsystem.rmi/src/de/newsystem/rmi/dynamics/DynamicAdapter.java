@@ -81,24 +81,41 @@ public class DynamicAdapter {
 			if (method.getReturnType() != void.class)
 				reply.setReturnType(method.getReturnType());
 		} catch (SecurityException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
-			e.printStackTrace();
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
+			System.err.println(e.getClass().getSimpleName() + ": "
+					+ e.getMessage());
+			if (request.getParams() != null
+					&& request.getParams().length > 0
+					&& request.getParams()[0].getClass().getInterfaces().length > 0)
+				System.err.println("  ->  "
+						+ object.getClass().getSimpleName()
+						+ "."
+						+ request.getMethod()
+						+ "("
+						+ request.getParams()[0].getClass().getInterfaces()[0]
+								.getSimpleName() + ")");
 		} catch (IllegalAccessException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			reply.setError(e.getTargetException());
 		} catch (UnknownHostException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
 			e.printStackTrace();
 		} catch (IOException e) {
-			reply.setError(new RemoteException(request.getObject(), e.getMessage()));
+			reply.setError(new RemoteException(request.getObject(), e
+					.getMessage()));
 			e.printStackTrace();
 		}
 		return reply;
