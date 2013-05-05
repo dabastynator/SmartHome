@@ -178,7 +178,6 @@ public abstract class RemoteBaseService extends Service {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-						if (listener != null)
 							listener.serverConnectionChanged(serverName);
 				}
 			});
@@ -189,7 +188,6 @@ public abstract class RemoteBaseService extends Service {
 					Toast.makeText(RemoteBaseService.this, e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener listener : actionListener)
-						if (listener != null)
 							listener.serverConnectionChanged(null);
 				}
 			});
@@ -247,6 +245,7 @@ public abstract class RemoteBaseService extends Service {
 		notification.contentIntent = pIntent;
 		nm.notify(DOWNLOAD_NOTIFICATION_ID, notification);
 	}
+	
 
 	@Override
 	public void onDestroy() {
@@ -254,6 +253,8 @@ public abstract class RemoteBaseService extends Service {
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
 		nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
+		for (IRemoteActionListener listener : actionListener)
+			listener.onStopService();
 		disconnect();
 		serverDB.close();
 	}
@@ -264,7 +265,8 @@ public abstract class RemoteBaseService extends Service {
 	protected void disconnect() {
 		if (player != null) {
 			try {
-				player.removePlayerMessageListener(playerListener);
+				station.getMPlayer().removePlayerMessageListener(playerListener);
+				station.getTotemPlayer().removePlayerMessageListener(playerListener);
 			} catch (Exception e) {
 			}
 		}
@@ -284,7 +286,6 @@ public abstract class RemoteBaseService extends Service {
 				if (actionListener == null)
 					actionListener = new ArrayList<IRemoteActionListener>();
 				for (IRemoteActionListener listener : actionListener)
-					if (listener != null)
 						listener.serverConnectionChanged(null);
 			}
 		});

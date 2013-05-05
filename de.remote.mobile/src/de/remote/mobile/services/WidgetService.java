@@ -1,8 +1,5 @@
 package de.remote.mobile.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -35,7 +32,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	/**
 	 * list of all remote views
 	 */
-	private List<RemoteViews> remoteViewsList = new ArrayList<RemoteViews>();
+	private RemoteViews remoteViews;
 
 	/**
 	 * the handler executes runnables in the ui thread
@@ -56,7 +53,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			binder = (PlayerBinder) service;
 			binder.addRemoteActionListener(WidgetService.this);
 			if (binder.isConnected())
-				updateWidget();
+				updateWidget(null);
 			else
 				setWidgetText("not connected", "no connection with any server",
 						"", false);
@@ -70,14 +67,17 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
+		remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
+				R.layout.widget);
+		initializeWidgets();
 	};
 
-	protected void updateWidget() {
-		PlayingBean playing = null;
-		if (binder.getPlayer() != null)
+	protected void updateWidget(PlayingBean playing) {
+		if (binder.getPlayer() != null && playing == null)
 			playing = binder.getPlayingFile();
 		if (playing == null) {
-			setWidgetText("no file playing", "", "", false);
+			setWidgetText("no file playing",
+					"at server " + binder.getServerName(), "", false);
 			return;
 		}
 		String title = "playing";
@@ -101,7 +101,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (intent != null && intent.getAction() != null)
 			executeCommand(intent.getAction());
 		else {
-			configureWidgets();
+			remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
+					R.layout.widget);
 			initializeWidgets();
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -143,19 +144,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	private void initializeWidgets() {
-		if (binder != null) {
-			if (binder.isConnected())
-				updateWidget();
-			else
-				setWidgetText("not connected", "no connection with any server",
-						"", false);
-		}
-	}
-
-	private void configureWidgets() {
-		RemoteViews remoteViews = new RemoteViews(getApplicationContext()
-				.getPackageName(), R.layout.widget);
-		remoteViewsList.add(remoteViews);
+		if (binder != null && binder.isConnected())
+			updateWidget(null);
+		else
+			setWidgetText("not connected", "no connection with any server", "",
+					false);
 	}
 
 	protected void setWidgetText(String big, String small, String small2,
@@ -164,7 +157,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
 				RemoteWidgetProvider.class);
-		for (RemoteViews remote : remoteViewsList) {
+		// for (RemoteViews remote : remoteViewsList)
+		RemoteViews remote = remoteViews;
+		if (remote != null) {
 			remote.setTextViewText(R.id.lbl_widget_big, big);
 			remote.setTextViewText(R.id.lbl_widget_small, small);
 			remote.setTextViewText(R.id.lbl_widget_small2, small2);
@@ -193,15 +188,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void newPlayingFile(PlayingBean bean) {
-		updateWidget();
+		updateWidget(bean);
 	}
 
 	@Override
 	public void serverConnectionChanged(String serverName) {
-		if (serverName == null)
-			setWidgetText("no connection", "", "", false);
-		else
-			updateWidget();
+		initializeWidgets();
 	}
 
 	@Override
@@ -232,6 +224,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	public void downloadCanceled() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void onStopService() {
+		stopSelf();
 	}
 
 }

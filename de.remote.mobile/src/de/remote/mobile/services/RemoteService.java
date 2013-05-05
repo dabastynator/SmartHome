@@ -35,6 +35,7 @@ public class RemoteService extends RemoteBaseService {
 	}
 
 	public void onDestroy() {
+		super.onDestroy();
 		unregisterReceiver(wlanReceiver);
 	};
 
@@ -72,8 +73,7 @@ public class RemoteService extends RemoteBaseService {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						if (l != null)
-							l.startReceive(size);
+						l.startReceive(size);
 				}
 			});
 		}
@@ -85,8 +85,7 @@ public class RemoteService extends RemoteBaseService {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						if (l != null)
-							l.progressReceive(size);
+						l.progressReceive(size);
 				}
 			});
 		}
@@ -101,8 +100,7 @@ public class RemoteService extends RemoteBaseService {
 					Toast.makeText(RemoteService.this, file + " loaded",
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						if (l != null)
-							l.endReceive(size);
+						l.endReceive(size);
 				}
 			});
 		}
@@ -118,8 +116,7 @@ public class RemoteService extends RemoteBaseService {
 							"error occurred while loading: " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						if (l != null)
-							l.exceptionOccurred(e);
+						l.exceptionOccurred(e);
 				}
 			});
 		}
@@ -134,8 +131,7 @@ public class RemoteService extends RemoteBaseService {
 					Toast.makeText(RemoteService.this, "download cancled",
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : actionListener)
-						if (l != null)
-							l.downloadCanceled();
+						l.downloadCanceled();
 				}
 			});
 		}
@@ -175,8 +171,7 @@ public class RemoteService extends RemoteBaseService {
 					} else
 						makePlayingNotification(title, msg);
 					for (IRemoteActionListener listener : actionListener)
-						if (listener != null)
-							listener.newPlayingFile(playing);
+						listener.newPlayingFile(playing);
 				}
 			});
 		}
@@ -203,6 +198,11 @@ public class RemoteService extends RemoteBaseService {
 		 * @param serverName
 		 */
 		void serverConnectionChanged(String serverName);
+
+		/**
+		 * call on stopping remote service.
+		 */
+		void onStopService();
 
 	}
 }

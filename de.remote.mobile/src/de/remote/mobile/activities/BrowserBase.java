@@ -184,10 +184,10 @@ public abstract class BrowserBase extends BindedActivity {
 	
 	@Override
 	void binderConnected() {
-		binder.addRemoteActionListener(remoteListener);
 		remoteListener = new BrowserRemoteListener(downloadLayout,
 				downloadProgress, playButton, binder);
 		remoteListener.newPlayingFile(binder.getPlayingFile());
+		binder.addRemoteActionListener(remoteListener);
 	}
 
 }

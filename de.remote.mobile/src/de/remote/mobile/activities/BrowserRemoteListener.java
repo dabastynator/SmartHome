@@ -67,4 +67,9 @@ public class BrowserRemoteListener implements IRemoteActionListener {
 		downloadView.setVisibility(View.GONE);
 	}
 
+	@Override
+	public void onStopService() {
+		
+	}
+
 }
