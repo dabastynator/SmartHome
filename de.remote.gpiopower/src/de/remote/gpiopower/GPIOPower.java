@@ -53,6 +53,7 @@ public class GPIOPower implements IGPIOPower {
 	 * The gpio power is a singelton.
 	 */
 	private GPIOPower() {
+		System.out.println("initialize gpio pins, set as output and write 0");
 		setAsOutput(PIN_ON);
 		setAsOutput(PIN_OFF);
 		setAsOutput(PIN_A);
@@ -121,7 +122,7 @@ public class GPIOPower implements IGPIOPower {
 		writeGPIO(switches.get(powerSwitch), 0);
 
 		actualState.put(powerSwitch, state);
-//		System.out.println("Set switch " + powerSwitch + " to " + state);
+		System.out.println("Set switch " + powerSwitch + " to " + state);
 	}
 
 	@Override
