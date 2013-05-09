@@ -22,6 +22,7 @@ public class GPIOMain {
 				public void rmiLog(LogPriority priority, String message,
 						String id, long date) {
 					System.out.println(priority.name() + ": " + message);
+					System.out.flush();
 				}
 			});
 			server.startServer(IGPIOPower.PORT);
