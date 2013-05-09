@@ -83,6 +83,15 @@ public class PowerActivity extends BindedActivity {
 	void remoteConnected() {
 		powerObject = null;
 		IGPIOPower power = binder.getPower();
+		
+		if (power == null){
+			setTitle("No Power@" + binder.getServerName());
+			buttonA.setEnabled(false);
+			buttonB.setEnabled(false);
+			buttonC.setEnabled(false);
+			buttonD.setEnabled(false);
+			return;
+		}
 
 		setTitle("Power@" + binder.getServerName());
 

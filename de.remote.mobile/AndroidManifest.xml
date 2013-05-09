@@ -78,11 +78,13 @@
         </service>
         <service android:name=".services.WidgetService" >
         </service>
+        <service android:name=".services.WidgetPowerService" >
+        </service>
 
         <receiver
             android:name=".receivers.RemoteWidgetProvider"
             android:icon="@drawable/ic_launcher"
-            android:label="Remote Control" >
+            android:label="Remote Music" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -90,6 +92,18 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
+        </receiver>
+        <receiver
+            android:name=".receivers.RemotePowerWidgetProvider"
+            android:icon="@drawable/light_on"
+            android:label="Remote Power" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_power_info" />
         </receiver>
         <receiver android:name=".receivers.WLANReceiver" >
             <intent-filter>
