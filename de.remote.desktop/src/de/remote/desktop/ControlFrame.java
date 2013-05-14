@@ -332,11 +332,7 @@ public class ControlFrame extends JFrame implements Connectable {
 			} catch (RemoteException e1) {
 				e1.printStackTrace();
 			}
-			try {
-				ControlFrame.this.server.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			ControlFrame.this.server.close();
 		}
 	}
 }
