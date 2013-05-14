@@ -28,6 +28,10 @@ public class BrowserImpl implements IBrowser {
 	private String location;
 	private String root;
 
+	/**
+	 * Create new browser
+	 * @param path to root directory for the browser
+	 */
 	public BrowserImpl(String string) {
 		if (!string.endsWith(File.separator))
 			string += File.separator;
