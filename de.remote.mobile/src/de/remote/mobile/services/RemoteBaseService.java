@@ -1,6 +1,5 @@
 package de.remote.mobile.services;
 
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,7 @@ public abstract class RemoteBaseService extends Service {
 	 * remote browser object
 	 */
 	protected IBrowser browser;
-	
+
 	/**
 	 * gpio power point
 	 */
@@ -170,7 +169,8 @@ public abstract class RemoteBaseService extends Service {
 			playList = station.getPlayList();
 			chatServer = (IChatServer) localServer.find(
 					ControlConstants.CHAT_ID, IChatServer.class);
-			power = (IGPIOPower) localServer.find(IGPIOPower.ID, IGPIOPower.class);
+			power = (IGPIOPower) localServer.find(IGPIOPower.ID,
+					IGPIOPower.class);
 			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);
@@ -178,7 +178,7 @@ public abstract class RemoteBaseService extends Service {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-							listener.serverConnectionChanged(serverName);
+						listener.serverConnectionChanged(serverName);
 				}
 			});
 		} catch (final Exception e) {
@@ -188,7 +188,7 @@ public abstract class RemoteBaseService extends Service {
 					Toast.makeText(RemoteBaseService.this, e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener listener : actionListener)
-							listener.serverConnectionChanged(null);
+						listener.serverConnectionChanged(null);
 				}
 			});
 		}
@@ -245,7 +245,6 @@ public abstract class RemoteBaseService extends Service {
 		notification.contentIntent = pIntent;
 		nm.notify(DOWNLOAD_NOTIFICATION_ID, notification);
 	}
-	
 
 	@Override
 	public void onDestroy() {
@@ -265,16 +264,15 @@ public abstract class RemoteBaseService extends Service {
 	protected void disconnect() {
 		if (player != null) {
 			try {
-				station.getMPlayer().removePlayerMessageListener(playerListener);
-				station.getTotemPlayer().removePlayerMessageListener(playerListener);
+				station.getMPlayer()
+						.removePlayerMessageListener(playerListener);
+				station.getTotemPlayer().removePlayerMessageListener(
+						playerListener);
 			} catch (Exception e) {
 			}
 		}
 		if (localServer != null)
-			try {
-				localServer.close();
-			} catch (IOException e) {
-			}
+			localServer.close();
 		station = null;
 		player = null;
 		serverID = -1;
@@ -286,7 +284,7 @@ public abstract class RemoteBaseService extends Service {
 				if (actionListener == null)
 					actionListener = new ArrayList<IRemoteActionListener>();
 				for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(null);
+					listener.serverConnectionChanged(null);
 			}
 		});
 	}
