@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -91,11 +92,6 @@ public class Server {
 	 * List of all registered ids in the registry.
 	 */
 	private List<String> registeredIDList = new ArrayList<String>();
-
-	/**
-	 * list of all proxies
-	 */
-	private Map<String, Object> proxyMap = new HashMap<String, Object>();
 
 	/**
 	 * list of all adapters
@@ -284,11 +280,9 @@ public class Server {
 			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ",
 					id);
 		} catch (IOException e) {
-			e.printStackTrace();
 			RMILogger.performLog(LogPriority.ERROR,
 					"unregister object " + e.getMessage(), id);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 			RMILogger.performLog(LogPriority.ERROR,
 					"unregister object " + e.getMessage(), id);
 		}
@@ -315,7 +309,7 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject()
 					.getServerPort());
 			// create proxy
-			return createProxy(id, sc, template);
+			return sc.createProxy(id, template);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {
@@ -323,25 +317,6 @@ public class Server {
 		} catch (ClassNotFoundException e) {
 			throw new RemoteException(id, e.getMessage());
 		}
-	}
-
-	/**
-	 * Create new Proxy with given id, server connection and class template.
-	 * 
-	 * @param id
-	 * @param sc
-	 * @param template
-	 * @return proxy
-	 */
-	public Object createProxy(String id, ServerConnection sc, Class template) {
-		Object p = proxyMap.get(id);
-		if (p != null)
-			return p;
-		p = new DynamicProxy(id, sc, this);
-		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),
-				new Class[] { template }, (InvocationHandler) p);
-		proxyMap.put(id, object);
-		return object;
 	}
 
 	/**
@@ -394,7 +369,7 @@ public class Server {
 				}
 			} catch (IOException e1) {
 				if (e1 instanceof SocketException)
-					RMILogger.performLog(LogPriority.WARNING, "server closed "
+					RMILogger.performLog(LogPriority.ERROR, "server closed "
 							+ "(" + e1.getMessage() + ")", null);
 				else
 					e1.printStackTrace();
@@ -408,7 +383,7 @@ public class Server {
 	 * 
 	 * @throws IOException
 	 */
-	public void close() throws IOException {
+	public void close() {
 		// close connections
 		for (ServerConnection sc : serverConnections.values())
 			sc.disconnect();
@@ -416,15 +391,20 @@ public class Server {
 			handler.close();
 		// close sockets
 		if (registrySocket != null)
-			registrySocket.close();
+			try {
+				registrySocket.close();
+			} catch (IOException e) {
+			}
 		if (serverSocket != null)
-			serverSocket.close();
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+			}
 
 		serverSocket = null;
 		registrySocket = null;
 		serverConnections.clear();
 		handlers.clear();
-		proxyMap.clear();
 		adapterMap.clear();
 		adapterObjectId.clear();
 		RMILogger.performLog(LogPriority.INFORMATION, "close server", null);
@@ -444,7 +424,7 @@ public class Server {
 		ServerConnection serverConnection = serverConnections.get(serverPort);
 		if (serverConnection != null)
 			return serverConnection;
-		serverConnection = new ServerConnection(serverPort);
+		serverConnection = new ServerConnection(serverPort, this);
 		serverConnections.put(serverPort, serverConnection);
 		return serverConnection;
 	}
@@ -484,6 +464,14 @@ public class Server {
 
 	public List<String> getRegisteredIDs() {
 		return registeredIDList;
+	}
+
+	public void closeConnectionTo(ServerPort serverPort) {
+		ServerConnection connection = serverConnections.get(serverPort);
+		if (connection != null) {
+			connection.disconnect();
+			serverConnections.remove(serverPort);
+		}
 	}
 
 }

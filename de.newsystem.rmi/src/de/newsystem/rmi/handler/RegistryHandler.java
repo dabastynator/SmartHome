@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Registry;
@@ -74,9 +75,19 @@ public class RegistryHandler {
 			if (e instanceof EOFException)
 				RMILogger.performLog(LogPriority.INFORMATION,
 						"registry connection closed", null);
-			else
-				e.printStackTrace();
+			else if (e instanceof SocketException)
+				RMILogger.performLog(LogPriority.INFORMATION,
+						"registry closed", null);
 		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void close() {
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

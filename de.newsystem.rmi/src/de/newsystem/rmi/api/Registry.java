@@ -3,7 +3,9 @@ package de.newsystem.rmi.api;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
@@ -39,11 +41,15 @@ public class Registry {
 	 * all global objects
 	 */
 	private HashMap<String, GlobalObject> globalObjects = new HashMap<String, GlobalObject>();
+	
+	private List<RegistryHandler> handler = new ArrayList<RegistryHandler>();
 
 	/**
 	 * port for registry
 	 */
 	private int port = 5003;
+
+	private ServerSocket registrySocket;
 
 	/**
 	 * private constructor for singleton
@@ -106,22 +112,24 @@ public class Registry {
 	 */
 	public void run() {
 		try {
-			ServerSocket server = new ServerSocket(port);
+			registrySocket = new ServerSocket(port);
 			RMILogger.performLog(LogPriority.INFORMATION,
 					"registry is listening on port: " + port, null);
 			while (true) {
-				final Socket socket = server.accept();
+				final Socket socket = registrySocket.accept();
 
 				new Thread() {
 					@Override
 					public void run() {
-						RegistryHandler handler = new RegistryHandler(socket);
-						handler.handle();
+						RegistryHandler h = new RegistryHandler(socket);
+						handler.add(h);
+						h.handle();
 					}
 				}.start();
 			}
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			RMILogger.performLog(LogPriority.INFORMATION,
+					"registry closed", null);
 		}
 	}
 
@@ -141,5 +149,15 @@ public class Registry {
 		Registry registry = getRegistry();
 		registry.init(PORT);
 		registry.run();
+	}
+
+	public void close() {
+		try {
+			for (RegistryHandler h: handler)
+				h.close();
+			handler.clear();
+			registrySocket.close();
+		} catch (IOException e) {
+		}
 	}
 }

@@ -142,7 +142,7 @@ public class DynamicAdapter {
 				Reply r = ((Reply) request.getParams()[i]);
 				types[i] = r.getReturnType();
 				ServerConnection sc = server.connectToServer(r.getServerPort());
-				request.getParams()[i] = server.createProxy(r.getNewId(), sc,
+				request.getParams()[i] = sc.createProxy(r.getNewId(),
 						r.getReturnType());
 			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();

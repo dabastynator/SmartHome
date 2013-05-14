@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
@@ -16,6 +17,8 @@ import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
 import de.newsystem.rmi.protokol.Request;
+import de.newsystem.rmi.protokol.Request.Type;
+import de.newsystem.rmi.protokol.ServerPort;
 
 /**
  * handles a client connection.
@@ -86,6 +89,10 @@ public class ConnectionHandler {
 			while (true) {
 				Object object = in.readObject();
 				Request request = (Request) object;
+				if (request.getType() == Type.CLOSE) {
+					server.closeConnectionTo((ServerPort) request.getParams()[0]);
+					throw new EOFException();
+				}
 				DynamicAdapter adapter = server.getAdapterMap().get(
 						request.getObject());
 				if (adapter != null) {
@@ -94,7 +101,7 @@ public class ConnectionHandler {
 						configureReply(reply, reply.getResult());
 					// if (reply.getResult() instanceof Collection)
 					// configureReplyCollection(reply);
-					if (!request.isOneway())
+					if (request.getType() == Type.NORMAL)
 						out.writeObject(reply);
 				} else {
 					Reply r = new Reply();
@@ -163,10 +170,12 @@ public class ConnectionHandler {
 	/**
 	 * close the connection
 	 * 
-	 * @throws IOException
 	 */
-	public void close() throws IOException {
-		socket.close();
+	public void close() {
+		try {
+			socket.close();
+		} catch (IOException e) {
+		}
 	}
 
 }

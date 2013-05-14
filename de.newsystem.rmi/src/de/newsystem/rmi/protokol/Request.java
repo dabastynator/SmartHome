@@ -10,6 +10,10 @@ import java.io.Serializable;
  */
 public class Request implements Serializable {
 
+	public enum Type{
+		CLOSE, NORMAL, ONEWAY
+	}
+	
 	/**
 	 * 
 	 */
@@ -33,7 +37,7 @@ public class Request implements Serializable {
 	/**
 	 * this request is oneway or not
 	 */
-	private boolean oneway;
+	private Type type;
 
 	/**
 	 * 
@@ -71,13 +75,12 @@ public class Request implements Serializable {
 		this.parameters = params;
 	}
 
-	public boolean isOneway() {
-		return oneway;
-	}
-
-	public void setOneway(boolean oneway) {
-		this.oneway = oneway;
+	public void setType(Type type) {
+		this.type = type;
 	}
 	
+	public Type getType(){
+		return type;
+	}
 
 }

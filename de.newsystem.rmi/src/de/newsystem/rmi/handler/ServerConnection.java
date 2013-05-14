@@ -1,16 +1,25 @@
 package de.newsystem.rmi.handler;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.dynamics.DynamicProxy;
+import de.newsystem.rmi.protokol.Request;
+import de.newsystem.rmi.protokol.Request.Type;
 import de.newsystem.rmi.protokol.ServerPort;
 
 /**
@@ -29,15 +38,23 @@ public class ServerConnection {
 	/**
 	 * list of server connections
 	 */
-	private List<ConnectionSocket> serverConnections = new ArrayList<ConnectionSocket>();
+	private List<ConnectionSocket> serverConnections = Collections.synchronizedList(new ArrayList<ConnectionSocket>());
+
+	/**
+	 * list of all proxies that belong to this server port
+	 */
+	private Map<String, Object> proxyMap = new HashMap<String, Object>();
+
+	private Server server;
 
 	/**
 	 * allocate new server connection with given server and socket.
 	 * 
 	 * @param serverSocket
 	 */
-	public ServerConnection(ServerPort serverPort) {
+	public ServerConnection(ServerPort serverPort, Server server) {
 		this.serverPort = serverPort;
+		this.server = server;
 	}
 
 	/**
@@ -102,15 +119,43 @@ public class ServerConnection {
 	}
 
 	/**
+	 * Create new Proxy with given id, server connection and class template.
+	 * 
+	 * @param id
+	 * @param sc
+	 * @param template
+	 * @return proxy
+	 */
+	public Object createProxy(String id, Class template) {
+		Object p = proxyMap.get(id);
+		if (p != null)
+			return p;
+		p = new DynamicProxy(id, this, server);
+		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),
+				new Class[] { template }, (InvocationHandler) p);
+		proxyMap.put(id, object);
+		return object;
+	}
+
+	/**
 	 * disconnect all sockets of the server connection
 	 * 
-	 * @throws IOException
 	 */
-	public void disconnect() throws IOException {
+	public void disconnect() {
+		Request closeRequest = new Request("", "");
+		closeRequest.setType(Type.CLOSE);
+		closeRequest.setParams(new Object[]{server.getServerPort()});
 		for (ConnectionSocket cs : serverConnections) {
+			try {
+				cs.output.writeObject(closeRequest);
+			} catch (IOException e) {
+
+			}
 			cs.disconnect();
 		}
+		proxyMap.clear();
 		serverConnections.clear();
+
 	}
 
 	/**
@@ -159,7 +204,6 @@ public class ServerConnection {
 		/**
 		 * close streams of the socket
 		 * 
-		 * @throws IOException
 		 */
 		public void disconnect() {
 			try {

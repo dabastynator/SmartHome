@@ -12,6 +12,7 @@ import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
 import de.newsystem.rmi.protokol.Request;
+import de.newsystem.rmi.protokol.Request.Type;
 import de.newsystem.rmi.protokol.ServerPort;
 
 /**
@@ -40,7 +41,7 @@ public class DynamicProxy implements InvocationHandler {
 	/**
 	 * the static counter counts new global objects to number them.
 	 */
-	private static int counter = 0;
+	public static int counter = 0;
 
 	/**
 	 * Allocates new proxy with given id, server connection and server.
@@ -67,7 +68,9 @@ public class DynamicProxy implements InvocationHandler {
 		Request request = new Request(id, method.getName());
 		checkParameter(vals, method);
 		request.setParams(vals);
-		request.setOneway(method.getAnnotation(Oneway.class) != null);
+		request.setType(Type.NORMAL);
+		if (method.getAnnotation(Oneway.class) != null)
+			request.setType(Type.ONEWAY);
 		return performeRequest(request);
 	}
 
@@ -91,7 +94,7 @@ public class DynamicProxy implements InvocationHandler {
 			try {
 				try {
 					socket.getOutput().writeObject(request);
-					if (request.isOneway())
+					if (request.getType() == Type.ONEWAY)
 						return null;
 					reply = (Reply) socket.getInput().readObject();
 					if (reply == null)
@@ -101,8 +104,8 @@ public class DynamicProxy implements InvocationHandler {
 						resultException = reply.getError();
 					else if (reply.getReturnType() != null
 							&& reply.getNewId() != null)
-						return server.createProxy(reply.getNewId(),
-								serverConnection, reply.getReturnType());
+						return serverConnection.createProxy(reply.getNewId(),
+								reply.getReturnType());
 					else
 						return reply.getResult();
 					i = server.getConnectionSocketCount();
