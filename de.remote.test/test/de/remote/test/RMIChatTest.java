@@ -8,14 +8,19 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Registry;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.api.IBrowser;
 import de.remote.api.IChatListener;
 import de.remote.api.IChatServer;
+import de.remote.api.IThumbnailListener;
+import de.remote.impl.BrowserImpl;
 import de.remote.impl.ChatServerImpl;
 
 public class RMIChatTest extends TestCase {
@@ -41,6 +46,11 @@ public class RMIChatTest extends TestCase {
 	public static final String RMI_TEST_OBJECT_ID = "de.test.rmi.object";
 
 	/**
+	 * remote object id for rmi test
+	 */
+	public static final String RMI_TEST_OBJECT_2_ID = "de.test.rmi.object2";
+
+	/**
 	 * received message over chat client
 	 */
 	public boolean received = false;
@@ -59,10 +69,10 @@ public class RMIChatTest extends TestCase {
 	}
 
 	/**
-	 * perform the main test
+	 * perform simple test
 	 */
 	@Test
-	public void testRMI() {
+	public void testSimpleRMI() {
 		RMILogger.addLogListener(new RMILogListener() {
 			@Override
 			public void rmiLog(LogPriority priority, String message, String id,
@@ -72,9 +82,10 @@ public class RMIChatTest extends TestCase {
 		});
 		startRegistry();
 		startServer();
-		startClient();
+		startClient(false);
+		Registry.getRegistry().close();
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(1500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -82,19 +93,60 @@ public class RMIChatTest extends TestCase {
 	}
 
 	/**
+	 * perform the main test
+	 */
+	@Test
+	public void testRMI() {
+		// RMILogger.addLogListener(new RMILogListener() {
+		// @Override
+		// public void rmiLog(LogPriority priority, String message, String id,
+		// long date) {
+		// System.out.println(priority + ": " + message + " (" + id + ")");
+		// }
+		// });
+		System.out.println("     ======>>>>>      this inscance has " + received);
+		startRegistry();
+		startServer();
+		DynamicProxy.counter = 0;
+		startClient(false);
+		DynamicProxy.counter = 0;
+		startClient(true);
+		System.out.println("     ======>>>>>      this inscance has " + received);
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("     ======>>>>>      this inscance has " + received);
+		Assert.assertTrue("no message received", received);
+	}
+
+	/**
 	 * start the test client
 	 */
-	private void startClient() {
+	private void startClient(boolean chatFirst) {
 		Server s = new Server();
 		MyChatListener l = new MyChatListener();
+		IThumbnailListener l2 = new ThumbnailListener();
 		try {
 			s.connectToRegistry("localhost", RMI_TEST_PORT_REGISTRY);
 			s.startServer(RMI_TEST_PORT_CLIENT);
 			IChatServer chatServer = (IChatServer) s.find(RMI_TEST_OBJECT_ID,
 					IChatServer.class);
-			chatServer.addChatListener(l);
-			System.out.println("post message");
-			chatServer.postMessage("me", "test message");
+			IBrowser browser = (IBrowser) s.find(RMI_TEST_OBJECT_2_ID,
+					IBrowser.class);
+			if (chatFirst) {
+				chatServer.addChatListener(l);
+				System.out.println("post message");
+				chatServer.postMessage("me", "test message");
+			}
+			browser.fireThumbnails(l2, 10, 10);
+			if (!chatFirst) {
+				chatServer.addChatListener(l);
+				System.out.println("post message");
+				chatServer.postMessage("me", "test message");
+			}
+			s.close();
 		} catch (RemoteException e) {
 			Assert.assertTrue(e.getMessage(), false);
 		} catch (UnknownHostException e) {
@@ -109,11 +161,13 @@ public class RMIChatTest extends TestCase {
 	 */
 	private void startServer() {
 		IChatServer impl = new ChatServerImpl();
+		IBrowser browserImpl = new BrowserImpl(BrowserTest.TEST_LOCATION);
 		Server s = new Server();
 		try {
 			s.connectToRegistry("localhost", RMI_TEST_PORT_REGISTRY);
 			s.startServer(RMI_TEST_PORT_SERVER);
 			s.register(RMI_TEST_OBJECT_ID, impl);
+			s.register(RMI_TEST_OBJECT_2_ID, browserImpl);
 		} catch (UnknownHostException e) {
 			Assert.assertTrue(e.getMessage(), false);
 		} catch (IOException e) {
@@ -125,9 +179,11 @@ public class RMIChatTest extends TestCase {
 		@Override
 		public void informMessage(String client, String message, String time)
 				throws RemoteException {
-			System.out.println("receive message: " + client + " : " + message
-					+ " at " + time);
 			received = true;
+			System.out.println("    =====>    ");
+			System.out.println("    =====>    receive message: " + client + " : " + message
+					+ " at " + time + " " + received + "    <=====");
+			System.out.println("    =====>    " + RMIChatTest.this.hashCode());
 		}
 
 		@Override
@@ -141,6 +197,17 @@ public class RMIChatTest extends TestCase {
 		@Override
 		public String getName() throws RemoteException {
 			return "testclient";
+		}
+
+	}
+
+	public class ThumbnailListener implements IThumbnailListener {
+
+		@Override
+		@Oneway
+		public void setThumbnail(String file, int width, int height,
+				int[] thumbnail) throws RemoteException {
+			System.out.println("get thumbnail: " + file);
 		}
 
 	}

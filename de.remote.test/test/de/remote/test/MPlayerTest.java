@@ -40,7 +40,7 @@ public class MPlayerTest extends TestCase {
 
 	@Before
 	public void createPlayer() {
-		player = new MPlayer();
+		player = new MPlayer(BrowserTest.TEST_LOCATION);
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class MPlayerTest extends TestCase {
 	@Test
 	public void testPLayer() {
 		try {
-			player = new MPlayer();
+			player = new MPlayer(BrowserTest.TEST_LOCATION);
 			player.addPlayerMessageListener(new PlayerListener());
 			player.play(BrowserTest.TEST_LOCATION + TEST_FILE);
 			Thread.sleep(5000);
