@@ -142,8 +142,6 @@ public class AI implements IVoiceRecognition {
 
 	@Override
 	public void onEndOfSpeech() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
