@@ -18,7 +18,7 @@
 
 	<target name="compile_rmi">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" />
+		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" includeantruntime="false"/>
 	</target>
 
 	<target name="jar_rmi" depends="compile_rmi">
@@ -32,9 +32,9 @@
 
 	<target name="compile_remote">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}" />
-		<javac srcdir="./../de.remote.impl/src" destdir="${classes.dir}" classpathref="classpath" />
-		<javac srcdir="./../de.webcam/src" destdir="${classes.dir}" classpathref="classpath" />
+		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}"  includeantruntime="false"/>
+		<javac srcdir="./../de.remote.impl/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
+		<javac srcdir="./../de.webcam/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
 	</target>
 
 	<target name="jar_remote" depends="compile_remote">
@@ -55,7 +55,7 @@
 	
 	<target name="compile_synch">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath" />
+		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
 	</target>
 
 	<target name="jar_synch" depends="compile_synch">
@@ -73,8 +73,8 @@
 
 	<target name="compile_desktop">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}" />
-		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}" />
+		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}"  includeantruntime="false"/>
+		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}"  includeantruntime="false"/>
 	</target>
 
 	<target name="jar_desktop" depends="compile_desktop">
@@ -89,7 +89,7 @@
 	</target>
 	
 	<target name="gpio_power">
-	    <javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}" />
+	    <javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}"  includeantruntime="false"/>
 	    <mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">			
 			<manifest>
