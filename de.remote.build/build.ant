@@ -53,7 +53,7 @@
 		</jar>
 	</target>
 	
-	<target name="compile_synch">
+	<target name="compile_synch" depends="compile_desktop">
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
 	</target>
@@ -71,7 +71,7 @@
 		</jar>
 	</target>
 
-	<target name="compile_desktop">
+	<target name="compile_desktop" depends="compile_remote">
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}"  includeantruntime="false"/>
 		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}"  includeantruntime="false"/>
