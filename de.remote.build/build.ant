@@ -16,7 +16,7 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="compile_rmi">
+	<target name="compile_rmi" depends="clean">
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" includeantruntime="false"/>
 	</target>
