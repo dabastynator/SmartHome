@@ -39,6 +39,7 @@ public class MPlayer extends AbstractPlayer {
 			mplayerIn.print("loadfile \"" + file + "\" 0\n");
 			mplayerIn.flush();
 		}
+		writeVolume();
 		super.play(file);
 	}
 
@@ -162,9 +163,7 @@ public class MPlayer extends AbstractPlayer {
 		volume += 7;
 		if (volume > 100)
 			volume = 100;
-		mplayerIn.print("volume " + volume + " 1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeVolume();
 	}
 
 	@Override
@@ -174,6 +173,10 @@ public class MPlayer extends AbstractPlayer {
 		volume -= 7;
 		if (volume < 0)
 			volume = 0;
+		writeVolume();
+	}
+
+	private void writeVolume() {
 		mplayerIn.print("volume " + volume + " 1");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
@@ -224,6 +227,7 @@ public class MPlayer extends AbstractPlayer {
 		if (!new File(pls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
 		mplayerIn.print("loadlist " + pls + "\n");
+		writeVolume();
 		mplayerIn.flush();
 	}
 
