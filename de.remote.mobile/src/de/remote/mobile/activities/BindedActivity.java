@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import de.remote.mobile.R;
+import de.remote.mobile.activities.BrowserActivity.ShowFolderRunnable;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
@@ -103,6 +104,26 @@ public abstract class BindedActivity extends Activity {
 
 		serverDB = new ServerDatabase(this);
 	};
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == SelectServerActivity.RESULT_CODE) {
+			if (data == null || data.getExtras() == null)
+				return;
+			serverID = data.getExtras().getInt(
+					SelectServerActivity.SERVER_ID);
+			disableScreen();
+			Runnable success = new Runnable() {
+				
+				@Override
+				public void run() {
+					remoteConnected();
+				}
+			};
+			binder.connectToServer(serverID, success);
+		}
+	}
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {

@@ -49,6 +49,8 @@ public class PlayerBinder extends Binder {
 	 */
 	private AbstractReceiver receiver;
 
+	private boolean usesMplayer;
+
 	/**
 	 * allocate new binder.
 	 * 
@@ -132,6 +134,7 @@ public class PlayerBinder extends Binder {
 	 * 
 	 */
 	public void useMPlayer() {
+		usesMplayer = true;
 		new Thread() {
 			public void run() {
 				try {
@@ -147,6 +150,7 @@ public class PlayerBinder extends Binder {
 	 * set totem for current player
 	 */
 	public void useTotemPlayer() {
+		usesMplayer = false;
 		new Thread() {
 			public void run() {
 				try {
@@ -342,5 +346,9 @@ public class PlayerBinder extends Binder {
 			System.err.println(e.getClass().getSimpleName() + ": "
 					+ e.getMessage());
 		}
+	}
+
+	public boolean usesMPlayer() {
+		return usesMplayer;
 	}
 }

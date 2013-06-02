@@ -54,21 +54,23 @@ public class BrowserActivity extends BrowserBase {
 		searchText.addTextChangedListener(new SearchTextWatcher());
 		listView.setOnItemClickListener(new ListClickListener());
 		listView.setOnItemLongClickListener(new ListLongClickListener());
-		musicstationSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
-				String station = (String) musicstationSpinner.getSelectedItem();
-				binder.setMusicStation(musicStations.get(station));
-				showUpdateUI();
-			}
+		musicstationSpinner
+				.setOnItemSelectedListener(new OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> arg0, View arg1,
+							int arg2, long arg3) {
+						String station = (String) musicstationSpinner
+								.getSelectedItem();
+						binder.setMusicStation(musicStations.get(station));
+						showUpdateUI();
+					}
 
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+					@Override
+					public void onNothingSelected(AdapterView<?> arg0) {
+						// TODO Auto-generated method stub
+
+					}
+				});
 	}
 
 	@Override
@@ -156,9 +158,8 @@ public class BrowserActivity extends BrowserBase {
 			protected void onPostExecute(String[] result) {
 				super.onPostExecute(result);
 				setProgressBarVisibility(false);
-				if (binder.getBrowser() == null){
-					setTitle("No Musicstation@"
-							+ binder.getServerName());
+				if (binder.getBrowser() == null) {
+					setTitle("No Musicstation@" + binder.getServerName());
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
@@ -172,11 +173,17 @@ public class BrowserActivity extends BrowserBase {
 					} catch (RemoteException e) {
 						setTitle("no connection");
 					}
+					filesystemButton.setBackgroundResource(R.drawable.image_border);
+					playlistButton.setBackgroundDrawable(null);
 					break;
 				case PLAYLISTS:
 					setTitle("Playlists@" + binder.getServerName());
+					playlistButton.setBackgroundResource(R.drawable.image_border);
+					filesystemButton.setBackgroundDrawable(null);
 					break;
 				case PLS_ITEMS:
+					playlistButton.setBackgroundResource(R.drawable.image_border);
+					filesystemButton.setBackgroundDrawable(null);
 					setTitle("Playlist: " + currentPlayList + "@"
 							+ binder.getServerName());
 				}
@@ -201,16 +208,15 @@ public class BrowserActivity extends BrowserBase {
 		int size = binder.getStationHandler().getStationSize();
 		String[] spinnerItems = new String[size];
 		for (int i = 0; i < size; i++) {
-			IMusicStation station = binder.getStationHandler()
-					.getStation(i);
+			IMusicStation station = binder.getStationHandler().getStation(i);
 			String name = station.getName();
 			musicStations.put(name, station);
 			spinnerItems[i] = name;
 		}
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				BrowserActivity.this,
-				android.R.layout.simple_spinner_item, spinnerItems);
-		musicstationSpinner.setAdapter(adapter);		
+				BrowserActivity.this, R.layout.spinner,
+				spinnerItems);
+		musicstationSpinner.setAdapter(adapter);
 	}
 
 	@Override
@@ -567,14 +573,6 @@ public class BrowserActivity extends BrowserBase {
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
 			}
-			if (requestCode == SelectServerActivity.RESULT_CODE) {
-				if (data == null || data.getExtras() == null)
-					return;
-				serverID = data.getExtras().getInt(
-						SelectServerActivity.SERVER_ID);
-				disableScreen();
-				binder.connectToServer(serverID, new ShowFolderRunnable());
-			}
 			if (requestCode == FILE_REQUEST) {
 				Uri uri = data.getData();
 				binder.uploadFile(new File(getFilePathByUri(uri)));
@@ -624,7 +622,7 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	void remoteConnected() {
-		if (binder.isConnected()){
+		if (binder.isConnected()) {
 			try {
 				updateSpinner();
 			} catch (RemoteException e) {
@@ -632,7 +630,7 @@ public class BrowserActivity extends BrowserBase {
 				e.printStackTrace();
 			}
 			showUpdateUI();
-		}else
+		} else
 			disableScreen();
 		ai.setPlayerBinder(binder);
 	}
@@ -697,6 +695,28 @@ public class BrowserActivity extends BrowserBase {
 						Toast.LENGTH_SHORT).show();
 			}
 		}
+	}
+
+	public void showFileSystem(View view) {
+		viewerState = ViewerState.DIRECTORIES;
+		showUpdateUI();
+	}
+
+	public void showPlaylist(View view) {
+		viewerState = ViewerState.PLAYLISTS;
+		showUpdateUI();
+	}
+	
+	public void setTotem(View view) {
+		binder.useTotemPlayer();
+		totemButton.setBackgroundResource(R.drawable.image_border);
+		mplayerButton.setBackgroundDrawable(null);
+	}
+	
+	public void setMPlayer(View view) {
+		binder.useMPlayer();
+		mplayerButton.setBackgroundResource(R.drawable.image_border);
+		totemButton.setBackgroundDrawable(null);
 	}
 
 	/**

@@ -119,6 +119,14 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	protected AI ai;
 
+	protected ImageView mplayerButton;
+
+	protected ImageView totemButton;
+
+	protected ImageView filesystemButton;
+
+	protected ImageView playlistButton;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -159,6 +167,10 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
 		musicstationSpinner = (Spinner) findViewById(R.id.spinner_music_station);
+		mplayerButton = (ImageView)findViewById(R.id.button_mplayer);
+		totemButton = (ImageView)findViewById(R.id.button_totem);
+		filesystemButton = (ImageView)findViewById(R.id.button_filesystem);
+		playlistButton = (ImageView)findViewById(R.id.button_playlist);
 	}
 
 	@Override
