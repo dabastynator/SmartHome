@@ -23,6 +23,7 @@ import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
 import de.remote.api.IPlayerListener;
 import de.remote.api.IMusicStation;
+import de.remote.api.IStationHandler;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.desktop.menus.ControlMenu;
@@ -110,6 +111,12 @@ public class ControlFrame extends JFrame implements Connectable {
 	 * remote factory object to get all other remote objects
 	 */
 	public IMusicStation station;
+	
+	/**
+	 * remote music station list object to get all other remote music station
+	 */
+	public IStationHandler stationList;
+
 
 	/**
 	 * remote mplayer
@@ -243,8 +250,9 @@ public class ControlFrame extends JFrame implements Connectable {
 			server = Server.getServer();
 			server.connectToRegistry(registry);
 			server.startServer(port);
-			station = ((IMusicStation) server.find(ControlConstants.STATION_ID,
-					IMusicStation.class));
+			stationList = ((IStationHandler) server.find(IStationHandler.STATION_ID,
+					IStationHandler.class));
+			station = stationList.getStation(0);
 			mPlayer = station.getMPlayer();
 			totemPlayer = station.getTotemPlayer();
 			IBrowser browser = station.createBrowser();
