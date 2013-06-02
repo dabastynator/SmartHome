@@ -14,13 +14,15 @@ public class StationImpl implements IMusicStation {
 	private ControlImpl control;
 	private PlayListImpl playlist;
 	private String browserLocation;
+	private String name;
 
-	public StationImpl(String browseLocation, String playlistLocation) {
+	public StationImpl(String browseLocation, String playlistLocation, String name) {
 		totem = new TotemPlayer();
 		mplayer = new MPlayer(playlistLocation);
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
+		this.name = name;
 	}
 
 	@Override
@@ -46,5 +48,10 @@ public class StationImpl implements IMusicStation {
 	@Override
 	public IPlayList getPlayList() throws RemoteException {
 		return playlist;
+	}
+
+	@Override
+	public String getName() throws RemoteException {
+		return name;
 	}
 }

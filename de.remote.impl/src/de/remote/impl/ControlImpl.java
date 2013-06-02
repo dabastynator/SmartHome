@@ -16,6 +16,8 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.ServerPort;
 import de.remote.api.ControlConstants;
 import de.remote.api.IControl;
+import de.remote.api.IMusicStation;
+import de.remote.api.IStationHandler;
 
 public class ControlImpl implements IControl {
 
@@ -63,7 +65,7 @@ public class ControlImpl implements IControl {
 			try {
 				robot = new Robot();
 			} catch (AWTException e) {
-				throw new RemoteException(ControlConstants.STATION_ID,
+				throw new RemoteException(IStationHandler.STATION_ID,
 						"robot not available: " + e.getMessage());
 			}
 		return robot;
