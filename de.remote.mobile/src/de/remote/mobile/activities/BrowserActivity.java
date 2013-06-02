@@ -22,12 +22,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
+import de.remote.api.IMusicStation;
 import de.remote.api.PlayerException;
 import de.remote.mobile.R;
 import de.remote.mobile.util.BrowserAdapter;
@@ -52,7 +54,21 @@ public class BrowserActivity extends BrowserBase {
 		searchText.addTextChangedListener(new SearchTextWatcher());
 		listView.setOnItemClickListener(new ListClickListener());
 		listView.setOnItemLongClickListener(new ListLongClickListener());
+		musicstationSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				String station = (String) musicstationSpinner.getSelectedItem();
+				binder.setMusicStation(musicStations.get(station));
+				showUpdateUI();
+			}
 
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	@Override
@@ -140,6 +156,11 @@ public class BrowserActivity extends BrowserBase {
 			protected void onPostExecute(String[] result) {
 				super.onPostExecute(result);
 				setProgressBarVisibility(false);
+				if (binder.getBrowser() == null){
+					setTitle("No Musicstation@"
+							+ binder.getServerName());
+					return;
+				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
 						binder.getBrowser(), result, viewerState));
 				listView.setSelection(selectedPosition);
@@ -173,6 +194,23 @@ public class BrowserActivity extends BrowserBase {
 			}
 
 		}.execute(new Integer[] {});
+	}
+
+	protected void updateSpinner() throws RemoteException {
+		musicStations.clear();
+		int size = binder.getStationHandler().getStationSize();
+		String[] spinnerItems = new String[size];
+		for (int i = 0; i < size; i++) {
+			IMusicStation station = binder.getStationHandler()
+					.getStation(i);
+			String name = station.getName();
+			musicStations.put(name, station);
+			spinnerItems[i] = name;
+		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+				BrowserActivity.this,
+				android.R.layout.simple_spinner_item, spinnerItems);
+		musicstationSpinner.setAdapter(adapter);		
 	}
 
 	@Override
@@ -403,19 +441,19 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_audiotrack:
 				binder.getPlayer().nextAudio();
 				break;
-			case R.id.opt_left:
-				binder.getPlayer().moveLeft();
-				break;
-			case R.id.opt_right:
-				binder.getPlayer().moveRight();
-				break;
+			// case R.id.opt_left:
+			// binder.getPlayer().moveLeft();
+			// break;
+			// case R.id.opt_right:
+			// binder.getPlayer().moveRight();
+			// break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
 				showUpdateUI();
 				break;
 			case R.id.opt_record:
 				ai.record();
-				break;				
+				break;
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("image/*");
@@ -423,12 +461,12 @@ public class BrowserActivity extends BrowserBase {
 						Intent.createChooser(intent, "File Chooser"),
 						FILE_REQUEST);
 				break;
-			case R.id.opt_shuffle_on:
-				binder.getPlayer().useShuffle(true);
-				break;
-			case R.id.opt_shuffle_off:
-				binder.getPlayer().useShuffle(false);
-				break;
+			// case R.id.opt_shuffle_on:
+			// binder.getPlayer().useShuffle(true);
+			// break;
+			// case R.id.opt_shuffle_off:
+			// binder.getPlayer().useShuffle(false);
+			// break;
 			case R.id.opt_mousepad:
 				intent = new Intent(this, MouseActivity.class);
 				startActivity(intent);
@@ -586,9 +624,15 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	void remoteConnected() {
-		if (binder.isConnected())
+		if (binder.isConnected()){
+			try {
+				updateSpinner();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			showUpdateUI();
-		else
+		}else
 			disableScreen();
 		ai.setPlayerBinder(binder);
 	}

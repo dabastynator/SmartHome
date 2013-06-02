@@ -15,12 +15,16 @@ import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.api.IBrowser;
 import de.remote.api.IChatServer;
 import de.remote.api.IControl;
+import de.remote.api.IMusicStation;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
+import de.remote.api.IStationHandler;
+import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
+import de.remote.mobile.util.BufferBrowser;
 
 /**
  * binder as api for this service. it provides all functionality to the remote
@@ -79,6 +83,15 @@ public class PlayerBinder extends Binder {
 	 */
 	public IControl getControl() {
 		return service.control;
+	}
+
+	/**
+	 * Get station handler list
+	 * 
+	 * @return station list
+	 */
+	public IStationHandler getStationHandler() {
+		return service.stationList;
 	}
 
 	/**
@@ -168,7 +181,7 @@ public class PlayerBinder extends Binder {
 	 * @return true if there is a connection wich a server
 	 */
 	public boolean isConnected() {
-		return service.station != null;
+		return service.stationList != null;
 	}
 
 	/**
@@ -310,5 +323,24 @@ public class PlayerBinder extends Binder {
 
 	public IGPIOPower getPower() {
 		return service.power;
+	}
+
+	public void setMusicStation(IMusicStation station) {
+		try {
+			if (service.station == station)
+				return;
+			service.station = station;
+			service.browser = new BufferBrowser(station.createBrowser());
+			service.player = station.getMPlayer();
+			service.control = station.getControl();
+			service.playList = station.getPlayList();
+			service.registerAndUpdate();
+		} catch (RemoteException e) {
+			System.err.println(e.getClass().getSimpleName() + ": "
+					+ e.getMessage());
+		} catch (PlayerException e) {
+			System.err.println(e.getClass().getSimpleName() + ": "
+					+ e.getMessage());
+		}
 	}
 }

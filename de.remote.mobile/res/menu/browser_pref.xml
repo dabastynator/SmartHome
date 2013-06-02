@@ -59,7 +59,7 @@
                 android:id="@+id/opt_audiotrack"
                 android:icon="@drawable/audio"
                 android:title="@string/str_audio_track"/>
-            <item
+            <!-- <item
                 android:id="@+id/opt_right"
                 android:icon="@drawable/right"
                 android:title="@string/str_move_right"/>
@@ -72,7 +72,7 @@
                 android:title="Shuffle"/>
             <item
                 android:id="@+id/opt_shuffle_off"
-                android:title="No shuffle"/>
+                android:title="No shuffle"/>  -->
             <item
                 android:id="@+id/opt_mousepad"
                 android:title="Mousepad"/>

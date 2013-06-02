@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import de.remote.api.IMusicStation;
+import de.remote.api.IStationHandler;
 import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.util.AI;
@@ -29,12 +32,12 @@ public abstract class BrowserBase extends BindedActivity {
 	 * name of the playlist field to store and restore the value
 	 */
 	public static final String PLAYLIST = "playlist";
-	
+
 	/**
 	 * request code for file search
 	 */
 	public static final int FILE_REQUEST = 3;
-	
+
 	/**
 	 * name of the position in the list view
 	 */
@@ -48,12 +51,14 @@ public abstract class BrowserBase extends BindedActivity {
 	public enum ViewerState {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
 	}
+	
+	protected Map<String, IMusicStation> musicStations = new HashMap<String, IMusicStation>();
 
 	/**
 	 * list view
 	 */
 	protected ListView listView;
-	
+
 	/**
 	 * listener for remote actions
 	 */
@@ -63,6 +68,11 @@ public abstract class BrowserBase extends BindedActivity {
 	 * search input field
 	 */
 	protected EditText searchText;
+
+	/**
+	 * spinner for all music stations of the server.
+	 */
+	protected Spinner musicstationSpinner;
 
 	/**
 	 * map to get full path string from a file name of a playlist item
@@ -112,18 +122,18 @@ public abstract class BrowserBase extends BindedActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-	    requestWindowFeature(Window.FEATURE_PROGRESS);
-		
+		requestWindowFeature(Window.FEATURE_PROGRESS);
+
 		setContentView(R.layout.main);
-		
+
 		findComponents();
-//		listView.setBackgroundResource(R.drawable.idefix_dark);
-//		listView.setScrollingCacheEnabled(false);
-//		listView.setCacheColorHint(0);
+		// listView.setBackgroundResource(R.drawable.idefix_dark);
+		// listView.setScrollingCacheEnabled(false);
+		// listView.setCacheColorHint(0);
 		registerForContextMenu(listView);
-		
+
 		ai = new AI(this);
 	}
 
@@ -148,6 +158,7 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
+		musicstationSpinner = (Spinner) findViewById(R.id.spinner_music_station);
 	}
 
 	@Override
@@ -166,7 +177,7 @@ public abstract class BrowserBase extends BindedActivity {
 		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
 
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -181,7 +192,7 @@ public abstract class BrowserBase extends BindedActivity {
 				searchLayout.setVisibility(View.VISIBLE);
 		}
 	}
-	
+
 	@Override
 	void binderConnected() {
 		remoteListener = new BrowserRemoteListener(downloadLayout,

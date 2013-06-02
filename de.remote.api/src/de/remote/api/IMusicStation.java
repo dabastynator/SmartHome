@@ -1,5 +1,6 @@
 package de.remote.api;
 
+import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 
 /**
@@ -7,7 +8,7 @@ import de.newsystem.rmi.protokol.RemoteException;
  * 
  * @author sebastian
  */
-public interface IMusicStation {
+public interface IMusicStation extends RemoteAble {
 
 	/**
 	 * create new browser for the file system

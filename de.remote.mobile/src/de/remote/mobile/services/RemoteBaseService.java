@@ -22,6 +22,7 @@ import de.remote.api.IControl;
 import de.remote.api.IMusicStation;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
+import de.remote.api.IStationHandler;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
@@ -79,6 +80,11 @@ public abstract class RemoteBaseService extends Service {
 	 * remote station object
 	 */
 	protected IMusicStation station;
+	
+	/**
+	 * remote station list object
+	 */
+	protected IStationHandler stationList;	
 
 	/**
 	 * remote browser object
@@ -156,22 +162,15 @@ public abstract class RemoteBaseService extends Service {
 			}
 			localServer.startServer();
 
-			station = (IMusicStation) localServer.find(
-					ControlConstants.STATION_ID, IMusicStation.class);
+			stationList = (IStationHandler) localServer.find(IStationHandler.STATION_ID, IStationHandler.class);
+			if (stationList == null)
+				throw new RemoteException(IStationHandler.STATION_ID,
+						"music handler not found in registry");		
 
-			if (station == null)
-				throw new RemoteException(ControlConstants.STATION_ID,
-						"station not found in registry");
-
-			browser = new BufferBrowser(station.createBrowser());
-			player = station.getMPlayer();
-			control = station.getControl();
-			playList = station.getPlayList();
 			chatServer = (IChatServer) localServer.find(
 					ControlConstants.CHAT_ID, IChatServer.class);
 			power = (IGPIOPower) localServer.find(IGPIOPower.ID,
 					IGPIOPower.class);
-			registerAndUpdate();
 			if (successRunnable != null)
 				handler.post(successRunnable);
 			handler.post(new Runnable() {

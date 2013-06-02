@@ -110,6 +110,19 @@
                 android:src="@drawable/cancel" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/layout_top_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal" >
+
+            <Spinner
+                android:id="@+id/spinner_music_station"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
         <ListView
             android:id="@+id/fileList"
             android:layout_width="fill_parent"
