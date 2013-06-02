@@ -54,7 +54,7 @@ public class RemoteServer {
 		try {
 			// connect to registry and start server
 			server.forceConnectToRegistry(registry);
-			server.startServer(ControlConstants.STATION_PORT + 2);
+			server.startServer(ControlConstants.STATION_PORT + 3);
 
 			// register objects at registry
 			if (stationList)
