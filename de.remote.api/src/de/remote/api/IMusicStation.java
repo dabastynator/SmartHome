@@ -3,7 +3,7 @@ package de.remote.api;
 import de.newsystem.rmi.protokol.RemoteException;
 
 /**
- * this factory holds all objects for the computer control
+ * this music station holds all objects for the music control
  * 
  * @author sebastian
  */
@@ -48,4 +48,12 @@ public interface IMusicStation {
 	 * @throws RemoteException
 	 */
 	public IPlayList getPlayList() throws RemoteException;
+
+	/**
+	 * Get the name of the music station.
+	 * 
+	 * @return station name
+	 * @throws RemoteException
+	 */
+	public String getName() throws RemoteException;
 }
