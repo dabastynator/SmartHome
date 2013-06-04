@@ -2,6 +2,7 @@ package de.remote.mobile.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import android.os.Binder;
 import android.os.Environment;
@@ -18,10 +19,10 @@ import de.remote.api.IControl;
 import de.remote.api.IMusicStation;
 import de.remote.api.IPlayList;
 import de.remote.api.IPlayer;
-import de.remote.api.IStationHandler;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
+import de.remote.mobile.services.RemoteBaseService.StationStuff;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
 import de.remote.mobile.util.BufferBrowser;
@@ -50,6 +51,8 @@ public class PlayerBinder extends Binder {
 	private AbstractReceiver receiver;
 
 	private boolean usesMplayer;
+
+	private String musicStationName;
 
 	/**
 	 * allocate new binder.
@@ -88,43 +91,21 @@ public class PlayerBinder extends Binder {
 	}
 
 	/**
-	 * Get station handler list
-	 * 
-	 * @return station list
-	 */
-	public IStationHandler getStationHandler() {
-		return service.stationList;
-	}
-
-	/**
 	 * connect to server, ip of the server will be load from the database
 	 * 
 	 * @param id
 	 * @param r
 	 */
-	public void connectToServer(final int id, final Runnable r) {
+	public void connectToServer(final int id) {
 		new Thread() {
 			public void run() {
-				if (id == service.serverID) {
-					if (r != null)
-						r.run();
-				} else {
+				if (id != service.serverID) {
 					service.disconnect();
 					service.serverID = id;
 					service.serverIP = service.serverDB.getIpOfServer(id);
 					service.serverName = service.serverDB.getNameOfServer(id);
-					service.connect(r);
+					service.connect();
 				}
-			}
-		}.start();
-	}
-
-	public void disconnect(final Runnable r) {
-		new Thread() {
-			public void run() {
-				service.disconnect();
-				if (r != null)
-					service.handler.post(r);
 			}
 		}.start();
 	}
@@ -329,15 +310,31 @@ public class PlayerBinder extends Binder {
 		return service.power;
 	}
 
-	public void setMusicStation(IMusicStation station) {
+	public void setMusicStation(String stationName) {
 		try {
+			IMusicStation station = service.musicStations.get(stationName);
 			if (service.station == station)
 				return;
+			musicStationName = stationName;
 			service.station = station;
-			service.browser = new BufferBrowser(station.createBrowser());
-			service.player = station.getMPlayer();
-			service.control = station.getControl();
-			service.playList = station.getPlayList();
+			StationStuff stuff = service.stationStuff.get(station);
+			if (stuff != null) {
+				service.browser = stuff.browser;
+				service.player = stuff.player;
+				service.control = stuff.control;
+				service.playList = stuff.pls;
+			} else {
+				stuff = new StationStuff();
+				service.browser = new BufferBrowser(station.createBrowser());
+				service.player = station.getMPlayer();
+				service.control = station.getControl();
+				service.playList = station.getPlayList();
+				stuff.browser = service.browser;
+				stuff.player = service.player;
+				stuff.control = service.control;
+				stuff.pls = service.playList;
+				service.stationStuff.put(station, stuff);
+			}
 			service.registerAndUpdate();
 		} catch (RemoteException e) {
 			System.err.println(e.getClass().getSimpleName() + ": "
@@ -350,5 +347,17 @@ public class PlayerBinder extends Binder {
 
 	public boolean usesMPlayer() {
 		return usesMplayer;
+	}
+
+	public Map<String, IMusicStation> getMusicStations() {
+		return service.musicStations;
+	}
+
+	public IMusicStation getMusicStation() {
+		return service.station;
+	}
+
+	public String getMusicStationName() {
+		return musicStationName;
 	}
 }

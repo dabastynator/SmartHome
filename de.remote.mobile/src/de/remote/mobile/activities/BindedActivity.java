@@ -5,15 +5,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import de.remote.api.PlayingBean;
 import de.remote.mobile.R;
-import de.remote.mobile.activities.BrowserActivity.ShowFolderRunnable;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
+import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 
 /**
  * the activity handes connection with remote service.
@@ -21,7 +23,7 @@ import de.remote.mobile.services.RemoteService;
  * @author sebastian
  * 
  */
-public abstract class BindedActivity extends Activity {
+public abstract class BindedActivity extends Activity implements IRemoteActionListener {
 
 	/**
 	 * name for extra data for server name
@@ -47,6 +49,11 @@ public abstract class BindedActivity extends Activity {
 	 * database object
 	 */
 	protected ServerDatabase serverDB;
+	
+	/**
+	 * handler to post runnables on the gui thread
+	 */
+	protected Handler handler = new Handler();
 
 	/**
 	 * connection to the service
@@ -55,14 +62,16 @@ public abstract class BindedActivity extends Activity {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
+			binder.removeRemoteActionListener(BindedActivity.this);
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			boolean newConnection = !binder.isConnected();
-			disableScreen();
+			startConnecting();
 			binderConnected();
+			binder.addRemoteActionListener(BindedActivity.this);
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
 					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
@@ -83,14 +92,9 @@ public abstract class BindedActivity extends Activity {
 			}
 			// if there is a server id to connect -> connect
 			if (serverID >= 0 && newConnection)
-				binder.connectToServer(serverID, new Runnable() {
-					@Override
-					public void run() {
-						remoteConnected();
-					}
-				});
+				binder.connectToServer(serverID);
 			else if (!newConnection)
-				remoteConnected();
+				BindedActivity.this.onServerConnectionChanged(null);
 		}
 	};
 
@@ -113,15 +117,8 @@ public abstract class BindedActivity extends Activity {
 				return;
 			serverID = data.getExtras().getInt(
 					SelectServerActivity.SERVER_ID);
-			disableScreen();
-			Runnable success = new Runnable() {
-				
-				@Override
-				public void run() {
-					remoteConnected();
-				}
-			};
-			binder.connectToServer(serverID, success);
+			startConnecting();
+			binder.connectToServer(serverID);
 		}
 	}
 
@@ -133,7 +130,6 @@ public abstract class BindedActivity extends Activity {
 			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 			break;
 		case R.id.opt_exit:
-			binder.disconnect(null);
 			intent = new Intent(this, RemoteService.class);
 			stopService(intent);
 			finish();
@@ -148,19 +144,42 @@ public abstract class BindedActivity extends Activity {
 	abstract void binderConnected();
 
 	/**
-	 * perform on connection to a remote system
+	 * start connection. inform user about connecting status.
 	 */
-	abstract void remoteConnected();
-
-	/**
-	 * disable the gui elements. inform user about connecting status.
-	 */
-	abstract void disableScreen();
+	abstract void startConnecting();
 
 	@Override
 	protected void onDestroy() {
 		serverDB.close();
 
 		super.onDestroy();
+	}
+
+	@Override
+	public void onPlayingBeanChanged(PlayingBean bean) {
+	}
+
+	@Override
+	public void onStopService() {
+	}
+
+	@Override
+	public void startReceive(long size) {
+	}
+
+	@Override
+	public void progressReceive(long size) {
+	}
+
+	@Override
+	public void endReceive(long size) {
+	}
+
+	@Override
+	public void exceptionOccurred(Exception e) {
+	}
+
+	@Override
+	public void downloadCanceled() {
 	}
 }

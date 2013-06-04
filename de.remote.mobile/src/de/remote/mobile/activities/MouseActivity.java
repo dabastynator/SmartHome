@@ -4,16 +4,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import de.newsystem.rmi.api.Server;
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.ServerPort;
 import de.remote.api.IControl;
 import de.remote.mobile.R;
-import android.os.Bundle;
-import android.view.MotionEvent;
-import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Toast;
 
 public class MouseActivity extends BindedActivity {
 
@@ -89,7 +87,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	void remoteConnected() {
+	public void onServerConnectionChanged(String serverName) {
 		try {
 			ServerPort sp = binder.getControl().openMouseMoveStream();
 			socket = new Socket(sp.getIp(), sp.getPort());
@@ -101,7 +99,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	void disableScreen() {
+	void startConnecting() {
 		mouseMoveOutput = null;
 	}
 

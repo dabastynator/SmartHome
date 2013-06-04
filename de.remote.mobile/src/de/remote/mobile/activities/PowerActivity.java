@@ -80,7 +80,7 @@ public class PowerActivity extends BindedActivity {
 	}
 
 	@Override
-	void remoteConnected() {
+	public void onServerConnectionChanged(String serverName) {
 		powerObject = null;
 		IGPIOPower power = binder.getPower();
 		
@@ -114,7 +114,7 @@ public class PowerActivity extends BindedActivity {
 	}
 
 	@Override
-	void disableScreen() {
+	void startConnecting() {
 		buttonA.setEnabled(false);
 		buttonB.setEnabled(false);
 		buttonC.setEnabled(false);
@@ -148,8 +148,6 @@ public class PowerActivity extends BindedActivity {
 			if (powerObject == null)
 				return;
 			new AsyncTask<Integer, Integer, String[]>() {
-
-				Exception exeption = null;
 
 				@Override
 				protected void onPreExecute() {

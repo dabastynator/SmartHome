@@ -5,4 +5,5 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:textColor="#FF000000"
-    android:textSize="10pt" />
+    android:padding="2pt"
+    android:textSize="11pt" />

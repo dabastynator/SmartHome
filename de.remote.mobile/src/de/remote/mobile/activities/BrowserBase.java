@@ -15,8 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import de.remote.api.IMusicStation;
-import de.remote.api.IStationHandler;
+import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.util.AI;
@@ -43,6 +43,8 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	public static final String LISTVIEW_POSITION = "listviewPosition";
 
+	public static final String SPINNER_POSITION = "spinnerPosition";
+
 	/**
 	 * viewer states of the browser
 	 * 
@@ -51,8 +53,6 @@ public abstract class BrowserBase extends BindedActivity {
 	public enum ViewerState {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
 	}
-	
-	protected Map<String, IMusicStation> musicStations = new HashMap<String, IMusicStation>();
 
 	/**
 	 * list view
@@ -127,6 +127,8 @@ public abstract class BrowserBase extends BindedActivity {
 
 	protected ImageView playlistButton;
 
+	protected int spinnerPosition;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -167,10 +169,10 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
 		musicstationSpinner = (Spinner) findViewById(R.id.spinner_music_station);
-		mplayerButton = (ImageView)findViewById(R.id.button_mplayer);
-		totemButton = (ImageView)findViewById(R.id.button_totem);
-		filesystemButton = (ImageView)findViewById(R.id.button_filesystem);
-		playlistButton = (ImageView)findViewById(R.id.button_playlist);
+		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
+		totemButton = (ImageView) findViewById(R.id.button_totem);
+		filesystemButton = (ImageView) findViewById(R.id.button_filesystem);
+		playlistButton = (ImageView) findViewById(R.id.button_playlist);
 	}
 
 	@Override
@@ -179,6 +181,8 @@ public abstract class BrowserBase extends BindedActivity {
 		outState.putInt(VIEWER_STATE, viewerState.ordinal());
 		outState.putString(PLAYLIST, currentPlayList);
 		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
+		outState.putInt(SPINNER_POSITION,
+				musicstationSpinner.getSelectedItemPosition());
 	}
 
 	@Override
@@ -187,7 +191,7 @@ public abstract class BrowserBase extends BindedActivity {
 		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
 		currentPlayList = bundle.getString(PLAYLIST);
 		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
-
+		spinnerPosition = bundle.getInt(SPINNER_POSITION);
 	}
 
 	@Override
@@ -207,10 +211,56 @@ public abstract class BrowserBase extends BindedActivity {
 
 	@Override
 	void binderConnected() {
-		remoteListener = new BrowserRemoteListener(downloadLayout,
-				downloadProgress, playButton, binder);
-		remoteListener.newPlayingFile(binder.getPlayingFile());
-		binder.addRemoteActionListener(remoteListener);
+		onPlayingBeanChanged(binder.getPlayingFile());
+	}
+
+	private long max = 0;
+
+	@Override
+	public void onPlayingBeanChanged(PlayingBean bean) {
+		if (bean == null || bean.getState() == STATE.PLAY)
+			playButton.setImageResource(R.drawable.pause);
+		else if (bean.getState() == STATE.PAUSE)
+			playButton.setImageResource(R.drawable.play);
+	}
+
+	@Override
+	public void onServerConnectionChanged(String serverName) {
+
+	}
+
+	@Override
+	public void startReceive(long size) {
+		max = size;
+		downloadLayout.setVisibility(View.VISIBLE);
+		downloadProgress.setProgress(0);
+	}
+
+	@Override
+	public void progressReceive(long size) {
+		if (max == 0)
+			max = binder.getReceiver().getFullSize();
+		downloadProgress.setProgress((int) ((100d * size) / max));
+	}
+
+	@Override
+	public void endReceive(long size) {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void exceptionOccurred(Exception e) {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void downloadCanceled() {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void onStopService() {
+
 	}
 
 }

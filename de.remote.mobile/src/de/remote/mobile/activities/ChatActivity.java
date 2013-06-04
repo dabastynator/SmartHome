@@ -142,7 +142,7 @@ public class ChatActivity extends BindedActivity {
 	}
 
 	@Override
-	protected void disableScreen() {
+	protected void startConnecting() {
 		chatInput.setEnabled(false);
 		postButton.setEnabled(false);
 	}
@@ -362,9 +362,9 @@ public class ChatActivity extends BindedActivity {
 		// TODO Auto-generated method stub
 
 	}
-
+	
 	@Override
-	void remoteConnected() {
+	public void onServerConnectionChanged(String serverName) {
 		try {
 			if (binder != null && binder.isConnected()) {
 				if (binder.getChatServer() != null) {
@@ -373,12 +373,14 @@ public class ChatActivity extends BindedActivity {
 				} else {
 					Toast.makeText(this, "no chat server available",
 							Toast.LENGTH_SHORT).show();
-					disableScreen();
+					startConnecting();
 				}
 			} else
-				disableScreen();
+				startConnecting();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
+	
+
 }

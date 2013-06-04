@@ -12,7 +12,6 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
-import de.webcam.api.WebcamException;
 
 public class WebcamActivity extends BindedActivity {
 
@@ -109,13 +108,13 @@ public class WebcamActivity extends BindedActivity {
 	}
 
 	@Override
-	void remoteConnected() {
+	public void onServerConnectionChanged(String serverName) {
 		if (binder.isConnected())
 			registerListener();
 	}
 
 	@Override
-	void disableScreen() {
+	void startConnecting() {
 		// TODO Auto-generated method stub
 		
 	}

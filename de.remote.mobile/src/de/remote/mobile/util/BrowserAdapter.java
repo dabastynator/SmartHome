@@ -52,15 +52,17 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 		handler = new Handler();
 		thumbnails.clear();
 		this.browser = browser;
-		new Thread() {
-			public void run() {
-				try {
-					BrowserAdapter.this.browser.fireThumbnails(
-							BrowserAdapter.this, PREVIEW_SIZE, PREVIEW_SIZE);
-				} catch (RemoteException e) {
+		if (this.browser != null)
+			new Thread() {
+				public void run() {
+					try {
+						BrowserAdapter.this.browser
+								.fireThumbnails(BrowserAdapter.this,
+										PREVIEW_SIZE, PREVIEW_SIZE);
+					} catch (RemoteException e) {
+					}
 				}
-			}
-		}.start();
+			}.start();
 		this.viewerState = state;
 		this.setNotifyOnChange(true);
 	}
@@ -113,7 +115,6 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	@Override
 	public void setThumbnail(String file, int width, int height, int[] thumbnail)
 			throws RemoteException {
-		Log.e("get thumbnail", file);
 		Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 		IntBuffer buf = IntBuffer.wrap(thumbnail); // data is my array
 		bm.copyPixelsFromBuffer(buf);

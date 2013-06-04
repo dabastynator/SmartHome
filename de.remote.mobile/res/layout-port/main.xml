@@ -72,7 +72,7 @@
 
         <Spinner
             android:id="@+id/spinner_music_station"
-            android:layout_width="143dp"
+            android:layout_width="126dp"
             android:layout_height="fill_parent" />
 
         <ImageView

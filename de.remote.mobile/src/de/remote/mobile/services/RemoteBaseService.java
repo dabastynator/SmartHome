@@ -2,7 +2,9 @@ package de.remote.mobile.services;
 
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,6 +13,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
@@ -32,7 +35,6 @@ import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.MobileReceiverListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
-import de.remote.mobile.util.BufferBrowser;
 
 public abstract class RemoteBaseService extends Service {
 
@@ -85,7 +87,14 @@ public abstract class RemoteBaseService extends Service {
 	 * remote station list object
 	 */
 	protected IStationHandler stationList;	
+	
+	/**
+	 * list of available music stations
+	 */
+	protected Map<String, IMusicStation> musicStations = new HashMap<String, IMusicStation>();
 
+	protected Map<IMusicStation, StationStuff> stationStuff = new HashMap<IMusicStation, RemoteBaseService.StationStuff>();
+	
 	/**
 	 * remote browser object
 	 */
@@ -152,7 +161,7 @@ public abstract class RemoteBaseService extends Service {
 	 * 
 	 * @param successRunnable
 	 */
-	protected void connect(final Runnable successRunnable) {
+	protected void connect() {
 		localServer = Server.getServer();
 		try {
 			try {
@@ -165,19 +174,26 @@ public abstract class RemoteBaseService extends Service {
 			stationList = (IStationHandler) localServer.find(IStationHandler.STATION_ID, IStationHandler.class);
 			if (stationList == null)
 				throw new RemoteException(IStationHandler.STATION_ID,
-						"music handler not found in registry");		
+						"music handler not found in registry");	
+			
+			int stationSize = stationList.getStationSize();
+			musicStations.clear();
+			stationStuff.clear();
+			for (int i=0; i<stationSize; i++){
+				IMusicStation musicStation = stationList.getStation(i);
+				String name = musicStation.getName();
+				musicStations.put(name, musicStation);
+			}
 
 			chatServer = (IChatServer) localServer.find(
 					ControlConstants.CHAT_ID, IChatServer.class);
 			power = (IGPIOPower) localServer.find(IGPIOPower.ID,
 					IGPIOPower.class);
-			if (successRunnable != null)
-				handler.post(successRunnable);
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(serverName);
+						listener.onServerConnectionChanged(serverName);
 				}
 			});
 		} catch (final Exception e) {
@@ -187,36 +203,20 @@ public abstract class RemoteBaseService extends Service {
 					Toast.makeText(RemoteBaseService.this, e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener listener : actionListener)
-						listener.serverConnectionChanged(null);
+						listener.onServerConnectionChanged(null);
 				}
 			});
 		}
 	}
 
 	public void registerAndUpdate() throws RemoteException, PlayerException {
+		Log.e("Remote Control", "register and update");
+		if (station == null)
+			return;
 		station.getMPlayer().addPlayerMessageListener(playerListener);
 		station.getTotemPlayer().addPlayerMessageListener(playerListener);
-		playerListener.playerMessage(player.getPlayingBean());
-	}
-
-	/**
-	 * create notification about playing file
-	 * 
-	 * @param title
-	 * @param body
-	 */
-	protected void makePlayingNotification(String title, String body) {
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.browser;
-		Notification notification = new Notification(icon, "Player started",
-				System.currentTimeMillis());
-		Intent nIntent = new Intent(this, BrowserActivity.class);
-		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
-		PendingIntent pInent = PendingIntent.getActivity(this, 0, nIntent, 0);
-		notification.setLatestEventInfo(getApplicationContext(), title, body,
-				pInent);
-		nm.notify(PLAYING_NOTIFICATION_ID, notification);
+		PlayingBean bean = player.getPlayingBean();
+		playerListener.playerMessage(bean);
 	}
 
 	/**
@@ -247,7 +247,6 @@ public abstract class RemoteBaseService extends Service {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
 		nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
@@ -255,6 +254,7 @@ public abstract class RemoteBaseService extends Service {
 			listener.onStopService();
 		disconnect();
 		serverDB.close();
+		super.onDestroy();
 	}
 
 	/**
@@ -273,19 +273,23 @@ public abstract class RemoteBaseService extends Service {
 		if (localServer != null)
 			localServer.close();
 		station = null;
+		musicStations.clear();
+		stationList = null;
+		stationStuff.clear();
+		browser = null;
 		player = null;
 		serverID = -1;
 		serverName = null;
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
-		handler.post(new Runnable() {
-			public void run() {
-				if (actionListener == null)
-					actionListener = new ArrayList<IRemoteActionListener>();
-				for (IRemoteActionListener listener : actionListener)
-					listener.serverConnectionChanged(null);
-			}
-		});
+//		handler.post(new Runnable() {
+//			public void run() {
+//				if (actionListener == null)
+//					actionListener = new ArrayList<IRemoteActionListener>();
+//				for (IRemoteActionListener listener : actionListener)
+//					listener.OnServerConnectionChanged(null);
+//			}
+//		});
 	}
 
 	@Override
@@ -298,6 +302,13 @@ public abstract class RemoteBaseService extends Service {
 	 */
 	public Server getServer() {
 		return localServer;
+	}
+	
+	public static class StationStuff{
+		public IBrowser browser;
+		public IPlayer player;
+		public IPlayList pls;
+		public IControl control;
 	}
 
 }

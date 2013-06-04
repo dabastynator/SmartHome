@@ -46,6 +46,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
+			binder.removeRemoteActionListener(WidgetService.this);
 		}
 
 		@Override
@@ -76,8 +77,14 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder.getPlayer() != null && playing == null)
 			playing = binder.getPlayingFile();
 		if (playing == null) {
-			setWidgetText("no file playing",
-					"at server " + binder.getServerName(), "", false);
+			if (binder.getMusicStationName() == null)
+				setWidgetText(
+						"no music station",
+						"no music station specified at server "
+								+ binder.getServerName(), "", false);
+			else
+				setWidgetText("no file playing",
+						"at music station " + binder.getMusicStationName(), "", false);
 			return;
 		}
 		String title = "playing";
@@ -101,8 +108,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (intent != null && intent.getAction() != null)
 			executeCommand(intent.getAction());
 		else {
-			remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
-					R.layout.widget);
+			remoteViews = new RemoteViews(getApplicationContext()
+					.getPackageName(), R.layout.widget);
 			initializeWidgets();
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -187,12 +194,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	@Override
-	public void newPlayingFile(PlayingBean bean) {
+	public void onPlayingBeanChanged(PlayingBean bean) {
 		updateWidget(bean);
 	}
 
 	@Override
-	public void serverConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName) {
 		initializeWidgets();
 	}
 

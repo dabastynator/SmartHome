@@ -142,11 +142,11 @@ public class WidgetPowerService extends Service implements
 	}
 
 	@Override
-	public void newPlayingFile(PlayingBean bean) {
+	public void onPlayingBeanChanged(PlayingBean bean) {
 	}
 
 	@Override
-	public void serverConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName) {
 	}
 
 	@Override

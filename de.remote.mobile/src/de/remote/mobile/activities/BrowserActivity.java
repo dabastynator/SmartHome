@@ -29,7 +29,6 @@ import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
-import de.remote.api.IMusicStation;
 import de.remote.api.PlayerException;
 import de.remote.mobile.R;
 import de.remote.mobile.util.BrowserAdapter;
@@ -43,6 +42,8 @@ import de.remote.mobile.util.BufferBrowser;
  */
 public class BrowserActivity extends BrowserBase {
 
+	private boolean updateSpinner;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,22 +56,7 @@ public class BrowserActivity extends BrowserBase {
 		listView.setOnItemClickListener(new ListClickListener());
 		listView.setOnItemLongClickListener(new ListLongClickListener());
 		musicstationSpinner
-				.setOnItemSelectedListener(new OnItemSelectedListener() {
-					@Override
-					public void onItemSelected(AdapterView<?> arg0, View arg1,
-							int arg2, long arg3) {
-						String station = (String) musicstationSpinner
-								.getSelectedItem();
-						binder.setMusicStation(musicStations.get(station));
-						showUpdateUI();
-					}
-
-					@Override
-					public void onNothingSelected(AdapterView<?> arg0) {
-						// TODO Auto-generated method stub
-
-					}
-				});
+				.setOnItemSelectedListener(new SelectMusicStationListener());
 	}
 
 	@Override
@@ -124,10 +110,21 @@ public class BrowserActivity extends BrowserBase {
 		}
 	}
 
+	private void disableScreen() {
+		setTitle("No connection");
+		setProgressBarVisibility(false);
+		listView.setAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, new String[] {}));
+		String[] spinnerItems = new String[] {};
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+				BrowserActivity.this, R.layout.spinner, spinnerItems);
+		musicstationSpinner.setAdapter(adapter);
+	}
+
 	/**
 	 * update gui elements, show current directory or playlist
 	 */
-	private void showUpdateUI() {
+	private void updateGUI() {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return;
@@ -159,7 +156,9 @@ public class BrowserActivity extends BrowserBase {
 				super.onPostExecute(result);
 				setProgressBarVisibility(false);
 				if (binder.getBrowser() == null) {
-					setTitle("No Musicstation@" + binder.getServerName());
+					setTitle("Select musicstation@" + binder.getServerName());
+					listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
+							binder.getBrowser(), new String[]{}, viewerState));
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
@@ -173,16 +172,19 @@ public class BrowserActivity extends BrowserBase {
 					} catch (RemoteException e) {
 						setTitle("no connection");
 					}
-					filesystemButton.setBackgroundResource(R.drawable.image_border);
+					filesystemButton
+							.setBackgroundResource(R.drawable.image_border);
 					playlistButton.setBackgroundDrawable(null);
 					break;
 				case PLAYLISTS:
 					setTitle("Playlists@" + binder.getServerName());
-					playlistButton.setBackgroundResource(R.drawable.image_border);
+					playlistButton
+							.setBackgroundResource(R.drawable.image_border);
 					filesystemButton.setBackgroundDrawable(null);
 					break;
 				case PLS_ITEMS:
-					playlistButton.setBackgroundResource(R.drawable.image_border);
+					playlistButton
+							.setBackgroundResource(R.drawable.image_border);
 					filesystemButton.setBackgroundDrawable(null);
 					setTitle("Playlist: " + currentPlayList + "@"
 							+ binder.getServerName());
@@ -203,20 +205,18 @@ public class BrowserActivity extends BrowserBase {
 		}.execute(new Integer[] {});
 	}
 
-	protected void updateSpinner() throws RemoteException {
-		musicStations.clear();
-		int size = binder.getStationHandler().getStationSize();
-		String[] spinnerItems = new String[size];
-		for (int i = 0; i < size; i++) {
-			IMusicStation station = binder.getStationHandler().getStation(i);
-			String name = station.getName();
-			musicStations.put(name, station);
-			spinnerItems[i] = name;
-		}
+	protected void updateSpinner() {
+		updateSpinner = true;
+		String[] stationArray = binder.getMusicStations().keySet()
+				.toArray(new String[] {});
+		String[] spinnerItems = new String[stationArray.length+1];
+		spinnerItems[0] = "Select musicstation";
+		for (int i=0; i<stationArray.length;i++)
+			spinnerItems[i+1] = stationArray[i];
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				BrowserActivity.this, R.layout.spinner,
-				spinnerItems);
+				BrowserActivity.this, R.layout.spinner, spinnerItems);
 		musicstationSpinner.setAdapter(adapter);
+		musicstationSpinner.setSelection(spinnerPosition);
 	}
 
 	@Override
@@ -233,17 +233,17 @@ public class BrowserActivity extends BrowserBase {
 				selectedPosition = 0;
 				if (viewerState == ViewerState.DIRECTORIES)
 					if (binder.getBrowser().goBack()) {
-						showUpdateUI();
+						updateGUI();
 						return true;
 					}
 				if (viewerState == ViewerState.PLAYLISTS) {
 					viewerState = ViewerState.DIRECTORIES;
-					showUpdateUI();
+					updateGUI();
 					return true;
 				}
 				if (viewerState == ViewerState.PLS_ITEMS) {
 					viewerState = ViewerState.PLAYLISTS;
-					showUpdateUI();
+					updateGUI();
 					return true;
 				}
 			}
@@ -455,7 +455,7 @@ public class BrowserActivity extends BrowserBase {
 			// break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
-				showUpdateUI();
+				updateGUI();
 				break;
 			case R.id.opt_record:
 				ai.record();
@@ -516,11 +516,11 @@ public class BrowserActivity extends BrowserBase {
 				binder.getBrowser().delete(
 						binder.getBrowser().getFullLocation() + selectedItem);
 				((BufferBrowser) binder.getBrowser()).setDirty();
-				showUpdateUI();
+				updateGUI();
 				break;
 			case R.id.opt_pls_delete:
 				binder.getPlayList().removePlayList(selectedItem);
-				showUpdateUI();
+				updateGUI();
 				Toast.makeText(BrowserActivity.this,
 						"Playlist '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -528,11 +528,11 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_pls_show:
 				viewerState = ViewerState.PLS_ITEMS;
 				currentPlayList = selectedItem;
-				showUpdateUI();
+				updateGUI();
 				break;
 			case R.id.opt_pls_item_delete:
 				binder.getPlayList().removeItem(currentPlayList, selectedItem);
-				showUpdateUI();
+				updateGUI();
 				Toast.makeText(BrowserActivity.this,
 						"Entry '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -568,7 +568,7 @@ public class BrowserActivity extends BrowserBase {
 					&& data.getExtras() != null) {
 				String pls = data.getExtras().getString(GetTextActivity.RESULT);
 				binder.getPlayList().addPlayList(pls);
-				showUpdateUI();
+				updateGUI();
 				Toast.makeText(BrowserActivity.this,
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
@@ -613,25 +613,25 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	@Override
-	protected void disableScreen() {
+	protected void startConnecting() {
 		setTitle("connecting...");
 		setProgressBarVisibility(true);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
+		String[] spinnerItems = new String[] {};
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+				BrowserActivity.this, R.layout.spinner, spinnerItems);
+		musicstationSpinner.setAdapter(adapter);
 	}
 
 	@Override
-	void remoteConnected() {
+	public void onServerConnectionChanged(String serverName) {
 		if (binder.isConnected()) {
-			try {
-				updateSpinner();
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			showUpdateUI();
-		} else
+			updateSpinner();
+			updateGUI();
+		} else {
 			disableScreen();
+		}
 		ai.setPlayerBinder(binder);
 	}
 
@@ -644,7 +644,7 @@ public class BrowserActivity extends BrowserBase {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			showUpdateUI();
+			updateGUI();
 			if (binder.getReceiver() != null
 					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
 				downloadLayout.setVisibility(View.VISIBLE);
@@ -680,7 +680,7 @@ public class BrowserActivity extends BrowserBase {
 					if (position < binder.getBrowser().getDirectories().length) {
 						binder.getBrowser().goTo(item);
 						selectedPosition = 0;
-						showUpdateUI();
+						updateGUI();
 						return;
 					}
 					String file = binder.getBrowser().getFullLocation() + item;
@@ -699,20 +699,20 @@ public class BrowserActivity extends BrowserBase {
 
 	public void showFileSystem(View view) {
 		viewerState = ViewerState.DIRECTORIES;
-		showUpdateUI();
+		updateGUI();
 	}
 
 	public void showPlaylist(View view) {
 		viewerState = ViewerState.PLAYLISTS;
-		showUpdateUI();
+		updateGUI();
 	}
-	
+
 	public void setTotem(View view) {
 		binder.useTotemPlayer();
 		totemButton.setBackgroundResource(R.drawable.image_border);
 		mplayerButton.setBackgroundDrawable(null);
 	}
-	
+
 	public void setMPlayer(View view) {
 		binder.useMPlayer();
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
@@ -766,6 +766,35 @@ public class BrowserActivity extends BrowserBase {
 				adapter.getFilter().filter(s);
 				adapter.notifyDataSetChanged();
 			}
+		}
+	}
+	
+	class SelectMusicStationListener implements OnItemSelectedListener {
+		@Override
+		public void onItemSelected(AdapterView<?> arg0, View arg1,
+				int arg2, long arg3) {
+			if (updateSpinner) {
+				updateSpinner = false;
+				return;
+			}
+			final String station = (String) musicstationSpinner
+					.getSelectedItem();
+			if (binder.getMusicStations().containsKey(station)) {
+				setProgressBarVisibility(true);
+				setTitle("loading...");
+				new Thread(){
+					public void run() {
+						binder.setMusicStation(station);
+						handler.post(new ShowFolderRunnable());
+					};
+				}.start();
+			}
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// TODO Auto-generated method stub
+
 		}
 	}
 }
