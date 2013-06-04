@@ -159,6 +159,10 @@ public class DynamicProxy implements InvocationHandler {
 	public String getId() {
 		return id;
 	}
+	
+	public ServerPort getServerPort(){
+		return serverConnection.getServerPort();
+	}
 
 	@Override
 	public boolean equals(Object obj) {

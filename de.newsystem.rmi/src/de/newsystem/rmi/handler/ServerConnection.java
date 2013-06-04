@@ -1,6 +1,5 @@
 package de.newsystem.rmi.handler;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.newsystem.rmi.api.RMILogger;
-import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.protokol.Request;
 import de.newsystem.rmi.protokol.Request.Type;
@@ -148,14 +147,20 @@ public class ServerConnection {
 		for (ConnectionSocket cs : serverConnections) {
 			try {
 				cs.output.writeObject(closeRequest);
+				System.out.println("success send close packet to " + serverPort.getIp());
 			} catch (IOException e) {
-
+				System.out.println("fail send close packet to " + serverPort.getIp());
 			}
 			cs.disconnect();
 		}
 		proxyMap.clear();
 		serverConnections.clear();
 
+	}
+	
+	@Override
+	public String toString() {
+		return serverConnections.size() + " connections to " + serverPort.getIp();
 	}
 
 	/**
@@ -251,6 +256,10 @@ public class ServerConnection {
 			}
 		}
 
+	}
+
+	public ServerPort getServerPort() {
+		return serverPort;
 	}
 
 }

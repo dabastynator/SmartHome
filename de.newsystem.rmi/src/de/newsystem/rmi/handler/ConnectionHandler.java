@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -13,6 +14,7 @@ import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
+import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.Reply;
@@ -90,6 +92,7 @@ public class ConnectionHandler {
 				Object object = in.readObject();
 				Request request = (Request) object;
 				if (request.getType() == Type.CLOSE) {
+					System.out.println("receive close packet");
 					server.closeConnectionTo((ServerPort) request.getParams()[0]);
 					throw new EOFException();
 				}
@@ -139,11 +142,17 @@ public class ConnectionHandler {
 	/**
 	 * set id for remoteable result. if there is already an adapter use the old
 	 * one.
+	 * @param adapter 
 	 * 
 	 * @param reply
 	 */
 	private void configureReply(Reply reply, Object result) {
-		if (server.getAdapterObjectIdMap().containsKey(result)) {
+		if (reply.getResult() instanceof DynamicProxy){
+			DynamicProxy dp = (DynamicProxy) reply.getResult();
+			reply.addNewId(dp.getId());
+			reply.setServerPort(dp.getServerPort());
+			reply.setResult(null);
+		} else if (server.getAdapterObjectIdMap().containsKey(result)) {
 			reply.addNewId(server.getAdapterObjectIdMap().get(result));
 			reply.setResult(null);
 		} else {

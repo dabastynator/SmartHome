@@ -385,8 +385,10 @@ public class Server {
 	 */
 	public void close() {
 		// close connections
-		for (ServerConnection sc : serverConnections.values())
+		for (ServerConnection sc : serverConnections.values()){
+			System.out.println("server connection: " + sc.toString());
 			sc.disconnect();
+		}
 		for (ConnectionHandler handler : handlers)
 			handler.close();
 		// close sockets
