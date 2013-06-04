@@ -162,6 +162,7 @@ public class ConnectionHandler {
 			server.getAdapterMap().put(id, dynamicAdapter);
 			server.getAdapterObjectIdMap().put(result, id);
 			reply.addNewId(id);
+			reply.setServerPort(server.getServerPort());
 			reply.setResult(null);
 		}
 	}

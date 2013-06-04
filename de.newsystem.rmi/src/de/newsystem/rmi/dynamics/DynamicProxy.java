@@ -105,9 +105,11 @@ public class DynamicProxy implements InvocationHandler {
 					else if (reply.getError() != null)
 						resultException = reply.getError();
 					else if (reply.getReturnType() != null
-							&& reply.getNewId() != null)
-						return serverConnection.createProxy(reply.getNewId(),
+							&& reply.getNewId() != null){
+						ServerConnection sp = server.connectToServer(reply.getServerPort());
+						return sp.createProxy(reply.getNewId(),
 								reply.getReturnType());
+					}
 					else
 						return reply.getResult();
 					i = server.getConnectionSocketCount();
