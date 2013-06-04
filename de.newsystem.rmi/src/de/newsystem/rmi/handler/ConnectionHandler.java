@@ -156,6 +156,7 @@ public class ConnectionHandler {
 		} else if (server.getAdapterObjectIdMap().containsKey(result)) {
 			reply.addNewId(server.getAdapterObjectIdMap().get(result));
 			reply.setResult(null);
+			reply.setServerPort(server.getServerPort());
 		} else {
 			String id = getNextId();
 			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result, server);

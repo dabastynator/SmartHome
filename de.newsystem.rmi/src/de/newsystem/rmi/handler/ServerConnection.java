@@ -160,7 +160,9 @@ public class ServerConnection {
 	
 	@Override
 	public String toString() {
-		return serverConnections.size() + " connections to " + serverPort.getIp();
+		int size = serverConnections.size();
+		String ip = serverPort.getIp();
+		return size + " connections to " + ip;
 	}
 
 	/**

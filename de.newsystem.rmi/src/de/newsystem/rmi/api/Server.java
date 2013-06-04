@@ -423,6 +423,8 @@ public class Server {
 	 */
 	public synchronized ServerConnection connectToServer(ServerPort serverPort)
 			throws UnknownHostException, IOException {
+		if (serverPort == null)
+			throw new RuntimeException("serverport must not be null");
 		ServerConnection serverConnection = serverConnections.get(serverPort);
 		if (serverConnection != null)
 			return serverConnection;
