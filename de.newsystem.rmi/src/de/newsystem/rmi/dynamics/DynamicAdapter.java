@@ -63,7 +63,6 @@ public class DynamicAdapter {
 		this.object = object;
 		template = object.getClass();
 		this.server = server;
-		System.out.println("create new adapter: " + id);
 	}
 
 	/**

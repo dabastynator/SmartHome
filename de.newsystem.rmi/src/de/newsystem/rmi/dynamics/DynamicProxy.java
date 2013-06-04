@@ -51,7 +51,6 @@ public class DynamicProxy implements InvocationHandler {
 	 * @param sc
 	 */
 	public DynamicProxy(String id, ServerConnection sc, Server server) {
-		System.out.println("create new dynamic proxy: " + id);
 		this.id = id;
 		this.serverConnection = sc;
 		this.server = server;

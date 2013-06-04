@@ -37,7 +37,8 @@ public class ServerConnection {
 	/**
 	 * list of server connections
 	 */
-	private List<ConnectionSocket> serverConnections = Collections.synchronizedList(new ArrayList<ConnectionSocket>());
+	private List<ConnectionSocket> serverConnections = Collections
+			.synchronizedList(new ArrayList<ConnectionSocket>());
 
 	/**
 	 * list of all proxies that belong to this server port
@@ -45,6 +46,8 @@ public class ServerConnection {
 	private Map<String, Object> proxyMap = new HashMap<String, Object>();
 
 	private Server server;
+
+	private boolean active = true;;
 
 	/**
 	 * allocate new server connection with given server and socket.
@@ -141,23 +144,23 @@ public class ServerConnection {
 	 * 
 	 */
 	public void disconnect() {
+		if (!active)
+			return;
+		active = false;
 		Request closeRequest = new Request("", "");
 		closeRequest.setType(Type.CLOSE);
-		closeRequest.setParams(new Object[]{server.getServerPort()});
+		closeRequest.setParams(new Object[] { server.getServerPort() });
 		for (ConnectionSocket cs : serverConnections) {
 			try {
 				cs.output.writeObject(closeRequest);
-				System.out.println("success send close packet to " + serverPort.getIp());
 			} catch (IOException e) {
-				System.out.println("fail send close packet to " + serverPort.getIp());
 			}
 			cs.disconnect();
 		}
 		proxyMap.clear();
 		serverConnections.clear();
-
 	}
-	
+
 	@Override
 	public String toString() {
 		int size = serverConnections.size();

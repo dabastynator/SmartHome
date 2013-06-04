@@ -92,7 +92,6 @@ public class ConnectionHandler {
 				Object object = in.readObject();
 				Request request = (Request) object;
 				if (request.getType() == Type.CLOSE) {
-					System.out.println("receive close packet");
 					server.closeConnectionTo((ServerPort) request.getParams()[0]);
 					throw new EOFException();
 				}
