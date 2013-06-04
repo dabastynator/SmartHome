@@ -57,6 +57,7 @@ public class StationHandler implements IStationHandler {
 	@Override
 	public void addMusicStation(IMusicStation station) throws RemoteException {
 		musicStations.add(station);
+		System.out.println("get station: " + station.getName());
 	}
 
 }
