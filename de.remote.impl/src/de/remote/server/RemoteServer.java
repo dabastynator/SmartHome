@@ -25,9 +25,9 @@ public class RemoteServer {
 		String place = getParameter("--location", args);
 		String plsDirecotry = getParameter("--temp", args);
 		String registry = getParameter("--registry", args);
-		;
+		
 		String name = getParameter("--name", args);
-		;
+		
 		boolean stationList = hasParameter("--stationlist", args);
 
 		System.out.println("Registry Location at " + registry);
@@ -54,7 +54,7 @@ public class RemoteServer {
 		try {
 			// connect to registry and start server
 			server.forceConnectToRegistry(registry);
-			server.startServer(ControlConstants.STATION_PORT + 2);
+			server.startServer(ControlConstants.STATION_PORT + 4);
 
 			// register objects at registry
 			if (stationList)

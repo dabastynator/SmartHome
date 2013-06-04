@@ -61,6 +61,7 @@ public abstract class AbstractPlayer implements IPlayer {
 		try {
 			MP3File mp3File = new MP3File(file);
 			bean.setFile(file.getName().trim());
+			bean.setPath(file.getPath());
 			AbstractID3v2 id3v2Tag = mp3File.getID3v2Tag();
 			if (id3v2Tag != null) {
 				if (id3v2Tag.getAuthorComposer() != null)
@@ -100,14 +101,11 @@ public abstract class AbstractPlayer implements IPlayer {
 		List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
 		for (IPlayerListener listener : listeners)
 			try {
-				System.out.println("-->  inform listener");
 				listener.playerMessage(playingBean);
 			} catch (RemoteException e) {
 				exceptionList.add(listener);
 			}
 		listeners.removeAll(exceptionList);
-		if (exceptionList.size() > 0)
-			System.out.println("-->  exception listener");
 	}
 
 	@Override
