@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.NetworkInfo.State;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -82,9 +83,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 						"no music station",
 						"no music station specified at server "
 								+ binder.getServerName(), "", false);
-			else
-				setWidgetText("no file playing",
-						"at music station " + binder.getMusicStationName(), "", false);
+			return;
+		}
+		if (playing.getState() == STATE.DOWN){
+			setWidgetText("no file playing",
+					"at music station " + binder.getMusicStationName(), "",
+					false);
 			return;
 		}
 		String title = "playing";

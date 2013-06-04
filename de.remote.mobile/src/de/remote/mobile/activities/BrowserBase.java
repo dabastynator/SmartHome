@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -20,6 +21,7 @@ import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.util.AI;
+import de.remote.mobile.util.BrowserAdapter;
 
 public abstract class BrowserBase extends BindedActivity {
 
@@ -216,12 +218,20 @@ public abstract class BrowserBase extends BindedActivity {
 
 	private long max = 0;
 
+	protected PlayingBean playingBean;
+
 	@Override
 	public void onPlayingBeanChanged(PlayingBean bean) {
 		if (bean == null || bean.getState() == STATE.PLAY)
 			playButton.setImageResource(R.drawable.pause);
 		else if (bean.getState() == STATE.PAUSE)
 			playButton.setImageResource(R.drawable.play);
+		playingBean = bean;
+		if (listView != null
+				&& listView.getAdapter() instanceof BrowserAdapter) {
+			BrowserAdapter adapter = (BrowserAdapter) listView.getAdapter();
+			adapter.setPlayingFile(bean);
+		}
 	}
 
 	@Override

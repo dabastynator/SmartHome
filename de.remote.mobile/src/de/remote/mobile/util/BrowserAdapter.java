@@ -9,7 +9,6 @@ import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 import de.remote.api.IThumbnailListener;
+import de.remote.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.BrowserBase.ViewerState;
 
@@ -43,19 +43,25 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 
 	private Handler handler;
 
+	private String path;
+
+	private PlayingBean playingBean;
+
 	private static Map<String, Bitmap> thumbnails = Collections
 			.synchronizedMap(new HashMap<String, Bitmap>());
 
 	public BrowserAdapter(Context context, IBrowser browser, String[] all,
-			ViewerState state) {
+			ViewerState state, PlayingBean bean) {
 		super(context, R.layout.browser_row, R.id.lbl_item_name, all);
 		handler = new Handler();
 		thumbnails.clear();
+		playingBean = bean;
 		this.browser = browser;
 		if (this.browser != null)
 			new Thread() {
 				public void run() {
 					try {
+						path = BrowserAdapter.this.browser.getFullLocation();
 						BrowserAdapter.this.browser
 								.fireThumbnails(BrowserAdapter.this,
 										PREVIEW_SIZE, PREVIEW_SIZE);
@@ -82,7 +88,11 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 					if (position < browser.getDirectories().length)
 						image.setImageResource(R.drawable.folder);
 					else {
-						if (file.toUpperCase(Locale.US).endsWith("MP3")
+						if (playingBean != null
+								&& playingBean.getPath() != null
+								&& playingBean.getPath().equals(path + file)) {
+							image.setImageResource(R.drawable.playing);
+						} else if (file.toUpperCase(Locale.US).endsWith("MP3")
 								|| file.toUpperCase(Locale.US).endsWith("OGG")
 								|| file.toUpperCase(Locale.US).endsWith("WAV"))
 							image.setImageResource(R.drawable.music);
@@ -125,6 +135,11 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 				BrowserAdapter.super.notifyDataSetChanged();
 			}
 		});
+	}
+
+	public void setPlayingFile(PlayingBean bean) {
+		this.playingBean = bean;
+		notifyDataSetChanged();
 	}
 
 }

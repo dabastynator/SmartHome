@@ -158,11 +158,11 @@ public class BrowserActivity extends BrowserBase {
 				if (binder.getBrowser() == null) {
 					setTitle("Select musicstation@" + binder.getServerName());
 					listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
-							binder.getBrowser(), new String[]{}, viewerState));
+							binder.getBrowser(), new String[]{}, viewerState, playingBean));
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
-						binder.getBrowser(), result, viewerState));
+						binder.getBrowser(), result, viewerState, playingBean));
 				listView.setSelection(selectedPosition);
 				switch (viewerState) {
 				case DIRECTORIES:
@@ -718,7 +718,7 @@ public class BrowserActivity extends BrowserBase {
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);
 	}
-
+	
 	/**
 	 * listener for long clicks on the list view. store the selected item in the
 	 * selecteditem field.
