@@ -3,6 +3,7 @@ package de.newsystem.rmi.dynamics;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.Server;
@@ -50,6 +51,7 @@ public class DynamicProxy implements InvocationHandler {
 	 * @param sc
 	 */
 	public DynamicProxy(String id, ServerConnection sc, Server server) {
+		System.out.println("create new dynamic proxy: " + id);
 		this.id = id;
 		this.serverConnection = sc;
 		this.server = server;
@@ -130,13 +132,21 @@ public class DynamicProxy implements InvocationHandler {
 	private void checkParameter(Object[] paramters, Method method) {
 		if (paramters != null)
 			for (int i = 0; i < paramters.length; i++) {
-				if (paramters[i] instanceof RemoteAble) {
+				if (paramters[i] instanceof Proxy) {
+					DynamicProxy dp = (DynamicProxy) Proxy
+							.getInvocationHandler(paramters[i]);
+					Reply r = new Reply();
+					r.addNewId(dp.getId());
+					r.setServerPort(dp.getServerPort());
+					r.setReturnType(method.getParameterTypes()[i]);
+					paramters[i] = r;
+				} else if (paramters[i] instanceof RemoteAble) {
 					String objId = server.getAdapterObjectIdMap().get(
 							paramters[i]);
 					if (objId == null) {
-						DynamicAdapter adapter = new DynamicAdapter(
-								paramters[i], server);
 						objId = getNextId();
+						DynamicAdapter adapter = new DynamicAdapter(objId,
+								paramters[i], server);
 						server.getAdapterMap().put(objId, adapter);
 						server.getAdapterObjectIdMap().put(paramters[i], objId);
 					}
@@ -159,8 +169,8 @@ public class DynamicProxy implements InvocationHandler {
 	public String getId() {
 		return id;
 	}
-	
-	public ServerPort getServerPort(){
+
+	public ServerPort getServerPort() {
 		return serverConnection.getServerPort();
 	}
 

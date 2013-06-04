@@ -109,7 +109,7 @@ public class ConnectionHandler {
 				} else {
 					Reply r = new Reply();
 					r.setError(new RemoteException(request.getObject(),
-							"no such object found: " + request.getObject()));
+							"no such object found: " + request.getObject() + " at " + server.getServerPort()));
 					out.writeObject(r);
 				}
 			}
@@ -157,8 +157,8 @@ public class ConnectionHandler {
 			reply.addNewId(server.getAdapterObjectIdMap().get(result));
 			reply.setResult(null);
 		} else {
-			DynamicAdapter dynamicAdapter = new DynamicAdapter(result, server);
 			String id = getNextId();
+			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result, server);
 			server.getAdapterMap().put(id, dynamicAdapter);
 			server.getAdapterObjectIdMap().put(result, id);
 			reply.addNewId(id);

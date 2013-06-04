@@ -239,7 +239,7 @@ public class Server {
 	public void register(String id, Object object) {
 		// add adapter
 		ServerPort serverPort = new ServerPort(ip, port);
-		adapterMap.put(id, new DynamicAdapter(object, this));
+		adapterMap.put(id, new DynamicAdapter(id, object, this));
 		adapterObjectId.put(object, id);
 		// tell registry
 		GlobalObject globalObject = new GlobalObject(id, serverPort);

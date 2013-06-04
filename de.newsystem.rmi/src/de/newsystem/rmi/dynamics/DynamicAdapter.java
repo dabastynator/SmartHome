@@ -35,6 +35,8 @@ public class DynamicAdapter {
 	 */
 	private Server server;
 
+	private String id;
+
 	/**
 	 * primitive Map
 	 */
@@ -54,11 +56,14 @@ public class DynamicAdapter {
 	 * allocates new adapter
 	 * 
 	 * @param object
+	 * @param object2 
 	 */
-	public DynamicAdapter(Object object, Server server) {
+	public DynamicAdapter(String id, Object object, Server server) {
+		this.id = id;
 		this.object = object;
 		template = object.getClass();
 		this.server = server;
+		System.out.println("create new adapter: " + id);
 	}
 
 	/**
