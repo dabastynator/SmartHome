@@ -86,7 +86,7 @@ public class ConnectionHandler {
 	 */
 	public void handle() {
 		RMILogger.performLog(LogPriority.INFORMATION,
-				"Incoming connection from client started", null);
+				"Incoming connection from client", null);
 		try {
 			while (true) {
 				Object object = in.readObject();
@@ -152,6 +152,7 @@ public class ConnectionHandler {
 			reply.addNewId(dp.getId());
 			reply.setServerPort(dp.getServerPort());
 			reply.setResult(null);
+			RMILogger.performLog(LogPriority.INFORMATION, "link proxy to adapter", dp.getId());
 		} else if (server.getAdapterObjectIdMap().containsKey(result)) {
 			reply.addNewId(server.getAdapterObjectIdMap().get(result));
 			reply.setResult(null);

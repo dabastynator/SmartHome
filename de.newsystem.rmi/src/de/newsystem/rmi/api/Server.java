@@ -421,7 +421,7 @@ public class Server {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public ServerConnection connectToServer(ServerPort serverPort)
+	public synchronized ServerConnection connectToServer(ServerPort serverPort)
 			throws UnknownHostException, IOException {
 		ServerConnection serverConnection = serverConnections.get(serverPort);
 		if (serverConnection != null)
