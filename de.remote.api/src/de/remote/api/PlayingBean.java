@@ -47,6 +47,11 @@ public class PlayingBean implements Serializable {
 	 * current file
 	 */
 	private String file;
+	
+	/**
+	 * current path of playing file
+	 */
+	private String path;
 
 	/**
 	 * current state
@@ -73,6 +78,7 @@ public class PlayingBean implements Serializable {
 		file = bean.getFile();
 		radio = bean.getRadio();
 		state = bean.getState();
+		path = bean.getPath();
 	}
 
 	/**
@@ -86,13 +92,14 @@ public class PlayingBean implements Serializable {
 	 * @param state
 	 */
 	public PlayingBean(String artist, String album, String title, String file,
-			String radio, STATE state) {
+			String radio, String path, STATE state) {
 		this.artist = artist;
 		this.album = album;
 		this.title = title;
 		this.file = file;
 		this.radio = radio;
 		this.state = state;
+		this.path = path;
 	}
 
 	/**
@@ -177,6 +184,14 @@ public class PlayingBean implements Serializable {
 	 */
 	public void setFile(String file) {
 		this.file = file;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 }
