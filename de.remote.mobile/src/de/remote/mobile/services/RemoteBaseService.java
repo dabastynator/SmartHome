@@ -6,15 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -29,24 +24,13 @@ import de.remote.api.IStationHandler;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
-import de.remote.mobile.R;
-import de.remote.mobile.activities.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
-import de.remote.mobile.services.RemoteService.MobileReceiverListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
+import de.remote.mobile.services.RemoteService.ProgressListener;
+import de.remote.mobile.util.NotificationHandler;
 
 public abstract class RemoteBaseService extends Service {
-
-	/**
-	 * id of the playing notification
-	 */
-	protected static final int PLAYING_NOTIFICATION_ID = 1;
-
-	/**
-	 * id of the download notification
-	 */
-	protected static final int DOWNLOAD_NOTIFICATION_ID = 2;
 
 	/**
 	 * port for downloads
@@ -82,19 +66,19 @@ public abstract class RemoteBaseService extends Service {
 	 * remote station object
 	 */
 	protected IMusicStation station;
-	
+
 	/**
 	 * remote station list object
 	 */
-	protected IStationHandler stationList;	
-	
+	protected IStationHandler stationList;
+
 	/**
 	 * list of available music stations
 	 */
 	protected Map<String, IMusicStation> musicStations = new HashMap<String, IMusicStation>();
 
 	protected Map<IMusicStation, StationStuff> stationStuff = new HashMap<IMusicStation, RemoteBaseService.StationStuff>();
-	
+
 	/**
 	 * remote browser object
 	 */
@@ -121,9 +105,11 @@ public abstract class RemoteBaseService extends Service {
 	protected PlayerListener playerListener;
 
 	/**
-	 * listener for download progress
+	 * listener for download progress and playing files to update notifications
 	 */
-	protected MobileReceiverListener progressListener;
+	protected NotificationHandler notificationHandler;
+	
+	protected ProgressListener downloadListener;
 
 	/**
 	 * remote playlist object
@@ -171,15 +157,16 @@ public abstract class RemoteBaseService extends Service {
 			}
 			localServer.startServer();
 
-			stationList = (IStationHandler) localServer.find(IStationHandler.STATION_ID, IStationHandler.class);
+			stationList = (IStationHandler) localServer.find(
+					IStationHandler.STATION_ID, IStationHandler.class);
 			if (stationList == null)
 				throw new RemoteException(IStationHandler.STATION_ID,
-						"music handler not found in registry");	
-			
+						"music handler not found in registry");
+
 			int stationSize = stationList.getStationSize();
 			musicStations.clear();
 			stationStuff.clear();
-			for (int i=0; i<stationSize; i++){
+			for (int i = 0; i < stationSize; i++) {
 				IMusicStation musicStation = stationList.getStation(i);
 				String name = musicStation.getName();
 				musicStations.put(name, musicStation);
@@ -193,7 +180,7 @@ public abstract class RemoteBaseService extends Service {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-						listener.onServerConnectionChanged(serverName);
+						listener.onServerConnectionChanged(serverName, serverID);
 				}
 			});
 		} catch (final Exception e) {
@@ -203,7 +190,7 @@ public abstract class RemoteBaseService extends Service {
 					Toast.makeText(RemoteBaseService.this, e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener listener : actionListener)
-						listener.onServerConnectionChanged(null);
+						listener.onServerConnectionChanged(null, -1);
 				}
 			});
 		}
@@ -219,40 +206,13 @@ public abstract class RemoteBaseService extends Service {
 		playerListener.playerMessage(bean);
 	}
 
-	/**
-	 * create notification about downloading file
-	 * 
-	 * @param title
-	 * @param body
-	 */
-	protected void makeDonwloadingNotification(String file, float progress) {
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(R.drawable.download,
-				"Download started", System.currentTimeMillis());
-		notification.contentView = new RemoteViews(getPackageName(),
-				R.layout.download_progress);
-		notification.contentView.setImageViewResource(R.id.status_icon,
-				R.drawable.download);
-		notification.contentView.setTextViewText(R.id.status_text, "download "
-				+ file);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				(int) (progress * 100), false);
-		Intent nIntent = new Intent(this, BrowserActivity.class);
-		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
-		PendingIntent pIntent = PendingIntent.getActivity(this, 0, nIntent, 0);
-		notification.contentIntent = pIntent;
-		nm.notify(DOWNLOAD_NOTIFICATION_ID, notification);
-	}
-
 	@Override
 	public void onDestroy() {
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
-		nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
-		for (IRemoteActionListener listener : actionListener)
-			listener.onStopService();
 		disconnect();
+		for (IRemoteActionListener listener : actionListener) {
+			listener.onServerConnectionChanged(null, -1);
+			listener.onStopService();
+		}
 		serverDB.close();
 		super.onDestroy();
 	}
@@ -280,16 +240,7 @@ public abstract class RemoteBaseService extends Service {
 		player = null;
 		serverID = -1;
 		serverName = null;
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
-//		handler.post(new Runnable() {
-//			public void run() {
-//				if (actionListener == null)
-//					actionListener = new ArrayList<IRemoteActionListener>();
-//				for (IRemoteActionListener listener : actionListener)
-//					listener.OnServerConnectionChanged(null);
-//			}
-//		});
+		notificationHandler.removeNotification();
 	}
 
 	@Override
@@ -303,8 +254,8 @@ public abstract class RemoteBaseService extends Service {
 	public Server getServer() {
 		return localServer;
 	}
-	
-	public static class StationStuff{
+
+	public static class StationStuff {
 		public IBrowser browser;
 		public IPlayer player;
 		public IPlayList pls;

@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -235,7 +234,7 @@ public abstract class BrowserBase extends BindedActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 
 	}
 
@@ -248,6 +247,7 @@ public abstract class BrowserBase extends BindedActivity {
 
 	@Override
 	public void progressReceive(long size) {
+		downloadLayout.setVisibility(View.VISIBLE);
 		if (max == 0)
 			max = binder.getReceiver().getFullSize();
 		downloadProgress.setProgress((int) ((100d * size) / max));

@@ -625,7 +625,7 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected()) {
 			updateSpinner();
 			updateGUI();

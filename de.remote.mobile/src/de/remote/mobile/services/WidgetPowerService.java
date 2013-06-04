@@ -16,7 +16,6 @@ import de.remote.gpiopower.api.IGPIOPower.State;
 import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemotePowerWidgetProvider;
-import de.remote.mobile.receivers.RemoteWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 
 /**
@@ -146,7 +145,7 @@ public class WidgetPowerService extends Service implements
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 	}
 
 	@Override

@@ -364,7 +364,7 @@ public class ChatActivity extends BindedActivity {
 	}
 	
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 		try {
 			if (binder != null && binder.isConnected()) {
 				if (binder.getChatServer() != null) {

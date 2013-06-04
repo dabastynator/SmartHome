@@ -18,6 +18,7 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.IBrowser;
 import de.remote.api.IThumbnailListener;
 import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.BrowserBase.ViewerState;
 
@@ -89,6 +90,7 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 						image.setImageResource(R.drawable.folder);
 					else {
 						if (playingBean != null
+								&& playingBean.getState() != STATE.DOWN
 								&& playingBean.getPath() != null
 								&& playingBean.getPath().equals(path + file)) {
 							image.setImageResource(R.drawable.playing);

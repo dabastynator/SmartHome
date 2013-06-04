@@ -87,7 +87,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 		try {
 			ServerPort sp = binder.getControl().openMouseMoveStream();
 			socket = new Socket(sp.getIp(), sp.getPort());

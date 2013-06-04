@@ -80,7 +80,7 @@ public class PowerActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 		powerObject = null;
 		IGPIOPower power = binder.getPower();
 		

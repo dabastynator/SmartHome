@@ -108,7 +108,7 @@ public class WebcamActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName) {
+	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected())
 			registerListener();
 	}

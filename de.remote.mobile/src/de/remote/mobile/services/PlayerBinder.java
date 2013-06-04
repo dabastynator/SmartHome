@@ -224,7 +224,7 @@ public class PlayerBinder extends Binder {
 			File newFile = new File(folder + File.separator + file.trim());
 			FileReceiver receiver = new FileReceiver(ip,
 					RemoteBaseService.DOWNLOAD_PORT, 200000, newFile);
-			service.progressListener.setFile(file);
+			service.notificationHandler.setFile(file);
 			download(receiver);
 		} catch (Exception e) {
 			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -247,7 +247,7 @@ public class PlayerBinder extends Binder {
 				dir.mkdir();
 			DirectoryReceiver receiver = new DirectoryReceiver(ip,
 					RemoteBaseService.DOWNLOAD_PORT, dir);
-			service.progressListener.setFile(directory);
+			service.notificationHandler.setFile(directory);
 			download(receiver);
 		} catch (Exception e) {
 			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -263,7 +263,7 @@ public class PlayerBinder extends Binder {
 		this.receiver = receiver;
 		// set maximum byte size to 1MB
 		receiver.setBufferSize(1000000);
-		receiver.getProgressListener().add(service.progressListener);
+		receiver.getProgressListener().add(service.downloadListener);
 		receiver.receiveAsync();
 		Toast.makeText(service, "download started", Toast.LENGTH_SHORT).show();
 	}

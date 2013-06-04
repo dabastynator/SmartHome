@@ -1,10 +1,5 @@
 package de.remote.mobile.services;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.util.Log;
@@ -15,11 +10,9 @@ import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.transceiver.ReceiverProgress;
 import de.remote.api.IPlayerListener;
 import de.remote.api.PlayingBean;
-import de.remote.api.PlayingBean.STATE;
-import de.remote.mobile.R;
-import de.remote.mobile.activities.BrowserActivity;
 import de.remote.mobile.database.ServerDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
+import de.remote.mobile.util.NotificationHandler;
 
 /**
  * service for remotecontrol a server. the binder enables functions to control
@@ -35,9 +28,10 @@ public class RemoteService extends RemoteBaseService {
 	public void onCreate() {
 		super.onCreate();
 		binder = new PlayerBinder(this);
+		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
-		actionListener.add(new NotificationHandler());
-		progressListener = new MobileReceiverListener();
+		downloadListener = new ProgressListener();
+		actionListener.add(notificationHandler);
 		serverDB = new ServerDatabase(this);
 		wlanReceiver = new WLANReceiver(this);
 		registerReceiver(wlanReceiver, new IntentFilter(
@@ -55,105 +49,6 @@ public class RemoteService extends RemoteBaseService {
 		unregisterReceiver(wlanReceiver);
 		super.onDestroy();
 	};
-
-	/**
-	 * the receiver gets information about the download progress and informs via
-	 * a notification.
-	 * 
-	 * @author sebastian
-	 */
-	public class MobileReceiverListener implements ReceiverProgress {
-
-		/**
-		 * current downloading file
-		 */
-		private String file;
-
-		/**
-		 * size of the whole file
-		 */
-		private long fullSize;
-
-		/**
-		 * set new donwloading file
-		 * 
-		 * @param file
-		 */
-		public void setFile(String file) {
-			this.file = file;
-		}
-
-		@Override
-		public void startReceive(final long size) {
-			fullSize = size;
-			makeDonwloadingNotification(file, 0);
-			handler.post(new Runnable() {
-				public void run() {
-					for (IRemoteActionListener l : actionListener)
-						l.startReceive(size);
-				}
-			});
-		}
-
-		@Override
-		public void progressReceive(final long size) {
-			makeDonwloadingNotification(file, ((float) size)
-					/ ((float) fullSize));
-			handler.post(new Runnable() {
-				public void run() {
-					for (IRemoteActionListener l : actionListener)
-						l.progressReceive(size);
-				}
-			});
-		}
-
-		@Override
-		public void endReceive(final long size) {
-			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(RemoteService.this, file + " loaded",
-							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
-						l.endReceive(size);
-				}
-			});
-		}
-
-		@Override
-		public void exceptionOccurred(final Exception e) {
-			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(RemoteService.this,
-							"error occurred while loading: " + e.getMessage(),
-							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
-						l.exceptionOccurred(e);
-				}
-			});
-		}
-
-		@Override
-		public void downloadCanceled() {
-			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.cancel(RemoteService.DOWNLOAD_NOTIFICATION_ID);
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(RemoteService.this, "download cancled",
-							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
-						l.downloadCanceled();
-				}
-			});
-		}
-
-	}
 
 	/**
 	 * listener for player activity. make notification if any message comes.
@@ -175,80 +70,71 @@ public class RemoteService extends RemoteBaseService {
 		}
 	}
 	
-	public class NotificationHandler implements IRemoteActionListener{
+	public class ProgressListener implements ReceiverProgress{
 
 		@Override
-		public void startReceive(long size) {
+		public void startReceive(final long size) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.startReceive(size);
+				}
+			});			
 		}
 
 		@Override
-		public void progressReceive(long size) {
+		public void progressReceive(final long size) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.progressReceive(size);
+				}
+			});			
 		}
 
 		@Override
-		public void endReceive(long size) {
+		public void endReceive(final long size) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this, "download finished", Toast.LENGTH_SHORT)
+							.show();
+					for (IRemoteActionListener l : actionListener)
+						l.endReceive(size);
+				}
+			});			
 		}
 
 		@Override
-		public void exceptionOccurred(Exception e) {
+		public void exceptionOccurred(final Exception e) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this,
+							"error occurred while loading: " + e.getMessage(),
+							Toast.LENGTH_SHORT).show();
+					for (IRemoteActionListener l : actionListener)
+						l.exceptionOccurred(e);
+				}
+			});			
 		}
 
 		@Override
 		public void downloadCanceled() {
-		}
-
-		@Override
-		public void onPlayingBeanChanged(PlayingBean playing) {
-			if (playing == null)
-				return;
-			StringBuilder sb = new StringBuilder();
-			String t = "Playing";
-			if (playing.getTitle() != null && playing.getTitle().length() > 0)
-				t = playing.getTitle();
-			else if (playing.getFile() != null)
-				t = playing.getFile();
-			if (playing.getArtist() != null && playing.getArtist().length() > 0)
-				sb.append(playing.getArtist());
-			if (playing.getAlbum() != null && playing.getAlbum().length() > 0)
-				sb.append(" <" + playing.getAlbum() + ">");
-			final String msg = sb.toString();
-			final String title = t;
-			if (playing.getState() == STATE.DOWN) {
-				NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-				nm.cancel(RemoteService.PLAYING_NOTIFICATION_ID);
-			} else
-				makePlayingNotification(title, msg);
-		}
-		
-		/**
-		 * create notification about playing file
-		 * 
-		 * @param title
-		 * @param body
-		 */
-		protected void makePlayingNotification(String title, String body) {
-			NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			int icon = R.drawable.browser;
-			Notification notification = new Notification(icon, "Player started",
-					System.currentTimeMillis());
-			Intent nIntent = new Intent(RemoteService.this, BrowserActivity.class);
-			nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-			nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
-			PendingIntent pInent = PendingIntent.getActivity(RemoteService.this, 0, nIntent, 0);
-			notification.setLatestEventInfo(getApplicationContext(), title, body,
-					pInent);
-			nm.notify(PLAYING_NOTIFICATION_ID, notification);
-		}
-
-		@Override
-		public void onServerConnectionChanged(String serverName) {
-		}
-
-		@Override
-		public void onStopService() {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(RemoteService.this, "download cancled", Toast.LENGTH_SHORT)
+							.show();
+					for (IRemoteActionListener l : actionListener)
+						l.downloadCanceled();
+				}
+			});			
 		}
 		
 	}
+
+	
 
 	/**
 	 * this interface informs listener about any action on the remote service,
@@ -270,7 +156,7 @@ public class RemoteService extends RemoteBaseService {
 		 * 
 		 * @param serverName
 		 */
-		void onServerConnectionChanged(String serverName);
+		void onServerConnectionChanged(String serverName, int serverID);
 
 		/**
 		 * call on stopping remote service.

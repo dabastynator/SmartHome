@@ -94,7 +94,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 			if (serverID >= 0 && newConnection)
 				binder.connectToServer(serverID);
 			else if (!newConnection)
-				BindedActivity.this.onServerConnectionChanged(null);
+				BindedActivity.this.onServerConnectionChanged(null, -1);
 		}
 	};
 
