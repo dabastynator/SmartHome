@@ -85,7 +85,6 @@ public class WidgetPowerService extends Service implements
 		new Thread() {
 			public void run() {
 				try {
-					String abc = action;
 					if (binder == null)
 						throw new RemoteException("not binded", "not binded");
 					else if (action

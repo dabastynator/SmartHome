@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 import de.remote.mobile.R;
 import de.remote.mobile.services.WidgetPowerService;
-import de.remote.mobile.services.WidgetService;
 
 /**
  * the remote widget provider starts the widget service.
