@@ -167,9 +167,11 @@ public abstract class RemoteBaseService extends Service {
 			musicStations.clear();
 			stationStuff.clear();
 			for (int i = 0; i < stationSize; i++) {
+				try{
 				IMusicStation musicStation = stationList.getStation(i);
 				String name = musicStation.getName();
 				musicStations.put(name, musicStation);
+				}catch(Exception e){}
 			}
 
 			chatServer = (IChatServer) localServer.find(
