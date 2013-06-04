@@ -147,8 +147,8 @@ public class ConnectionHandler {
 	 * @param reply
 	 */
 	private void configureReply(Reply reply, Object result) {
-		if (reply.getResult() instanceof DynamicProxy){
-			DynamicProxy dp = (DynamicProxy) reply.getResult();
+		if (reply.getResult() instanceof Proxy){
+			DynamicProxy dp = (DynamicProxy) Proxy.getInvocationHandler(reply.getResult());
 			reply.addNewId(dp.getId());
 			reply.setServerPort(dp.getServerPort());
 			reply.setResult(null);
