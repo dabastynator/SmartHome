@@ -3,30 +3,27 @@ package de.newsystem.rmi.api;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
-import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.handler.ConnectionHandler;
 import de.newsystem.rmi.handler.ServerConnection;
 import de.newsystem.rmi.handler.ShutdownHandler;
 import de.newsystem.rmi.protokol.GlobalObject;
 import de.newsystem.rmi.protokol.RegistryReply;
 import de.newsystem.rmi.protokol.RegistryRequest;
+import de.newsystem.rmi.protokol.RegistryRequest.Type;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.ServerPort;
-import de.newsystem.rmi.protokol.RegistryRequest.Type;
 
 /**
  * server api for all clients. to provide a remote object first initialize the
@@ -106,7 +103,7 @@ public class Server {
 	/**
 	 * list of all connections to other servers
 	 */
-	private HashMap<ServerPort, ServerConnection> serverConnections = new HashMap<ServerPort, ServerConnection>();
+	private Map<ServerPort, ServerConnection> serverConnections = Collections.synchronizedMap(new HashMap<ServerPort, ServerConnection>());
 
 	/**
 	 * list of all connections of the server
@@ -383,7 +380,7 @@ public class Server {
 	 * 
 	 * @throws IOException
 	 */
-	public void close() {
+	public synchronized void close() {
 		// close connections
 		for (ServerConnection sc : serverConnections.values())
 			sc.disconnect();
@@ -468,7 +465,7 @@ public class Server {
 		return registeredIDList;
 	}
 
-	public void closeConnectionTo(ServerPort serverPort) {
+	public synchronized void closeConnectionTo(ServerPort serverPort) {
 		ServerConnection connection = serverConnections.get(serverPort);
 		if (connection != null) {
 			connection.disconnect();
