@@ -130,8 +130,9 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 			break;
 		case R.id.opt_exit:
-			intent = new Intent(this, RemoteService.class);
-			stopService(intent);
+//			intent = new Intent(this, RemoteService.class);
+//			stopService(intent);
+			binder.disconnect();
 			finish();
 			break;
 		}

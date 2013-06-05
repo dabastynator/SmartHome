@@ -97,17 +97,7 @@ public class PlayerBinder extends Binder {
 	 * @param r
 	 */
 	public void connectToServer(final int id) {
-		new Thread() {
-			public void run() {
-				if (id != service.serverID) {
-					service.disconnect();
-					service.serverID = id;
-					service.serverIP = service.serverDB.getIpOfServer(id);
-					service.serverName = service.serverDB.getNameOfServer(id);
-					service.connect();
-				}
-			}
-		}.start();
+		service.connectToServer(id);
 	}
 
 	/**
@@ -359,5 +349,9 @@ public class PlayerBinder extends Binder {
 
 	public String getMusicStationName() {
 		return musicStationName;
+	}
+
+	public void disconnect() {
+		service.disconnectFromServer();
 	}
 }

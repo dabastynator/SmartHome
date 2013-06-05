@@ -23,6 +23,7 @@ import de.remote.mobile.util.NotificationHandler;
 public class RemoteService extends RemoteBaseService {
 
 	private WLANReceiver wlanReceiver;
+	
 
 	@Override
 	public void onCreate() {
@@ -36,13 +37,6 @@ public class RemoteService extends RemoteBaseService {
 		wlanReceiver = new WLANReceiver(this);
 		registerReceiver(wlanReceiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		RMILogger.addLogListener(new RMILogListener() {
-			@Override
-			public void rmiLog(LogPriority priority, String message, String id,
-					long date) {
-				Log.e("RMI Logs", message);
-			}
-		});
 	}
 
 	public void onDestroy() {

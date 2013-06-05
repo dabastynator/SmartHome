@@ -11,7 +11,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
+import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.Server;
+import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.ControlConstants;
 import de.remote.api.IBrowser;
@@ -108,7 +111,7 @@ public abstract class RemoteBaseService extends Service {
 	 * listener for download progress and playing files to update notifications
 	 */
 	protected NotificationHandler notificationHandler;
-	
+
 	protected ProgressListener downloadListener;
 
 	/**
@@ -135,6 +138,14 @@ public abstract class RemoteBaseService extends Service {
 	 * list of all listeners for any action on this service
 	 */
 	protected List<IRemoteActionListener> actionListener = new ArrayList<IRemoteActionListener>();
+
+	private RMILogListener rmiLogListener = new RMILogListener() {
+		@Override
+		public void rmiLog(LogPriority priority, String message, String id,
+				long date) {
+			Log.e("RMI Logs", message);
+		}
+	};
 
 	/**
 	 * remote chat server object
@@ -167,11 +178,12 @@ public abstract class RemoteBaseService extends Service {
 			musicStations.clear();
 			stationStuff.clear();
 			for (int i = 0; i < stationSize; i++) {
-				try{
-				IMusicStation musicStation = stationList.getStation(i);
-				String name = musicStation.getName();
-				musicStations.put(name, musicStation);
-				}catch(Exception e){}
+				try {
+					IMusicStation musicStation = stationList.getStation(i);
+					String name = musicStation.getName();
+					musicStations.put(name, musicStation);
+				} catch (Exception e) {
+				}
 			}
 
 			chatServer = (IChatServer) localServer.find(
@@ -209,6 +221,12 @@ public abstract class RemoteBaseService extends Service {
 	}
 
 	@Override
+	public void onCreate() {
+		super.onCreate();
+		RMILogger.addLogListener(rmiLogListener);
+	}
+
+	@Override
 	public void onDestroy() {
 		disconnect();
 		for (IRemoteActionListener listener : actionListener) {
@@ -216,13 +234,14 @@ public abstract class RemoteBaseService extends Service {
 			listener.onStopService();
 		}
 		serverDB.close();
+		RMILogger.removeLogListener(rmiLogListener);
 		super.onDestroy();
 	}
 
 	/**
 	 * disconnect from current connection
 	 */
-	protected void disconnect() {
+	private void disconnect() {
 		if (player != null) {
 			try {
 				station.getMPlayer()
@@ -241,6 +260,8 @@ public abstract class RemoteBaseService extends Service {
 		browser = null;
 		player = null;
 		serverID = -1;
+		power = null;
+		chatServer = null;
 		serverName = null;
 		notificationHandler.removeNotification();
 	}
@@ -262,6 +283,36 @@ public abstract class RemoteBaseService extends Service {
 		public IPlayer player;
 		public IPlayList pls;
 		public IControl control;
+	}
+
+	public void connectToServer(final int id) {
+		new Thread() {
+			public void run() {
+				if (id != serverID) {
+					disconnect();
+					serverID = id;
+					serverIP = serverDB.getIpOfServer(id);
+					serverName = serverDB.getNameOfServer(id);
+					connect();
+				}
+			}
+		}.start();
+	}
+
+	public void disconnectFromServer() {
+		new Thread() {
+			public void run() {
+				disconnect();
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						for (IRemoteActionListener listener : actionListener)
+							listener.onServerConnectionChanged(serverName,
+									serverID);
+					}
+				});
+			}
+		}.start();
 	}
 
 }

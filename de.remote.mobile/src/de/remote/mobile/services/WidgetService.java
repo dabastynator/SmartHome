@@ -76,15 +76,14 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	protected void updateWidget(PlayingBean playing) {
 		if (binder.getPlayer() != null && playing == null)
 			playing = binder.getPlayingFile();
-		if (playing == null) {
-			if (binder.getMusicStationName() == null)
-				setWidgetText(
-						"no music station",
-						"no music station specified at server "
-								+ binder.getServerName(), "", false);
+		if (binder.getMusicStationName() == null) {
+			setWidgetText(
+					"no music station",
+					"no music station specified at server "
+							+ binder.getServerName(), "", false);
 			return;
 		}
-		if (playing.getState() == STATE.DOWN) {
+		if (playing == null || playing.getState() == STATE.DOWN) {
 			setWidgetText("no file playing",
 					"at music station " + binder.getMusicStationName(), "",
 					false);
