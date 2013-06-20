@@ -354,4 +354,8 @@ public class PlayerBinder extends Binder {
 	public void disconnect() {
 		service.disconnectFromServer();
 	}
+
+	public void refreshStations() {
+		service.refreshStations();
+	}
 }

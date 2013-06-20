@@ -1,13 +1,12 @@
 package de.remote.mobile.activities;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import de.remote.mobile.R;
-import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.database.RemoteDatabase;
 
 /**
  * the activity provides functionality to create a new server. it reads the
@@ -30,7 +29,7 @@ public class NewServerActivity extends Activity {
 	/**
 	 * database object
 	 */
-	private ServerDatabase serverDB;
+	private RemoteDatabase serverDB;
 
 	/**
 	 * if editing an old server, the name will be stored in this field.
@@ -43,14 +42,14 @@ public class NewServerActivity extends Activity {
 		setContentView(R.layout.newserver);
 		findComponents();
 		oldServer = -1;
-		serverDB = new ServerDatabase(this);
+		serverDB = new RemoteDatabase(this);
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(
 						BrowserActivity.EXTRA_SERVER_ID)) {
 			int server = getIntent().getExtras().getInt(
 					BrowserActivity.EXTRA_SERVER_ID);
-			String ip = serverDB.getIpOfServer(server);
-			String name = serverDB.getNameOfServer(server);
+			String ip = serverDB.getServerDao().getIpOfServer(server);
+			String name = serverDB.getServerDao().getNameOfServer(server);
 			oldServer = server;
 			this.name.setText(name);
 			this.ip.setText(ip);
@@ -73,12 +72,13 @@ public class NewServerActivity extends Activity {
 	public void createServer(View view) {
 		String serverName = name.getText().toString();
 		if (oldServer >= 0)
-			serverDB.deleteServer(oldServer);
-		int id = (int) serverDB.insertServer(serverName, ip.getText().toString());
+			serverDB.getServerDao().deleteServer(oldServer);
+		serverDB.getServerDao().insertServer(serverName,
+				ip.getText().toString());
 		Toast.makeText(this, "server '" + serverName + "' added",
 				Toast.LENGTH_SHORT).show();
-		Intent i = new Intent(this, SelectServerActivity.class);
-		startActivity(i);
+		// Intent i = new Intent(this, SelectServerActivity.class);
+		// startActivity(i);
 		finish();
 	}
 

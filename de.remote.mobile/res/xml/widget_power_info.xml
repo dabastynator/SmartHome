@@ -3,6 +3,7 @@
     android:initialLayout="@layout/power_widget"
     android:minHeight="70dp"
     android:minWidth="60dp"
-    android:updatePeriodMillis="180000" >
+    android:updatePeriodMillis="180000" 
+    android:configure="de.remote.mobile.activities.SelectSwitchActivity">
 
 </appwidget-provider>

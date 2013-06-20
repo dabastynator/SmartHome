@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import de.remote.api.PlayingBean;
 import de.remote.mobile.R;
-import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.services.RemoteService;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -48,7 +48,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 	/**
 	 * database object
 	 */
-	protected ServerDatabase serverDB;
+	protected RemoteDatabase serverDB;
 	
 	/**
 	 * handler to post runnables on the gui thread
@@ -80,7 +80,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 			}
 			// else just connect if there is no connection
 			else if (newConnection) {
-				serverID = serverDB.getFavoriteServer();
+				serverID = serverDB.getServerDao().getFavoriteServer();
 				if (serverID == -1) {
 					Toast.makeText(BindedActivity.this, "no favorite server",
 							Toast.LENGTH_SHORT).show();
@@ -106,7 +106,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 
-		serverDB = new ServerDatabase(this);
+		serverDB = new RemoteDatabase(this);
 	};
 
 	@Override

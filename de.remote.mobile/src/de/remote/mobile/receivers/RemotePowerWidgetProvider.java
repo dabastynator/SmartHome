@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 import de.remote.mobile.R;
+import de.remote.mobile.activities.PowerActivity;
 import de.remote.mobile.services.WidgetPowerService;
 
 /**
@@ -31,7 +32,7 @@ public class RemotePowerWidgetProvider extends AppWidgetProvider {
 		ComponentName thisWidget = new ComponentName(context,
 				RemotePowerWidgetProvider.class);
 		appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-		
+
 		// update each of the app widgets with the remote adapter
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
@@ -41,21 +42,23 @@ public class RemotePowerWidgetProvider extends AppWidgetProvider {
 			// set switch functionality
 			Intent playIntent = new Intent(context, WidgetPowerService.class);
 			playIntent.setAction(ACTION_SWITCH);
-			PendingIntent playPending = PendingIntent.getService(context, 0,
-					playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			playIntent.putExtra(PowerActivity.SWITCH_NUMBER, appWidgetIds[i]);
+			PendingIntent playPending = PendingIntent.getService(context,
+					playIntent.hashCode(), playIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
 
 			views.setOnClickPendingIntent(R.id.image_power_widget, playPending);
+			views.setOnClickPendingIntent(R.id.text_power_widget, playPending);
 
 			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}
 	}
-	
-	
+
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		super.onReceive(context, intent);
 		AppWidgetManager manager = AppWidgetManager.getInstance(context);
 		onUpdate(context, manager, null);
 	}
-	
+
 }

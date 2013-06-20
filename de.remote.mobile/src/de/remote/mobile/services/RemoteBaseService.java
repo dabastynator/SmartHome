@@ -27,7 +27,7 @@ import de.remote.api.IStationHandler;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
-import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
 import de.remote.mobile.services.RemoteService.ProgressListener;
@@ -132,7 +132,7 @@ public abstract class RemoteBaseService extends Service {
 	/**
 	 * database object to the local database
 	 */
-	protected ServerDatabase serverDB;
+	protected RemoteDatabase serverDB;
 
 	/**
 	 * list of all listeners for any action on this service
@@ -174,17 +174,7 @@ public abstract class RemoteBaseService extends Service {
 				throw new RemoteException(IStationHandler.STATION_ID,
 						"music handler not found in registry");
 
-			int stationSize = stationList.getStationSize();
-			musicStations.clear();
-			stationStuff.clear();
-			for (int i = 0; i < stationSize; i++) {
-				try {
-					IMusicStation musicStation = stationList.getStation(i);
-					String name = musicStation.getName();
-					musicStations.put(name, musicStation);
-				} catch (Exception e) {
-				}
-			}
+			refreshStations();
 
 			chatServer = (IChatServer) localServer.find(
 					ControlConstants.CHAT_ID, IChatServer.class);
@@ -291,8 +281,8 @@ public abstract class RemoteBaseService extends Service {
 				if (id != serverID) {
 					disconnect();
 					serverID = id;
-					serverIP = serverDB.getIpOfServer(id);
-					serverName = serverDB.getNameOfServer(id);
+					serverIP = serverDB.getServerDao().getIpOfServer(id);
+					serverName = serverDB.getServerDao().getNameOfServer(id);
 					connect();
 				}
 			}
@@ -313,6 +303,25 @@ public abstract class RemoteBaseService extends Service {
 				});
 			}
 		}.start();
+	}
+
+	public void refreshStations() {
+		int stationSize = 0;
+		try {
+			stationSize = stationList.getStationSize();
+		} catch (RemoteException e1) {
+		}
+		musicStations.clear();
+		stationStuff.clear();
+		station = null;
+		for (int i = 0; i < stationSize; i++) {
+			try {
+				IMusicStation musicStation = stationList.getStation(i);
+				String name = musicStation.getName();
+				musicStations.put(name, musicStation);
+			} catch (Exception e) {
+			}
+		}		
 	}
 
 }

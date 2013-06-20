@@ -49,6 +49,14 @@
             android:label="@string/app_name" >
         </activity>
         <activity
+            android:name=".activities.SelectSwitchActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Dialog" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".activities.ChatActivity"
             android:icon="@drawable/chat"
             android:label="Chat"

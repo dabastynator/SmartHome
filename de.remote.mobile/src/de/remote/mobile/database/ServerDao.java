@@ -1,48 +1,18 @@
 package de.remote.mobile.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
-/**
- * helper class to manage the database with the server table.
- * 
- * @author sebastian
- */
-public class ServerDatabase extends SQLiteOpenHelper {
+public class ServerDao {
 
-	/**
-	 * name of the database
-	 */
-	private static final String DATABASE_NAME = "remote_server.db";
+	
+	private RemoteDatabase database;
 
-	/**
-	 * current version
-	 */
-	private static final int DATABASE_VERSION = 1;
-
-	/**
-	 * allocate the sql helper
-	 * 
-	 * @param context
-	 */
-	public ServerDatabase(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-	}
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(ServerTable.SQL_CREATE);
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL(ServerTable.SQL_DROP);
-		onCreate(db);
+	public ServerDao(RemoteDatabase serverDatabase) {
+		this.database = serverDatabase;
 	}
 
 	/**
@@ -51,7 +21,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @param id of the server to delete
 	 */
 	public void deleteServer(int id) {
-		SQLiteDatabase db = getReadableDatabase();
+		SQLiteDatabase db = database.getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_DELETE_SERVER);
 		stmt.bindLong(1, id);
@@ -66,7 +36,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @return ip
 	 */
 	public String getIpOfServer(int id) {
-		SQLiteDatabase db = getReadableDatabase();
+		SQLiteDatabase db = database.getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_IP_FROM_SERVER);
 		stmt.bindLong(1, id);
@@ -81,7 +51,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @return name
 	 */
 	public String getNameOfServer(int id) {
-		SQLiteDatabase db = getReadableDatabase();
+		SQLiteDatabase db = database.getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_NAME_FROM_SERVER);
 		stmt.bindLong(1, id);
@@ -96,7 +66,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @return server
 	 */
 	public int getFavoriteServer() {
-		SQLiteDatabase db = getReadableDatabase();
+		SQLiteDatabase db = database.getReadableDatabase();
 		SQLiteStatement stmt = db
 				.compileStatement(ServerTable.SQL_FAVORITE_SERVER);
 		int server = -1;
@@ -116,7 +86,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @param ip
 	 */
 	public long insertServer(String serverName, String ip) {
-		SQLiteDatabase db = getWritableDatabase();
+		SQLiteDatabase db = database.getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(ServerTable.NAME, serverName);
 		cv.put(ServerTable.IP, ip);
@@ -131,7 +101,7 @@ public class ServerDatabase extends SQLiteOpenHelper {
 	 * @param id of the server
 	 */
 	public void setFavorite(int id) {
-		SQLiteDatabase db = getWritableDatabase();
+		SQLiteDatabase db = database.getWritableDatabase();
 		try {
 			SQLiteStatement stmt = db
 					.compileStatement(ServerTable.SQL_SET_FAVORITE);
@@ -142,4 +112,5 @@ public class ServerDatabase extends SQLiteOpenHelper {
 		}
 		db.close();
 	}
+	
 }

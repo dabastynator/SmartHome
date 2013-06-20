@@ -17,7 +17,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import de.remote.mobile.R;
-import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.database.ServerTable;
 import de.remote.mobile.util.ServerCursorAdapter;
 
@@ -47,26 +47,18 @@ public class SelectServerActivity extends Activity {
 	/**
 	 * database object to execute changes
 	 */
-	private ServerDatabase serverDB;
+	private RemoteDatabase serverDB;
 
 	private ListView serverList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		serverDB = new ServerDatabase(this);
-		SQLiteDatabase db = serverDB.getReadableDatabase();
-		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
-				null, null, null, null, null);
-		startManagingCursor(c);
 		
 		setContentView(R.layout.server);
 		
 		findComponents();
 
-		serverList.setAdapter(new ServerCursorAdapter(this, c));
-		
-		db.close();
 		serverList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
@@ -93,6 +85,20 @@ public class SelectServerActivity extends Activity {
 		});
 		registerForContextMenu(serverList);
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		serverDB = new RemoteDatabase(this);
+		SQLiteDatabase db = serverDB.getReadableDatabase();
+		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
+				null, null, null, null, null);
+		startManagingCursor(c);
+
+		serverList.setAdapter(new ServerCursorAdapter(this, c));
+		
+		db.close();
+	}
 
 	private void findComponents() {
 		serverList = (ListView)findViewById(R.id.server_list);
@@ -110,7 +116,7 @@ public class SelectServerActivity extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_server_delete:
-			serverDB.deleteServer(selectedItem);
+			serverDB.getServerDao().deleteServer(selectedItem);
 			updateList();
 			break;
 		case R.id.opt_server_edit:
@@ -121,7 +127,7 @@ public class SelectServerActivity extends Activity {
 			finish();
 			break;
 		case R.id.opt_server_favorite:
-			serverDB.setFavorite(selectedItem);
+			serverDB.getServerDao().setFavorite(selectedItem);
 			updateList();
 			break;
 		}

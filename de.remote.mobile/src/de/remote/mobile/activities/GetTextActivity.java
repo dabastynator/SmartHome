@@ -24,6 +24,8 @@ public class GetTextActivity extends Activity {
 	 */
 	public static final String RESULT = "result";
 
+	public static final String ADDITIONAL_VALUE = "additional_value";
+
 	/**
 	 * name of default value for the text
 	 */
@@ -59,6 +61,11 @@ public class GetTextActivity extends Activity {
 	public void submit(View v) {
 		Intent i = new Intent();
 		i.putExtra(RESULT, text.getText().toString());
+		if (getIntent().getExtras() != null
+				&& getIntent().getExtras().containsKey(ADDITIONAL_VALUE)) {
+			String value = getIntent().getExtras().getString(ADDITIONAL_VALUE);
+			i.putExtra(ADDITIONAL_VALUE, value);
+		}
 		setResult(RESULT_CODE, i);
 		finish();
 	}

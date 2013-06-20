@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -15,6 +16,9 @@ import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower.State;
 import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
+import de.remote.mobile.activities.PowerActivity;
+import de.remote.mobile.activities.SelectSwitchActivity;
+import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 
@@ -66,9 +70,10 @@ public class WidgetPowerService extends Service implements
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent != null && intent.getAction() != null)
-			executeCommand(intent.getAction());
-		else {
+		if (intent != null && intent.getAction() != null){
+			int widgetID = intent.getIntExtra(PowerActivity.SWITCH_NUMBER, 0);
+			executeCommand(intent.getAction(), widgetID);
+		}else {
 			remotePowerViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.power_widget);
 		}
@@ -79,9 +84,10 @@ public class WidgetPowerService extends Service implements
 	 * execute given action
 	 * 
 	 * @param action
+	 * @param widgetID 
 	 * @return true if action is known
 	 */
-	private void executeCommand(final String action) {
+	private void executeCommand(final String action, final int widgetID) {
 		new Thread() {
 			public void run() {
 				try {
@@ -89,7 +95,7 @@ public class WidgetPowerService extends Service implements
 						throw new RemoteException("not binded", "not binded");
 					else if (action
 							.equals(RemotePowerWidgetProvider.ACTION_SWITCH))
-						switchPower();
+						switchPower(widgetID);
 				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						public void run() {
@@ -102,27 +108,37 @@ public class WidgetPowerService extends Service implements
 		}.start();
 	}
 
-	private void switchPower() throws Exception {
+	private void switchPower(int widgetID) throws Exception {
 		if (binder.getPower() == null)
 			throw new Exception(binder.getServerName() + " has no power server");
-		State state = binder.getPower().getState(Switch.A);
+		RemoteDatabase serverDB = new RemoteDatabase(this);
+		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
+        int switcH = prefs.getInt(widgetID+"", -1);
+        if (switcH == -1)
+        	return;
+        String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
+        if (name == null)
+        	name = "Switch " + switcH;
+        Switch s = Switch.values()[switcH];
+        State state = binder.getPower().getState(s);
 		if (state == State.ON)
 			state = State.OFF;
 		else
 			state = State.ON;
-		binder.getPower().setState(state, Switch.A);
+		binder.getPower().setState(state, s);
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
 				RemotePowerWidgetProvider.class);
-		if (remotePowerViews != null) {
+		if (remotePowerViews != null) {			
 			if (state == State.ON)
 				remotePowerViews.setImageViewResource(R.id.image_power_widget,
 						R.drawable.light_on);
 			else
 				remotePowerViews.setImageViewResource(R.id.image_power_widget,
 						R.drawable.light_off);
-			appWidgetManager.updateAppWidget(thisWidget, remotePowerViews);
+			remotePowerViews.setTextViewText(R.id.text_power_widget, name);
+			appWidgetManager.updateAppWidget(widgetID, remotePowerViews);
 		}
 	}
 

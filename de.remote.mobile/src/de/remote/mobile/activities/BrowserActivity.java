@@ -80,13 +80,15 @@ public class BrowserActivity extends BrowserBase {
 		return true;
 	}
 
-	private String[] loadItems() throws RemoteException, PlayerException {
+	private String[] loadItems(String[] gotoPath) throws RemoteException, PlayerException {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return new String[] {};
 		}
 		switch (viewerState) {
 		case DIRECTORIES:
+			if (gotoPath != null && gotoPath.length > 0 && gotoPath[0] != null)
+				binder.getBrowser().goTo(gotoPath[0]);
 			String[] directories = binder.getBrowser().getDirectories();
 			String[] files = binder.getBrowser().getFiles();
 			String[] all = new String[directories.length + files.length];
@@ -123,13 +125,14 @@ public class BrowserActivity extends BrowserBase {
 
 	/**
 	 * update gui elements, show current directory or playlist
+	 * @param gotoPath 
 	 */
-	private void updateGUI() {
+	private void updateGUI(final String gotoPath) {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return;
 		}
-		new AsyncTask<Integer, Integer, String[]>() {
+		new AsyncTask<String, Integer, String[]>() {
 
 			Exception exeption = null;
 
@@ -141,10 +144,10 @@ public class BrowserActivity extends BrowserBase {
 			}
 
 			@Override
-			protected String[] doInBackground(Integer... params) {
+			protected String[] doInBackground(String... params) {
 				try {
 					exeption = null;
-					return loadItems();
+					return loadItems(params);
 				} catch (Exception e) {
 					exeption = e;
 					return new String[] {};
@@ -157,8 +160,9 @@ public class BrowserActivity extends BrowserBase {
 				setProgressBarVisibility(false);
 				if (binder.getBrowser() == null) {
 					setTitle("Select musicstation@" + binder.getServerName());
-					listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
-							binder.getBrowser(), new String[]{}, viewerState, playingBean));
+					listView.setAdapter(new BrowserAdapter(
+							BrowserActivity.this, binder.getBrowser(),
+							new String[] {}, viewerState, playingBean));
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
@@ -202,17 +206,18 @@ public class BrowserActivity extends BrowserBase {
 				}
 			}
 
-		}.execute(new Integer[] {});
+		}.execute(new String[] {gotoPath});
 	}
 
 	protected void updateSpinner() {
 		updateSpinner = true;
 		String[] stationArray = binder.getMusicStations().keySet()
 				.toArray(new String[] {});
-		String[] spinnerItems = new String[stationArray.length+1];
+		String[] spinnerItems = new String[stationArray.length + 2];
 		spinnerItems[0] = "Select musicstation";
-		for (int i=0; i<stationArray.length;i++)
-			spinnerItems[i+1] = stationArray[i];
+		spinnerItems[stationArray.length + 1] = "Refresh";
+		for (int i = 0; i < stationArray.length; i++)
+			spinnerItems[i + 1] = stationArray[i];
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 				BrowserActivity.this, R.layout.spinner, spinnerItems);
 		musicstationSpinner.setAdapter(adapter);
@@ -233,17 +238,17 @@ public class BrowserActivity extends BrowserBase {
 				selectedPosition = 0;
 				if (viewerState == ViewerState.DIRECTORIES)
 					if (binder.getBrowser().goBack()) {
-						updateGUI();
+						updateGUI(null);
 						return true;
 					}
 				if (viewerState == ViewerState.PLAYLISTS) {
 					viewerState = ViewerState.DIRECTORIES;
-					updateGUI();
+					updateGUI(null);
 					return true;
 				}
 				if (viewerState == ViewerState.PLS_ITEMS) {
 					viewerState = ViewerState.PLAYLISTS;
-					updateGUI();
+					updateGUI(null);
 					return true;
 				}
 			}
@@ -455,7 +460,7 @@ public class BrowserActivity extends BrowserBase {
 			// break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
-				updateGUI();
+				updateGUI(null);
 				break;
 			case R.id.opt_record:
 				ai.record();
@@ -516,11 +521,11 @@ public class BrowserActivity extends BrowserBase {
 				binder.getBrowser().delete(
 						binder.getBrowser().getFullLocation() + selectedItem);
 				((BufferBrowser) binder.getBrowser()).setDirty();
-				updateGUI();
+				updateGUI(null);
 				break;
 			case R.id.opt_pls_delete:
 				binder.getPlayList().removePlayList(selectedItem);
-				updateGUI();
+				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"Playlist '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -528,11 +533,11 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_pls_show:
 				viewerState = ViewerState.PLS_ITEMS;
 				currentPlayList = selectedItem;
-				updateGUI();
+				updateGUI(null);
 				break;
 			case R.id.opt_pls_item_delete:
 				binder.getPlayList().removeItem(currentPlayList, selectedItem);
-				updateGUI();
+				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"Entry '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -568,7 +573,7 @@ public class BrowserActivity extends BrowserBase {
 					&& data.getExtras() != null) {
 				String pls = data.getExtras().getString(GetTextActivity.RESULT);
 				binder.getPlayList().addPlayList(pls);
-				updateGUI();
+				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
@@ -628,7 +633,7 @@ public class BrowserActivity extends BrowserBase {
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected()) {
 			updateSpinner();
-			updateGUI();
+			updateGUI(null);
 		} else {
 			disableScreen();
 		}
@@ -644,7 +649,7 @@ public class BrowserActivity extends BrowserBase {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			updateGUI();
+			updateGUI(null);
 			if (binder.getReceiver() != null
 					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
 				downloadLayout.setVisibility(View.VISIBLE);
@@ -678,9 +683,8 @@ public class BrowserActivity extends BrowserBase {
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
 					if (position < binder.getBrowser().getDirectories().length) {
-						binder.getBrowser().goTo(item);
 						selectedPosition = 0;
-						updateGUI();
+						updateGUI(item);
 						return;
 					}
 					String file = binder.getBrowser().getFullLocation() + item;
@@ -699,12 +703,12 @@ public class BrowserActivity extends BrowserBase {
 
 	public void showFileSystem(View view) {
 		viewerState = ViewerState.DIRECTORIES;
-		updateGUI();
+		updateGUI(null);
 	}
 
 	public void showPlaylist(View view) {
 		viewerState = ViewerState.PLAYLISTS;
-		updateGUI();
+		updateGUI(null);
 	}
 
 	public void setTotem(View view) {
@@ -718,7 +722,7 @@ public class BrowserActivity extends BrowserBase {
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);
 	}
-	
+
 	/**
 	 * listener for long clicks on the list view. store the selected item in the
 	 * selecteditem field.
@@ -768,7 +772,7 @@ public class BrowserActivity extends BrowserBase {
 			}
 		}
 	}
-	
+
 	class SelectMusicStationListener implements OnItemSelectedListener {
 		@Override
 		public void onItemSelected(AdapterView<?> arg0, View arg1,
@@ -785,6 +789,22 @@ public class BrowserActivity extends BrowserBase {
 				new Thread(){
 					public void run() {
 						binder.setMusicStation(station);
+						handler.post(new ShowFolderRunnable());
+					};
+				}.start();
+			}
+			if ("Refresh".equals(station)) {
+				setProgressBarVisibility(true);
+				setTitle("loading...");
+				new Thread(){
+					public void run() {
+						binder.refreshStations();
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								updateSpinner();								
+							}
+						});
 						handler.post(new ShowFolderRunnable());
 					};
 				}.start();

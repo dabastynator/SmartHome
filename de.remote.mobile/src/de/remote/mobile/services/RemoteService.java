@@ -10,7 +10,7 @@ import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.transceiver.ReceiverProgress;
 import de.remote.api.IPlayerListener;
 import de.remote.api.PlayingBean;
-import de.remote.mobile.database.ServerDatabase;
+import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
 import de.remote.mobile.util.NotificationHandler;
 
@@ -33,7 +33,7 @@ public class RemoteService extends RemoteBaseService {
 		playerListener = new PlayerListener();
 		downloadListener = new ProgressListener();
 		actionListener.add(notificationHandler);
-		serverDB = new ServerDatabase(this);
+		serverDB = new RemoteDatabase(this);
 		wlanReceiver = new WLANReceiver(this);
 		registerReceiver(wlanReceiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));

@@ -1,12 +1,16 @@
 package de.remote.mobile.activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import de.newsystem.rmi.protokol.RemoteException;
@@ -14,9 +18,12 @@ import de.remote.gpiopower.api.IGPIOPower;
 import de.remote.gpiopower.api.IGPIOPower.State;
 import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
+import de.remote.mobile.database.PowerSwitchDao;
 import de.remote.mobile.util.AI;
 
 public class PowerActivity extends BindedActivity {
+
+	public static final String SWITCH_NUMBER = "switch_number";
 
 	private ToggleButton buttonA;
 	private ToggleButton buttonB;
@@ -28,17 +35,21 @@ public class PowerActivity extends BindedActivity {
 	 * The artificial intelligence recognize speech
 	 */
 	protected AI ai;
+	private TextView lableA;
+	private TextView lableB;
+	private TextView lableC;
+	private TextView lableD;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-	    requestWindowFeature(Window.FEATURE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_PROGRESS);
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(false);
 
 		setContentView(R.layout.powerpoint);
-		
+
 		findComponents();
 	};
 
@@ -62,6 +73,44 @@ public class PowerActivity extends BindedActivity {
 		buttonC.setEnabled(false);
 		buttonD.setEnabled(false);
 
+		lableA = (TextView) findViewById(R.id.powerlable_1);
+		lableB = (TextView) findViewById(R.id.powerlable_2);
+		lableC = (TextView) findViewById(R.id.powerlable_3);
+		lableD = (TextView) findViewById(R.id.powerlable_4);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		updateLables();
+	}
+
+	private void updateLables() {
+		PowerSwitchDao powerDao = serverDB.getPowerSwitchDao();
+		TextView[] views = new TextView[] { lableA, lableB, lableC, lableD };
+		for (Switch s : Switch.values()) {
+			String name = powerDao.getNameOfSwitch(s.ordinal());
+			if (name == null)
+				name = "Switch " + s.ordinal();
+			views[s.ordinal()].setText(name);
+			views[s.ordinal()].setOnClickListener(new NewNameClickListener(s,
+					name));
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == GetTextActivity.RESULT_CODE && data != null
+				&& data.getExtras() != null) {
+			PowerSwitchDao powerDao = serverDB.getPowerSwitchDao();
+			String newName = data.getExtras().getString(GetTextActivity.RESULT);
+			String switchString = data.getExtras().getString(
+					GetTextActivity.ADDITIONAL_VALUE);
+			int switcH = Integer.valueOf(switchString);
+			powerDao.setSwitchName(switcH, newName);
+			updateLables();
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
@@ -83,8 +132,8 @@ public class PowerActivity extends BindedActivity {
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		powerObject = null;
 		IGPIOPower power = binder.getPower();
-		
-		if (power == null){
+
+		if (power == null) {
 			setTitle("No Power@" + binder.getServerName());
 			buttonA.setEnabled(false);
 			buttonB.setEnabled(false);
@@ -129,6 +178,27 @@ public class PowerActivity extends BindedActivity {
 			break;
 		}
 		return super.onMenuItemSelected(featureId, item);
+	}
+
+	public class NewNameClickListener implements OnClickListener {
+
+		private Switch s;
+		private String name;
+
+		public NewNameClickListener(Switch s, String name) {
+			this.s = s;
+			this.name = name;
+		}
+
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(PowerActivity.this,
+					GetTextActivity.class);
+			intent.putExtra(GetTextActivity.DEFAULT_TEXT, name);
+			intent.putExtra(GetTextActivity.ADDITIONAL_VALUE, s.ordinal()+"");
+			startActivityForResult(intent, GetTextActivity.RESULT_CODE);
+		}
+
 	}
 
 	public class SwitchChangeListener implements
