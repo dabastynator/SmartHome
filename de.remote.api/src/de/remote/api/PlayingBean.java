@@ -194,4 +194,19 @@ public class PlayingBean implements Serializable {
 		this.path = path;
 	}
 
+	public void parseICYInfo(String line) {
+		this.artist = null;
+		this.album = null;
+		this.title = null;
+		this.file = null;
+		this.radio = null;
+		this.state = null;
+		this.path = null;	
+		String title = line.substring(23);
+		title = title.substring(0, title.indexOf('\''));
+		String[] split = title.split("-");
+		this.artist = split[0].trim();
+		this.title = split[split.length-1].trim();
+	}
+
 }
