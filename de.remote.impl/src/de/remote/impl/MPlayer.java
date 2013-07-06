@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
+import de.remote.api.PlayingBean.STATE;
 
 public class MPlayer extends AbstractPlayer {
 
@@ -300,6 +301,7 @@ public class MPlayer extends AbstractPlayer {
 					}
 					if (line.startsWith("ICY Info")) {
 						bean.parseICYInfo(line);
+						bean.setState(STATE.PLAY);
 						informPlayingBean(bean);
 					}
 				}
