@@ -37,7 +37,6 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void addPlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		System.out.println("-->  add listener");
 		if (!listeners.contains(listener))
 			listeners.add(listener);
 	}
@@ -45,7 +44,6 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void removePlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		System.out.println("-->  add listener");
 		listeners.remove(listener);
 	}
 

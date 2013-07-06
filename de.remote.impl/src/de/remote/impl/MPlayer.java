@@ -2,7 +2,9 @@ package de.remote.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -226,9 +228,38 @@ public class MPlayer extends AbstractPlayer {
 		}
 		if (!new File(pls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
-		mplayerIn.print("loadlist " + pls + "\n");
+
+		if (firstLineOf(pls).equals("[playlist]")) {
+			String url = lineOfFile(pls, 3);
+			url = url.substring(6);
+			mplayerIn.print("loadfile " + url + "\n");
+		} else
+			mplayerIn.print("loadlist " + pls + "\n");
+
 		writeVolume();
 		mplayerIn.flush();
+	}
+
+	private String firstLineOf(String pls) {
+		return lineOfFile(pls, 1);
+	}
+
+	private String lineOfFile(String file, int line) {
+		String firstLine = null;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(
+					file)));
+			for (int i = 0; i < line; i++)
+				firstLine = reader.readLine();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return firstLine;
 	}
 
 	class PlayerObserver extends Thread {
@@ -265,6 +296,10 @@ public class MPlayer extends AbstractPlayer {
 						bean.setAlbum(line.substring(8).trim());
 					if (line.equals("Starting playback...")) {
 						bean.setState(PlayingBean.STATE.PLAY);
+						informPlayingBean(bean);
+					}
+					if (line.startsWith("ICY Info")) {
+						bean.parseICYInfo(line);
 						informPlayingBean(bean);
 					}
 				}
