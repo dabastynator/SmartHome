@@ -58,33 +58,94 @@ public class WidgetPowerService extends Service implements
 		}
 	};
 
+	private RemoteDatabase serverDB;
+
 	@Override
 	public void onCreate() {
 		// bind service
+		serverDB = new RemoteDatabase(this);
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 		remotePowerViews = new RemoteViews(getApplicationContext()
 				.getPackageName(), R.layout.power_widget);
+		updateWidget();
 	};
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent != null && intent.getAction() != null){
+		if (intent != null && intent.getAction() != null) {
 			int widgetID = intent.getIntExtra(PowerActivity.SWITCH_NUMBER, 0);
 			executeCommand(intent.getAction(), widgetID);
-		}else {
+		} else {
 			remotePowerViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.power_widget);
+			updateWidget();
 		}
 		return super.onStartCommand(intent, flags, startId);
+	}
+
+	private void updateWidget() {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+
+		ComponentName thisWidget = new ComponentName(getApplicationContext(),
+				RemotePowerWidgetProvider.class);
+		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+		// update each of the app widgets with the remote adapter
+		Thread thread = new Thread() {
+			public void run() {
+				for (int i = 0; i < appWidgetIds.length; ++i) {
+					try {
+						updateWidget(appWidgetIds[i]);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			};
+		};
+		thread.start();
+	}
+
+	private void updateWidget(int widgetID) throws Exception {
+		if (binder == null)
+			throw new Exception("not conneced");
+		if (binder.getPower() == null)
+			throw new Exception(binder.getServerName() + " has no power server");
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+		int switcH = prefs.getInt(widgetID + "", -1);
+		if (switcH == -1)
+			return;
+		String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
+		if (name == null)
+			name = "Switch " + switcH;
+		Switch s = Switch.values()[switcH];
+		State state = binder.getPower().getState(s);
+		if (state == State.ON)
+			updateWidget(widgetID, R.drawable.light_on, name);
+		else
+			updateWidget(widgetID, R.drawable.light_off, name);
+	}
+
+	private void updateWidget(int widgetID, int image, String text) {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+		if (remotePowerViews != null) {
+			remotePowerViews.setImageViewResource(R.id.image_power_widget,
+					image);
+			remotePowerViews.setTextViewText(R.id.text_power_widget, text);
+			appWidgetManager.updateAppWidget(widgetID, remotePowerViews);
+		}
 	}
 
 	/**
 	 * execute given action
 	 * 
 	 * @param action
-	 * @param widgetID 
+	 * @param widgetID
 	 * @return true if action is known
 	 */
 	private void executeCommand(final String action, final int widgetID) {
@@ -112,15 +173,16 @@ public class WidgetPowerService extends Service implements
 		if (binder.getPower() == null)
 			throw new Exception(binder.getServerName() + " has no power server");
 		RemoteDatabase serverDB = new RemoteDatabase(this);
-		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
-        int switcH = prefs.getInt(widgetID+"", -1);
-        if (switcH == -1)
-        	return;
-        String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
-        if (name == null)
-        	name = "Switch " + switcH;
-        Switch s = Switch.values()[switcH];
-        State state = binder.getPower().getState(s);
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+		int switcH = prefs.getInt(widgetID + "", -1);
+		if (switcH == -1)
+			return;
+		String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
+		if (name == null)
+			name = "Switch " + switcH;
+		Switch s = Switch.values()[switcH];
+		State state = binder.getPower().getState(s);
 		if (state == State.ON)
 			state = State.OFF;
 		else
@@ -130,7 +192,7 @@ public class WidgetPowerService extends Service implements
 				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
 				RemotePowerWidgetProvider.class);
-		if (remotePowerViews != null) {			
+		if (remotePowerViews != null) {
 			if (state == State.ON)
 				remotePowerViews.setImageViewResource(R.id.image_power_widget,
 						R.drawable.light_on);
@@ -149,6 +211,7 @@ public class WidgetPowerService extends Service implements
 
 	@Override
 	public void onDestroy() {
+		serverDB.close();
 		if (binder != null)
 			binder.removeRemoteActionListener(this);
 		unbindService(playerConnection);
@@ -161,6 +224,7 @@ public class WidgetPowerService extends Service implements
 
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
+		updateWidget();
 	}
 
 	@Override
@@ -196,6 +260,34 @@ public class WidgetPowerService extends Service implements
 	@Override
 	public void onStopService() {
 		stopSelf();
+	}
+
+	@Override
+	public void onPowerSwitchChange(Switch _switch, State state) {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+
+		ComponentName thisWidget = new ComponentName(getApplicationContext(),
+				RemotePowerWidgetProvider.class);
+		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+
+		// update each of the app widgets with the remote adapter
+		for (int i = 0; i < appWidgetIds.length; ++i) {
+
+			int switcH = prefs.getInt(appWidgetIds[i] + "", -1);
+			if (switcH == _switch.ordinal()) {
+				String name = serverDB.getPowerSwitchDao().getNameOfSwitch(
+						switcH);
+				if (name == null)
+					name = "Switch " + switcH;
+				if (state == State.ON)
+					updateWidget(appWidgetIds[i], R.drawable.light_on, name);
+				else
+					updateWidget(appWidgetIds[i], R.drawable.light_off, name);
+			}
+		}
 	}
 
 }

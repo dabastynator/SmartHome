@@ -13,6 +13,8 @@ import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
+import de.remote.gpiopower.api.IGPIOPower.State;
+import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemoteWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -240,6 +242,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		setWidgetText("not connected", "no connection with any server", "",
 				false);
 		stopSelf();
+	}
+
+	@Override
+	public void onPowerSwitchChange(Switch _switch, State state) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

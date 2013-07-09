@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 import de.remote.api.PlayingBean;
 import de.remote.api.PlayingBean.STATE;
+import de.remote.gpiopower.api.IGPIOPower.State;
+import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.BrowserActivity;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -190,6 +192,12 @@ public class NotificationHandler implements IRemoteActionListener {
 				0);
 		notification.contentIntent = pIntent;
 		nm.notify(DOWNLOAD_NOTIFICATION_ID, notification);
+	}
+
+	@Override
+	public void onPowerSwitchChange(Switch _switch, State state) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

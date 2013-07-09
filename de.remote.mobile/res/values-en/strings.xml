@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="str_record">Record</string>
+    <string name="str_left">Left</string>
+    <string name="str_right">Right</string>
     <string name="str_player">Player</string>
     <string name="str_make_bright">Bright display</string>
     <string name="str_make_dark">Dark display</string>
@@ -32,4 +36,5 @@
     <string name="str_upload">Upload</string>
     <string name="add_new_server">add new server</string>
     <string name="str_power">Internet Power Switch</string>
+
 </resources>

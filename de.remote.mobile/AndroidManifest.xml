@@ -79,10 +79,10 @@
             android:launchMode="singleTask" >
         </activity>
 
-        <service android:name=".services.RemoteService" >
-            <intent-filter>
+        <service android:name="de.remote.mobile.services.RemoteService" >
+        <!--     <intent-filter>
                 <action android:name=".services.remoteservice" />
-            </intent-filter>
+            </intent-filter> -->
         </service>
         <service android:name=".services.WidgetService" >
         </service>

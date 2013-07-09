@@ -30,6 +30,8 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.api.PlayerException;
+import de.remote.gpiopower.api.IGPIOPower.State;
+import de.remote.gpiopower.api.IGPIOPower.Switch;
 import de.remote.mobile.R;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
@@ -816,5 +818,11 @@ public class BrowserActivity extends BrowserBase {
 			// TODO Auto-generated method stub
 
 		}
+	}
+
+	@Override
+	public void onPowerSwitchChange(Switch _switch, State state) {
+		// TODO Auto-generated method stub
+		
 	}
 }

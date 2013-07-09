@@ -179,6 +179,28 @@ public class PowerActivity extends BindedActivity {
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
+	
+	@Override
+	public void onPowerSwitchChange(Switch _switch, State state) {
+		powerObject = null;
+		switch(_switch){
+		case A:
+			buttonA.setChecked(state == State.ON);
+			break;
+		case B:
+			buttonB.setChecked(state == State.ON);
+			break;
+		case C:
+			buttonC.setChecked(state == State.ON);
+			break;
+		case D:
+			buttonD.setChecked(state == State.ON);
+			break;
+		default:
+			break;
+		}
+		powerObject = binder.getPower();
+	}
 
 	public class NewNameClickListener implements OnClickListener {
 
@@ -200,7 +222,7 @@ public class PowerActivity extends BindedActivity {
 		}
 
 	}
-
+	
 	public class SwitchChangeListener implements
 			CompoundButton.OnCheckedChangeListener {
 

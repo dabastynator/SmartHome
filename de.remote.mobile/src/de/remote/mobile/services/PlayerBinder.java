@@ -22,9 +22,9 @@ import de.remote.api.IPlayer;
 import de.remote.api.PlayerException;
 import de.remote.api.PlayingBean;
 import de.remote.gpiopower.api.IGPIOPower;
-import de.remote.mobile.services.RemoteBaseService.StationStuff;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
+import de.remote.mobile.services.RemoteService.StationStuff;
 import de.remote.mobile.util.BufferBrowser;
 
 /**
@@ -43,7 +43,7 @@ public class PlayerBinder extends Binder {
 	/**
 	 * the service of this binder
 	 */
-	private RemoteBaseService service;
+	private RemoteService service;
 
 	/**
 	 * current receiver
@@ -59,7 +59,7 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param service
 	 */
-	public PlayerBinder(RemoteBaseService service) {
+	public PlayerBinder(RemoteService service) {
 		this.service = service;
 	}
 
@@ -205,7 +205,7 @@ public class PlayerBinder extends Binder {
 	public void downloadFile(String file) {
 		try {
 			String ip = service.browser.publishFile(file,
-					RemoteBaseService.DOWNLOAD_PORT);
+					RemoteService.DOWNLOAD_PORT);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
 			File dir = new File(folder);
@@ -213,7 +213,7 @@ public class PlayerBinder extends Binder {
 				dir.mkdir();
 			File newFile = new File(folder + File.separator + file.trim());
 			FileReceiver receiver = new FileReceiver(ip,
-					RemoteBaseService.DOWNLOAD_PORT, 200000, newFile);
+					RemoteService.DOWNLOAD_PORT, 200000, newFile);
 			service.notificationHandler.setFile(file);
 			download(receiver);
 		} catch (Exception e) {
@@ -229,14 +229,14 @@ public class PlayerBinder extends Binder {
 	public void downloadDirectory(String directory) {
 		try {
 			String ip = service.browser.publishDirectory(directory,
-					RemoteBaseService.DOWNLOAD_PORT);
+					RemoteService.DOWNLOAD_PORT);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
 			DirectoryReceiver receiver = new DirectoryReceiver(ip,
-					RemoteBaseService.DOWNLOAD_PORT, dir);
+					RemoteService.DOWNLOAD_PORT, dir);
 			service.notificationHandler.setFile(directory);
 			download(receiver);
 		} catch (Exception e) {
