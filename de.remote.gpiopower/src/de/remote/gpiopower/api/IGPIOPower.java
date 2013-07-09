@@ -15,12 +15,12 @@ public interface IGPIOPower extends RemoteAble {
 	 * Remote id of the object
 	 */
 	public static final String ID = "de.remote.GPIOPower";
-		
+
 	/**
-	 * default port of the server 
+	 * default port of the server
 	 */
 	public static final int PORT = 5034;
-	
+
 	public enum Switch {
 		A, B, C, D
 	}
@@ -38,7 +38,7 @@ public interface IGPIOPower extends RemoteAble {
 	 */
 	public void setState(State state, Switch powerSwitch)
 			throws RemoteException;
-	
+
 	/**
 	 * @param powerSwitch
 	 * @return state of the power switch
@@ -46,4 +46,21 @@ public interface IGPIOPower extends RemoteAble {
 	 */
 	public State getState(Switch powerSwitch) throws RemoteException;
 
+	/**
+	 * Register power switch change listener.
+	 * 
+	 * @param listener
+	 * @throws RemoteException
+	 */
+	public void registerPowerSwitchListener(IGPIOListener listener)
+			throws RemoteException;
+
+	/**
+	 * Unregister power switch change listener.
+	 * 
+	 * @param listener
+	 * @throws RemoteException
+	 */
+	public void unregisterPowerSwitchListener(IGPIOListener listener)
+			throws RemoteException;
 }
