@@ -56,7 +56,8 @@ public class GPIOPower implements IGPIOPower {
 	/**
 	 * Listener for power switch change.
 	 */
-	private List<IGPIOListener> listeners = Collections.synchronizedList(new ArrayList<IGPIOListener>());
+	private List<IGPIOListener> listeners = Collections
+			.synchronizedList(new ArrayList<IGPIOListener>());
 
 	/**
 	 * The gpio power is a singelton.
@@ -117,8 +118,8 @@ public class GPIOPower implements IGPIOPower {
 	}
 
 	@Override
-	public synchronized void setState(final State state, final Switch powerSwitch)
-			throws RemoteException {
+	public synchronized void setState(final State state,
+			final Switch powerSwitch) throws RemoteException {
 		writeGPIO(states.get(state), 1);
 		writeGPIO(switches.get(powerSwitch), 1);
 		try {
@@ -132,15 +133,17 @@ public class GPIOPower implements IGPIOPower {
 
 		actualState.put(powerSwitch, state);
 		System.out.println("Set switch " + powerSwitch + " to " + state);
-		new Thread(){
-			public void run() {informListener(state, powerSwitch);};
+		new Thread() {
+			public void run() {
+				informListener(state, powerSwitch);
+			};
 		}.start();
-		
+
 	}
 
 	private void informListener(State state, Switch powerSwitch) {
 		List<IGPIOListener> exceptionList = new ArrayList<IGPIOListener>();
-		for (IGPIOListener listener: listeners){
+		for (IGPIOListener listener : listeners) {
 			try {
 				listener.onPowerSwitchChange(powerSwitch, state);
 			} catch (RemoteException e) {
@@ -158,7 +161,8 @@ public class GPIOPower implements IGPIOPower {
 	@Override
 	public void registerPowerSwitchListener(IGPIOListener listener)
 			throws RemoteException {
-		listeners.add(listener);
+		if (!listeners.contains(listener))
+			listeners.add(listener);
 	}
 
 	@Override
