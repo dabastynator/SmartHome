@@ -82,7 +82,8 @@ public class BrowserActivity extends BrowserBase {
 		return true;
 	}
 
-	private String[] loadItems(String[] gotoPath) throws RemoteException, PlayerException {
+	private String[] loadItems(String[] gotoPath) throws RemoteException,
+			PlayerException {
 		if (binder == null || !binder.isConnected()) {
 			disableScreen();
 			return new String[] {};
@@ -127,7 +128,8 @@ public class BrowserActivity extends BrowserBase {
 
 	/**
 	 * update gui elements, show current directory or playlist
-	 * @param gotoPath 
+	 * 
+	 * @param gotoPath
 	 */
 	private void updateGUI(final String gotoPath) {
 		if (binder == null || !binder.isConnected()) {
@@ -208,7 +210,7 @@ public class BrowserActivity extends BrowserBase {
 				}
 			}
 
-		}.execute(new String[] {gotoPath});
+		}.execute(new String[] { gotoPath });
 	}
 
 	protected void updateSpinner() {
@@ -454,12 +456,12 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_audiotrack:
 				binder.getPlayer().nextAudio();
 				break;
-			// case R.id.opt_left:
-			// binder.getPlayer().moveLeft();
-			// break;
-			// case R.id.opt_right:
-			// binder.getPlayer().moveRight();
-			// break;
+			case R.id.opt_left:
+				binder.getPlayer().moveLeft();
+				break;
+			case R.id.opt_right:
+				binder.getPlayer().moveRight();
+				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
 				updateGUI(null);
@@ -777,8 +779,8 @@ public class BrowserActivity extends BrowserBase {
 
 	class SelectMusicStationListener implements OnItemSelectedListener {
 		@Override
-		public void onItemSelected(AdapterView<?> arg0, View arg1,
-				int arg2, long arg3) {
+		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
 			if (updateSpinner) {
 				updateSpinner = false;
 				return;
@@ -788,7 +790,7 @@ public class BrowserActivity extends BrowserBase {
 			if (binder.getMusicStations().containsKey(station)) {
 				setProgressBarVisibility(true);
 				setTitle("loading...");
-				new Thread(){
+				new Thread() {
 					public void run() {
 						binder.setMusicStation(station);
 						handler.post(new ShowFolderRunnable());
@@ -798,13 +800,13 @@ public class BrowserActivity extends BrowserBase {
 			if ("Refresh".equals(station)) {
 				setProgressBarVisibility(true);
 				setTitle("loading...");
-				new Thread(){
+				new Thread() {
 					public void run() {
 						binder.refreshStations();
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								updateSpinner();								
+								updateSpinner();
 							}
 						});
 						handler.post(new ShowFolderRunnable());
@@ -823,6 +825,6 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	public void onPowerSwitchChange(Switch _switch, State state) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

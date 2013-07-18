@@ -59,7 +59,7 @@
                 android:id="@+id/opt_audiotrack"
                 android:icon="@drawable/audio"
                 android:title="@string/str_audio_track"/>
-            <!-- <item
+            <item
                 android:id="@+id/opt_right"
                 android:icon="@drawable/right"
                 android:title="@string/str_move_right"/>
@@ -67,7 +67,7 @@
                 android:id="@+id/opt_left"
                 android:icon="@drawable/left"
                 android:title="@string/str_move_left"/>
-            <item
+            <!--<item
                 android:id="@+id/opt_shuffle_on"
                 android:title="Shuffle"/>
             <item

@@ -110,10 +110,6 @@ public class WidgetPowerService extends Service implements
 	}
 
 	private void updateWidget(int widgetID) throws Exception {
-		if (binder == null)
-			throw new Exception("not conneced");
-		if (binder.getPower() == null)
-			throw new Exception(binder.getServerName() + " has no power server");
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
 		int switcH = prefs.getInt(widgetID + "", -1);
@@ -122,7 +118,12 @@ public class WidgetPowerService extends Service implements
 		String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
 		if (name == null)
 			name = "Switch " + switcH;
+		updateWidget(widgetID, R.drawable.light_off, name);
 		Switch s = Switch.values()[switcH];
+		if (binder == null)
+			throw new Exception("not conneced");
+		if (binder.getPower() == null)
+			throw new Exception(binder.getServerName() + " has no power server");
 		State state = binder.getPower().getState(s);
 		if (state == State.ON)
 			updateWidget(widgetID, R.drawable.light_on, name);

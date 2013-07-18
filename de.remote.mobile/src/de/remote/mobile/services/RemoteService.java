@@ -184,7 +184,7 @@ public class RemoteService extends Service {
 					ControlConstants.CHAT_ID, IChatServer.class);
 			power = (IGPIOPower) localServer.find(IGPIOPower.ID,
 					IGPIOPower.class);
-			power.registerPowerSwitchListener(powerListener);
+//			power.registerPowerSwitchListener(powerListener);
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
@@ -213,11 +213,11 @@ public class RemoteService extends Service {
 		station.getTotemPlayer().addPlayerMessageListener(playerListener);
 		PlayingBean bean = player.getPlayingBean();
 		playerListener.playerMessage(bean);
-		try {
-			power.registerPowerSwitchListener(powerListener);
-		} catch (RemoteException e) {
-
-		}
+//		try {
+//			power.registerPowerSwitchListener(powerListener);
+//		} catch (RemoteException e) {
+//
+//		}
 	}
 
 	@Override
