@@ -123,7 +123,7 @@ public class GPIOPower implements IGPIOPower {
 		writeGPIO(states.get(state), 1);
 		writeGPIO(switches.get(powerSwitch), 1);
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(600);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
