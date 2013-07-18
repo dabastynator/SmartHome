@@ -32,7 +32,16 @@ public abstract class AbstractPlayer implements IPlayer {
 	/**
 	 * current playing file
 	 */
-	private PlayingBean playingBean;
+	protected PlayingBean playingBean;
+
+	public AbstractPlayer() {
+		new PlayingTimeCounter().start();
+	}
+
+	@Override
+	public void fullScreen() throws RemoteException, PlayerException {
+
+	}
 
 	@Override
 	public void addPlayerMessageListener(IPlayerListener listener)
@@ -125,6 +134,8 @@ public abstract class AbstractPlayer implements IPlayer {
 	public void play(String file) {
 		if (playingBean != null) {
 			playingBean.setState(STATE.PLAY);
+			playingBean.setFile(file);
+			playingBean.setCurrentTime(0);
 			informPlayingBean(playingBean);
 		}
 	}
@@ -151,5 +162,23 @@ public abstract class AbstractPlayer implements IPlayer {
 			playingBean.setState(STATE.PLAY);
 			informPlayingBean(playingBean);
 		}
+	}
+
+	class PlayingTimeCounter extends Thread {
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if (playingBean != null && playingBean.getState() == STATE.PLAY) {
+					playingBean.incrementCurrentTime(1);
+				}
+			}
+		}
+
 	}
 }

@@ -19,7 +19,7 @@ public class MPlayer extends AbstractPlayer {
 
 	private Process mplayerProcess;
 	private PrintStream mplayerIn;
-	private int fullscreen = 0;
+	private int fullscreen = 1;
 	private int positionLeft = 0;
 	private boolean shuffle = false;
 	private int volume = 50;
@@ -27,6 +27,7 @@ public class MPlayer extends AbstractPlayer {
 	private Object playListfolder;
 
 	public MPlayer(String playListfolder) {
+		super();
 		this.playListfolder = playListfolder;
 	}
 
@@ -82,6 +83,7 @@ public class MPlayer extends AbstractPlayer {
 			// set default volume
 			mplayerIn.print("volume " + volume + " 1\n");
 			mplayerIn.flush();
+			fullscreen = 1;
 		} catch (IOException e) {
 			// throw new PlayerException(e.getMessage());
 		}
@@ -138,6 +140,7 @@ public class MPlayer extends AbstractPlayer {
 		else if (seekValue < -600)
 			seekValue *= 5;
 		mplayerIn.print("seek " + seekValue + " 0");
+		playingBean.incrementCurrentTime(seekValue);
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
@@ -151,6 +154,7 @@ public class MPlayer extends AbstractPlayer {
 		else if (seekValue > -600)
 			seekValue *= 5;
 		mplayerIn.print("seek " + seekValue + " 0");
+		playingBean.incrementCurrentTime(seekValue);
 		mplayerIn.print("\n");
 		mplayerIn.flush();
 	}
@@ -201,16 +205,40 @@ public class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void moveLeft() throws PlayerException {
+		int time = 0;
+		if (playingBean != null)
+			time = Math.max(playingBean.getCurrentTime() - 3, 0);
 		quit();
-		positionLeft -= 700;
+		positionLeft -= 1680;
 		startPlayer();
+		if (playingBean != null && playingBean.getPath() != null) {
+			play(playingBean.getPath());
+			try {
+				setPlayingPosition(time);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void moveRight() throws PlayerException {
+		int time = 0;
+		if (playingBean != null)
+			time = Math.max(playingBean.getCurrentTime() - 3, 0);
 		quit();
-		positionLeft -= 700;
+		positionLeft += 1680;
 		startPlayer();
+		if (playingBean != null && playingBean.getPath() != null) {
+			play(playingBean.getPath());
+			try {
+				setPlayingPosition(time);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
@@ -280,6 +308,10 @@ public class MPlayer extends AbstractPlayer {
 								.lastIndexOf(File.separator) + 1);
 						file = file.substring(0, file.length() - 1);
 						bean.setFile(file.trim());
+						if (playingBean != null
+								&& playingBean.getPath() != null
+								&& playingBean.getPath().equals(bean.getPath()))
+							bean.setCurrentTime(playingBean.getCurrentTime());
 					}
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8).trim());
@@ -292,6 +324,7 @@ public class MPlayer extends AbstractPlayer {
 						informPlayingBean(bean);
 					}
 					if (line.startsWith("ICY Info")) {
+						bean.setCurrentTime(0);
 						bean.parseICYInfo(line);
 						bean.setState(STATE.PLAY);
 						informPlayingBean(bean);
@@ -325,5 +358,6 @@ public class MPlayer extends AbstractPlayer {
 		mplayerIn.print("seek " + second + " 2");
 		mplayerIn.print("\n");
 		mplayerIn.flush();
+		playingBean.setCurrentTime(second);
 	}
 }
