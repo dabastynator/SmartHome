@@ -163,4 +163,13 @@ public interface IPlayer extends RemoteAble {
 	 */
 	void playPlayList(String pls) throws RemoteException, PlayerException;
 
+	/**
+	 * Set position of playing file in specified seconds.
+	 * 
+	 * @param second
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void setPlayingPosition(int second) throws RemoteException, PlayerException;
+
 }
