@@ -143,4 +143,10 @@ public class TotemPlayer extends AbstractPlayer {
 			PlayerException {
 		throw new PlayerException("not supported function for totem");
 	}
+
+	@Override
+	public void setPlayingPosition(int second) throws RemoteException,
+			PlayerException {
+		throw new PlayerException("not supported function for totem");		
+	}
 }

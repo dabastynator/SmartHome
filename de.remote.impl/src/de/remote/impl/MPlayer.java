@@ -20,6 +20,7 @@ public class MPlayer extends AbstractPlayer {
 	private Process mplayerProcess;
 	private PrintStream mplayerIn;
 	private int fullscreen = 0;
+	private int positionLeft = 0;
 	private boolean shuffle = false;
 	private int volume = 50;
 	private int seekValue;
@@ -71,13 +72,8 @@ public class MPlayer extends AbstractPlayer {
 
 	private void startPlayer() {
 		try {
-			String[] args = null;
-			if (shuffle)
-				args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
-						"-idle", "-shuffle" };
-			else
-				args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet",
-						"-idle" };
+			String[] args = new String[] { "/usr/bin/mplayer", "-slave",
+					"-quiet", "-idle", "-geometry", positionLeft + ":0" };
 			mplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
@@ -205,20 +201,16 @@ public class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void moveLeft() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("change_rectangle 2 -800");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		quit();
+		positionLeft -= 700;
+		startPlayer();
 	}
 
 	@Override
 	public void moveRight() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("change_rectangle 2 800");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		quit();
+		positionLeft -= 700;
+		startPlayer();
 	}
 
 	@Override
@@ -323,5 +315,15 @@ public class MPlayer extends AbstractPlayer {
 
 		}
 		startPlayer();
+	}
+
+	@Override
+	public void setPlayingPosition(int second) throws RemoteException,
+			PlayerException {
+		if (mplayerIn == null)
+			throw new PlayerException("mplayer is down");
+		mplayerIn.print("seek " + second + " 2");
+		mplayerIn.print("\n");
+		mplayerIn.flush();
 	}
 }

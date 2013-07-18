@@ -73,4 +73,11 @@ public class VLCPlayer extends AbstractPlayer{
 		super.play(file);
 	}
 
+	@Override
+	public void setPlayingPosition(int second) throws RemoteException,
+			PlayerException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
