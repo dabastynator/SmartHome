@@ -47,7 +47,7 @@ public class PlayingBean implements Serializable {
 	 * current file
 	 */
 	private String file;
-	
+
 	/**
 	 * current path of playing file
 	 */
@@ -57,12 +57,12 @@ public class PlayingBean implements Serializable {
 	 * current state
 	 */
 	private STATE state;
-	
+
 	/**
 	 * current playing time in seconds
 	 */
 	private int startTime;
-	
+
 	/**
 	 * length of file in seconds
 	 */
@@ -89,7 +89,7 @@ public class PlayingBean implements Serializable {
 		radio = bean.getRadio();
 		state = bean.getState();
 		path = bean.getPath();
-		startTime = bean.getStartTime();
+		startTime = bean.getCurrentTime();
 		lengthTime = bean.getLengthTime();
 	}
 
@@ -205,15 +205,16 @@ public class PlayingBean implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	
-	
 
-	public int getStartTime() {
+	public int getCurrentTime() {
 		return startTime;
 	}
 
-	public void setStartTime(int startTime) {
+	public void setCurrentTime(int startTime) {
 		this.startTime = startTime;
+		if (startTime < 2) {
+			startTime = 2;
+		}
 	}
 
 	public int getLengthTime() {
@@ -231,14 +232,18 @@ public class PlayingBean implements Serializable {
 		this.file = null;
 		this.radio = null;
 		this.state = null;
-		this.path = null;	
+		this.path = null;
 		this.lengthTime = -1;
 		this.startTime = 0;
 		String title = line.substring(23);
 		title = title.substring(0, title.indexOf('\''));
 		String[] split = title.split("-");
 		this.artist = split[0].trim();
-		this.title = split[split.length-1].trim();
+		this.title = split[split.length - 1].trim();
+	}
+
+	public void incrementCurrentTime(int seekValue) {
+		startTime += seekValue;
 	}
 
 }
