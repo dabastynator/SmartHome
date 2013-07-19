@@ -1,22 +1,23 @@
 package de.remote.gpiopower;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.api.IGPIOListener;
-import de.remote.gpiopower.api.IGPIOPower;
+import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
 
 /**
  * Implements the gpio power by executing gpio commands
  * 
  * @author sebastian
  */
-public class GPIOPower implements IGPIOPower {
+public class GPIOPower {
+
+	enum Switch {
+		A, B, C, D
+	}
 
 	// match gpio numbers in constans
 	private static final int PIN_ON = 24;
@@ -31,7 +32,7 @@ public class GPIOPower implements IGPIOPower {
 	private static final Map<Switch, Integer> switches = new HashMap<Switch, Integer>();
 	private static final Map<State, Integer> states = new HashMap<State, Integer>();
 
-	private static final Map<Switch, State> actualState = new HashMap<IGPIOPower.Switch, IGPIOPower.State>();
+	private static final Map<Switch, State> actualState = new HashMap<Switch, IInternetSwitch.State>();
 
 	static {
 		switches.put(Switch.A, PIN_A);
@@ -52,12 +53,6 @@ public class GPIOPower implements IGPIOPower {
 	 * singelton object
 	 */
 	private static GPIOPower singelton;
-
-	/**
-	 * Listener for power switch change.
-	 */
-	private List<IGPIOListener> listeners = Collections
-			.synchronizedList(new ArrayList<IGPIOListener>());
 
 	/**
 	 * The gpio power is a singelton.
@@ -117,7 +112,6 @@ public class GPIOPower implements IGPIOPower {
 		}
 	}
 
-	@Override
 	public synchronized void setState(final State state,
 			final Switch powerSwitch) throws RemoteException {
 		writeGPIO(states.get(state), 1);
@@ -133,42 +127,12 @@ public class GPIOPower implements IGPIOPower {
 
 		actualState.put(powerSwitch, state);
 		System.out.println("Set switch " + powerSwitch + " to " + state);
-		new Thread() {
-			public void run() {
-				informListener(state, powerSwitch);
-			};
-		}.start();
-
 	}
 
-	private void informListener(State state, Switch powerSwitch) {
-		List<IGPIOListener> exceptionList = new ArrayList<IGPIOListener>();
-		for (IGPIOListener listener : listeners) {
-			try {
-				listener.onPowerSwitchChange(powerSwitch, state);
-			} catch (RemoteException e) {
-				exceptionList.add(listener);
-			}
-		}
-		listeners.removeAll(exceptionList);
-	}
+	
 
-	@Override
-	public State getState(Switch powerSwitch) throws RemoteException {
+	public State getState(Switch powerSwitch){
 		return actualState.get(powerSwitch);
-	}
-
-	@Override
-	public void registerPowerSwitchListener(IGPIOListener listener)
-			throws RemoteException {
-		if (!listeners.contains(listener))
-			listeners.add(listener);
-	}
-
-	@Override
-	public void unregisterPowerSwitchListener(IGPIOListener listener)
-			throws RemoteException {
-		listeners.remove(listener);
 	}
 
 }
