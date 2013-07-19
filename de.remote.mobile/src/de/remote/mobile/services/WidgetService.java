@@ -11,10 +11,9 @@ import android.os.IBinder;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.PlayingBean;
-import de.remote.api.PlayingBean.STATE;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.PlayingBean;
+import de.remote.mediaserver.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemoteWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -245,7 +244,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	@Override
-	public void onPowerSwitchChange(Switch _switch, State state) {
+	public void onPowerSwitchChange(String switchName, State state) {
 		// TODO Auto-generated method stub
 		
 	}

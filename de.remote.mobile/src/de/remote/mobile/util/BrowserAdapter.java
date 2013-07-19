@@ -15,10 +15,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.api.IThumbnailListener;
-import de.remote.api.PlayingBean;
-import de.remote.api.PlayingBean.STATE;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IThumbnailListener;
+import de.remote.mediaserver.api.PlayingBean;
+import de.remote.mediaserver.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.BrowserBase.ViewerState;
 

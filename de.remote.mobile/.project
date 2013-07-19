@@ -42,6 +42,16 @@
 			<locationURI>WORKSPACE_LOC/remote/de.remote.api/src</locationURI>
 		</link>
 		<link>
+			<name>src_controlcenter</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/remote/de.remote.controlcenter/src</locationURI>
+		</link>
+		<link>
+			<name>src_mediaserver</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/remote/de.remote.mediaserver/src</locationURI>
+		</link>
+		<link>
 			<name>src_rmi</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/remote/de.newsystem.rmi/src</locationURI>

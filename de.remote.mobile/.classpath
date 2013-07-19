@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_controlcenter"/>
+	<classpathentry excluding="de/remote/mediaserver/impl/|de/remote/mediaserver/server/" including="de/remote/mediaserver/api/" kind="src" path="src_mediaserver"/>
 	<classpathentry kind="src" path="gpio_power"/>
 	<classpathentry excluding="de/webcam/impl/|de/webcam/server/|de/webcam/test/" including="de/webcam/api/" kind="src" path="src_webcam"/>
 	<classpathentry kind="src" path="src_rmi"/>

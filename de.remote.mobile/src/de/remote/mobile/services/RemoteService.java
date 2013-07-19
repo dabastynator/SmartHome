@@ -19,21 +19,20 @@ import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.ReceiverProgress;
-import de.remote.api.ControlConstants;
-import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
-import de.remote.api.IControl;
-import de.remote.api.IMusicStation;
-import de.remote.api.IPlayList;
-import de.remote.api.IPlayer;
-import de.remote.api.IPlayerListener;
-import de.remote.api.IStationHandler;
-import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
-import de.remote.gpiopower.api.IGPIOListener;
-import de.remote.gpiopower.api.IGPIOPower;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.controlcenter.api.IControlCenter;
+import de.remote.controlcenter.api.IControlUnit;
+import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.gpiopower.api.IInternetSwitchListener;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IChatServer;
+import de.remote.mediaserver.api.IControl;
+import de.remote.mediaserver.api.IMediaServer;
+import de.remote.mediaserver.api.IPlayList;
+import de.remote.mediaserver.api.IPlayer;
+import de.remote.mediaserver.api.IPlayerListener;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
 import de.remote.mobile.util.NotificationHandler;
@@ -73,19 +72,19 @@ public class RemoteService extends Service {
 	/**
 	 * remote station object
 	 */
-	protected IMusicStation station;
+	protected IMediaServer station;
 
 	/**
 	 * remote station list object
 	 */
-	protected IStationHandler stationList;
+	protected IControlCenter stationList;
 
 	/**
 	 * list of available music stations
 	 */
-	protected Map<String, IMusicStation> musicStations;
+	protected Map<String, IMediaServer> musicStations;
 
-	protected Map<IMusicStation, StationStuff> stationStuff;
+	protected Map<IMediaServer, StationStuff> stationStuff;
 
 	/**
 	 * remote browser object
@@ -95,7 +94,7 @@ public class RemoteService extends Service {
 	/**
 	 * gpio power point
 	 */
-	protected IGPIOPower power;
+	protected Map<String, IInternetSwitch> internetSwitch;
 
 	/**
 	 * current selected remote player object
@@ -121,7 +120,7 @@ public class RemoteService extends Service {
 
 	protected ProgressListener downloadListener;
 
-	protected IGPIOListener powerListener;
+	protected IInternetSwitchListener internetSwitchListener;
 
 	/**
 	 * remote playlist object
@@ -155,7 +154,6 @@ public class RemoteService extends Service {
 	 */
 	public IChatServer chatServer;
 
-	
 	/**
 	 * create connection, execute runnable if connection has started in the ui
 	 * thread.
@@ -172,19 +170,17 @@ public class RemoteService extends Service {
 			}
 			localServer.startServer();
 
-			stationList = (IStationHandler) localServer.find(
-					IStationHandler.STATION_ID, IStationHandler.class);
+			stationList = (IControlCenter) localServer.find(IControlCenter.ID,
+					IControlCenter.class);
 			if (stationList == null)
-				throw new RemoteException(IStationHandler.STATION_ID,
-						"music handler not found in registry");
+				throw new RemoteException(IControlCenter.ID,
+						"control center not found in registry");
 
 			refreshStations();
 
-			chatServer = (IChatServer) localServer.find(
-					ControlConstants.CHAT_ID, IChatServer.class);
-			power = (IGPIOPower) localServer.find(IGPIOPower.ID,
-					IGPIOPower.class);
-//			power.registerPowerSwitchListener(powerListener);
+			chatServer = (IChatServer) localServer.find(IChatServer.ID,
+					IChatServer.class);
+			// power.registerPowerSwitchListener(powerListener);
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
@@ -213,11 +209,11 @@ public class RemoteService extends Service {
 		station.getTotemPlayer().addPlayerMessageListener(playerListener);
 		PlayingBean bean = player.getPlayingBean();
 		playerListener.playerMessage(bean);
-//		try {
-//			power.registerPowerSwitchListener(powerListener);
-//		} catch (RemoteException e) {
-//
-//		}
+		// try {
+		// power.registerPowerSwitchListener(powerListener);
+		// } catch (RemoteException e) {
+		//
+		// }
 	}
 
 	@Override
@@ -233,12 +229,13 @@ public class RemoteService extends Service {
 		};
 		RMILogger.addLogListener(rmiLogListener);
 		binder = new PlayerBinder(this);
-		musicStations = new HashMap<String, IMusicStation>();
-		stationStuff = new HashMap<IMusicStation, StationStuff>();
+		musicStations = new HashMap<String, IMediaServer>();
+		stationStuff = new HashMap<IMediaServer, StationStuff>();
+		internetSwitch = new HashMap<String, IInternetSwitch>();
 		actionListener = new ArrayList<IRemoteActionListener>();
 		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
-		powerListener = new GPIOListener();
+		internetSwitchListener = new GPIOListener();
 		downloadListener = new ProgressListener();
 		actionListener.add(notificationHandler);
 		serverDB = new RemoteDatabase(this);
@@ -277,12 +274,12 @@ public class RemoteService extends Service {
 			localServer.close();
 		station = null;
 		musicStations.clear();
+		internetSwitch.clear();
 		stationList = null;
 		stationStuff.clear();
 		browser = null;
 		player = null;
 		serverID = -1;
-		power = null;
 		chatServer = null;
 		serverName = null;
 		notificationHandler.removeNotification();
@@ -340,7 +337,7 @@ public class RemoteService extends Service {
 	public void refreshStations() {
 		int stationSize = 0;
 		try {
-			stationSize = stationList.getStationSize();
+			stationSize = stationList.getControlUnitNumber();
 		} catch (RemoteException e1) {
 		}
 		musicStations.clear();
@@ -348,10 +345,20 @@ public class RemoteService extends Service {
 		station = null;
 		for (int i = 0; i < stationSize; i++) {
 			try {
-				IMusicStation musicStation = stationList.getStation(i);
-				String name = musicStation.getName();
-				musicStations.put(name, musicStation);
+				IControlUnit unit = stationList.getControlUnit(i);
+				Object object = unit.getRemoteableControlObject();
+				if (object instanceof IMediaServer){
+					IMediaServer server = (IMediaServer) object;
+					String name = server.getName();
+					musicStations.put(name, server);	
+				}
+				if (object instanceof IInternetSwitch){
+					IInternetSwitch iswitch = (IInternetSwitch) object;
+					String name = unit.getName();
+					internetSwitch.put(name, iswitch);
+				}
 			} catch (Exception e) {
+				Log.e("error", e.getMessage());
 			}
 		}
 	}
@@ -382,19 +389,19 @@ public class RemoteService extends Service {
 	 * @author sebastian
 	 * 
 	 */
-	public class GPIOListener implements IGPIOListener {
+	public class GPIOListener implements IInternetSwitchListener {
 
 		@Override
-		public void onPowerSwitchChange(final Switch _switch, final State state)
+		public void onPowerSwitchChange(final String switchName, final State state)
 				throws RemoteException {
-			Log.e("gpio power", "Switch: " + _switch + " " + state);
+			Log.e("gpio power", "Switch: " + switchName + " " + state);
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					for (IRemoteActionListener listener : actionListener)
-						listener.onPowerSwitchChange(_switch, state);
+						listener.onPowerSwitchChange(switchName, state);
 				}
-			});
+			});			
 		}
 
 	}
@@ -502,7 +509,7 @@ public class RemoteService extends Service {
 		 * @param _switch
 		 * @param state
 		 */
-		void onPowerSwitchChange(Switch _switch, State state);
+		void onPowerSwitchChange(String _switch, State state);
 
 	}
 

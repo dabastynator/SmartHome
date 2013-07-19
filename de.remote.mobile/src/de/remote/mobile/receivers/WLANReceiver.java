@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.PlayerException;
+import de.remote.mediaserver.api.PlayerException;
 import de.remote.mobile.services.RemoteService;
 
 /**

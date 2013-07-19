@@ -1,13 +1,13 @@
 package de.remote.mobile.util;
 
-import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.PlayerException;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
-import de.remote.mobile.services.PlayerBinder;
-import de.remote.mobile.util.VoiceRecognizer.IVoiceRecognition;
 import android.content.Context;
 import android.widget.Toast;
+import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mobile.services.PlayerBinder;
+import de.remote.mobile.util.VoiceRecognizer.IVoiceRecognition;
 
 /**
  * The artificial intelligence records, recognizes and executes speech.
@@ -92,25 +92,15 @@ public class AI implements IVoiceRecognition {
 				binder.getPlayer().play(play);
 			Toast.makeText(context, "success play", Toast.LENGTH_SHORT).show();
 		} else if (cmd.startsWith("licht")) {
-			if (split.length < 2)
-				throw new AIException("what to do with light?");
-			if (split[1].equals("an"))
-				binder.getPower().setState(State.ON, Switch.A);
-			else if (split[1].equals("aus"))
-				binder.getPower().setState(State.OFF, Switch.A);
-			else if (split[1].equals("schlafzimmer")) {
-				if (split.length < 3)
-					throw new AIException("what to do with schlafzimmer?");
-				if (split[2].equals("an")) {
-					binder.getPower().setState(State.ON, Switch.B);
-					binder.getPower().setState(State.ON, Switch.C);
-				} else if (split[2].equals("aus")) {
-					binder.getPower().setState(State.OFF, Switch.B);
-					binder.getPower().setState(State.OFF, Switch.C);
-				} else
-					throw new AIException("can't make schlafzimmer " + split[1]);
-			} else
-				throw new AIException("can't make light " + split[1]);
+			if (split.length != 3)
+				throw new AIException("Usage: licht 'name' [an|aus]");
+			State state = State.OFF;
+			if (split[2].equalsIgnoreCase("an"))
+				state = State.ON;
+			IInternetSwitch power = binder.getPower().get(split[1]);
+			if (power == null)
+				throw new AIException("Unknown switch: " + split[1]);
+			power.setState(state);
 			Toast.makeText(context, "success light", Toast.LENGTH_SHORT).show();
 		} else if (cmd.startsWith("bildschirm")) {
 			if (split.length < 2)

@@ -17,9 +17,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IChatListener;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.IChatListener;
 import de.remote.mobile.R;
 import de.remote.mobile.util.ChatAdapter;
 
@@ -385,7 +384,7 @@ public class ChatActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onPowerSwitchChange(Switch _switch, State state) {
+	public void onPowerSwitchChange(String _switch, State state) {
 		// TODO Auto-generated method stub
 		
 	}

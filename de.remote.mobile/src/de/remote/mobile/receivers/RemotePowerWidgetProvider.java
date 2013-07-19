@@ -40,15 +40,19 @@ public class RemotePowerWidgetProvider extends AppWidgetProvider {
 					R.layout.power_widget);
 
 			// set switch functionality
-			Intent playIntent = new Intent(context, WidgetPowerService.class);
-			playIntent.setAction(ACTION_SWITCH);
-			playIntent.putExtra(PowerActivity.SWITCH_NUMBER, appWidgetIds[i]);
-			PendingIntent playPending = PendingIntent.getService(context,
-					playIntent.hashCode(), playIntent,
+			Intent switchIntent = new Intent(context, WidgetPowerService.class);
+			switchIntent.setAction(ACTION_SWITCH);
+			switchIntent.putExtra(PowerActivity.SWITCH_NUMBER, appWidgetIds[i]);
+			PendingIntent switchPending = PendingIntent.getService(context,
+					switchIntent.hashCode(), switchIntent,
 					PendingIntent.FLAG_UPDATE_CURRENT);
 
-			views.setOnClickPendingIntent(R.id.image_power_widget, playPending);
-			views.setOnClickPendingIntent(R.id.text_power_widget, playPending);
+//			views.setOnClickPendingIntent(R.id.image_power_widget, playPending);
+//			views.setOnClickPendingIntent(R.id.text_power_widget, playPending);
+			views.setOnClickPendingIntent(R.id.widget_power_layout, switchPending);
+			
+//			pendingIntent = PendingIntent.getBroadcast(context,
+//					0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.api.IThumbnailListener;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IThumbnailListener;
 
 /**
  * this proxy buffers temporary information about the current directory.

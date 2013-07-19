@@ -10,7 +10,7 @@ import android.os.IBinder;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import de.remote.api.PlayingBean;
+import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.services.PlayerBinder;

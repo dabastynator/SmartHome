@@ -13,15 +13,15 @@ import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
-import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
-import de.remote.api.IControl;
-import de.remote.api.IMusicStation;
-import de.remote.api.IPlayList;
-import de.remote.api.IPlayer;
-import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
-import de.remote.gpiopower.api.IGPIOPower;
+import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IChatServer;
+import de.remote.mediaserver.api.IControl;
+import de.remote.mediaserver.api.IMediaServer;
+import de.remote.mediaserver.api.IPlayList;
+import de.remote.mediaserver.api.IPlayer;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
 import de.remote.mobile.services.RemoteService.StationStuff;
@@ -296,13 +296,13 @@ public class PlayerBinder extends Binder {
 		}
 	}
 
-	public IGPIOPower getPower() {
-		return service.power;
+	public Map<String, IInternetSwitch> getPower() {
+		return service.internetSwitch;
 	}
 
 	public void setMusicStation(String stationName) {
 		try {
-			IMusicStation station = service.musicStations.get(stationName);
+			IMediaServer station = service.musicStations.get(stationName);
 			if (service.station == station)
 				return;
 			musicStationName = stationName;
@@ -339,11 +339,11 @@ public class PlayerBinder extends Binder {
 		return usesMplayer;
 	}
 
-	public Map<String, IMusicStation> getMusicStations() {
+	public Map<String, IMediaServer> getMusicStations() {
 		return service.musicStations;
 	}
 
-	public IMusicStation getMusicStation() {
+	public IMediaServer getMusicStation() {
 		return service.station;
 	}
 

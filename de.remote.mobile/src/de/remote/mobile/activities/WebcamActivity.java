@@ -9,8 +9,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mobile.R;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
@@ -122,9 +121,10 @@ public class WebcamActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onPowerSwitchChange(Switch _switch, State state) {
+	public void onPowerSwitchChange(String _switch, State state) {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }

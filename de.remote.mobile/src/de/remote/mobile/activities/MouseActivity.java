@@ -10,9 +10,8 @@ import android.view.View;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.ServerPort;
-import de.remote.api.IControl;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.IControl;
 import de.remote.mobile.R;
 
 public class MouseActivity extends BindedActivity {
@@ -106,7 +105,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	public void onPowerSwitchChange(Switch _switch, State state) {
+	public void onPowerSwitchChange(String _switch, State state) {
 		// TODO Auto-generated method stub
 		
 	}

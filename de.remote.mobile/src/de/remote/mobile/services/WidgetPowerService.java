@@ -12,13 +12,12 @@ import android.os.IBinder;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.PlayingBean;
-import de.remote.gpiopower.api.IGPIOPower.State;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.PowerActivity;
 import de.remote.mobile.activities.SelectSwitchActivity;
-import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 
@@ -58,12 +57,10 @@ public class WidgetPowerService extends Service implements
 		}
 	};
 
-	private RemoteDatabase serverDB;
 
 	@Override
 	public void onCreate() {
 		// bind service
-		serverDB = new RemoteDatabase(this);
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
@@ -112,23 +109,20 @@ public class WidgetPowerService extends Service implements
 	private void updateWidget(int widgetID) throws Exception {
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
-		int switcH = prefs.getInt(widgetID + "", -1);
-		if (switcH == -1)
+		String switchName = prefs.getString(widgetID + "", null);
+		if (switchName == null)
 			return;
-		String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
-		if (name == null)
-			name = "Switch " + switcH;
-		updateWidget(widgetID, R.drawable.light_off, name);
-		Switch s = Switch.values()[switcH];
+		updateWidget(widgetID, R.drawable.light_off, switchName);
 		if (binder == null)
 			throw new Exception("not conneced");
 		if (binder.getPower() == null)
 			throw new Exception(binder.getServerName() + " has no power server");
-		State state = binder.getPower().getState(s);
+		IInternetSwitch power = binder.getPower().get(switchName);
+		State state = power.getState();
 		if (state == State.ON)
-			updateWidget(widgetID, R.drawable.light_on, name);
+			updateWidget(widgetID, R.drawable.light_on, switchName);
 		else
-			updateWidget(widgetID, R.drawable.light_off, name);
+			updateWidget(widgetID, R.drawable.light_off, switchName);
 	}
 
 	private void updateWidget(int widgetID, int image, String text) {
@@ -173,26 +167,22 @@ public class WidgetPowerService extends Service implements
 	private void switchPower(int widgetID) throws Exception {
 		if (binder.getPower() == null)
 			throw new Exception(binder.getServerName() + " has no power server");
-		RemoteDatabase serverDB = new RemoteDatabase(this);
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
-		int switcH = prefs.getInt(widgetID + "", -1);
-		if (switcH == -1)
-			return;
-		String name = serverDB.getPowerSwitchDao().getNameOfSwitch(switcH);
+		String name = prefs.getString(widgetID + "", null);
 		if (name == null)
-			name = "Switch " + switcH;
-		Switch s = Switch.values()[switcH];
-		State state = binder.getPower().getState(s);
+			return;
+		IInternetSwitch power = binder.getPower().get(name);
+		if (power == null)
+			throw new Exception("Switch " + name + " is unknown");
+		State state = power.getState();
 		if (state == State.ON)
 			state = State.OFF;
 		else
 			state = State.ON;
-		binder.getPower().setState(state, s);
+		power.setState(state);
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
-		ComponentName thisWidget = new ComponentName(getApplicationContext(),
-				RemotePowerWidgetProvider.class);
 		if (remotePowerViews != null) {
 			if (state == State.ON)
 				remotePowerViews.setImageViewResource(R.id.image_power_widget,
@@ -212,7 +202,6 @@ public class WidgetPowerService extends Service implements
 
 	@Override
 	public void onDestroy() {
-		serverDB.close();
 		if (binder != null)
 			binder.removeRemoteActionListener(this);
 		unbindService(playerConnection);
@@ -264,7 +253,7 @@ public class WidgetPowerService extends Service implements
 	}
 
 	@Override
-	public void onPowerSwitchChange(Switch _switch, State state) {
+	public void onPowerSwitchChange(String switchName, State state) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
 
@@ -277,12 +266,8 @@ public class WidgetPowerService extends Service implements
 		// update each of the app widgets with the remote adapter
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
-			int switcH = prefs.getInt(appWidgetIds[i] + "", -1);
-			if (switcH == _switch.ordinal()) {
-				String name = serverDB.getPowerSwitchDao().getNameOfSwitch(
-						switcH);
-				if (name == null)
-					name = "Switch " + switcH;
+			String name = prefs.getString(appWidgetIds[i] + "", null);
+			if (switchName.equals(name)) {
 				if (state == State.ON)
 					updateWidget(appWidgetIds[i], R.drawable.light_on, name);
 				else

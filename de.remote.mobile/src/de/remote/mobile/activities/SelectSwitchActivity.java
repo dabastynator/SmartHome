@@ -1,95 +1,84 @@
 package de.remote.mobile.activities;
 
-import android.app.Activity;
+import java.util.Map;
+
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import de.remote.gpiopower.api.IGPIOPower.Switch;
+import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.mobile.R;
-import de.remote.mobile.database.PowerSwitchDao;
-import de.remote.mobile.database.RemoteDatabase;
+import de.remote.mobile.receivers.RemotePowerWidgetProvider;
+import de.remote.mobile.services.WidgetPowerService;
+import de.remote.mobile.util.SwitchAdapter;
 
-public class SelectSwitchActivity extends Activity {
+public class SelectSwitchActivity extends PowerActivity {
 
 	public static final String WIDGET_PREFS = "prefs";
 
-	private TextView lableA;
-	private TextView lableB;
-	private TextView lableC;
-	private TextView lableD;
 	private int appWidgetId;
+
+	private SelectSwitchListener listener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.powerpoint);
-
 		Bundle extras = getIntent().getExtras();
 		appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 				AppWidgetManager.INVALID_APPWIDGET_ID);
-
-		findComponents();
-		RemoteDatabase serverDB = new RemoteDatabase(this);
-		updateLables(serverDB.getPowerSwitchDao());
-		serverDB.close();
-
+		listener = new SelectSwitchListener();
 	}
 
-	private void findComponents() {
-		View buttonA = findViewById(R.id.switch_a);
-		View buttonB = findViewById(R.id.switch_b);
-		View buttonC = findViewById(R.id.switch_c);
-		View buttonD = findViewById(R.id.switch_d);
-
-		buttonA.setVisibility(View.GONE);
-		buttonB.setVisibility(View.GONE);
-		buttonC.setVisibility(View.GONE);
-		buttonD.setVisibility(View.GONE);
-
-		lableA = (TextView) findViewById(R.id.powerlable_1);
-		lableB = (TextView) findViewById(R.id.powerlable_2);
-		lableC = (TextView) findViewById(R.id.powerlable_3);
-		lableD = (TextView) findViewById(R.id.powerlable_4);
-	}
-
-	private void updateLables(PowerSwitchDao powerDao) {
-		TextView[] views = new TextView[] { lableA, lableB, lableC, lableD };
-		for (Switch s : Switch.values()) {
-			String name = powerDao.getNameOfSwitch(s.ordinal());
-			if (name == null)
-				name = "Switch " + s.ordinal();
-			views[s.ordinal()].setText(name);
-			views[s.ordinal()].setOnClickListener(new SelectSwitchListener(s));
+	@Override
+	public void onServerConnectionChanged(String serverName, int serverID) {
+		if (binder.isConnected()) {
+			Map<String, IInternetSwitch> power = binder.getPower();
+			String[] switches = power.keySet()
+					.toArray(new String[power.size()]);
+			switchList.setAdapter(new SwitchAdapter(this, switches, power,
+					listener));
+		} else {
+			switchList
+					.setAdapter(new SwitchAdapter(this, new String[] {}, null));
 		}
 	}
 
-	public class SelectSwitchListener implements OnClickListener {
-		private Switch s;
+	public class SelectSwitchListener {
 
-		public SelectSwitchListener(Switch s) {
-			this.s = s;
-		}
-
-		@Override
-		public void onClick(View v) {
-
+		public boolean onSelectSwitch(String switchName) {
 			// Speichere Auswahl
 			SharedPreferences prefs = SelectSwitchActivity.this
 					.getSharedPreferences(WIDGET_PREFS, 0);
 			SharedPreferences.Editor edit = prefs.edit();
-			edit.putInt("" + appWidgetId, s.ordinal());
+			edit.putString("" + appWidgetId, switchName);
 			edit.commit();
 
 			AppWidgetManager manager = AppWidgetManager
 					.getInstance(SelectSwitchActivity.this);
-			RemoteViews views = new RemoteViews(SelectSwitchActivity.this.getPackageName(),
+			RemoteViews views = new RemoteViews(
+					SelectSwitchActivity.this.getPackageName(),
 					R.layout.power_widget);
+			Intent switchIntent = new Intent(SelectSwitchActivity.this,
+					WidgetPowerService.class);
+			switchIntent.setAction(RemotePowerWidgetProvider.ACTION_SWITCH);
+			switchIntent.putExtra(PowerActivity.SWITCH_NUMBER, appWidgetId);
+			PendingIntent switchPending = PendingIntent.getService(
+					SelectSwitchActivity.this, switchIntent.hashCode(),
+					switchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			views.setOnClickPendingIntent(R.id.widget_power_layout,
+					switchPending);
+			views.setImageViewResource(R.id.image_power_widget,
+					R.drawable.light_off);
+			views.setTextViewText(R.id.text_power_widget, switchName);
 			manager.updateAppWidget(appWidgetId, views);
 
 			Intent resultValue = new Intent();
@@ -97,6 +86,7 @@ public class SelectSwitchActivity extends Activity {
 					appWidgetId);
 			setResult(RESULT_OK, resultValue);
 			finish();
+			return false;
 		}
 
 	}
