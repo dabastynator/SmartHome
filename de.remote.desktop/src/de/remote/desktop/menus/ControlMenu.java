@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IControl;
+import de.remote.mediaserver.api.IControl;
 
 /**
  * Menu to handle standard commands for the computer. Provides items to handle

@@ -16,16 +16,7 @@ import javax.swing.JTabbedPane;
 
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.ControlConstants;
-import de.remote.api.IBrowser;
-import de.remote.api.IChatServer;
-import de.remote.api.IPlayList;
-import de.remote.api.IPlayer;
-import de.remote.api.IPlayerListener;
-import de.remote.api.IMusicStation;
-import de.remote.api.IStationHandler;
-import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
+import de.remote.controlcenter.api.IControlCenter;
 import de.remote.desktop.menus.ControlMenu;
 import de.remote.desktop.menus.PlayerMenu;
 import de.remote.desktop.menus.RegistryMenu;
@@ -35,6 +26,14 @@ import de.remote.desktop.panels.PlayListPanel;
 import de.remote.desktop.panels.PlayerPanel;
 import de.remote.desktop.panels.RegistryPanel;
 import de.remote.desktop.panels.WebcamPanel;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IChatServer;
+import de.remote.mediaserver.api.IMediaServer;
+import de.remote.mediaserver.api.IPlayList;
+import de.remote.mediaserver.api.IPlayer;
+import de.remote.mediaserver.api.IPlayerListener;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mediaserver.api.PlayingBean;
 
 /**
  * The main frame for the gui. It creates all panels and menus that will be
@@ -110,12 +109,12 @@ public class ControlFrame extends JFrame implements Connectable {
 	/**
 	 * remote factory object to get all other remote objects
 	 */
-	public IMusicStation station;
+	public IMediaServer station;
 	
 	/**
 	 * remote music station list object to get all other remote music station
 	 */
-	public IStationHandler stationList;
+	public IControlCenter stationList;
 
 
 	/**
@@ -250,9 +249,9 @@ public class ControlFrame extends JFrame implements Connectable {
 			server = Server.getServer();
 			server.connectToRegistry(registry);
 			server.startServer(port);
-			stationList = ((IStationHandler) server.find(IStationHandler.STATION_ID,
-					IStationHandler.class));
-			station = stationList.getStation(0);
+			stationList = ((IControlCenter) server.find(IControlCenter.ID,
+					IControlCenter.class));
+			station = (IMediaServer) stationList.getControlUnit(0).getRemoteableControlObject();
 			mPlayer = station.getMPlayer();
 			totemPlayer = station.getTotemPlayer();
 			IBrowser browser = station.createBrowser();
@@ -266,7 +265,7 @@ public class ControlFrame extends JFrame implements Connectable {
 			IPlayList playList = station.getPlayList();
 			fileBrowser.setPlayList(playList);
 			plsBrowser.setPlayList(playList);
-			chatServer = (IChatServer) server.find(ControlConstants.CHAT_ID,
+			chatServer = (IChatServer) server.find(IChatServer.ID,
 					IChatServer.class);
 			chat.setClientName(name);
 			chat.setChatServer(chatServer);

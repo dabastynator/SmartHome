@@ -5,8 +5,8 @@ import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import de.remote.api.IPlayer;
 import de.remote.desktop.ControlFrame;
+import de.remote.mediaserver.api.IPlayer;
 
 /**
  * Menu to switch the current player. There are two possible players: mplayer

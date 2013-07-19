@@ -15,8 +15,8 @@ import java.awt.event.KeyListener;
 import javax.swing.JButton;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IChatListener;
-import de.remote.api.IChatServer;
+import de.remote.mediaserver.api.IChatListener;
+import de.remote.mediaserver.api.IChatServer;
 
 /**
  * a panel to chat with other clients. the panel provides textfiels to show

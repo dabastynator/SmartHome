@@ -13,10 +13,10 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.api.IPlayList;
-import de.remote.api.IPlayer;
-import de.remote.api.PlayerException;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IPlayList;
+import de.remote.mediaserver.api.IPlayer;
+import de.remote.mediaserver.api.PlayerException;
 
 /**
  * panel to browse throw the file system, it contains a list to list all

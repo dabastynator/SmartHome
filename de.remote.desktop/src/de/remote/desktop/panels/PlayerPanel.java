@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayer;
-import de.remote.api.PlayerException;
+import de.remote.mediaserver.api.IPlayer;
+import de.remote.mediaserver.api.PlayerException;
 
 /**
  * the playerpanel contains buttons to control the current player.
