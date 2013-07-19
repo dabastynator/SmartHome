@@ -6,9 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.impl.BrowserImpl;
-
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.impl.BrowserImpl;
 import junit.framework.TestCase;
 
 public class BrowserTest extends TestCase {

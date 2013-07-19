@@ -8,11 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayerListener;
-import de.remote.api.PlayerException;
-import de.remote.api.PlayingBean;
-import de.remote.api.PlayingBean.STATE;
-import de.remote.impl.MPlayer;
+import de.remote.mediaserver.api.IPlayerListener;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mediaserver.api.PlayingBean;
+import de.remote.mediaserver.api.PlayingBean.STATE;
+import de.remote.mediaserver.impl.MPlayer;
 
 /**
  * test for mplayer

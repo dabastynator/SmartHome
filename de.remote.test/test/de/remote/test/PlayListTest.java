@@ -6,9 +6,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IPlayList;
-import de.remote.api.PlayerException;
-import de.remote.impl.StationImpl;
+import de.remote.mediaserver.api.IPlayList;
+import de.remote.mediaserver.api.PlayerException;
+import de.remote.mediaserver.impl.MediaServerImpl;
 
 public class PlayListTest extends TestCase {
 
@@ -18,7 +18,7 @@ public class PlayListTest extends TestCase {
 	@Test
 	public void testPlayList() {
 		try {
-			IPlayList pls = new StationImpl(null, BrowserTest.TEST_LOCATION)
+			IPlayList pls = new MediaServerImpl(BrowserTest.TEST_LOCATION, BrowserTest.TEST_LOCATION, "Test")
 					.getPlayList();
 			String plsName = "test_pls";
 			testAddRemote(pls, plsName);

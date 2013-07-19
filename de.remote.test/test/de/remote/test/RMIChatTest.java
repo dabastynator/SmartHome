@@ -16,12 +16,12 @@ import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.api.IBrowser;
-import de.remote.api.IChatListener;
-import de.remote.api.IChatServer;
-import de.remote.api.IThumbnailListener;
-import de.remote.impl.BrowserImpl;
-import de.remote.impl.ChatServerImpl;
+import de.remote.mediaserver.api.IBrowser;
+import de.remote.mediaserver.api.IChatListener;
+import de.remote.mediaserver.api.IChatServer;
+import de.remote.mediaserver.api.IThumbnailListener;
+import de.remote.mediaserver.impl.BrowserImpl;
+import de.remote.mediaserver.impl.ChatServerImpl;
 
 public class RMIChatTest extends TestCase {
 
