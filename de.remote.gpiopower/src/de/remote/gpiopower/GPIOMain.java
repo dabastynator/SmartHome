@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import de.newsystem.rmi.api.RMILogger;
-import de.newsystem.rmi.api.Registry;
-import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.controlcenter.api.IControlCenter;
 import de.remote.gpiopower.GPIOPower.Switch;
@@ -32,6 +31,8 @@ public class GPIOMain {
 			server.startServer(IInternetSwitch.PORT);
 			IControlCenter control = (IControlCenter) server.find(
 					IControlCenter.ID, IControlCenter.class);
+			if (control == null)
+				throw new RemoteException(IControlCenter.ID, "not found in registry");
 			for (Switch s : Switch.values()) {
 				String switchParameter = "-" + s.toString().toLowerCase();
 				if (hasParameter(switchParameter, args)) {
