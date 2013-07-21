@@ -347,12 +347,12 @@ public class RemoteService extends Service {
 			try {
 				IControlUnit unit = stationList.getControlUnit(i);
 				Object object = unit.getRemoteableControlObject();
-				if (object instanceof IMediaServer){
+				if (object instanceof IMediaServer) {
 					IMediaServer server = (IMediaServer) object;
 					String name = server.getName();
-					musicStations.put(name, server);	
+					musicStations.put(name, server);
 				}
-				if (object instanceof IInternetSwitch){
+				if (object instanceof IInternetSwitch) {
 					IInternetSwitch iswitch = (IInternetSwitch) object;
 					String name = unit.getName();
 					internetSwitch.put(name, iswitch);
@@ -392,8 +392,8 @@ public class RemoteService extends Service {
 	public class GPIOListener implements IInternetSwitchListener {
 
 		@Override
-		public void onPowerSwitchChange(final String switchName, final State state)
-				throws RemoteException {
+		public void onPowerSwitchChange(final String switchName,
+				final State state) throws RemoteException {
 			Log.e("gpio power", "Switch: " + switchName + " " + state);
 			handler.post(new Runnable() {
 				@Override
@@ -401,7 +401,7 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener listener : actionListener)
 						listener.onPowerSwitchChange(switchName, state);
 				}
-			});			
+			});
 		}
 
 	}
