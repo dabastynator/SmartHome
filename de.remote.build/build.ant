@@ -1,6 +1,6 @@
 <project>
 
-	<property name="lib.dir" value="./../de.remote.impl/lib" />
+	<property name="lib.dir" value="./../de.remote.mediaserver/lib" />
 	<property name="lib.dir2" value="./../de.webcam/lib" />
 	<property name="lib.dir3" value="./../de.hcl.synchronize/lib" />
 	<property name="classes.dir" value="./build/classes" />
@@ -16,13 +16,10 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="compile_rmi" depends="clean">
+	<target name="jar_rmi" depends="clean">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" includeantruntime="false"/>
-	</target>
-
-	<target name="jar_rmi" depends="compile_rmi">
 		<mkdir dir="${jar.dir}" />
+		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" includeantruntime="false" />
 		<jar destfile="${jar.dir}/registry.jar" basedir="${classes.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="de.newsystem.rmi.api.Registry" />
@@ -30,21 +27,8 @@
 		</jar>
 	</target>
 
-	<target name="compile_remote">
-		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}"  includeantruntime="false"/>
-		<javac srcdir="./../de.remote.impl/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
-		<javac srcdir="./../de.webcam/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
-	</target>
-
-	<target name="jar_remote" depends="compile_remote">
-		<mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/server.jar" basedir="${classes.dir}">
-			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="" />
-			<manifest>
-				<attribute name="Main-Class" value="de.remote.server.RemoteServer" />
-			</manifest>
-		</jar>
+	<target name="jar_webcam" depends="jar_rmi">
+		<javac srcdir="./../de.webcam/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/webcam.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.dir2}" includes="*.jar" excludes="" />
 			<manifest>
@@ -52,14 +36,28 @@
 			</manifest>
 		</jar>
 	</target>
-	
-	<target name="compile_synch" depends="compile_desktop">
-		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath"  includeantruntime="false"/>
+
+	<target name="jar_controlcenter" depends="jar_rmi">
+		<javac srcdir="./../de.remote.controlcenter/src" destdir="${classes.dir}" includeantruntime="false" />
+		<jar destfile="${jar.dir}/controlcenter.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.remote.controlcenter.ControlCenterMain" />
+			</manifest>
+		</jar>
 	</target>
 
-	<target name="jar_synch" depends="compile_synch">
-		<mkdir dir="${jar.dir}" />
+	<target name="jar_mediaserver" depends="jar_controlcenter">
+		<javac srcdir="./../de.remote.mediaserver/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+		<jar destfile="${jar.dir}/mediaserver.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="" />
+			<manifest>
+				<attribute name="Main-Class" value="de.remote.mediaserver.server.MediaServerMain" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="jar_synch" depends="jar_desktop">
+		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/synchronizer.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.dir3}" includes="*.jar" excludes="" />
 			<zipgroupfileset dir="${lib.dir3}" includes="*.zip" excludes="" />
@@ -71,14 +69,8 @@
 		</jar>
 	</target>
 
-	<target name="compile_desktop" depends="compile_remote">
-		<mkdir dir="${classes.dir}" />
-		<javac srcdir="./../de.remote.api/src" destdir="${classes.dir}"  includeantruntime="false"/>
-		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}"  includeantruntime="false"/>
-	</target>
-
-	<target name="jar_desktop" depends="compile_desktop">
-		<mkdir dir="${jar.dir}" />
+	<target name="jar_desktop" depends="jar_mediaserver,jar_webcam">
+		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}" includeantruntime="false" />
 		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
 			<fileset dir="./../de.remote.desktop/" includes="res/*.png" excludes="" />
 			<zipgroupfileset dir="${lib.dir2}" includes="*.jar" excludes="" />
@@ -87,14 +79,17 @@
 			</manifest>
 		</jar>
 	</target>
-	
-	<target name="gpio_power">
-	    <javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}"  includeantruntime="false"/>
-	    <mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">			
+
+	<target name="jar_gpio_power" depends="jar_controlcenter">
+		<javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}" includeantruntime="false" />
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="de.remote.gpiopower.GPIOMain" />
 			</manifest>
 		</jar>
+	</target>
+
+	<target name="build_remote" depends="jar_webcam,jar_mediaserver,jar_synch,jar_desktop,jar_gpio_power">
 	</target>
 </project>
