@@ -39,6 +39,14 @@ public interface IControlCenter extends RemoteAble {
 	public void addControlUnit(IControlUnit controlUnit) throws RemoteException;
 
 	/**
+	 * Get the ground plot of the control center area.
+	 * 
+	 * @return ground plot
+	 * @throws RemoteException
+	 */
+	public GroundPlot getGroundPlot() throws RemoteException;
+
+	/**
 	 * remove remote control unit.
 	 * 
 	 * @param controlUnit
