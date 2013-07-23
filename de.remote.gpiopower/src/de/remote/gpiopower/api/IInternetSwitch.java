@@ -53,4 +53,12 @@ public interface IInternetSwitch extends RemoteAble {
 	 */
 	public void unregisterPowerSwitchListener(IInternetSwitchListener listener)
 			throws RemoteException;
+
+	/**
+	 * Get the type of the internet switch.
+	 * 
+	 * @return switch type
+	 * @throws RemoteException
+	 */
+	public String getType() throws RemoteException;
 }

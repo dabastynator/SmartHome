@@ -20,11 +20,13 @@ public class InternetSwitchImpl implements IInternetSwitch {
 	private String name;
 	private Switch _switch;
 	private GPIOPower power;
+	private String type;
 
-	public InternetSwitchImpl(String name, GPIOPower power, Switch _switch) {
+	public InternetSwitchImpl(String name, GPIOPower power, Switch _switch, String type) {
 		this.name = name;
 		this.power = power;
 		this._switch = _switch;
+		this.type = type;
 	}
 
 	@Override
@@ -65,6 +67,11 @@ public class InternetSwitchImpl implements IInternetSwitch {
 			}
 		}
 		listeners.removeAll(exceptionList);
+	}
+	
+	@Override
+	public String getType(){
+		return type;
 	}
 
 }

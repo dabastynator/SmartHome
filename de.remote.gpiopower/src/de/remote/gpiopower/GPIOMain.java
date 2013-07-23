@@ -32,15 +32,31 @@ public class GPIOMain {
 			IControlCenter control = (IControlCenter) server.find(
 					IControlCenter.ID, IControlCenter.class);
 			if (control == null)
-				throw new RemoteException(IControlCenter.ID, "not found in registry");
+				throw new RemoteException(IControlCenter.ID,
+						"not found in registry");
 			for (Switch s : Switch.values()) {
 				String switchParameter = "-" + s.toString().toLowerCase();
 				if (hasParameter(switchParameter, args)) {
-					String switchName = getParameter(switchParameter, args);
-					InternetSwitchImpl internetSwitch = new InternetSwitchImpl(
-							switchName, gpioPower, s);
-					GPIOControlUnit unit = new GPIOControlUnit(switchName, "Internet switch", internetSwitch);
-					control.addControlUnit(unit);
+					try {
+						String[] switchConfig = getParameter(switchParameter,
+								args).split(",");
+						float[] position = new float[3];
+						position[0] = Float.parseFloat(switchConfig[1]);
+						position[1] = Float.parseFloat(switchConfig[2]);
+						position[2] = Float.parseFloat(switchConfig[3]);
+						String type = switchConfig[4];
+						InternetSwitchImpl internetSwitch = new InternetSwitchImpl(
+								switchConfig[0], gpioPower, s, type);
+						GPIOControlUnit unit = new GPIOControlUnit(
+								switchConfig[0], "Internet switch",
+								internetSwitch, position);
+						control.addControlUnit(unit);
+					} catch (Exception e) {
+						System.err.println("Error reading switch " + s + ": "
+								+ e.getMessage());
+						printUsage();
+						System.exit(1);
+					}
 				}
 			}
 		} catch (UnknownHostException e) {
@@ -74,21 +90,28 @@ public class GPIOMain {
 		return false;
 	}
 
-	private static void checkArgs(String[] args) {
-		for (String str : args) {
-			if (str.toLowerCase().contains("help")
-					|| str.toLowerCase().contains("-h")) {
-				printUsage();
-				System.exit(1);
-			}
-
+	private static float[] getPosition(String[] args) {
+		String sPos = getParameter("--position", args);
+		try {
+			String[] split = sPos.split(",");
+			float[] pos = new float[3];
+			pos[0] = Float.parseFloat(split[0]);
+			pos[1] = Float.parseFloat(split[1]);
+			pos[2] = Float.parseFloat(split[2]);
+			return pos;
+		} catch (Exception e) {
+			System.err.println("Error reading position: " + e.getMessage());
+			printUsage();
+			System.exit(1);
 		}
+		return null;
 	}
 
 	private static void printUsage() {
 		System.out.println("Usage:  ");
 		System.out.println("  --registry    : ip of registry.");
-		System.out.println("  -[a|b|c|d]    : name of specified switch.");
+		System.out
+				.println("  -[a|b|c|d]    : name,x,y,z,type of specified switch.");
 	}
 
 }
