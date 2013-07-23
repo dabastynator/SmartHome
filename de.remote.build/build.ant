@@ -3,6 +3,7 @@
 	<property name="lib.dir" value="./../de.remote.mediaserver/lib" />
 	<property name="lib.dir2" value="./../de.webcam/lib" />
 	<property name="lib.dir3" value="./../de.hcl.synchronize/lib" />
+	<property name="lib.center" value="./../de.remote.controlcenter/lib" />
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
 
@@ -10,6 +11,7 @@
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 		<fileset dir="${lib.dir2}" includes="**/*.jar" />
 		<fileset dir="${lib.dir3}" includes="**/*.jar" />
+		<fileset dir="${lib.center}" includes="**/*.jar" />
 	</path>
 
 	<target name="clean">
@@ -38,8 +40,9 @@
 	</target>
 
 	<target name="jar_controlcenter" depends="jar_rmi">
-		<javac srcdir="./../de.remote.controlcenter/src" destdir="${classes.dir}" includeantruntime="false" />
+		<javac srcdir="./../de.remote.controlcenter/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/controlcenter.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.center}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.remote.controlcenter.ControlCenterMain" />
 			</manifest>
