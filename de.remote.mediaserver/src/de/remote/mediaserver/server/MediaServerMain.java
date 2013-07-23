@@ -25,6 +25,7 @@ public class MediaServerMain {
 		String place = getParameter("--location", args);
 		String plsDirecotry = getParameter("--temp", args);
 		String registry = getParameter("--registry", args);
+		float[] position = getPosition(args);
 
 		String name = getParameter("--name", args);
 
@@ -43,7 +44,8 @@ public class MediaServerMain {
 
 		IMediaServer mediaServer = new MediaServerImpl(place, plsDirecotry,
 				name);
-		IControlUnit mediaUnit = new MediaControlUnit(name, mediaServer);
+		IControlUnit mediaUnit = new MediaControlUnit(name, mediaServer,
+				position);
 		IChatServer chat = new ChatServerImpl();
 
 		try {
@@ -69,6 +71,23 @@ public class MediaServerMain {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static float[] getPosition(String[] args) {
+		String sPos = getParameter("--position", args);
+		try {
+			String[] split = sPos.split(",");
+			float[] pos = new float[3];
+			pos[0] = Float.parseFloat(split[0]);
+			pos[1] = Float.parseFloat(split[1]);
+			pos[2] = Float.parseFloat(split[2]);
+			return pos;
+		} catch (Exception e) {
+			System.err.println("Error reading position: " + e.getMessage());
+			printUsage();
+			System.exit(1);
+		}
+		return null;
 	}
 
 	private static String getParameter(String string, String[] args) {
@@ -99,6 +118,7 @@ public class MediaServerMain {
 		System.out.println("  --registry    : ip of the registry.");
 		System.out.println("  --name        : specify name or music station.");
 		System.out.println("  --location    : specify music browse location.");
+		System.out.println("  --position    : Position of server x,y,z.");
 		System.out
 				.println("  --temp        : specify temprary location for playlists.");
 	}
