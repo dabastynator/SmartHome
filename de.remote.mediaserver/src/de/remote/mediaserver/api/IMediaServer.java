@@ -14,7 +14,7 @@ public interface IMediaServer extends RemoteAble {
 	 * standard port for the server
 	 */
 	public static final int STATION_PORT = 5006;
-	
+
 	/**
 	 * create new browser for the file system
 	 * 
@@ -55,11 +55,4 @@ public interface IMediaServer extends RemoteAble {
 	 */
 	public IPlayList getPlayList() throws RemoteException;
 
-	/**
-	 * Get the name of the music station.
-	 * 
-	 * @return station name
-	 * @throws RemoteException
-	 */
-	public String getName() throws RemoteException;
 }

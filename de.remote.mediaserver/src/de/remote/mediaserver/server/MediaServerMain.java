@@ -42,8 +42,7 @@ public class MediaServerMain {
 			}
 		});
 
-		IMediaServer mediaServer = new MediaServerImpl(place, plsDirecotry,
-				name);
+		IMediaServer mediaServer = new MediaServerImpl(place, plsDirecotry);
 		IControlUnit mediaUnit = new MediaControlUnit(name, mediaServer,
 				position);
 		IChatServer chat = new ChatServerImpl();

@@ -14,15 +14,13 @@ public class MediaServerImpl implements IMediaServer {
 	private ControlImpl control;
 	private PlayListImpl playlist;
 	private String browserLocation;
-	private String name;
 
-	public MediaServerImpl(String browseLocation, String playlistLocation, String name) {
+	public MediaServerImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
 		mplayer = new MPlayer(playlistLocation);
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
-		this.name = name;
 	}
 
 	@Override
@@ -50,8 +48,4 @@ public class MediaServerImpl implements IMediaServer {
 		return playlist;
 	}
 
-	@Override
-	public String getName() throws RemoteException {
-		return name;
-	}
 }
