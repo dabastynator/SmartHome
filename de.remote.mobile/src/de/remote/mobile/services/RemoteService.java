@@ -163,7 +163,7 @@ public class RemoteService extends Service {
 				@Override
 				public void run() {
 					Toast.makeText(RemoteService.this, e.getMessage(),
-							Toast.LENGTH_SHORT).show();
+							Toast.LENGTH_LONG).show();
 					for (IRemoteActionListener listener : actionListener)
 						listener.onServerConnectionChanged(null, -1);
 				}

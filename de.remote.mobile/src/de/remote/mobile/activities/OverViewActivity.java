@@ -7,8 +7,6 @@ import android.view.MenuInflater;
 import android.view.Window;
 import android.widget.Toast;
 import de.newsystem.opengl.common.AbstractSceneSurfaceView;
-import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.controlcenter.api.IControlCenter;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mobile.R;
 import de.remote.mobile.util.ControlSceneRenderer;
@@ -35,6 +33,18 @@ public class OverViewActivity extends BindedActivity {
 		setTitle("connecting...");
 		setProgressBarVisibility(true);
 	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		view.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		view.onResume();
+	}
 
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
@@ -42,9 +52,8 @@ public class OverViewActivity extends BindedActivity {
 		setProgressBarVisibility(true);
 		new Thread() {
 			public void run() {
-				IControlCenter control = binder.getControlCenter();
 				try {
-					renderer.reloadControlCenter(control);
+					renderer.reloadControlCenter(binder);
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
@@ -55,13 +64,13 @@ public class OverViewActivity extends BindedActivity {
 							setProgressBarVisibility(false);
 						}
 					});
-				} catch (final RemoteException e) {
+				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
 							Toast.makeText(OverViewActivity.this,
 									"error load center: " + e.getMessage(),
-									Toast.LENGTH_SHORT).show();
+									Toast.LENGTH_LONG).show();
 							setTitle("Not connected");
 							setProgressBarVisibility(false);
 						}
