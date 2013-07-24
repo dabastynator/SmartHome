@@ -19,6 +19,18 @@
             android:name=".activities.BrowserActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask" >
+            <!--
+        <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity
+            android:name=".activities.OverViewActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -80,9 +92,12 @@
         </activity>
 
         <service android:name="de.remote.mobile.services.RemoteService" >
-        <!--     <intent-filter>
+
+            <!--
+                 <intent-filter>
                 <action android:name=".services.remoteservice" />
-            </intent-filter> -->
+            </intent-filter>
+            -->
         </service>
         <service android:name=".services.WidgetService" >
         </service>
@@ -118,6 +133,7 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

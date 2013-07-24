@@ -21,7 +21,6 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.ReceiverProgress;
 import de.remote.controlcenter.api.IControlCenter;
 import de.remote.controlcenter.api.IControlUnit;
-import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.gpiopower.api.IInternetSwitchListener;
 import de.remote.mediaserver.api.IBrowser;
@@ -31,10 +30,10 @@ import de.remote.mediaserver.api.IMediaServer;
 import de.remote.mediaserver.api.IPlayList;
 import de.remote.mediaserver.api.IPlayer;
 import de.remote.mediaserver.api.IPlayerListener;
-import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
+import de.remote.mobile.util.ControlCenterBuffer;
 import de.remote.mobile.util.NotificationHandler;
 
 public class RemoteService extends Service {
@@ -70,43 +69,18 @@ public class RemoteService extends Service {
 	protected Server localServer;
 
 	/**
-	 * remote station object
-	 */
-	protected IMediaServer station;
-
-	/**
 	 * remote station list object
 	 */
-	protected IControlCenter stationList;
-
-	/**
-	 * list of available music stations
-	 */
-	protected Map<String, IMediaServer> musicStations;
+	protected IControlCenter controlCenter;
 
 	protected Map<IMediaServer, StationStuff> stationStuff;
 
-	/**
-	 * remote browser object
-	 */
-	protected IBrowser browser;
-
-	/**
-	 * gpio power point
-	 */
-	protected Map<String, IInternetSwitch> internetSwitch;
-
-	/**
-	 * current selected remote player object
-	 */
-	protected IPlayer player;
-
 	private WLANReceiver wlanReceiver;
+	
+	protected Map<IControlUnit, Object> unitMap;
+	
+	protected Map<IControlUnit, String> unitName;
 
-	/**
-	 * remote control object
-	 */
-	protected IControl control;
 
 	/**
 	 * listener for player
@@ -121,11 +95,6 @@ public class RemoteService extends Service {
 	protected ProgressListener downloadListener;
 
 	protected IInternetSwitchListener internetSwitchListener;
-
-	/**
-	 * remote playlist object
-	 */
-	protected IPlayList playList;
 
 	/**
 	 * current playing file
@@ -170,13 +139,14 @@ public class RemoteService extends Service {
 			}
 			localServer.startServer();
 
-			stationList = (IControlCenter) localServer.find(IControlCenter.ID,
+			controlCenter = (IControlCenter) localServer.find(IControlCenter.ID,
 					IControlCenter.class);
-			if (stationList == null)
+			if (controlCenter == null)
 				throw new RemoteException(IControlCenter.ID,
 						"control center not found in registry");
+			controlCenter = new ControlCenterBuffer(controlCenter);
 
-			refreshStations();
+			refreshControlCenter();
 
 			chatServer = (IChatServer) localServer.find(IChatServer.ID,
 					IChatServer.class);
@@ -201,21 +171,6 @@ public class RemoteService extends Service {
 		}
 	}
 
-	public void registerAndUpdate() throws RemoteException, PlayerException {
-		Log.e("Remote Control", "register and update");
-		if (station == null)
-			return;
-		station.getMPlayer().addPlayerMessageListener(playerListener);
-		station.getTotemPlayer().addPlayerMessageListener(playerListener);
-		PlayingBean bean = player.getPlayingBean();
-		playerListener.playerMessage(bean);
-		// try {
-		// power.registerPowerSwitchListener(powerListener);
-		// } catch (RemoteException e) {
-		//
-		// }
-	}
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -229,9 +184,9 @@ public class RemoteService extends Service {
 		};
 		RMILogger.addLogListener(rmiLogListener);
 		binder = new PlayerBinder(this);
-		musicStations = new HashMap<String, IMediaServer>();
 		stationStuff = new HashMap<IMediaServer, StationStuff>();
-		internetSwitch = new HashMap<String, IInternetSwitch>();
+		unitMap = new HashMap<IControlUnit, Object>();
+		unitName = new HashMap<IControlUnit, String>();
 		actionListener = new ArrayList<IRemoteActionListener>();
 		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
@@ -261,24 +216,11 @@ public class RemoteService extends Service {
 	 * disconnect from current connection
 	 */
 	private void disconnect() {
-		if (player != null) {
-			try {
-				station.getMPlayer()
-						.removePlayerMessageListener(playerListener);
-				station.getTotemPlayer().removePlayerMessageListener(
-						playerListener);
-			} catch (Exception e) {
-			}
-		}
 		if (localServer != null)
 			localServer.close();
-		station = null;
-		musicStations.clear();
-		internetSwitch.clear();
-		stationList = null;
+		unitMap.clear();
+		controlCenter = null;
 		stationStuff.clear();
-		browser = null;
-		player = null;
 		serverID = -1;
 		chatServer = null;
 		serverName = null;
@@ -302,6 +244,9 @@ public class RemoteService extends Service {
 		public IPlayer player;
 		public IPlayList pls;
 		public IControl control;
+		public IPlayer mplayer;
+		public IPlayer totem;
+		public String name;
 	}
 
 	public void connectToServer(final int id) {
@@ -334,29 +279,22 @@ public class RemoteService extends Service {
 		}.start();
 	}
 
-	public void refreshStations() {
+	public void refreshControlCenter() {
 		int stationSize = 0;
 		try {
-			stationSize = stationList.getControlUnitNumber();
+			stationSize = controlCenter.getControlUnitNumber();
 		} catch (RemoteException e1) {
 		}
-		musicStations.clear();
 		stationStuff.clear();
-		station = null;
+		unitMap.clear();
+		unitName.clear();
 		for (int i = 0; i < stationSize; i++) {
 			try {
-				IControlUnit unit = stationList.getControlUnit(i);
+				IControlUnit unit = controlCenter.getControlUnit(i);
 				Object object = unit.getRemoteableControlObject();
-				if (object instanceof IMediaServer) {
-					IMediaServer server = (IMediaServer) object;
-					String name = server.getName();
-					musicStations.put(name, server);
-				}
-				if (object instanceof IInternetSwitch) {
-					IInternetSwitch iswitch = (IInternetSwitch) object;
-					String name = unit.getName();
-					internetSwitch.put(name, iswitch);
-				}
+				String name = unit.getName();
+				unitMap.put(unit, object);
+				unitName.put(unit, name);
 			} catch (Exception e) {
 				Log.e("error", e.getMessage());
 			}

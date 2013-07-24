@@ -75,19 +75,19 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	};
 
 	protected void updateWidget(PlayingBean playing) {
-		if (binder.getPlayer() != null && playing == null)
-			playing = binder.getPlayingFile();
-		if (binder.getMusicStationName() == null) {
+		if (binder.getLatestMediaServer() == null) {
 			setWidgetText(
 					"no music station",
 					"no music station specified at server "
 							+ binder.getServerName(), "", false);
 			return;
 		}
+		if (binder.getLatestMediaServer().player != null && playing == null)
+			playing = binder.getPlayingFile();
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			setWidgetText("no file playing",
-					"at music station " + binder.getMusicStationName(), "",
-					false);
+					"at music station " + binder.getLatestMediaServer().name,
+					"", false);
 			return;
 		}
 		String title = "playing";
@@ -130,17 +130,17 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				try {
 					if (binder == null)
 						throw new RemoteException("not binded", "not binded");
-					if (binder.getPlayer() == null)
+					if (binder.getLatestMediaServer().player == null)
 						throw new RemoteException("not connected",
 								"not connected");
 					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
-						binder.getPlayer().playPause();
+						binder.getLatestMediaServer().player.playPause();
 					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
-						binder.getPlayer().quit();
+						binder.getLatestMediaServer().player.quit();
 					else if (action.equals(RemoteWidgetProvider.ACTION_NEXT))
-						binder.getPlayer().next();
+						binder.getLatestMediaServer().player.next();
 					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
-						binder.getPlayer().previous();
+						binder.getLatestMediaServer().player.previous();
 				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						public void run() {
@@ -246,7 +246,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void onPowerSwitchChange(String switchName, State state) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

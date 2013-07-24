@@ -7,13 +7,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.mobile.R;
 import de.remote.mobile.receivers.RemotePowerWidgetProvider;
@@ -41,9 +35,8 @@ public class SelectSwitchActivity extends PowerActivity {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected()) {
-			Map<String, IInternetSwitch> power = binder.getPower();
-			String[] switches = power.keySet()
-					.toArray(new String[power.size()]);
+			Map<String, IInternetSwitch> power = getPower(binder);
+			String[] switches = power.keySet().toArray(new String[power.size()]);
 			switchList.setAdapter(new SwitchAdapter(this, switches, power,
 					listener));
 		} else {

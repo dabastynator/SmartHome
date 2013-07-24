@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_opengl"/>
 	<classpathentry kind="src" path="src_controlcenter"/>
 	<classpathentry excluding="de/remote/mediaserver/impl/|de/remote/mediaserver/server/" including="de/remote/mediaserver/api/" kind="src" path="src_mediaserver"/>
 	<classpathentry kind="src" path="gpio_power"/>

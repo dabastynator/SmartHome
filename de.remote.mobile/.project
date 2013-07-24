@@ -52,6 +52,11 @@
 			<locationURI>WORKSPACE_LOC/remote/de.remote.mediaserver/src</locationURI>
 		</link>
 		<link>
+			<name>src_opengl</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/mobile/de.newsystem.opengl.common/src</locationURI>
+		</link>
+		<link>
 			<name>src_rmi</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/remote/de.newsystem.rmi/src</locationURI>

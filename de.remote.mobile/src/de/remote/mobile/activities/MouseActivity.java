@@ -13,6 +13,7 @@ import de.newsystem.rmi.protokol.ServerPort;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.IControl;
 import de.remote.mobile.R;
+import de.remote.mobile.services.RemoteService.StationStuff;
 
 public class MouseActivity extends BindedActivity {
 
@@ -20,11 +21,18 @@ public class MouseActivity extends BindedActivity {
 	private float startY;
 	private DataOutputStream mouseMoveOutput;
 	private Socket socket;
+	private String mediaServerName;
+	private StationStuff mediaServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.remote_mouse_key);
+		
+		if (getIntent().getExtras() != null
+				&& getIntent().getExtras().containsKey(BrowserBase.EXTRA_MEDIA_NAME)) {
+			mediaServerName = getIntent().getExtras().getString(BrowserBase.EXTRA_MEDIA_NAME);
+		}
 	}
 
 	@Override
@@ -59,7 +67,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	public void mouseLeft(View view) {
-		IControl control = binder.getControl();
+		IControl control = mediaServer.control;
 		if (control != null)
 			try {
 				control.mousePress(IControl.LEFT_CLICK);
@@ -69,7 +77,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	public void mouseRight(View view) {
-		IControl control = binder.getControl();
+		IControl control = mediaServer.control;
 		if (control != null)
 			try {
 				control.mousePress(IControl.RIGHT_CLICK);
@@ -90,7 +98,8 @@ public class MouseActivity extends BindedActivity {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		try {
-			ServerPort sp = binder.getControl().openMouseMoveStream();
+			mediaServer = binder.getMediaServerByName(mediaServerName);
+			ServerPort sp = mediaServer.control.openMouseMoveStream();
 			socket = new Socket(sp.getIp(), sp.getPort());
 			mouseMoveOutput = new DataOutputStream(socket.getOutputStream());
 		} catch (Exception e) {

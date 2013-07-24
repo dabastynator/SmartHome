@@ -22,7 +22,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +31,7 @@ import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.PlayerException;
 import de.remote.mobile.R;
+import de.remote.mobile.services.RemoteService.StationStuff;
 import de.remote.mobile.util.BrowserAdapter;
 import de.remote.mobile.util.BufferBrowser;
 
@@ -43,7 +43,7 @@ import de.remote.mobile.util.BufferBrowser;
  */
 public class BrowserActivity extends BrowserBase {
 
-	private boolean updateSpinner;
+	private StationStuff mediaServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +56,6 @@ public class BrowserActivity extends BrowserBase {
 		searchText.addTextChangedListener(new SearchTextWatcher());
 		listView.setOnItemClickListener(new ListClickListener());
 		listView.setOnItemLongClickListener(new ListLongClickListener());
-		musicstationSpinner
-				.setOnItemSelectedListener(new SelectMusicStationListener());
 	}
 
 	@Override
@@ -83,26 +81,25 @@ public class BrowserActivity extends BrowserBase {
 
 	private String[] loadItems(String[] gotoPath) throws RemoteException,
 			PlayerException {
-		if (binder == null || !binder.isConnected()) {
+		if (mediaServer == null) {
 			disableScreen();
 			return new String[] {};
 		}
 		switch (viewerState) {
 		case DIRECTORIES:
 			if (gotoPath != null && gotoPath.length > 0 && gotoPath[0] != null)
-				binder.getBrowser().goTo(gotoPath[0]);
-			String[] directories = binder.getBrowser().getDirectories();
-			String[] files = binder.getBrowser().getFiles();
+				mediaServer.browser.goTo(gotoPath[0]);
+			String[] directories = mediaServer.browser.getDirectories();
+			String[] files = mediaServer.browser.getFiles();
 			String[] all = new String[directories.length + files.length];
 			System.arraycopy(directories, 0, all, 0, directories.length);
 			System.arraycopy(files, 0, all, directories.length, files.length);
 			return all;
 		case PLAYLISTS:
-			return binder.getPlayList().getPlayLists();
+			return mediaServer.pls.getPlayLists();
 		case PLS_ITEMS:
 			plsFileMap.clear();
-			for (String item : binder.getPlayList()
-					.listContent(currentPlayList))
+			for (String item : mediaServer.pls.listContent(currentPlayList))
 				if (item.indexOf("/") >= 0)
 					plsFileMap.put(item.substring(item.lastIndexOf("/") + 1),
 							item);
@@ -119,10 +116,6 @@ public class BrowserActivity extends BrowserBase {
 		setProgressBarVisibility(false);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
-		String[] spinnerItems = new String[] {};
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				BrowserActivity.this, R.layout.spinner, spinnerItems);
-		musicstationSpinner.setAdapter(adapter);
 	}
 
 	/**
@@ -131,7 +124,7 @@ public class BrowserActivity extends BrowserBase {
 	 * @param gotoPath
 	 */
 	private void updateGUI(final String gotoPath) {
-		if (binder == null || !binder.isConnected()) {
+		if (mediaServer == null) {
 			disableScreen();
 			return;
 		}
@@ -161,20 +154,20 @@ public class BrowserActivity extends BrowserBase {
 			protected void onPostExecute(String[] result) {
 				super.onPostExecute(result);
 				setProgressBarVisibility(false);
-				if (binder.getBrowser() == null) {
-					setTitle("Select musicstation@" + binder.getServerName());
+				if (mediaServer.browser == null) {
+					setTitle("No media server@" + binder.getServerName());
 					listView.setAdapter(new BrowserAdapter(
-							BrowserActivity.this, binder.getBrowser(),
+							BrowserActivity.this, mediaServer.browser,
 							new String[] {}, viewerState, playingBean));
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
-						binder.getBrowser(), result, viewerState, playingBean));
+						mediaServer.browser, result, viewerState, playingBean));
 				listView.setSelection(selectedPosition);
 				switch (viewerState) {
 				case DIRECTORIES:
 					try {
-						setTitle(binder.getBrowser().getLocation() + "@"
+						setTitle(mediaServer.browser.getLocation() + "@"
 								+ binder.getServerName());
 					} catch (RemoteException e) {
 						setTitle("no connection");
@@ -212,21 +205,6 @@ public class BrowserActivity extends BrowserBase {
 		}.execute(new String[] { gotoPath });
 	}
 
-	protected void updateSpinner() {
-		updateSpinner = true;
-		String[] stationArray = binder.getMusicStations().keySet()
-				.toArray(new String[] {});
-		String[] spinnerItems = new String[stationArray.length + 2];
-		spinnerItems[0] = "Select musicstation";
-		spinnerItems[stationArray.length + 1] = "Refresh";
-		for (int i = 0; i < stationArray.length; i++)
-			spinnerItems[i + 1] = stationArray[i];
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				BrowserActivity.this, R.layout.spinner, spinnerItems);
-		musicstationSpinner.setAdapter(adapter);
-		musicstationSpinner.setSelection(spinnerPosition);
-	}
-
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		try {
@@ -240,7 +218,7 @@ public class BrowserActivity extends BrowserBase {
 				}
 				selectedPosition = 0;
 				if (viewerState == ViewerState.DIRECTORIES)
-					if (binder.getBrowser().goBack()) {
+					if (mediaServer.browser.goBack()) {
 						updateGUI(null);
 						return true;
 					}
@@ -262,11 +240,11 @@ public class BrowserActivity extends BrowserBase {
 				mgr.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
 			}
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-				binder.getPlayer().volDown();
+				mediaServer.player.volDown();
 				return true;
 			}
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-				binder.getPlayer().volUp();
+				mediaServer.player.volUp();
 				return true;
 			}
 		} catch (Exception e) {
@@ -282,7 +260,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void playPause(View v) {
 		try {
-			binder.getPlayer().playPause();
+			mediaServer.player.playPause();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -295,7 +273,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void stopPlayer(View v) {
 		try {
-			binder.getPlayer().quit();
+			mediaServer.player.quit();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -308,7 +286,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void next(View v) {
 		try {
-			binder.getPlayer().next();
+			mediaServer.player.next();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -321,7 +299,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void prev(View v) {
 		try {
-			binder.getPlayer().previous();
+			mediaServer.player.previous();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -334,7 +312,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void seekBwd(View v) {
 		try {
-			binder.getPlayer().seekBackwards();
+			mediaServer.player.seekBackwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -347,7 +325,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void seekFwd(View v) {
 		try {
-			binder.getPlayer().seekForwards();
+			mediaServer.player.seekForwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -360,7 +338,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void volUp(View v) {
 		try {
-			binder.getPlayer().volUp();
+			mediaServer.player.volUp();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -373,7 +351,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void volDown(View v) {
 		try {
-			binder.getPlayer().volDown();
+			mediaServer.player.volDown();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -386,7 +364,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void fullScreen(View v) {
 		try {
-			binder.getPlayer().fullScreen();
+			mediaServer.player.fullScreen();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -438,28 +416,28 @@ public class BrowserActivity extends BrowserBase {
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
-				binder.useMPlayer();
+				mediaServer.player = mediaServer.mplayer;
 				break;
 			case R.id.opt_totem:
-				binder.useTotemPlayer();
+				mediaServer.player = mediaServer.totem;
 				break;
 			case R.id.opt_light_off:
-				binder.getControl().displayDark();
+				mediaServer.control.displayDark();
 				break;
 			case R.id.opt_light_on:
-				binder.getControl().displayBride();
+				mediaServer.control.displayBride();
 				break;
 			case R.id.opt_shutdown:
-				binder.getControl().shutdown();
+				mediaServer.control.shutdown();
 				break;
 			case R.id.opt_audiotrack:
-				binder.getPlayer().nextAudio();
+				mediaServer.player.nextAudio();
 				break;
 			case R.id.opt_left:
-				binder.getPlayer().moveLeft();
+				mediaServer.player.moveLeft();
 				break;
 			case R.id.opt_right:
-				binder.getPlayer().moveRight();
+				mediaServer.player.moveRight();
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
@@ -501,33 +479,33 @@ public class BrowserActivity extends BrowserBase {
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_item_play:
-				binder.getPlayer().play(
-						binder.getBrowser().getFullLocation() + selectedItem);
+				mediaServer.player.play(mediaServer.browser.getFullLocation()
+						+ selectedItem);
 				Toast.makeText(BrowserActivity.this, "Ordner abspielen",
 						Toast.LENGTH_SHORT).show();
 				break;
 			case R.id.opt_item_addplaylist:
 				Intent i = new Intent(this, SelectPlaylistActivity.class);
-				i.putExtra(SelectPlaylistActivity.PLS_LIST, binder
-						.getPlayList().getPlayLists());
+				i.putExtra(SelectPlaylistActivity.PLS_LIST,
+						mediaServer.pls.getPlayLists());
 				startActivityForResult(i,
 						SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
 			case R.id.opt_item_download:
-				if (selectedPosition < binder.getBrowser().getDirectories().length)
-					binder.downloadDirectory(selectedItem);
+				if (selectedPosition < mediaServer.browser.getDirectories().length)
+					binder.downloadDirectory(mediaServer.browser, selectedItem);
 				else
-					binder.downloadFile(selectedItem);
+					binder.downloadFile(mediaServer.browser, selectedItem);
 				break;
 			case R.id.opt_item_delete:
 				selectedPosition = listView.getFirstVisiblePosition();
-				binder.getBrowser().delete(
-						binder.getBrowser().getFullLocation() + selectedItem);
-				((BufferBrowser) binder.getBrowser()).setDirty();
+				mediaServer.browser.delete(mediaServer.browser
+						.getFullLocation() + selectedItem);
+				((BufferBrowser) mediaServer.browser).setDirty();
 				updateGUI(null);
 				break;
 			case R.id.opt_pls_delete:
-				binder.getPlayList().removePlayList(selectedItem);
+				mediaServer.pls.removePlayList(selectedItem);
 				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"Playlist '" + selectedItem + "' deleted",
@@ -539,7 +517,7 @@ public class BrowserActivity extends BrowserBase {
 				updateGUI(null);
 				break;
 			case R.id.opt_pls_item_delete:
-				binder.getPlayList().removeItem(currentPlayList, selectedItem);
+				mediaServer.pls.removeItem(currentPlayList, selectedItem);
 				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"Entry '" + selectedItem + "' deleted",
@@ -567,15 +545,15 @@ public class BrowserActivity extends BrowserBase {
 					return;
 				String pls = data.getExtras().getString(
 						SelectPlaylistActivity.RESULT);
-				binder.getPlayList().extendPlayList(pls,
-						binder.getBrowser().getFullLocation() + selectedItem);
+				mediaServer.pls.extendPlayList(pls,
+						mediaServer.browser.getFullLocation() + selectedItem);
 				Toast.makeText(BrowserActivity.this, selectedItem + " added",
 						Toast.LENGTH_SHORT).show();
 			}
 			if (requestCode == GetTextActivity.RESULT_CODE && data != null
 					&& data.getExtras() != null) {
 				String pls = data.getExtras().getString(GetTextActivity.RESULT);
-				binder.getPlayList().addPlayList(pls);
+				mediaServer.pls.addPlayList(pls);
 				updateGUI(null);
 				Toast.makeText(BrowserActivity.this,
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
@@ -583,7 +561,8 @@ public class BrowserActivity extends BrowserBase {
 			}
 			if (requestCode == FILE_REQUEST) {
 				Uri uri = data.getData();
-				binder.uploadFile(new File(getFilePathByUri(uri)));
+				binder.uploadFile(mediaServer.browser, new File(
+						getFilePathByUri(uri)));
 			}
 		} catch (RemoteException e) {
 			Toast.makeText(BrowserActivity.this, e.getMessage(),
@@ -626,21 +605,47 @@ public class BrowserActivity extends BrowserBase {
 		setProgressBarVisibility(true);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
-		String[] spinnerItems = new String[] {};
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				BrowserActivity.this, R.layout.spinner, spinnerItems);
-		musicstationSpinner.setAdapter(adapter);
 	}
 
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
-		if (binder.isConnected()) {
-			updateSpinner();
-			updateGUI(null);
-		} else {
-			disableScreen();
-		}
-		ai.setPlayerBinder(binder);
+
+		new AsyncTask<String, Integer, String[]>() {
+
+			Exception exeption = null;
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				setProgressBarVisibility(true);
+				setTitle("loading media objects...");
+			}
+
+			@Override
+			protected String[] doInBackground(String... params) {
+				try {
+					mediaServer = binder.getMediaServerByName(mediaServerName);
+					return new String[] {};
+				} catch (Exception e) {
+					exeption = e;
+					return new String[] {};
+				}
+			}
+
+			@Override
+			protected void onPostExecute(String[] result) {
+				if (exeption != null)
+					Toast.makeText(BrowserActivity.this, exeption.getMessage(),
+							Toast.LENGTH_SHORT).show();
+				if (mediaServer != null) {
+					updateGUI(null);
+				} else {
+					disableScreen();
+				}
+				ai.setPlayerBinder(binder);
+			}
+
+		}.execute(new String[] {});
 	}
 
 	/**
@@ -676,23 +681,23 @@ public class BrowserActivity extends BrowserBase {
 					.getText().toString();
 			try {
 				if (viewerState == ViewerState.PLAYLISTS) {
-					binder.getPlayer().playPlayList(
-							binder.getPlayList().getPlaylistFullpath(item));
+					mediaServer.player.playPlayList(mediaServer.pls
+							.getPlaylistFullpath(item));
 					Toast.makeText(BrowserActivity.this, "play playlist",
 							Toast.LENGTH_SHORT).show();
 				}
 				if (viewerState == ViewerState.PLS_ITEMS) {
-					binder.getPlayer().play(plsFileMap.get(item));
+					mediaServer.player.play(plsFileMap.get(item));
 				}
 				if (viewerState == ViewerState.DIRECTORIES) {
-					if (position < binder.getBrowser().getDirectories().length) {
+					if (position < mediaServer.browser.getDirectories().length) {
 						selectedPosition = 0;
 						updateGUI(item);
 						return;
 					}
-					String file = binder.getBrowser().getFullLocation() + item;
+					String file = mediaServer.browser.getFullLocation() + item;
 
-					binder.getPlayer().play(file);
+					mediaServer.player.play(file);
 				}
 			} catch (RemoteException e) {
 				Toast.makeText(BrowserActivity.this, e.getMessage(),
@@ -715,13 +720,13 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	public void setTotem(View view) {
-		binder.useTotemPlayer();
+		mediaServer.player = mediaServer.totem;
 		totemButton.setBackgroundResource(R.drawable.image_border);
 		mplayerButton.setBackgroundDrawable(null);
 	}
 
 	public void setMPlayer(View view) {
-		binder.useMPlayer();
+		mediaServer.player = mediaServer.totem;
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);
 	}
@@ -776,55 +781,10 @@ public class BrowserActivity extends BrowserBase {
 		}
 	}
 
-	class SelectMusicStationListener implements OnItemSelectedListener {
-		@Override
-		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-				long arg3) {
-			if (updateSpinner) {
-				updateSpinner = false;
-				return;
-			}
-			final String station = (String) musicstationSpinner
-					.getSelectedItem();
-			if (binder.getMusicStations().containsKey(station)) {
-				setProgressBarVisibility(true);
-				setTitle("loading...");
-				new Thread() {
-					public void run() {
-						binder.setMusicStation(station);
-						handler.post(new ShowFolderRunnable());
-					};
-				}.start();
-			}
-			if ("Refresh".equals(station)) {
-				setProgressBarVisibility(true);
-				setTitle("loading...");
-				new Thread() {
-					public void run() {
-						binder.refreshStations();
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								updateSpinner();
-							}
-						});
-						handler.post(new ShowFolderRunnable());
-					};
-				}.start();
-			}
-		}
-
-		@Override
-		public void onNothingSelected(AdapterView<?> arg0) {
-			// TODO Auto-generated method stub
-
-		}
-	}
-
 	@Override
 	public void onPowerSwitchChange(String _switch, State state) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

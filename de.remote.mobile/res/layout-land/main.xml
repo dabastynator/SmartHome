@@ -108,19 +108,6 @@
                 android:src="@drawable/cancel" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/layout_top_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="60dp"
-            android:orientation="horizontal" >
-
-            <Spinner
-                android:id="@+id/spinner_music_station"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </LinearLayout>
-
         <ListView
             android:id="@+id/fileList"
             android:layout_width="fill_parent"
@@ -129,7 +116,7 @@
             android:fastScrollEnabled="true"
             android:scrollbars="vertical" />
     </LinearLayout>
-    
+
     <LinearLayout
         android:layout_width="64dp"
         android:layout_height="match_parent"

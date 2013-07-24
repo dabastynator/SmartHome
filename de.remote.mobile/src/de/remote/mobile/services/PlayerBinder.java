@@ -13,14 +13,11 @@ import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
-import de.remote.gpiopower.api.IInternetSwitch;
+import de.remote.controlcenter.api.IControlCenter;
+import de.remote.controlcenter.api.IControlUnit;
 import de.remote.mediaserver.api.IBrowser;
 import de.remote.mediaserver.api.IChatServer;
-import de.remote.mediaserver.api.IControl;
 import de.remote.mediaserver.api.IMediaServer;
-import de.remote.mediaserver.api.IPlayList;
-import de.remote.mediaserver.api.IPlayer;
-import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.services.RemoteService.PlayerListener;
@@ -50,9 +47,7 @@ public class PlayerBinder extends Binder {
 	 */
 	private AbstractReceiver receiver;
 
-	private boolean usesMplayer;
-
-	private String musicStationName;
+	private StationStuff latestMediaObject;
 
 	/**
 	 * allocate new binder.
@@ -63,31 +58,8 @@ public class PlayerBinder extends Binder {
 		this.service = service;
 	}
 
-	/**
-	 * get remote browser object
-	 * 
-	 * @return browser
-	 */
-	public IBrowser getBrowser() {
-		return service.browser;
-	}
-
-	/**
-	 * get current remote player object
-	 * 
-	 * @return player
-	 */
-	public IPlayer getPlayer() {
-		return service.player;
-	}
-
-	/**
-	 * get remote control object
-	 * 
-	 * @return control
-	 */
-	public IControl getControl() {
-		return service.control;
+	public IControlCenter getControlCenter() {
+		return service.controlCenter;
 	}
 
 	/**
@@ -98,49 +70,6 @@ public class PlayerBinder extends Binder {
 	 */
 	public void connectToServer(final int id) {
 		service.connectToServer(id);
-	}
-
-	/**
-	 * set mplayer for current player
-	 * 
-	 */
-	public void useMPlayer() {
-		usesMplayer = true;
-		new Thread() {
-			public void run() {
-				try {
-					service.player = service.station.getMPlayer();
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
-		}.start();
-	}
-
-	/**
-	 * set totem for current player
-	 */
-	public void useTotemPlayer() {
-		usesMplayer = false;
-		new Thread() {
-			public void run() {
-				try {
-					service.player = service.station.getTotemPlayer();
-				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}.start();
-	}
-
-	/**
-	 * get remote playlist object
-	 * 
-	 * @return playlist
-	 */
-	public IPlayList getPlayList() {
-		return service.playList;
 	}
 
 	/**
@@ -156,7 +85,7 @@ public class PlayerBinder extends Binder {
 	 * @return true if there is a connection wich a server
 	 */
 	public boolean isConnected() {
-		return service.stationList != null;
+		return service.controlCenter != null;
 	}
 
 	/**
@@ -202,10 +131,9 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void downloadFile(String file) {
+	public void downloadFile(IBrowser browser, String file) {
 		try {
-			String ip = service.browser.publishFile(file,
-					RemoteService.DOWNLOAD_PORT);
+			String ip = browser.publishFile(file, RemoteService.DOWNLOAD_PORT);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
 			File dir = new File(folder);
@@ -226,9 +154,9 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param directory
 	 */
-	public void downloadDirectory(String directory) {
+	public void downloadDirectory(IBrowser browser, String directory) {
 		try {
-			String ip = service.browser.publishDirectory(directory,
+			String ip = browser.publishDirectory(directory,
 					RemoteService.DOWNLOAD_PORT);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
@@ -277,11 +205,11 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void uploadFile(File file) {
+	public void uploadFile(IBrowser browser, File file) {
 		try {
 			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1);
 			fileSender.sendAsync();
-			service.browser.updloadFile(file.getName(), Server.getServer()
+			browser.updloadFile(file.getName(), Server.getServer()
 					.getServerPort().getIp(), UPLOAD_PORT);
 			Toast.makeText(service, "upload started", Toast.LENGTH_SHORT)
 					.show();
@@ -296,66 +224,48 @@ public class PlayerBinder extends Binder {
 		}
 	}
 
-	public Map<String, IInternetSwitch> getPower() {
-		return service.internetSwitch;
-	}
-
-	public void setMusicStation(String stationName) {
-		try {
-			IMediaServer station = service.musicStations.get(stationName);
-			if (service.station == station)
-				return;
-			musicStationName = stationName;
-			service.station = station;
-			StationStuff stuff = service.stationStuff.get(station);
-			if (stuff != null) {
-				service.browser = stuff.browser;
-				service.player = stuff.player;
-				service.control = stuff.control;
-				service.playList = stuff.pls;
-			} else {
-				stuff = new StationStuff();
-				service.browser = new BufferBrowser(station.createBrowser());
-				service.player = station.getMPlayer();
-				service.control = station.getControl();
-				service.playList = station.getPlayList();
-				stuff.browser = service.browser;
-				stuff.player = service.player;
-				stuff.control = service.control;
-				stuff.pls = service.playList;
-				service.stationStuff.put(station, stuff);
-			}
-			service.registerAndUpdate();
-		} catch (RemoteException e) {
-			System.err.println(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
-		} catch (PlayerException e) {
-			System.err.println(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
-		}
-	}
-
-	public boolean usesMPlayer() {
-		return usesMplayer;
-	}
-
-	public Map<String, IMediaServer> getMusicStations() {
-		return service.musicStations;
-	}
-
-	public IMediaServer getMusicStation() {
-		return service.station;
-	}
-
-	public String getMusicStationName() {
-		return musicStationName;
+	public Map<IControlUnit, Object> getUnits() {
+		return service.unitMap;
 	}
 
 	public void disconnect() {
 		service.disconnectFromServer();
 	}
 
-	public void refreshStations() {
-		service.refreshStations();
+	public void refreshControlCenter() {
+		service.refreshControlCenter();
+	}
+
+	public StationStuff getMediaServerByName(String mediaServerName)
+			throws RemoteException {
+		for (IControlUnit unit : service.unitMap.keySet()) {
+			String unitName = service.unitName.get(unit);
+			Object object = service.unitMap.get(unit);
+			if ((object instanceof IMediaServer)&&(mediaServerName.equals(unitName))) {
+				IMediaServer media = (IMediaServer) object;
+				if (service.stationStuff.containsKey(media))
+					return service.stationStuff.get(media);
+				StationStuff mediaObjects = new StationStuff();
+				mediaObjects.browser = new BufferBrowser(media.createBrowser());
+				mediaObjects.control = media.getControl();
+				mediaObjects.mplayer = media.getMPlayer();
+				mediaObjects.player = mediaObjects.mplayer;
+				mediaObjects.pls = media.getPlayList();
+				mediaObjects.totem = media.getTotemPlayer();
+				mediaObjects.name = mediaServerName;
+				service.stationStuff.put(media, mediaObjects);
+				latestMediaObject = mediaObjects;
+				return mediaObjects;
+			}
+		}
+		return null;
+	}
+
+	public Map<IControlUnit, String> getUnitNames() {
+		return service.unitName;
+	}
+
+	public StationStuff getLatestMediaServer() {
+		return latestMediaObject;
 	}
 }

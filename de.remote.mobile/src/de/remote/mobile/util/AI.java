@@ -6,6 +6,7 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.PlayerException;
+import de.remote.mobile.activities.PowerActivity;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.util.VoiceRecognizer.IVoiceRecognition;
 
@@ -63,21 +64,21 @@ public class AI implements IVoiceRecognition {
 			split[i] = split[i].toLowerCase();
 		String cmd = split[0];
 		if (cmd.equals("pause")) {
-			binder.getPlayer().playPause();
+			binder.getLatestMediaServer().player.playPause();
 			Toast.makeText(context, "success pause", Toast.LENGTH_SHORT).show();
 		} else if (cmd.equals("stop")) {
-			binder.getPlayer().quit();
+			binder.getLatestMediaServer().player.quit();
 			Toast.makeText(context, "success stop", Toast.LENGTH_SHORT).show();
 		} else if (cmd.equals("fullscreen")) {
-			binder.getPlayer().fullScreen();
+			binder.getLatestMediaServer().player.fullScreen();
 			Toast.makeText(context, "success fullscreen", Toast.LENGTH_SHORT)
 					.show();
 		} else if (cmd.equals("next")){
-			binder.getPlayer().next();
+			binder.getLatestMediaServer().player.next();
 			Toast.makeText(context, "success next", Toast.LENGTH_SHORT).show();
 		}
 		else if (cmd.equals("previous")){
-			binder.getPlayer().previous();
+			binder.getLatestMediaServer().player.previous();
 			Toast.makeText(context, "success previous", Toast.LENGTH_SHORT).show();
 		}
 		else if (cmd.startsWith("play")) {
@@ -89,7 +90,7 @@ public class AI implements IVoiceRecognition {
 					throw new AIException("can not play empty playlit");
 				playPlayList(split[2]);
 			} else
-				binder.getPlayer().play(play);
+				binder.getLatestMediaServer().player.play(play);
 			Toast.makeText(context, "success play", Toast.LENGTH_SHORT).show();
 		} else if (cmd.startsWith("licht")) {
 			if (split.length != 3)
@@ -97,7 +98,7 @@ public class AI implements IVoiceRecognition {
 			State state = State.OFF;
 			if (split[2].equalsIgnoreCase("an"))
 				state = State.ON;
-			IInternetSwitch power = binder.getPower().get(split[1]);
+			IInternetSwitch power = PowerActivity.getPower(binder).get(split[1]);
 			if (power == null)
 				throw new AIException("Unknown switch: " + split[1]);
 			power.setState(state);
@@ -106,9 +107,9 @@ public class AI implements IVoiceRecognition {
 			if (split.length < 2)
 				throw new AIException("what to do with bildschirm?");
 			if (split[1].equals("an"))
-				binder.getControl().displayBride();
+				binder.getLatestMediaServer().control.displayBride();
 			else if (split[1].equals("aus"))
-				binder.getControl().displayDark();
+				binder.getLatestMediaServer().control.displayDark();
 			else
 				throw new AIException("can't make bildschirm " + split[1]);
 			Toast.makeText(context, "success bildschirm", Toast.LENGTH_SHORT).show();
@@ -116,7 +117,7 @@ public class AI implements IVoiceRecognition {
 			String keypress = "";
 			for (int i = 1; i < split.length; i++)
 				keypress = keypress + split[i] + " ";
-			binder.getControl().keyPress(keypress);
+			binder.getLatestMediaServer().control.keyPress(keypress);
 			Toast.makeText(context, "success tastatur", Toast.LENGTH_SHORT).show();
 		} else
 			throw new AIException("what is '" + cmd + "'");
@@ -124,9 +125,9 @@ public class AI implements IVoiceRecognition {
 
 	private void playPlayList(String pls) throws RemoteException,
 			PlayerException {
-		for (String pl : binder.getPlayList().getPlayLists()) {
+		for (String pl : binder.getLatestMediaServer().pls.getPlayLists()) {
 			if (pl.contains(pls) || pls.contains(pl))
-				binder.getPlayer().playPlayList(pl);
+				binder.getLatestMediaServer().player.playPlayList(pl);
 		}
 	}
 

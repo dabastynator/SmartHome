@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mediaserver.api.PlayingBean.STATE;
 import de.remote.mobile.R;
@@ -22,8 +21,21 @@ import de.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.util.AI;
 import de.remote.mobile.util.BrowserAdapter;
 
+/**
+ * @author sebastian
+ *
+ */
+/**
+ * @author sebastian
+ *
+ */
 public abstract class BrowserBase extends BindedActivity {
 
+	/**
+	 * name for extra data for media server name
+	 */
+	public static final String EXTRA_MEDIA_NAME = "mediaServerName";
+	
 	/**
 	 * name of the viewer state field to store and restore the value
 	 */
@@ -69,11 +81,6 @@ public abstract class BrowserBase extends BindedActivity {
 	 * search input field
 	 */
 	protected EditText searchText;
-
-	/**
-	 * spinner for all music stations of the server.
-	 */
-	protected Spinner musicstationSpinner;
 
 	/**
 	 * map to get full path string from a file name of a playlist item
@@ -127,8 +134,11 @@ public abstract class BrowserBase extends BindedActivity {
 	protected ImageView filesystemButton;
 
 	protected ImageView playlistButton;
-
-	protected int spinnerPosition;
+	
+	/**
+	 * Name of current music server
+	 */
+	protected String mediaServerName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +154,11 @@ public abstract class BrowserBase extends BindedActivity {
 		// listView.setScrollingCacheEnabled(false);
 		// listView.setCacheColorHint(0);
 		registerForContextMenu(listView);
+		
+		if (getIntent().getExtras() != null
+				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_NAME)) {
+			mediaServerName = getIntent().getExtras().getString(EXTRA_MEDIA_NAME);
+		}
 
 		ai = new AI(this);
 	}
@@ -169,7 +184,6 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
-		musicstationSpinner = (Spinner) findViewById(R.id.spinner_music_station);
 		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
 		totemButton = (ImageView) findViewById(R.id.button_totem);
 		filesystemButton = (ImageView) findViewById(R.id.button_filesystem);
@@ -182,8 +196,6 @@ public abstract class BrowserBase extends BindedActivity {
 		outState.putInt(VIEWER_STATE, viewerState.ordinal());
 		outState.putString(PLAYLIST, currentPlayList);
 		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
-		outState.putInt(SPINNER_POSITION,
-				musicstationSpinner.getSelectedItemPosition());
 	}
 
 	@Override
@@ -192,7 +204,6 @@ public abstract class BrowserBase extends BindedActivity {
 		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
 		currentPlayList = bundle.getString(PLAYLIST);
 		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
-		spinnerPosition = bundle.getInt(SPINNER_POSITION);
 	}
 
 	@Override
@@ -226,8 +237,7 @@ public abstract class BrowserBase extends BindedActivity {
 		else if (bean.getState() == STATE.PAUSE)
 			playButton.setImageResource(R.drawable.play);
 		playingBean = bean;
-		if (listView != null
-				&& listView.getAdapter() instanceof BrowserAdapter) {
+		if (listView != null && listView.getAdapter() instanceof BrowserAdapter) {
 			BrowserAdapter adapter = (BrowserAdapter) listView.getAdapter();
 			adapter.setPlayingFile(bean);
 		}

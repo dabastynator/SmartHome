@@ -1,5 +1,7 @@
 package de.remote.mobile.services;
 
+import java.util.Map;
+
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -107,6 +109,7 @@ public class WidgetPowerService extends Service implements
 	}
 
 	private void updateWidget(int widgetID) throws Exception {
+		Map<String, IInternetSwitch> powers = PowerActivity.getPower(binder);
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
 		String switchName = prefs.getString(widgetID + "", null);
@@ -115,9 +118,9 @@ public class WidgetPowerService extends Service implements
 		updateWidget(widgetID, R.drawable.light_off, switchName);
 		if (binder == null)
 			throw new Exception("not conneced");
-		if (binder.getPower() == null)
+		if (powers == null)
 			throw new Exception(binder.getServerName() + " has no power server");
-		IInternetSwitch power = binder.getPower().get(switchName);
+		IInternetSwitch power = powers.get(switchName);
 		State state = power.getState();
 		if (state == State.ON)
 			updateWidget(widgetID, R.drawable.light_on, switchName);
@@ -165,14 +168,15 @@ public class WidgetPowerService extends Service implements
 	}
 
 	private void switchPower(int widgetID) throws Exception {
-		if (binder.getPower() == null)
+		Map<String, IInternetSwitch> powers = PowerActivity.getPower(binder);
+		if (powers == null)
 			throw new Exception(binder.getServerName() + " has no power server");
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
 		String name = prefs.getString(widgetID + "", null);
 		if (name == null)
 			return;
-		IInternetSwitch power = binder.getPower().get(name);
+		IInternetSwitch power = powers.get(name);
 		if (power == null)
 			throw new Exception("Switch " + name + " is unknown");
 		State state = power.getState();

@@ -37,15 +37,12 @@ public class WLANReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		WifiManager myWifiManager = (WifiManager) context
 				.getSystemService(Context.WIFI_SERVICE);
-		if (myWifiManager.isWifiEnabled() && service.onBind(null).isConnected() && !service.isRestricted()) {
+		if (myWifiManager.isWifiEnabled() && service.onBind(null).isConnected()
+				&& !service.isRestricted()) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					try {
-						service.registerAndUpdate();
-					} catch (RemoteException e) {
-					} catch (PlayerException e) {
-					}
+					service.refreshControlCenter();
 				}
 			}).start();
 		}
