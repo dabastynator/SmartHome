@@ -59,7 +59,6 @@ public class WidgetPowerService extends Service implements
 		}
 	};
 
-
 	@Override
 	public void onCreate() {
 		// bind service
@@ -99,8 +98,9 @@ public class WidgetPowerService extends Service implements
 					try {
 						updateWidget(appWidgetIds[i]);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						// e.printStackTrace();
+						System.err.println(e.getClass().getSimpleName() + ": "
+								+ e.getMessage());
 					}
 				}
 			};
@@ -109,6 +109,8 @@ public class WidgetPowerService extends Service implements
 	}
 
 	private void updateWidget(int widgetID) throws Exception {
+		if (binder == null)
+			throw new Exception("not conneced");
 		Map<String, IInternetSwitch> powers = PowerActivity.getPower(binder);
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
@@ -116,11 +118,12 @@ public class WidgetPowerService extends Service implements
 		if (switchName == null)
 			return;
 		updateWidget(widgetID, R.drawable.light_off, switchName);
-		if (binder == null)
-			throw new Exception("not conneced");
 		if (powers == null)
 			throw new Exception(binder.getServerName() + " has no power server");
 		IInternetSwitch power = powers.get(switchName);
+		if (power == null)
+			throw new Exception(binder.getServerName()
+					+ " has no switch called " + switchName);
 		State state = power.getState();
 		if (state == State.ON)
 			updateWidget(widgetID, R.drawable.light_on, switchName);

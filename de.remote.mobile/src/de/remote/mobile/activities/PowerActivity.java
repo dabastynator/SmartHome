@@ -6,7 +6,6 @@ import java.util.Map;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.ListView;
-import de.remote.controlcenter.api.IControlUnit;
 import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mobile.R;
@@ -44,9 +43,10 @@ public class PowerActivity extends BindedActivity {
 
 	public static Map<String, IInternetSwitch> getPower(PlayerBinder binder) {
 		Map<String, IInternetSwitch> power = new HashMap<String, IInternetSwitch>();
-		for (IControlUnit unit : binder.getUnits().keySet()) {
-			Object object = binder.getUnits().get(unit);
-			String name = binder.getUnitNames().get(unit);
+		if (binder == null || binder.getUnits() == null)
+			return power;
+		for (String name : binder.getUnits().keySet()) {
+			Object object = binder.getUnits().get(name);
 			if (object instanceof IInternetSwitch) {
 				power.put(name, (IInternetSwitch) object);
 			}

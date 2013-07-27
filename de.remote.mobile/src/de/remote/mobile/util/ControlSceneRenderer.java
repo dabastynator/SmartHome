@@ -10,6 +10,7 @@ import de.newsystem.opengl.common.fibures.GLFigure.GLClickListener;
 import de.newsystem.opengl.common.fibures.GLPolynom;
 import de.newsystem.opengl.common.fibures.GLPolynom.GLPoint;
 import de.newsystem.opengl.common.systems.GLBox;
+import de.newsystem.opengl.common.systems.GLFlatScreen;
 import de.newsystem.opengl.common.systems.GLFloorlamp;
 import de.newsystem.opengl.common.systems.GLGroup;
 import de.newsystem.opengl.common.systems.GLLavalamp;
@@ -28,7 +29,7 @@ import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.IMediaServer;
 import de.remote.mobile.R;
-import de.remote.mobile.activities.OverViewActivity.SelectMediaServer;
+import de.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
 import de.remote.mobile.services.PlayerBinder;
 
 public class ControlSceneRenderer extends AbstractSceneRenderer {
@@ -43,6 +44,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		this.selecter = selecter;
 		translateSceneBounds[4] = -2;
 		translateSceneBounds[5] = -30;
+		ancX = 45;
 	}
 
 	@Override
@@ -52,24 +54,25 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return room;
 	}
 
-	public void reloadControlCenter(PlayerBinder binder) throws Exception {
+	public void reloadControlCenter(PlayerBinder binder) throws RemoteException {
 		IControlCenter control = binder.getControlCenter();
-		if (control == null)
-			throw new Exception("No control center");
 		if (glObjects != null)
 			room.removeFigure(glObjects);
+		if (control == null)
+			return;
 		glObjects = new GLGroup();
 		GroundPlot ground = control.getGroundPlot();
 		addGroundToScene(ground);
-		for (IControlUnit unit: binder.getUnits().keySet()) {
+		for (String name : binder.getUnits().keySet()) {
 			try {
-				Object object = binder.getUnits().get(unit);
-				float[] position = unit.getPosition();
-				String name = binder.getUnitNames().get(unit);
+				Object object = binder.getUnits().get(name);
+				float[] position = binder.getUnitPosition(name);
 				if (object instanceof IMediaServer) {
 					GLMediaServer glMusic = new GLMediaServer(GLFigure.PLANE);
 					glMusic.setTexture(GLBox.BOX,
 							loadBitmap(resources, R.drawable.textur_holz), 1);
+					glMusic.setTexture(GLFlatScreen.BOTTOM,
+							loadBitmap(resources, R.drawable.textur_metal), 1);
 					glMusic.x = position[0];
 					glMusic.y = position[2];
 					glMusic.z = -position[1];
@@ -104,7 +107,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		float maxY = Integer.MIN_VALUE;
 		for (Wall wall : ground.walls) {
 			List<GLPoint> points = new ArrayList<GLPoint>();
-			for (Point ccPoint: wall.points){
+			for (Point ccPoint : wall.points) {
 				GLPoint glPoint = new GLPoint();
 				glPoint.x = ccPoint.x;
 				glPoint.y = ccPoint.z;
@@ -125,11 +128,13 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		translateSceneBounds[1] = -maxX;
 		translateSceneBounds[0] = -minX;
 		translateSceneBounds[3] = -maxY;
-		translateSceneBounds[2] = -minY;	
-		
-		for (Feature feature: ground.features){
-			if (feature.type.equals("table")){
-				GLTableround table = new GLTableround(GLFigure.PLANE, 2, 1.8f);
+		translateSceneBounds[2] = -minY;
+
+		for (Feature feature : ground.features) {
+			if (feature.type.equals("table")) {
+				GLTableround table = new GLTableround(GLFigure.PLANE, 1.4f,
+						1.5f);
+				table.setTexture(loadBitmap(resources, R.drawable.textur_wood));
 				table.x = feature.x;
 				table.z = -feature.y;
 				glObjects.addFigure(table);

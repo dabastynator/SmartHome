@@ -14,7 +14,6 @@ import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.controlcenter.api.IControlCenter;
-import de.remote.controlcenter.api.IControlUnit;
 import de.remote.mediaserver.api.IBrowser;
 import de.remote.mediaserver.api.IChatServer;
 import de.remote.mediaserver.api.IMediaServer;
@@ -46,8 +45,6 @@ public class PlayerBinder extends Binder {
 	 * current receiver
 	 */
 	private AbstractReceiver receiver;
-
-	private StationStuff latestMediaObject;
 
 	/**
 	 * allocate new binder.
@@ -224,7 +221,7 @@ public class PlayerBinder extends Binder {
 		}
 	}
 
-	public Map<IControlUnit, Object> getUnits() {
+	public Map<String, Object> getUnits() {
 		return service.unitMap;
 	}
 
@@ -238,34 +235,35 @@ public class PlayerBinder extends Binder {
 
 	public StationStuff getMediaServerByName(String mediaServerName)
 			throws RemoteException {
-		for (IControlUnit unit : service.unitMap.keySet()) {
-			String unitName = service.unitName.get(unit);
-			Object object = service.unitMap.get(unit);
-			if ((object instanceof IMediaServer)&&(mediaServerName.equals(unitName))) {
-				IMediaServer media = (IMediaServer) object;
-				if (service.stationStuff.containsKey(media))
-					return service.stationStuff.get(media);
-				StationStuff mediaObjects = new StationStuff();
-				mediaObjects.browser = new BufferBrowser(media.createBrowser());
-				mediaObjects.control = media.getControl();
-				mediaObjects.mplayer = media.getMPlayer();
+		Object object = service.unitMap.get(mediaServerName);
+		if (object instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) object;
+			StationStuff mediaObjects = null;
+			if (service.stationStuff.containsKey(mediaServer)) {
+				mediaObjects = service.stationStuff.get(mediaServer);
+			} else {
+				mediaObjects = new StationStuff();
+				mediaObjects.browser = new BufferBrowser(
+						mediaServer.createBrowser());
+				mediaObjects.control = mediaServer.getControl();
+				mediaObjects.mplayer = mediaServer.getMPlayer();
 				mediaObjects.player = mediaObjects.mplayer;
-				mediaObjects.pls = media.getPlayList();
-				mediaObjects.totem = media.getTotemPlayer();
+				mediaObjects.pls = mediaServer.getPlayList();
+				mediaObjects.totem = mediaServer.getTotemPlayer();
 				mediaObjects.name = mediaServerName;
-				service.stationStuff.put(media, mediaObjects);
-				latestMediaObject = mediaObjects;
-				return mediaObjects;
+				service.stationStuff.put(mediaServer, mediaObjects);
 			}
+			service.setCurrentMediaServer(mediaObjects);
+			return mediaObjects;
 		}
 		return null;
 	}
 
-	public Map<IControlUnit, String> getUnitNames() {
-		return service.unitName;
+	public StationStuff getLatestMediaServer() {
+		return service.currentMediaServer;
 	}
 
-	public StationStuff getLatestMediaServer() {
-		return latestMediaObject;
+	public float[] getUnitPosition(String name) {
+		return service.unitMapPostion.get(name);
 	}
 }

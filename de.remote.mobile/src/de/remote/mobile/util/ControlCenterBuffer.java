@@ -57,5 +57,4 @@ public class ControlCenterBuffer implements IControlCenter {
 			units[number] = center.getControlUnit(number);
 		return units[number];
 	}
-
 }

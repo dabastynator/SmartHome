@@ -35,4 +35,5 @@
     <string name="str_upload">Hochladen</string>
     <string name="str_power">Internet Steckdosen</string>
     <string name="add_new_server">Neuen Server hinzufügen</string>
+    <string name="str_refresh">Neu Laden</string>
 </resources>

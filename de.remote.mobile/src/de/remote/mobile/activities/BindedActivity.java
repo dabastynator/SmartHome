@@ -23,7 +23,8 @@ import de.remote.mobile.services.RemoteService.IRemoteActionListener;
  * @author sebastian
  * 
  */
-public abstract class BindedActivity extends Activity implements IRemoteActionListener {
+public abstract class BindedActivity extends Activity implements
+		IRemoteActionListener {
 
 	/**
 	 * name for extra data for server name
@@ -49,7 +50,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 	 * database object
 	 */
 	protected RemoteDatabase serverDB;
-	
+
 	/**
 	 * handler to post runnables on the gui thread
 	 */
@@ -115,8 +116,7 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 		if (requestCode == SelectServerActivity.RESULT_CODE) {
 			if (data == null || data.getExtras() == null)
 				return;
-			serverID = data.getExtras().getInt(
-					SelectServerActivity.SERVER_ID);
+			serverID = data.getExtras().getInt(SelectServerActivity.SERVER_ID);
 			startConnecting();
 			binder.connectToServer(serverID);
 		}
@@ -130,9 +130,11 @@ public abstract class BindedActivity extends Activity implements IRemoteActionLi
 			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 			break;
 		case R.id.opt_exit:
-//			intent = new Intent(this, RemoteService.class);
-//			stopService(intent);
+			// intent = new Intent(this, RemoteService.class);
+			// stopService(intent);
 			binder.disconnect();
+			binder.removeRemoteActionListener(this);
+			unbindService(playerConnection);
 			finish();
 			break;
 		}

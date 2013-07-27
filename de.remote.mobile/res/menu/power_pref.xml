@@ -12,6 +12,11 @@
         android:title="@string/str_server_name">
     </item>
     <item
+        android:id="@+id/opt_control_refresh"
+        android:icon="@drawable/refresh_32"
+        android:title="@string/str_refresh">
+    </item>    
+    <item
         android:id="@+id/opt_exit"
         android:icon="@drawable/exit"
         android:title="@string/str_exit">

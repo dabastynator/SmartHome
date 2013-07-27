@@ -36,5 +36,5 @@
     <string name="str_upload">Upload</string>
     <string name="add_new_server">add new server</string>
     <string name="str_power">Internet Power Switch</string>
-
+	<string name="str_refresh">Refresh</string>
 </resources>

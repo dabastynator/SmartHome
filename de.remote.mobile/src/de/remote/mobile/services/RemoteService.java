@@ -30,6 +30,7 @@ import de.remote.mediaserver.api.IMediaServer;
 import de.remote.mediaserver.api.IPlayList;
 import de.remote.mediaserver.api.IPlayer;
 import de.remote.mediaserver.api.IPlayerListener;
+import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.database.RemoteDatabase;
 import de.remote.mobile.receivers.WLANReceiver;
@@ -71,16 +72,15 @@ public class RemoteService extends Service {
 	/**
 	 * remote station list object
 	 */
-	protected IControlCenter controlCenter;
+	protected ControlCenterBuffer controlCenter;
 
 	protected Map<IMediaServer, StationStuff> stationStuff;
 
 	private WLANReceiver wlanReceiver;
-	
-	protected Map<IControlUnit, Object> unitMap;
-	
-	protected Map<IControlUnit, String> unitName;
 
+	protected Map<String, Object> unitMap;
+	
+	protected Map<String, float[]> unitMapPostion;
 
 	/**
 	 * listener for player
@@ -124,6 +124,11 @@ public class RemoteService extends Service {
 	public IChatServer chatServer;
 
 	/**
+	 * current media server
+	 */
+	public StationStuff currentMediaServer;
+
+	/**
 	 * create connection, execute runnable if connection has started in the ui
 	 * thread.
 	 * 
@@ -139,12 +144,12 @@ public class RemoteService extends Service {
 			}
 			localServer.startServer();
 
-			controlCenter = (IControlCenter) localServer.find(IControlCenter.ID,
-					IControlCenter.class);
-			if (controlCenter == null)
+			IControlCenter center = (IControlCenter) localServer.find(
+					IControlCenter.ID, IControlCenter.class);
+			if (center == null)
 				throw new RemoteException(IControlCenter.ID,
 						"control center not found in registry");
-			controlCenter = new ControlCenterBuffer(controlCenter);
+			controlCenter = new ControlCenterBuffer(center);
 
 			refreshControlCenter();
 
@@ -185,8 +190,8 @@ public class RemoteService extends Service {
 		RMILogger.addLogListener(rmiLogListener);
 		binder = new PlayerBinder(this);
 		stationStuff = new HashMap<IMediaServer, StationStuff>();
-		unitMap = new HashMap<IControlUnit, Object>();
-		unitName = new HashMap<IControlUnit, String>();
+		unitMap = new HashMap<String, Object>();
+		unitMapPostion = new HashMap<String, float[]>();
 		actionListener = new ArrayList<IRemoteActionListener>();
 		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
@@ -239,6 +244,18 @@ public class RemoteService extends Service {
 		return localServer;
 	}
 
+	public void setCurrentMediaServer(StationStuff mediaObjects)
+			throws RemoteException {
+		currentMediaServer = mediaObjects;
+		currentMediaServer.mplayer.addPlayerMessageListener(playerListener);
+		currentMediaServer.totem.addPlayerMessageListener(playerListener);
+		try {
+			playerListener.playerMessage(currentMediaServer.player
+					.getPlayingBean());
+		} catch (PlayerException e) {
+		}
+	}
+
 	public static class StationStuff {
 		public IBrowser browser;
 		public IPlayer player;
@@ -281,20 +298,23 @@ public class RemoteService extends Service {
 
 	public void refreshControlCenter() {
 		int stationSize = 0;
+		controlCenter.clear();
 		try {
 			stationSize = controlCenter.getControlUnitNumber();
+			controlCenter.getGroundPlot();
 		} catch (RemoteException e1) {
 		}
 		stationStuff.clear();
 		unitMap.clear();
-		unitName.clear();
+		unitMapPostion.clear();
 		for (int i = 0; i < stationSize; i++) {
 			try {
 				IControlUnit unit = controlCenter.getControlUnit(i);
 				Object object = unit.getRemoteableControlObject();
 				String name = unit.getName();
-				unitMap.put(unit, object);
-				unitName.put(unit, name);
+				float[] position = unit.getPosition();
+				unitMap.put(name, object);
+				unitMapPostion.put(name, position);
 			} catch (Exception e) {
 				Log.e("error", e.getMessage());
 			}
