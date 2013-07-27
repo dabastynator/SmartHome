@@ -49,11 +49,12 @@ public class ControlCenterImpl implements IControlCenter {
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
-				try {
-					Thread.sleep(1000 * 60 * 5);
-				} catch (InterruptedException e) {
-				}
-				checkControlUnits();
+				while (true)
+					try {
+						Thread.sleep(1000 * 60 * 5);
+					} catch (InterruptedException e) {
+						checkControlUnits();
+					}
 			}
 		};
 		thread.start();
