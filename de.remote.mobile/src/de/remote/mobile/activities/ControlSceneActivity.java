@@ -119,7 +119,7 @@ public class ControlSceneActivity extends BindedActivity {
 							Toast.makeText(ControlSceneActivity.this,
 									"load center done", Toast.LENGTH_SHORT)
 									.show();
-						setTitle("Control Center Overview");
+						setTitle("Controlcenter@" + binder.getServerName());
 						setProgressBarVisibility(false);
 					}
 				});

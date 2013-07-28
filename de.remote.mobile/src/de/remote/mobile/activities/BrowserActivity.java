@@ -154,7 +154,8 @@ public class BrowserActivity extends BrowserBase {
 				super.onPostExecute(result);
 				setProgressBarVisibility(false);
 				if (mediaServer.browser == null) {
-					setTitle("No media server@" + binder.getServerName());
+					setTitle("No media server@"
+							+ binder.getLatestMediaServer().name);
 					listView.setAdapter(new BrowserAdapter(
 							BrowserActivity.this, mediaServer.browser,
 							new String[] {}, viewerState, playingBean));
