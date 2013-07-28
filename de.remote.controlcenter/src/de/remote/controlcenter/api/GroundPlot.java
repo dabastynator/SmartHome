@@ -90,7 +90,7 @@ public class GroundPlot implements Serializable {
 		private static final long serialVersionUID = 1529625875832161486L;
 
 		// properties of the feature
-		public float x, y, z, ax;
+		public float x, y, z, az;
 		public String type, extra;
 
 	}
