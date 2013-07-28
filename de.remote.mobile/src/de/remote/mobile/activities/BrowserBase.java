@@ -254,9 +254,24 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadLayout.setVisibility(View.VISIBLE);
 		downloadProgress.setProgress(0);
 	}
+	
+	@Override
+	public void startSending(long size) {
+		max = size;
+		downloadLayout.setVisibility(View.VISIBLE);
+		downloadProgress.setProgress(0);
+	}
 
 	@Override
 	public void progressReceive(long size) {
+		downloadLayout.setVisibility(View.VISIBLE);
+		if (max == 0)
+			max = binder.getReceiver().getFullSize();
+		downloadProgress.setProgress((int) ((100d * size) / max));
+	}
+	
+	@Override
+	public void progressSending(long size) {
 		downloadLayout.setVisibility(View.VISIBLE);
 		if (max == 0)
 			max = binder.getReceiver().getFullSize();
@@ -267,11 +282,18 @@ public abstract class BrowserBase extends BindedActivity {
 	public void endReceive(long size) {
 		downloadLayout.setVisibility(View.GONE);
 	}
+	
+	@Override
+	public void endSending(long size) {
+		downloadLayout.setVisibility(View.GONE);
+	}
 
 	@Override
 	public void exceptionOccurred(Exception e) {
 		downloadLayout.setVisibility(View.GONE);
 	}
+	
+	
 
 	@Override
 	public void downloadCanceled() {

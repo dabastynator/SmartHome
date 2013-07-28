@@ -28,7 +28,6 @@ import android.widget.Toast;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.AbstractReceiver;
 import de.newsystem.rmi.transceiver.AbstractReceiver.ReceiverState;
-import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.PlayerException;
 import de.remote.mobile.R;
 import de.remote.mobile.services.RemoteService.StationStuff;
@@ -779,12 +778,6 @@ public class BrowserActivity extends BrowserBase {
 				adapter.notifyDataSetChanged();
 			}
 		}
-	}
-
-	@Override
-	public void onPowerSwitchChange(String _switch, State state) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

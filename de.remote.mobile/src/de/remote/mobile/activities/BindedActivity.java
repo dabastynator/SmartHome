@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.database.RemoteDatabase;
@@ -184,5 +185,35 @@ public abstract class BindedActivity extends Activity implements
 
 	@Override
 	public void downloadCanceled() {
+	}
+	
+	@Override
+	public void onPowerSwitchChange(String _switch, State state) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void startSending(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void progressSending(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void endSending(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendingCanceled() {
+		// TODO Auto-generated method stub
+		
 	}
 }

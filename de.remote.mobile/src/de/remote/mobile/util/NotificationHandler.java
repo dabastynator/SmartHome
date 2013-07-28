@@ -47,7 +47,7 @@ public class NotificationHandler implements IRemoteActionListener {
 	private Context context;
 
 	private int serverID;
-	
+
 	public NotificationHandler(Context context) {
 		this.context = context;
 	}
@@ -64,13 +64,14 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void startReceive(final long size) {
 		fullSize = size;
-		makeDonwloadingNotification(file, 0);
-		
+		makeLoadNotification("download " + file, 0, R.drawable.download);
+
 	}
 
 	@Override
 	public void progressReceive(final long size) {
-		makeDonwloadingNotification(file, ((float) size) / ((float) fullSize));
+		makeLoadNotification("download " + file, ((float) size)
+				/ ((float) fullSize), R.drawable.download);
 
 	}
 
@@ -87,7 +88,7 @@ public class NotificationHandler implements IRemoteActionListener {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
-		
+
 	}
 
 	@Override
@@ -171,17 +172,17 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * @param title
 	 * @param body
 	 */
-	protected void makeDonwloadingNotification(String file, float progress) {
+	protected void makeLoadNotification(String text, float progress,
+			int imgResource) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(R.drawable.download,
+		Notification notification = new Notification(imgResource,
 				"Download started", System.currentTimeMillis());
 		notification.contentView = new RemoteViews(context.getPackageName(),
 				R.layout.download_progress);
 		notification.contentView.setImageViewResource(R.id.status_icon,
-				R.drawable.download);
-		notification.contentView.setTextViewText(R.id.status_text, "download "
-				+ file);
+				imgResource);
+		notification.contentView.setTextViewText(R.id.status_text, text);
 		notification.contentView.setProgressBar(R.id.status_progress, 100,
 				(int) (progress * 100), false);
 		Intent nIntent = new Intent(context, BrowserActivity.class);
@@ -196,7 +197,33 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void onPowerSwitchChange(String switchName, State state) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void startSending(long size) {
+		fullSize = size;
+		makeLoadNotification("upload " + file, 0, R.drawable.upload);
+	}
+
+	@Override
+	public void progressSending(long size) {
+		makeLoadNotification("upload " + file, ((float) size)
+				/ ((float) fullSize), R.drawable.upload);
+	}
+
+	@Override
+	public void endSending(long size) {
+		NotificationManager nm = (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
+	}
+
+	@Override
+	public void sendingCanceled() {
+		NotificationManager nm = (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}
 
 }

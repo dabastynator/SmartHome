@@ -19,6 +19,7 @@ import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.ReceiverProgress;
+import de.newsystem.rmi.transceiver.SenderProgress;
 import de.remote.controlcenter.api.IControlCenter;
 import de.remote.controlcenter.api.IControlUnit;
 import de.remote.gpiopower.api.IInternetSwitch.State;
@@ -128,6 +129,8 @@ public class RemoteService extends Service {
 	 */
 	public StationStuff currentMediaServer;
 
+	protected SenderProgress uploadListener;
+
 	/**
 	 * create connection, execute runnable if connection has started in the ui
 	 * thread.
@@ -197,6 +200,7 @@ public class RemoteService extends Service {
 		playerListener = new PlayerListener();
 		internetSwitchListener = new GPIOListener();
 		downloadListener = new ProgressListener();
+		uploadListener = new UploadProgressListenr();
 		actionListener.add(notificationHandler);
 		serverDB = new RemoteDatabase(this);
 		wlanReceiver = new WLANReceiver(this);
@@ -433,6 +437,60 @@ public class RemoteService extends Service {
 		}
 
 	}
+	
+	public class UploadProgressListenr implements SenderProgress{
+
+		@Override
+		public void startSending(final long size) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.startSending(size);
+				}
+			});			
+		}
+
+		@Override
+		public void progressSending(final long size) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.progressSending(size);
+				}
+			});					
+		}
+
+		@Override
+		public void endSending(final long size) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.endSending(size);
+				}
+			});					
+		}
+
+		@Override
+		public void exceptionOccurred(final Exception e) {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.exceptionOccurred(e);
+				}
+			});					
+		}
+
+		@Override
+		public void sendingCanceled() {
+			handler.post(new Runnable() {
+				public void run() {
+					for (IRemoteActionListener l : actionListener)
+						l.sendingCanceled();
+				}
+			});					
+		}
+		
+	}
 
 	/**
 	 * this interface informs listener about any action on the remote service,
@@ -440,7 +498,7 @@ public class RemoteService extends Service {
 	 * 
 	 * @author sebastian
 	 */
-	public interface IRemoteActionListener extends ReceiverProgress {
+	public interface IRemoteActionListener extends ReceiverProgress, SenderProgress {
 
 		/**
 		 * server player plays new file
