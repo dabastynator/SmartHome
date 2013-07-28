@@ -97,7 +97,11 @@ public class ControlCenterImpl implements IControlCenter {
 				Feature feature = new Feature();
 				feature.x = Float.parseFloat(featureElement.getAttribute("x"));
 				feature.y = Float.parseFloat(featureElement.getAttribute("y"));
+				feature.z = Float.parseFloat(featureElement.getAttribute("z"));
+				feature.ax = Float.parseFloat(featureElement.getAttribute("ax"));
 				feature.type = featureElement.getAttribute("type");
+				if (featureElement.hasAttribute("extra"))
+					feature.extra = featureElement.getAttribute("extra");
 
 				ground.features.add(feature);
 			}
