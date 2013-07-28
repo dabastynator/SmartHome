@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.res.Resources;
 import de.newsystem.opengl.common.AbstractSceneRenderer;
 import de.newsystem.opengl.common.fibures.GLFigure;
+import de.newsystem.opengl.common.fibures.GLSquare;
 import de.newsystem.opengl.common.fibures.GLFigure.GLClickListener;
 import de.newsystem.opengl.common.fibures.GLPolynom;
 import de.newsystem.opengl.common.fibures.GLPolynom.GLPoint;
@@ -131,13 +132,31 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		translateSceneBounds[2] = -minY;
 
 		for (Feature feature : ground.features) {
+			GLFigure figure = null;
 			if (feature.type.equals("table")) {
-				GLTableround table = new GLTableround(GLFigure.PLANE, 1.4f,
-						1.5f);
-				table.setTexture(loadBitmap(resources, R.drawable.textur_wood));
-				table.x = feature.x;
-				table.z = -feature.y;
-				glObjects.addFigure(table);
+				figure = new GLTableround(GLFigure.PLANE, 1.4f, 1.5f);
+				figure.setTexture(loadBitmap(resources, R.drawable.textur_wood));
+			}
+			if (feature.type.equals("picture")) {
+				figure = new GLSquare(GLFigure.PLANE);
+				figure.SizeX = 2.2f;
+				figure.red = figure.green = figure.blue = 1;
+				if ("leaves".equals(feature.extra))
+					figure.setTexture(loadBitmap(resources,
+							R.drawable.textur_image_leaves));
+				if ("africa".equals(feature.extra))
+					figure.setTexture(loadBitmap(resources,
+							R.drawable.textur_image_africa));
+				if ("sunset".equals(feature.extra))
+					figure.setTexture(loadBitmap(resources,
+							R.drawable.textur_image_sunset));
+			}
+			if (figure != null) {
+				figure.x = feature.x;
+				figure.z = -feature.y;
+				figure.y = feature.z;
+				figure.ancY = feature.az;
+				glObjects.addFigure(figure);
 			}
 		}
 	}
