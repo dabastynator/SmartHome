@@ -197,7 +197,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	@Override
-	public void onPlayingBeanChanged(PlayingBean bean) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 		updateWidget(bean);
 	}
 

@@ -1,15 +1,20 @@
 package de.remote.mobile.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import android.content.res.Resources;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import de.newsystem.opengl.common.AbstractSceneRenderer;
 import de.newsystem.opengl.common.fibures.GLFigure;
-import de.newsystem.opengl.common.fibures.GLSquare;
 import de.newsystem.opengl.common.fibures.GLFigure.GLClickListener;
 import de.newsystem.opengl.common.fibures.GLPolynom;
 import de.newsystem.opengl.common.fibures.GLPolynom.GLPoint;
+import de.newsystem.opengl.common.fibures.GLSquare;
 import de.newsystem.opengl.common.systems.GLBox;
 import de.newsystem.opengl.common.systems.GLFlatScreen;
 import de.newsystem.opengl.common.systems.GLFloorlamp;
@@ -25,10 +30,11 @@ import de.remote.controlcenter.api.GroundPlot.Feature;
 import de.remote.controlcenter.api.GroundPlot.Point;
 import de.remote.controlcenter.api.GroundPlot.Wall;
 import de.remote.controlcenter.api.IControlCenter;
-import de.remote.controlcenter.api.IControlUnit;
 import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.IMediaServer;
+import de.remote.mediaserver.api.PlayingBean;
+import de.remote.mediaserver.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 import de.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
 import de.remote.mobile.services.PlayerBinder;
@@ -36,22 +42,23 @@ import de.remote.mobile.services.PlayerBinder;
 public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	private GLGroup room;
-	private Resources resources;
 	private GLGroup glObjects;
 	private SelectMediaServer selecter;
 
-	public ControlSceneRenderer(Resources resources, SelectMediaServer selecter) {
-		super(resources);
+	private Map<String, GLMediaServer> glMediaServers;
+
+	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
+		super(context);
 		this.selecter = selecter;
 		translateSceneBounds[4] = -2;
 		translateSceneBounds[5] = -30;
 		ancX = 45;
+		glMediaServers = new HashMap<String, GLMediaServer>();
 	}
 
 	@Override
-	protected GLFigure createScene(Resources resources) {
+	protected GLFigure createScene() {
 		room = new GLGroup();
-		this.resources = resources;
 		return room;
 	}
 
@@ -59,6 +66,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		IControlCenter control = binder.getControlCenter();
 		if (glObjects != null)
 			room.removeFigure(glObjects);
+		glMediaServers.clear();
 		if (control == null)
 			return;
 		glObjects = new GLGroup();
@@ -70,10 +78,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				float[] position = binder.getUnitPosition(name);
 				if (object instanceof IMediaServer) {
 					GLMediaServer glMusic = new GLMediaServer(GLFigure.PLANE);
+					glMediaServers.put(name, glMusic);
 					glMusic.setTexture(GLBox.BOX,
-							loadBitmap(resources, R.drawable.textur_holz), 1);
+							loadBitmap(R.drawable.textur_holz), 1);
 					glMusic.setTexture(GLFlatScreen.BOTTOM,
-							loadBitmap(resources, R.drawable.textur_metal), 1);
+							loadBitmap(R.drawable.textur_metal), 1);
 					glMusic.x = position[0];
 					glMusic.y = position[2];
 					glMusic.z = -position[1];
@@ -135,27 +144,25 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			GLFigure figure = null;
 			if (feature.type.equals("table")) {
 				figure = new GLTableround(GLFigure.PLANE, 1.4f, 1.5f);
-				figure.setTexture(loadBitmap(resources, R.drawable.textur_wood));
+				figure.setTexture(loadBitmap(R.drawable.textur_wood));
 			}
 			if (feature.type.equals("picture")) {
 				figure = new GLSquare(GLFigure.PLANE);
 				figure.SizeX = 2.2f;
 				figure.red = figure.green = figure.blue = 1;
 				if ("leaves".equals(feature.extra))
-					figure.setTexture(loadBitmap(resources,
-							R.drawable.textur_image_leaves));
+					figure.setTexture(loadBitmap(R.drawable.textur_image_leaves));
 				if ("africa".equals(feature.extra))
-					figure.setTexture(loadBitmap(resources,
-							R.drawable.textur_image_africa));
+					figure.setTexture(loadBitmap(R.drawable.textur_image_africa));
 				if ("sunset".equals(feature.extra))
-					figure.setTexture(loadBitmap(resources,
-							R.drawable.textur_image_sunset));
+					figure.setTexture(loadBitmap(R.drawable.textur_image_sunset));
 			}
 			if (figure != null) {
 				figure.x = feature.x;
 				figure.z = -feature.y;
 				figure.y = feature.z;
 				figure.ancY = feature.az;
+				figure.alpha = 0.5f;
 				glObjects.addFigure(figure);
 			}
 		}
@@ -165,7 +172,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (type.equalsIgnoreCase("floorlamp")) {
 			GLFloorlamp lamp = new GLFloorlamp(GLFigure.PLANE);
 			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR,
-					loadBitmap(resources, R.drawable.textur_mamor));
+					loadBitmap(R.drawable.textur_mamor));
 			return lamp;
 		}
 		if (type.equalsIgnoreCase("readinglamp")) {
@@ -223,6 +230,63 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			ligthtObject.setLight(lightOn);
 		}
 
+	}
+
+	public void setPlayingBean(String mediaserver, PlayingBean bean) {
+		GLMediaServer glMedia = glMediaServers.get(mediaserver);
+		if (glMedia != null) {
+			Bitmap bitmap = createBitmapByText(getBeanString(bean));
+			glMedia.setTexture(GLFlatScreen.SCREEN, bitmap, 1);
+		}
+	}
+
+	private Bitmap createBitmapByText(String text) {
+		// Create an empty, mutable bitmap
+		Bitmap bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+		// get a canvas to paint over the bitmap
+		Canvas canvas = new Canvas(bitmap);
+		bitmap.eraseColor(0);
+
+		// set bitmap background
+		canvas.drawRGB(0, 0, 0);
+
+		// Draw the text
+		Paint textPaint = new Paint();
+		textPaint.setTextSize(32);
+		textPaint.setAntiAlias(true);
+		textPaint.setARGB(0xff, 0xFF, 0xFF, 0x00);
+
+		// draw the text centered
+		int i = 0;
+		while (text.length() > 0) {
+			i++;
+			String line = text;
+			if (text.contains("\n")) {
+				line = text.substring(0, text.indexOf('\n'));
+				text = text.substring(text.indexOf('\n') + 1);
+			} else
+				text = "";
+			canvas.drawText(line, 10, 20 + i * 30, textPaint);
+		}
+
+		return bitmap;
+	}
+
+	private String getBeanString(PlayingBean bean) {
+		String str = "";
+		if (bean == null)
+			return str;
+		if (bean.getTitle() != null)
+			str = str + "Title: " + bean.getTitle() + "\n";
+		if (bean.getArtist() != null)
+			str = str + "Artist: " + bean.getArtist() + "\n";
+		if (bean.getAlbum() != null)
+			str = str + "Album: " + bean.getAlbum() + "\n";
+		if (str.length() == 0 && bean.getFile() != null)
+			str = str + bean.getFile() + "\n";
+		if (bean.getState() == STATE.PAUSE)
+			str = str + "Pause";
+		return str;
 	}
 
 }

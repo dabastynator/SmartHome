@@ -36,7 +36,7 @@ public class PowerActivity extends BindedActivity {
 	}
 
 	@Override
-	void binderConnected() {
+	void onBinderConnected() {
 		// TODO Auto-generated method stub
 
 	}
@@ -68,7 +68,7 @@ public class PowerActivity extends BindedActivity {
 	}
 
 	@Override
-	void startConnecting() {
+	void onStartConnecting() {
 	}
 
 	@Override

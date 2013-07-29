@@ -9,6 +9,7 @@ import android.view.Window;
 import android.widget.Toast;
 import de.newsystem.opengl.common.AbstractSceneSurfaceView;
 import de.remote.gpiopower.api.IInternetSwitch.State;
+import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mobile.R;
 import de.remote.mobile.util.ControlSceneRenderer;
 
@@ -27,7 +28,7 @@ public class ControlSceneActivity extends BindedActivity {
 		setProgressBarVisibility(false);
 
 		SelectMediaServer selecter = new SelectMediaServer();
-		renderer = new ControlSceneRenderer(getResources(), selecter);
+		renderer = new ControlSceneRenderer(this, selecter);
 		view = new AbstractSceneSurfaceView(this, savedInstanceState, renderer);
 		setContentView(view);
 
@@ -81,6 +82,11 @@ public class ControlSceneActivity extends BindedActivity {
 	}
 
 	@Override
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
+		renderer.setPlayingBean(mediaserver, bean);
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater mi = new MenuInflater(getApplication());
@@ -95,13 +101,13 @@ public class ControlSceneActivity extends BindedActivity {
 	}
 
 	@Override
-	void binderConnected() {
+	void onBinderConnected() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	void startConnecting() {
+	void onStartConnecting() {
 		setTitle("connecting...");
 		setProgressBarVisibility(true);
 	}

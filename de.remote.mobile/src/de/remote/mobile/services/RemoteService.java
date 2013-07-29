@@ -338,8 +338,11 @@ public class RemoteService extends Service {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
+					String media = "unknown";
+					if (currentMediaServer != null)
+						media = currentMediaServer.name;
 					for (IRemoteActionListener listener : actionListener)
-						listener.onPlayingBeanChanged(playing);
+						listener.onPlayingBeanChanged(media, playing);
 				}
 			});
 		}
@@ -505,7 +508,7 @@ public class RemoteService extends Service {
 		 * 
 		 * @param bean
 		 */
-		void onPlayingBeanChanged(PlayingBean bean);
+		void onPlayingBeanChanged(String mediasesrver, PlayingBean bean);
 
 		/**
 		 * connection with server changed

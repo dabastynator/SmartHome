@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mobile.R;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
@@ -103,7 +102,7 @@ public class WebcamActivity extends BindedActivity {
 	}
 
 	@Override
-	void binderConnected() {
+	void onBinderConnected() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -115,16 +114,9 @@ public class WebcamActivity extends BindedActivity {
 	}
 
 	@Override
-	void startConnecting() {
+	void onStartConnecting() {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void onPowerSwitchChange(String _switch, State state) {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 }

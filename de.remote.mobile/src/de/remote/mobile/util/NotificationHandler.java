@@ -100,7 +100,7 @@ public class NotificationHandler implements IRemoteActionListener {
 	}
 
 	@Override
-	public void onPlayingBeanChanged(PlayingBean playing) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			NotificationManager nm = (NotificationManager) context
 					.getSystemService(Context.NOTIFICATION_SERVICE);

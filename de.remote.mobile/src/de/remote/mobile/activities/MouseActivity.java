@@ -36,7 +36,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	void binderConnected() {
+	void onBinderConnected() {
 		// TODO Auto-generated method stub
 
 	}
@@ -109,7 +109,7 @@ public class MouseActivity extends BindedActivity {
 	}
 
 	@Override
-	void startConnecting() {
+	void onStartConnecting() {
 		mouseMoveOutput = null;
 	}
 

@@ -71,8 +71,8 @@ public abstract class BindedActivity extends Activity implements
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			binder = (PlayerBinder) service;
 			boolean newConnection = !binder.isConnected();
-			startConnecting();
-			binderConnected();
+			onStartConnecting();
+			onBinderConnected();
 			binder.addRemoteActionListener(BindedActivity.this);
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
@@ -118,7 +118,7 @@ public abstract class BindedActivity extends Activity implements
 			if (data == null || data.getExtras() == null)
 				return;
 			serverID = data.getExtras().getInt(SelectServerActivity.SERVER_ID);
-			startConnecting();
+			onStartConnecting();
 			binder.connectToServer(serverID);
 		}
 	}
@@ -145,12 +145,12 @@ public abstract class BindedActivity extends Activity implements
 	/**
 	 * perform on connection to the binder
 	 */
-	abstract void binderConnected();
+	abstract void onBinderConnected();
 
 	/**
 	 * start connection. inform user about connecting status.
 	 */
-	abstract void startConnecting();
+	abstract void onStartConnecting();
 
 	@Override
 	protected void onDestroy() {
@@ -160,7 +160,7 @@ public abstract class BindedActivity extends Activity implements
 	}
 
 	@Override
-	public void onPlayingBeanChanged(PlayingBean bean) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 	}
 
 	@Override

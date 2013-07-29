@@ -42,8 +42,6 @@ import de.remote.mobile.util.BufferBrowser;
  */
 public class BrowserActivity extends BrowserBase {
 
-	private StationStuff mediaServer;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -80,6 +78,7 @@ public class BrowserActivity extends BrowserBase {
 
 	private String[] loadItems(String[] gotoPath) throws RemoteException,
 			PlayerException {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		if (mediaServer == null) {
 			disableScreen();
 			return new String[] {};
@@ -123,7 +122,7 @@ public class BrowserActivity extends BrowserBase {
 	 * @param gotoPath
 	 */
 	private void updateGUI(final String gotoPath) {
-		if (mediaServer == null) {
+		if (binder.getLatestMediaServer() == null) {
 			disableScreen();
 			return;
 		}
@@ -140,6 +139,7 @@ public class BrowserActivity extends BrowserBase {
 
 			@Override
 			protected String[] doInBackground(String... params) {
+
 				try {
 					exeption = null;
 					return loadItems(params);
@@ -152,6 +152,7 @@ public class BrowserActivity extends BrowserBase {
 			@Override
 			protected void onPostExecute(String[] result) {
 				super.onPostExecute(result);
+				StationStuff mediaServer = binder.getLatestMediaServer();
 				setProgressBarVisibility(false);
 				if (mediaServer.browser == null) {
 					setTitle("No media server@"
@@ -207,6 +208,7 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		try {
 			if (binder == null)
 				return super.onKeyDown(keyCode, event);
@@ -260,7 +262,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void playPause(View v) {
 		try {
-			mediaServer.player.playPause();
+			binder.getLatestMediaServer().player.playPause();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -273,7 +275,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void stopPlayer(View v) {
 		try {
-			mediaServer.player.quit();
+			binder.getLatestMediaServer().player.quit();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -286,7 +288,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void next(View v) {
 		try {
-			mediaServer.player.next();
+			binder.getLatestMediaServer().player.next();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -299,7 +301,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void prev(View v) {
 		try {
-			mediaServer.player.previous();
+			binder.getLatestMediaServer().player.previous();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -312,7 +314,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void seekBwd(View v) {
 		try {
-			mediaServer.player.seekBackwards();
+			binder.getLatestMediaServer().player.seekBackwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -325,7 +327,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void seekFwd(View v) {
 		try {
-			mediaServer.player.seekForwards();
+			binder.getLatestMediaServer().player.seekForwards();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -338,7 +340,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void volUp(View v) {
 		try {
-			mediaServer.player.volUp();
+			binder.getLatestMediaServer().player.volUp();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -351,7 +353,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void volDown(View v) {
 		try {
-			mediaServer.player.volDown();
+			binder.getLatestMediaServer().player.volDown();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -364,7 +366,7 @@ public class BrowserActivity extends BrowserBase {
 	 */
 	public void fullScreen(View v) {
 		try {
-			mediaServer.player.fullScreen();
+			binder.getLatestMediaServer().player.fullScreen();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -413,6 +415,7 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
@@ -476,6 +479,7 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_item_play:
@@ -537,6 +541,7 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		if (data == null)
 			return;
 		try {
@@ -600,11 +605,17 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	@Override
-	protected void startConnecting() {
+	protected void onStartConnecting() {
 		setTitle("connecting...");
 		setProgressBarVisibility(true);
 		listView.setAdapter(new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, new String[] {}));
+	};
+
+	@Override
+	void onBinderConnected() {
+		if (binder.getLatestMediaServer() != null)
+			updateGUI(null);
 	}
 
 	@Override
@@ -624,7 +635,7 @@ public class BrowserActivity extends BrowserBase {
 			@Override
 			protected String[] doInBackground(String... params) {
 				try {
-					mediaServer = binder.getMediaServerByName(mediaServerName);
+					binder.getMediaServerByName(mediaServerName);
 					return new String[] {};
 				} catch (Exception e) {
 					exeption = e;
@@ -637,7 +648,7 @@ public class BrowserActivity extends BrowserBase {
 				if (exeption != null)
 					Toast.makeText(BrowserActivity.this, exeption.getMessage(),
 							Toast.LENGTH_SHORT).show();
-				if (mediaServer != null) {
+				if (binder.getLatestMediaServer() != null) {
 					updateGUI(null);
 				} else {
 					disableScreen();
@@ -677,6 +688,7 @@ public class BrowserActivity extends BrowserBase {
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View view, int position,
 				long arg3) {
+			StationStuff mediaServer = binder.getLatestMediaServer();
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
 			try {
@@ -720,12 +732,14 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	public void setTotem(View view) {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		mediaServer.player = mediaServer.totem;
 		totemButton.setBackgroundResource(R.drawable.image_border);
 		mplayerButton.setBackgroundDrawable(null);
 	}
 
 	public void setMPlayer(View view) {
+		StationStuff mediaServer = binder.getLatestMediaServer();
 		mediaServer.player = mediaServer.totem;
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);

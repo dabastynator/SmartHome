@@ -222,8 +222,7 @@ public abstract class BrowserBase extends BindedActivity {
 	}
 
 	@Override
-	void binderConnected() {
-		onPlayingBeanChanged(binder.getPlayingFile());
+	void onBinderConnected() {
 	}
 
 	private long max = 0;
@@ -231,7 +230,7 @@ public abstract class BrowserBase extends BindedActivity {
 	protected PlayingBean playingBean;
 
 	@Override
-	public void onPlayingBeanChanged(PlayingBean bean) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 		if (bean == null || bean.getState() == STATE.PLAY)
 			playButton.setImageResource(R.drawable.pause);
 		else if (bean.getState() == STATE.PAUSE)

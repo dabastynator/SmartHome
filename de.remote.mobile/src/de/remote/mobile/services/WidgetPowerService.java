@@ -216,7 +216,7 @@ public class WidgetPowerService extends Service implements
 	}
 
 	@Override
-	public void onPlayingBeanChanged(PlayingBean bean) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 	}
 
 	@Override
