@@ -27,7 +27,7 @@ import de.remote.mobile.util.BrowserAdapter;
  */
 /**
  * @author sebastian
- *
+ * 
  */
 public abstract class BrowserBase extends BindedActivity {
 
@@ -35,7 +35,7 @@ public abstract class BrowserBase extends BindedActivity {
 	 * name for extra data for media server name
 	 */
 	public static final String EXTRA_MEDIA_NAME = "mediaServerName";
-	
+
 	/**
 	 * name of the viewer state field to store and restore the value
 	 */
@@ -134,7 +134,7 @@ public abstract class BrowserBase extends BindedActivity {
 	protected ImageView filesystemButton;
 
 	protected ImageView playlistButton;
-	
+
 	/**
 	 * Name of current music server
 	 */
@@ -154,10 +154,11 @@ public abstract class BrowserBase extends BindedActivity {
 		// listView.setScrollingCacheEnabled(false);
 		// listView.setCacheColorHint(0);
 		registerForContextMenu(listView);
-		
+
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_NAME)) {
-			mediaServerName = getIntent().getExtras().getString(EXTRA_MEDIA_NAME);
+			mediaServerName = getIntent().getExtras().getString(
+					EXTRA_MEDIA_NAME);
 		}
 
 		ai = new AI(this);
@@ -231,6 +232,9 @@ public abstract class BrowserBase extends BindedActivity {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
+		if (binder == null || binder.getLatestMediaServer() == null
+				|| !mediaserver.equals(binder.getLatestMediaServer().name))
+			return;
 		if (bean == null || bean.getState() == STATE.PLAY)
 			playButton.setImageResource(R.drawable.pause);
 		else if (bean.getState() == STATE.PAUSE)
@@ -253,7 +257,7 @@ public abstract class BrowserBase extends BindedActivity {
 		downloadLayout.setVisibility(View.VISIBLE);
 		downloadProgress.setProgress(0);
 	}
-	
+
 	@Override
 	public void startSending(long size) {
 		max = size;
@@ -268,7 +272,7 @@ public abstract class BrowserBase extends BindedActivity {
 			max = binder.getReceiver().getFullSize();
 		downloadProgress.setProgress((int) ((100d * size) / max));
 	}
-	
+
 	@Override
 	public void progressSending(long size) {
 		downloadLayout.setVisibility(View.VISIBLE);
@@ -281,7 +285,7 @@ public abstract class BrowserBase extends BindedActivity {
 	public void endReceive(long size) {
 		downloadLayout.setVisibility(View.GONE);
 	}
-	
+
 	@Override
 	public void endSending(long size) {
 		downloadLayout.setVisibility(View.GONE);
@@ -291,8 +295,6 @@ public abstract class BrowserBase extends BindedActivity {
 	public void exceptionOccurred(Exception e) {
 		downloadLayout.setVisibility(View.GONE);
 	}
-	
-	
 
 	@Override
 	public void downloadCanceled() {

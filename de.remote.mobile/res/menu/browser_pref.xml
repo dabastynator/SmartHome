@@ -2,11 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/opt_server_select"
-        android:icon="@drawable/server"
-        android:title="@string/str_server_name">
-    </item>
-    <item
         android:id="@+id/item2"
         android:icon="@drawable/player"
         android:title="@string/str_player">
@@ -38,6 +33,11 @@
         android:title="@string/str_record">
     </item>
     <item
+        android:id="@+id/opt_refresh"
+        android:icon="@drawable/refresh_32"
+        android:title="@string/str_refresh">
+    </item>
+    <item
         android:id="@+id/opt_control"
         android:icon="@drawable/control"
         android:title="@string/str_control">
@@ -67,12 +67,14 @@
                 android:id="@+id/opt_left"
                 android:icon="@drawable/left"
                 android:title="@string/str_move_left"/>
-            <!--<item
+            <!--
+            <item
                 android:id="@+id/opt_shuffle_on"
                 android:title="Shuffle"/>
             <item
                 android:id="@+id/opt_shuffle_off"
-                android:title="No shuffle"/>  -->
+                android:title="No shuffle"/>
+            -->
             <item
                 android:id="@+id/opt_mousepad"
                 android:title="Mousepad"/>
@@ -84,11 +86,6 @@
                 android:icon="@drawable/exit"
                 android:title="@string/str_shutdown"/>
         </menu>
-    </item>
-    <item
-        android:id="@+id/opt_exit"
-        android:icon="@drawable/exit"
-        android:title="@string/str_exit">
     </item>
 
 </menu>

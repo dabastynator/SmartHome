@@ -154,12 +154,12 @@ public class BrowserActivity extends BrowserBase {
 				super.onPostExecute(result);
 				StationStuff mediaServer = binder.getLatestMediaServer();
 				setProgressBarVisibility(false);
-				if (mediaServer.browser == null) {
+				if (mediaServer == null) {
 					setTitle("No media server@"
 							+ binder.getLatestMediaServer().name);
 					listView.setAdapter(new BrowserAdapter(
-							BrowserActivity.this, mediaServer.browser,
-							new String[] {}, viewerState, playingBean));
+							BrowserActivity.this, null, new String[] {},
+							viewerState, playingBean));
 					return;
 				}
 				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
@@ -169,7 +169,7 @@ public class BrowserActivity extends BrowserBase {
 				case DIRECTORIES:
 					try {
 						setTitle(mediaServer.browser.getLocation() + "@"
-								+ binder.getServerName());
+								+ mediaServer.name);
 					} catch (RemoteException e) {
 						setTitle("no connection");
 					}
@@ -178,7 +178,7 @@ public class BrowserActivity extends BrowserBase {
 					playlistButton.setBackgroundDrawable(null);
 					break;
 				case PLAYLISTS:
-					setTitle("Playlists@" + binder.getServerName());
+					setTitle("Playlists@" + mediaServer.name);
 					playlistButton
 							.setBackgroundResource(R.drawable.image_border);
 					filesystemButton.setBackgroundDrawable(null);
@@ -188,7 +188,7 @@ public class BrowserActivity extends BrowserBase {
 							.setBackgroundResource(R.drawable.image_border);
 					filesystemButton.setBackgroundDrawable(null);
 					setTitle("Playlist: " + currentPlayList + "@"
-							+ binder.getServerName());
+							+ mediaServer.name);
 				}
 				if (exeption != null) {
 					if (exeption.getMessage() != null
@@ -444,6 +444,10 @@ public class BrowserActivity extends BrowserBase {
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
+				updateGUI(null);
+				break;
+			case R.id.opt_refresh:
+				binder.getMediaServerByName(mediaServerName);
 				updateGUI(null);
 				break;
 			case R.id.opt_record:

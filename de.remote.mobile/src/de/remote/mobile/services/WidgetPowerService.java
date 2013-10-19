@@ -111,7 +111,7 @@ public class WidgetPowerService extends Service implements
 	private void updateWidget(int widgetID) throws Exception {
 		if (binder == null)
 			throw new Exception("not conneced");
-		Map<String, IInternetSwitch> powers = PowerActivity.getPower(binder);
+		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
 		String switchName = prefs.getString(widgetID + "", null);
@@ -171,9 +171,9 @@ public class WidgetPowerService extends Service implements
 	}
 
 	private void switchPower(int widgetID) throws Exception {
-		Map<String, IInternetSwitch> powers = PowerActivity.getPower(binder);
-		if (powers == null)
-			throw new Exception(binder.getServerName() + " has no power server");
+		if (binder == null)
+			throw new Exception("not connected");
+		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
 		String name = prefs.getString(widgetID + "", null);
@@ -286,25 +286,25 @@ public class WidgetPowerService extends Service implements
 	@Override
 	public void startSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void progressSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void sendingCanceled() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -80,7 +80,7 @@ public class RemoteService extends Service {
 	private WLANReceiver wlanReceiver;
 
 	protected Map<String, Object> unitMap;
-	
+
 	protected Map<String, float[]> unitMapPostion;
 
 	/**
@@ -250,6 +250,14 @@ public class RemoteService extends Service {
 
 	public void setCurrentMediaServer(StationStuff mediaObjects)
 			throws RemoteException {
+		if (mediaObjects != null) {
+			try {
+				mediaObjects.mplayer
+						.removePlayerMessageListener(playerListener);
+				mediaObjects.totem.removePlayerMessageListener(playerListener);
+			} catch (RemoteException e) {
+			}
+		}
 		currentMediaServer = mediaObjects;
 		currentMediaServer.mplayer.addPlayerMessageListener(playerListener);
 		currentMediaServer.totem.addPlayerMessageListener(playerListener);
@@ -440,8 +448,8 @@ public class RemoteService extends Service {
 		}
 
 	}
-	
-	public class UploadProgressListenr implements SenderProgress{
+
+	public class UploadProgressListenr implements SenderProgress {
 
 		@Override
 		public void startSending(final long size) {
@@ -450,7 +458,7 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener l : actionListener)
 						l.startSending(size);
 				}
-			});			
+			});
 		}
 
 		@Override
@@ -460,7 +468,7 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener l : actionListener)
 						l.progressSending(size);
 				}
-			});					
+			});
 		}
 
 		@Override
@@ -470,7 +478,7 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener l : actionListener)
 						l.endSending(size);
 				}
-			});					
+			});
 		}
 
 		@Override
@@ -480,7 +488,7 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener l : actionListener)
 						l.exceptionOccurred(e);
 				}
-			});					
+			});
 		}
 
 		@Override
@@ -490,9 +498,9 @@ public class RemoteService extends Service {
 					for (IRemoteActionListener l : actionListener)
 						l.sendingCanceled();
 				}
-			});					
+			});
 		}
-		
+
 	}
 
 	/**
@@ -501,7 +509,8 @@ public class RemoteService extends Service {
 	 * 
 	 * @author sebastian
 	 */
-	public interface IRemoteActionListener extends ReceiverProgress, SenderProgress {
+	public interface IRemoteActionListener extends ReceiverProgress,
+			SenderProgress {
 
 		/**
 		 * server player plays new file

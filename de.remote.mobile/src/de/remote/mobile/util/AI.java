@@ -6,7 +6,6 @@ import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.gpiopower.api.IInternetSwitch.State;
 import de.remote.mediaserver.api.PlayerException;
-import de.remote.mobile.activities.PowerActivity;
 import de.remote.mobile.services.PlayerBinder;
 import de.remote.mobile.util.VoiceRecognizer.IVoiceRecognition;
 
@@ -73,15 +72,14 @@ public class AI implements IVoiceRecognition {
 			binder.getLatestMediaServer().player.fullScreen();
 			Toast.makeText(context, "success fullscreen", Toast.LENGTH_SHORT)
 					.show();
-		} else if (cmd.equals("next")){
+		} else if (cmd.equals("next")) {
 			binder.getLatestMediaServer().player.next();
 			Toast.makeText(context, "success next", Toast.LENGTH_SHORT).show();
-		}
-		else if (cmd.equals("previous")){
+		} else if (cmd.equals("previous")) {
 			binder.getLatestMediaServer().player.previous();
-			Toast.makeText(context, "success previous", Toast.LENGTH_SHORT).show();
-		}
-		else if (cmd.startsWith("play")) {
+			Toast.makeText(context, "success previous", Toast.LENGTH_SHORT)
+					.show();
+		} else if (cmd.startsWith("play")) {
 			if (split.length < 2)
 				throw new AIException("can not play empty string");
 			String play = split[1];
@@ -98,7 +96,7 @@ public class AI implements IVoiceRecognition {
 			State state = State.OFF;
 			if (split[2].equalsIgnoreCase("an"))
 				state = State.ON;
-			IInternetSwitch power = PowerActivity.getPower(binder).get(split[1]);
+			IInternetSwitch power = binder.getPower().get(split[1]);
 			if (power == null)
 				throw new AIException("Unknown switch: " + split[1]);
 			power.setState(state);
@@ -112,13 +110,15 @@ public class AI implements IVoiceRecognition {
 				binder.getLatestMediaServer().control.displayDark();
 			else
 				throw new AIException("can't make bildschirm " + split[1]);
-			Toast.makeText(context, "success bildschirm", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "success bildschirm", Toast.LENGTH_SHORT)
+					.show();
 		} else if (cmd.startsWith("tastatur")) {
 			String keypress = "";
 			for (int i = 1; i < split.length; i++)
 				keypress = keypress + split[i] + " ";
 			binder.getLatestMediaServer().control.keyPress(keypress);
-			Toast.makeText(context, "success tastatur", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "success tastatur", Toast.LENGTH_SHORT)
+					.show();
 		} else
 			throw new AIException("what is '" + cmd + "'");
 	}

@@ -20,9 +20,9 @@ import de.newsystem.opengl.common.systems.GLFlatScreen;
 import de.newsystem.opengl.common.systems.GLFloorlamp;
 import de.newsystem.opengl.common.systems.GLGroup;
 import de.newsystem.opengl.common.systems.GLLavalamp;
-import de.newsystem.opengl.common.systems.GLLight;
 import de.newsystem.opengl.common.systems.GLMediaServer;
 import de.newsystem.opengl.common.systems.GLReadinglamp;
+import de.newsystem.opengl.common.systems.GLSwitch;
 import de.newsystem.opengl.common.systems.GLTableround;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.controlcenter.api.GroundPlot;
@@ -40,6 +40,13 @@ import de.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
 import de.remote.mobile.services.PlayerBinder;
 
 public class ControlSceneRenderer extends AbstractSceneRenderer {
+
+	public static final String AUDO = "audio";
+	public static final String VIDEO = "video";
+	public static final String LAMP_LAVA = "lavalamp";
+	public static final String LAMP_READ = "readinglamp";
+	public static final String LAMP_FLOOR = "floorlamp";
+	public static final String TABLE = "table";
 
 	private GLGroup room;
 	private GLGroup glObjects;
@@ -77,7 +84,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				Object object = binder.getUnits().get(name);
 				float[] position = binder.getUnitPosition(name);
 				if (object instanceof IMediaServer) {
-					GLMediaServer glMusic = new GLMediaServer(GLFigure.PLANE);
+					GLMediaServer glMusic = new GLMediaServer(GLFigure.PLANE, true);
 					glMediaServers.put(name, glMusic);
 					glMusic.setTexture(GLBox.BOX,
 							loadBitmap(R.drawable.textur_holz), 1);
@@ -93,8 +100,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				if (object instanceof IInternetSwitch) {
 					IInternetSwitch internet = (IInternetSwitch) object;
 					String type = internet.getType();
-					GLLight light = loadGLLightByType(type);
-					light.setLight(internet.getState() == State.ON);
+					GLSwitch light = loadGLSwitchByType(type);
+					light.setSwitch(internet.getState() == State.ON);
 					light.x = position[0];
 					light.y = position[2];
 					light.z = -position[1];
@@ -168,20 +175,34 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 	}
 
-	private GLLight loadGLLightByType(String type) {
-		if (type.equalsIgnoreCase("floorlamp")) {
+	private GLSwitch loadGLSwitchByType(String type) {
+		if (type.equalsIgnoreCase(LAMP_FLOOR)) {
 			GLFloorlamp lamp = new GLFloorlamp(GLFigure.PLANE);
 			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR,
 					loadBitmap(R.drawable.textur_mamor));
 			return lamp;
 		}
-		if (type.equalsIgnoreCase("readinglamp")) {
+		if (type.equalsIgnoreCase(LAMP_READ)) {
 			GLReadinglamp lamp = new GLReadinglamp(GLFigure.PLANE);
 			return lamp;
 		}
-		if (type.equalsIgnoreCase("lavalamp")) {
+		if (type.equalsIgnoreCase(LAMP_LAVA)) {
 			GLLavalamp lamp = new GLLavalamp(20, GLFigure.PLANE);
 			return lamp;
+		}
+		if (type.equalsIgnoreCase(VIDEO)) {
+			GLFlatScreen video = new GLFlatScreen(GLFigure.PLANE, 1.2f, 0.67f,
+					2f);
+			video.setSwitchTexture(GLFlatScreen.SCREEN,
+					loadBitmap(R.drawable.textur_image_africa), true);
+			video.setTexture(GLFlatScreen.BOTTOM,
+					loadBitmap(R.drawable.textur_metal));
+			return video;
+		}
+		if (type.equalsIgnoreCase(AUDO)) {
+			GLMediaServer audio = new GLMediaServer(GLFigure.PLANE, false);
+			audio.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
+			return audio;
 		}
 		GLLavalamp lamp = new GLLavalamp(20, GLFigure.PLANE);
 		return lamp;
@@ -204,10 +225,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	class InternetSwitchListener implements GLClickListener {
 
-		private GLLight ligthtObject;
+		private GLSwitch ligthtObject;
 		private IInternetSwitch internet;
 
-		public InternetSwitchListener(GLLight ligthtObject,
+		public InternetSwitchListener(GLSwitch ligthtObject,
 				IInternetSwitch internet) {
 			this.ligthtObject = ligthtObject;
 			this.internet = internet;
@@ -215,7 +236,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 		@Override
 		public void onGLClick() {
-			final boolean lightOn = !ligthtObject.isLightOn();
+			final boolean lightOn = !ligthtObject.isSwitchOn();
 			new Thread() {
 				public void run() {
 					try {
@@ -227,7 +248,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 					}
 				};
 			}.start();
-			ligthtObject.setLight(lightOn);
+			ligthtObject.setSwitch(lightOn);
 		}
 
 	}

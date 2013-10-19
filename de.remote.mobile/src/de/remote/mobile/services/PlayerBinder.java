@@ -2,6 +2,7 @@ package de.remote.mobile.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import android.os.Binder;
@@ -14,6 +15,7 @@ import de.newsystem.rmi.transceiver.DirectoryReceiver;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
 import de.remote.controlcenter.api.IControlCenter;
+import de.remote.gpiopower.api.IInternetSwitch;
 import de.remote.mediaserver.api.IBrowser;
 import de.remote.mediaserver.api.IChatServer;
 import de.remote.mediaserver.api.IMediaServer;
@@ -266,5 +268,18 @@ public class PlayerBinder extends Binder {
 
 	public float[] getUnitPosition(String name) {
 		return service.unitMapPostion.get(name);
+	}
+
+	public Map<String, IInternetSwitch> getPower() {
+		Map<String, IInternetSwitch> power = new HashMap<String, IInternetSwitch>();
+		if (getUnits() == null)
+			return power;
+		for (String name : getUnits().keySet()) {
+			Object object = getUnits().get(name);
+			if (object instanceof IInternetSwitch) {
+				power.put(name, (IInternetSwitch) object);
+			}
+		}
+		return power;
 	}
 }

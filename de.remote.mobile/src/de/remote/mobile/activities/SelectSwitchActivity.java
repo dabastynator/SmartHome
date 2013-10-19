@@ -35,8 +35,9 @@ public class SelectSwitchActivity extends PowerActivity {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected()) {
-			Map<String, IInternetSwitch> power = getPower(binder);
-			String[] switches = power.keySet().toArray(new String[power.size()]);
+			Map<String, IInternetSwitch> power = binder.getPower();
+			String[] switches = power.keySet()
+					.toArray(new String[power.size()]);
 			switchList.setAdapter(new SwitchAdapter(this, switches, power,
 					listener));
 		} else {
