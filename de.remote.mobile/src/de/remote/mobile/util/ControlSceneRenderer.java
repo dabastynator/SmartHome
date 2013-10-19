@@ -57,8 +57,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
 		super(context);
 		this.selecter = selecter;
-		translateSceneBounds[4] = -2;
-		translateSceneBounds[5] = -30;
+		translateSceneBounds[4] = -4;
+		translateSceneBounds[5] = -15;
 		ancX = 45;
 		glMediaServers = new HashMap<String, GLMediaServer>();
 	}
@@ -135,17 +135,28 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				maxX = Math.max(maxX, ccPoint.x);
 				maxY = Math.max(maxY, ccPoint.y);
 			}
-			GLPolynom glWall = new GLPolynom(points);
+			GLPolynom glWall = new GLPolynom(points, 2);
 
 			glObjects.addFigure(glWall);
 		}
 		translateScene[0] = -((maxX - minX) / 2 + minX);
 		translateScene[1] = -((maxY - minY) / 2 + minY);
-		translateScene[2] = -20;
+		translateScene[2] = -15;
 		translateSceneBounds[1] = -maxX;
 		translateSceneBounds[0] = -minX;
 		translateSceneBounds[3] = -maxY;
 		translateSceneBounds[2] = -minY;
+		
+		GLSquare laminat = new GLSquare(GLFigure.PLANE);
+		laminat.x = (maxX - minX) / 2 + minX;
+		laminat.z = - (maxY - minY) / 2 - minY;
+		laminat.y = -0.05f;
+		laminat.SizeX = (maxX - minX);
+		laminat.SizeY = (maxY - minY);
+		laminat.ancX = 90;
+		laminat.red = laminat.green = laminat.blue = 1;
+		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.SizeX, laminat.SizeY);
+		glObjects.addFigure(laminat);
 
 		for (Feature feature : ground.features) {
 			GLFigure figure = null;
@@ -194,7 +205,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			GLFlatScreen video = new GLFlatScreen(GLFigure.PLANE, 1.2f, 0.67f,
 					2f);
 			video.setSwitchTexture(GLFlatScreen.SCREEN,
-					loadBitmap(R.drawable.textur_image_africa), true);
+					loadBitmap(R.drawable.textur_image_sunset), true);
 			video.setTexture(GLFlatScreen.BOTTOM,
 					loadBitmap(R.drawable.textur_metal));
 			return video;
