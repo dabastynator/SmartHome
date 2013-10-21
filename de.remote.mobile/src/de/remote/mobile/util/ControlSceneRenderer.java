@@ -57,6 +57,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
 		super(context);
 		this.selecter = selecter;
+		setGradient(new float[]{0.3f, 0.3f, 1, 1}, new float[]{1, 1, 1, 1});
 		translateSceneBounds[4] = -4;
 		translateSceneBounds[5] = -15;
 		ancX = 45;
@@ -84,15 +85,15 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				Object object = binder.getUnits().get(name);
 				float[] position = binder.getUnitPosition(name);
 				if (object instanceof IMediaServer) {
-					GLMediaServer glMusic = new GLMediaServer(GLFigure.PLANE, true);
+					GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE, true);
 					glMediaServers.put(name, glMusic);
 					glMusic.setTexture(GLBox.BOX,
 							loadBitmap(R.drawable.textur_holz), 1);
 					glMusic.setTexture(GLFlatScreen.BOTTOM,
 							loadBitmap(R.drawable.textur_metal), 1);
-					glMusic.x = position[0];
-					glMusic.y = position[2];
-					glMusic.z = -position[1];
+					glMusic.position[0] = position[0];
+					glMusic.position[1] = position[2];
+					glMusic.position[2] = -position[1];
 					MediaServerListener listener = new MediaServerListener(name);
 					glMusic.setOnClickListener(listener);
 					glObjects.addFigure(glMusic);
@@ -102,9 +103,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 					String type = internet.getType();
 					GLSwitch light = loadGLSwitchByType(type);
 					light.setSwitch(internet.getState() == State.ON);
-					light.x = position[0];
-					light.y = position[2];
-					light.z = -position[1];
+					light.position[0] = position[0];
+					light.position[1] = position[2];
+					light.position[2] = -position[1];
 					InternetSwitchListener listener = new InternetSwitchListener(
 							light, internet);
 					light.setOnClickListener(listener);
@@ -147,27 +148,27 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		translateSceneBounds[3] = -maxY;
 		translateSceneBounds[2] = -minY;
 		
-		GLSquare laminat = new GLSquare(GLFigure.PLANE);
-		laminat.x = (maxX - minX) / 2 + minX;
-		laminat.z = - (maxY - minY) / 2 - minY;
-		laminat.y = -0.05f;
-		laminat.SizeX = (maxX - minX);
-		laminat.SizeY = (maxY - minY);
+		GLSquare laminat = new GLSquare(GLFigure.STYLE_PLANE);
+		laminat.position[0] = (maxX - minX) / 2 + minX;
+		laminat.position[2] = - (maxY - minY) / 2 - minY;
+		laminat.position[1] = -0.03f;
+		laminat.size[0] = (maxX - minX);
+		laminat.size[1] = (maxY - minY);
 		laminat.ancX = 90;
-		laminat.red = laminat.green = laminat.blue = 1;
-		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.SizeX, laminat.SizeY);
+		laminat.color[0] = laminat.color[1] = laminat.color[2] = 1;
+		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0], laminat.size[1]);
 		glObjects.addFigure(laminat);
 
 		for (Feature feature : ground.features) {
 			GLFigure figure = null;
 			if (feature.type.equals("table")) {
-				figure = new GLTableround(GLFigure.PLANE, 1.4f, 1.5f);
+				figure = new GLTableround(GLFigure.STYLE_PLANE, 1.4f, 1.5f);
 				figure.setTexture(loadBitmap(R.drawable.textur_wood));
 			}
 			if (feature.type.equals("picture")) {
-				figure = new GLSquare(GLFigure.PLANE);
-				figure.SizeX = 2.2f;
-				figure.red = figure.green = figure.blue = 1;
+				figure = new GLSquare(GLFigure.STYLE_PLANE);
+				figure.size[0] = 2.2f;
+				figure.color[0] = figure.color[1] = figure.color[2] = 1;
 				if ("leaves".equals(feature.extra))
 					figure.setTexture(loadBitmap(R.drawable.textur_image_leaves));
 				if ("africa".equals(feature.extra))
@@ -176,11 +177,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 					figure.setTexture(loadBitmap(R.drawable.textur_image_sunset));
 			}
 			if (figure != null) {
-				figure.x = feature.x;
-				figure.z = -feature.y;
-				figure.y = feature.z;
+				figure.position[0] = feature.x;
+				figure.position[2] = -feature.y;
+				figure.position[1] = feature.z;
 				figure.ancY = feature.az;
-				figure.alpha = 0.5f;
+				figure.color[3] = 0.5f;
 				glObjects.addFigure(figure);
 			}
 		}
@@ -188,21 +189,21 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	private GLSwitch loadGLSwitchByType(String type) {
 		if (type.equalsIgnoreCase(LAMP_FLOOR)) {
-			GLFloorlamp lamp = new GLFloorlamp(GLFigure.PLANE);
+			GLFloorlamp lamp = new GLFloorlamp(GLFigure.STYLE_PLANE);
 			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR,
 					loadBitmap(R.drawable.textur_mamor));
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(LAMP_READ)) {
-			GLReadinglamp lamp = new GLReadinglamp(GLFigure.PLANE);
+			GLReadinglamp lamp = new GLReadinglamp(GLFigure.STYLE_PLANE);
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(LAMP_LAVA)) {
-			GLLavalamp lamp = new GLLavalamp(20, GLFigure.PLANE);
+			GLLavalamp lamp = new GLLavalamp(20, GLFigure.STYLE_PLANE);
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(VIDEO)) {
-			GLFlatScreen video = new GLFlatScreen(GLFigure.PLANE, 1.2f, 0.67f,
+			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f, 0.67f,
 					2f);
 			video.setSwitchTexture(GLFlatScreen.SCREEN,
 					loadBitmap(R.drawable.textur_image_sunset), true);
@@ -211,11 +212,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			return video;
 		}
 		if (type.equalsIgnoreCase(AUDO)) {
-			GLMediaServer audio = new GLMediaServer(GLFigure.PLANE, false);
+			GLMediaServer audio = new GLMediaServer(GLFigure.STYLE_PLANE, false);
 			audio.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
 			return audio;
 		}
-		GLLavalamp lamp = new GLLavalamp(20, GLFigure.PLANE);
+		GLLavalamp lamp = new GLLavalamp(20, GLFigure.STYLE_PLANE);
 		return lamp;
 	}
 
