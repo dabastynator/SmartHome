@@ -53,14 +53,17 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	private SelectMediaServer selecter;
 
 	private Map<String, GLMediaServer> glMediaServers;
+	private TranslateSceneHandler handler;
 
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
 		super(context);
 		this.selecter = selecter;
 		setGradient(new float[]{0.3f, 0.3f, 1, 1}, new float[]{1, 1, 1, 1});
+		handler = new TranslateSceneHandler();
+		handler.ancX = 45;
+		setTouchSceneHandler(handler);
 		translateSceneBounds[4] = -4;
 		translateSceneBounds[5] = -15;
-		ancX = 45;
 		glMediaServers = new HashMap<String, GLMediaServer>();
 	}
 
@@ -140,9 +143,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 			glObjects.addFigure(glWall);
 		}
-		translateScene[0] = -((maxX - minX) / 2 + minX);
-		translateScene[1] = -((maxY - minY) / 2 + minY);
-		translateScene[2] = -15;
+		handler.translateScene[0] = -((maxX - minX) / 2 + minX);
+		handler.translateScene[1] = -((maxY - minY) / 2 + minY);
+		handler.translateScene[2] = -15;
 		translateSceneBounds[1] = -maxX;
 		translateSceneBounds[0] = -minX;
 		translateSceneBounds[3] = -maxY;
@@ -154,7 +157,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		laminat.position[1] = -0.03f;
 		laminat.size[0] = (maxX - minX);
 		laminat.size[1] = (maxY - minY);
-		laminat.ancX = 90;
+		laminat.rotation.rotateByAngleAxis(Math.PI/2, 1, 0, 0);
 		laminat.color[0] = laminat.color[1] = laminat.color[2] = 1;
 		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0], laminat.size[1]);
 		glObjects.addFigure(laminat);
@@ -180,7 +183,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				figure.position[0] = feature.x;
 				figure.position[2] = -feature.y;
 				figure.position[1] = feature.z;
-				figure.ancY = feature.az;
+				figure.rotation.rotateByAngleAxis(180 * feature.az/Math.PI, 0, 1, 0);
 				figure.color[3] = 0.5f;
 				glObjects.addFigure(figure);
 			}
