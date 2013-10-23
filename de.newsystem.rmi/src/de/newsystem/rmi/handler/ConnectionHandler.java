@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Proxy;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
 
 import de.newsystem.rmi.api.RMILogger;
-import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
+import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.dynamics.DynamicAdapter;
 import de.newsystem.rmi.dynamics.DynamicProxy;
 import de.newsystem.rmi.protokol.RemoteAble;
@@ -151,7 +150,6 @@ public class ConnectionHandler {
 			reply.addNewId(dp.getId());
 			reply.setServerPort(dp.getServerPort());
 			reply.setResult(null);
-			RMILogger.performLog(LogPriority.INFORMATION, "link proxy to adapter", dp.getId());
 		} else if (server.getAdapterObjectIdMap().containsKey(result)) {
 			reply.addNewId(server.getAdapterObjectIdMap().get(result));
 			reply.setResult(null);

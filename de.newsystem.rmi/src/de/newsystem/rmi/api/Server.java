@@ -103,7 +103,8 @@ public class Server {
 	/**
 	 * list of all connections to other servers
 	 */
-	private Map<ServerPort, ServerConnection> serverConnections = Collections.synchronizedMap(new HashMap<ServerPort, ServerConnection>());
+	private Map<ServerPort, ServerConnection> serverConnections = Collections
+			.synchronizedMap(new HashMap<ServerPort, ServerConnection>());
 
 	/**
 	 * list of all connections of the server
@@ -172,9 +173,8 @@ public class Server {
 	public void forceConnectToRegistry(String registry)
 			throws UnknownHostException, IOException {
 		boolean connected = false;
-		long waitTime = 500;
+		long waitTime = 100;
 		long maxTime = 1000 * 60 * 10;
-		double waitFactor = 1.5;
 		while (!connected) {
 			try {
 				connectToRegistry(registry);
@@ -182,13 +182,11 @@ public class Server {
 			} catch (SocketException e) {
 				connected = false;
 				RMILogger.performLog(LogPriority.WARNING,
-						"connection to registry refused: " + e.getMessage(),
+						"connection to registry refused. retry after " + waitTime + "ms",
 						null);
 				try {
 					Thread.sleep(waitTime);
-					waitTime = (long) (waitTime * waitFactor);
-					if (waitTime > maxTime)
-						waitTime = maxTime;
+					waitTime = Math.min(waitTime * 2, maxTime);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -245,6 +243,7 @@ public class Server {
 		request.setId(id);
 		try {
 			registryOut.writeObject(request);
+			@SuppressWarnings("unused")
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
 			registeredIDList.add(id);
 			RMILogger
@@ -272,6 +271,7 @@ public class Server {
 		RegistryRequest request = new RegistryRequest(Type.UNREGISTER);
 		try {
 			registryOut.writeObject(request);
+			@SuppressWarnings("unused")
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
 			registeredIDList.remove(id);
 			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ",
@@ -294,6 +294,7 @@ public class Server {
 	 * @return object
 	 * @throws RemoteException
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object find(String id, Class template) throws RemoteException {
 		try {
 			RegistryRequest request = new RegistryRequest(Type.FIND);
@@ -312,6 +313,52 @@ public class Server {
 		} catch (IOException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (ClassNotFoundException e) {
+			throw new RemoteException(id, e.getMessage());
+		}
+	}
+
+	/**
+	 * force search of a remote object in the registry. the search will be
+	 * retried, if the object is not in the registry. the registry must be
+	 * initialized and connected before.
+	 * 
+	 * @param id
+	 * @param template
+	 * @return object
+	 * @throws RemoteException
+	 */
+	@SuppressWarnings("rawtypes")
+	public Object forceFind(String id, Class template) throws RemoteException {
+		try {
+			RegistryRequest request = new RegistryRequest(Type.FIND);
+			request.setId(id);
+			int sleepTime = 100;
+			Object result = null;
+			RegistryReply reply = null;
+			while (result == null) {
+				registryOut.writeObject(request);
+				reply = (RegistryReply) registryIn.readObject();
+				if (reply.getObject() == null) {
+					RMILogger.performLog(LogPriority.WARNING,
+							"object not found in registry. retry after "
+									+ sleepTime + "ms", id);
+					Thread.sleep(sleepTime);
+					sleepTime = Math.min(sleepTime * 2, 60 * 1000);
+				}else
+					result = reply.getObject();
+			}
+			// connect to server
+			ServerConnection sc = connectToServer(reply.getObject()
+					.getServerPort());
+			// create proxy
+			return sc.createProxy(id, template);
+		} catch (UnknownHostException e) {
+			throw new RemoteException(id, e.getMessage());
+		} catch (IOException e) {
+			throw new RemoteException(id, e.getMessage());
+		} catch (ClassNotFoundException e) {
+			throw new RemoteException(id, e.getMessage());
+		} catch (InterruptedException e) {
 			throw new RemoteException(id, e.getMessage());
 		}
 	}
