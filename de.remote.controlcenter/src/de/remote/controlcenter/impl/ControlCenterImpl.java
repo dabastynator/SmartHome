@@ -3,6 +3,7 @@ package de.remote.controlcenter.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,7 +33,8 @@ public class ControlCenterImpl implements IControlCenter {
 	/**
 	 * List of all control units
 	 */
-	private List<IControlUnit> controlUnits = new ArrayList<IControlUnit>();
+	private List<IControlUnit> controlUnits = Collections
+			.synchronizedList(new ArrayList<IControlUnit>());
 
 	/**
 	 * The ground plot of the control center area
@@ -98,7 +100,8 @@ public class ControlCenterImpl implements IControlCenter {
 				feature.x = Float.parseFloat(featureElement.getAttribute("x"));
 				feature.y = Float.parseFloat(featureElement.getAttribute("y"));
 				feature.z = Float.parseFloat(featureElement.getAttribute("z"));
-				feature.az = Float.parseFloat(featureElement.getAttribute("az"));
+				feature.az = Float
+						.parseFloat(featureElement.getAttribute("az"));
 				feature.type = featureElement.getAttribute("type");
 				if (featureElement.hasAttribute("extra"))
 					feature.extra = featureElement.getAttribute("extra");
