@@ -53,7 +53,7 @@ public class MediaServerMain {
 			server.startServer(IMediaServer.STATION_PORT);
 
 			// register objects at registry
-			IControlCenter center = (IControlCenter) server.find(
+			IControlCenter center = (IControlCenter) server.forceFind(
 					IControlCenter.ID, IControlCenter.class);
 			if (center == null) {
 				System.err
