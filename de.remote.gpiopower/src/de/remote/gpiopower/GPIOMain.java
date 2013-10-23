@@ -16,9 +16,6 @@ public class GPIOMain {
 
 	public static void main(String[] args) {
 		try {
-			String registry = getParameter("--registry", args);
-			Server server = Server.getServer();
-			server.forceConnectToRegistry(registry);
 			GPIOPower gpioPower = GPIOPower.getGPIOPower();
 			RMILogger.addLogListener(new RMILogListener() {
 				@Override
@@ -28,8 +25,11 @@ public class GPIOMain {
 					System.out.flush();
 				}
 			});
+			String registry = getParameter("--registry", args);
+			Server server = Server.getServer();
+			server.forceConnectToRegistry(registry);			
 			server.startServer(IInternetSwitch.PORT);
-			IControlCenter control = (IControlCenter) server.find(
+			IControlCenter control = (IControlCenter) server.forceFind(
 					IControlCenter.ID, IControlCenter.class);
 			if (control == null)
 				throw new RemoteException(IControlCenter.ID,
