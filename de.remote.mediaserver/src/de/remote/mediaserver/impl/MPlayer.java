@@ -15,14 +15,14 @@ import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mediaserver.api.PlayingBean.STATE;
 
-public class MPlayer extends AbstractPlayer {
+public abstract class MPlayer extends AbstractPlayer {
 
-	private Process mplayerProcess;
-	private PrintStream mplayerIn;
-	private int fullscreen = 1;
-	private int positionLeft = 0;
+	protected Process mplayerProcess;
+	protected PrintStream mplayerIn;
+	protected int fullscreen = 1;
+	protected int positionLeft = 0;
 	private boolean shuffle = false;
-	private int volume = 50;
+	protected int volume = 50;
 	private int seekValue;
 	private Object playListfolder;
 

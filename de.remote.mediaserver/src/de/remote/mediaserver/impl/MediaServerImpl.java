@@ -17,7 +17,7 @@ public class MediaServerImpl implements IMediaServer {
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
-		mplayer = new MPlayer(playlistLocation);
+		mplayer = new MPlayerDVD(playlistLocation);
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);

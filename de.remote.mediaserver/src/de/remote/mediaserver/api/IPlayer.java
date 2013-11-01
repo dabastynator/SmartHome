@@ -172,4 +172,20 @@ public interface IPlayer extends RemoteAble {
 	 */
 	void setPlayingPosition(int second) throws RemoteException, PlayerException;
 
+	/**
+	 * Play dvd. Throws PlayerException if loading fails.
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void playDVD() throws RemoteException, PlayerException;
+
+	/**
+	 * Switch the DVD title. (Just for DVD)
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void nextTitle() throws RemoteException, PlayerException;
+
 }
