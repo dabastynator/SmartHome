@@ -10,11 +10,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import de.newsystem.opengl.common.AbstractSceneRenderer;
-import de.newsystem.opengl.common.fibures.GLFigure;
-import de.newsystem.opengl.common.fibures.GLFigure.GLClickListener;
-import de.newsystem.opengl.common.fibures.GLPolynom;
-import de.newsystem.opengl.common.fibures.GLPolynom.GLPoint;
-import de.newsystem.opengl.common.fibures.GLSquare;
+import de.newsystem.opengl.common.figures.GLFigure;
+import de.newsystem.opengl.common.figures.GLFigure.GLClickListener;
+import de.newsystem.opengl.common.figures.GLPolynom;
+import de.newsystem.opengl.common.figures.GLPolynom.GLPoint;
+import de.newsystem.opengl.common.figures.GLSquare;
 import de.newsystem.opengl.common.systems.GLBox;
 import de.newsystem.opengl.common.systems.GLFlatScreen;
 import de.newsystem.opengl.common.systems.GLFloorlamp;
@@ -24,6 +24,7 @@ import de.newsystem.opengl.common.systems.GLMediaServer;
 import de.newsystem.opengl.common.systems.GLReadinglamp;
 import de.newsystem.opengl.common.systems.GLSwitch;
 import de.newsystem.opengl.common.systems.GLTableround;
+import de.newsystem.opengl.common.touchhandler.TranslateSceneHandler;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.controlcenter.api.GroundPlot;
 import de.remote.controlcenter.api.GroundPlot.Feature;
@@ -60,10 +61,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		this.selecter = selecter;
 		setGradient(new float[]{0.3f, 0.3f, 1, 1}, new float[]{1, 1, 1, 1});
 		handler = new TranslateSceneHandler();
-		handler.ancX = 45;
+		handler.sceneRotation.rotateByAngleAxis(Math.PI/4, 1, 0, 0);
+		handler.zoomBounds[0] = -4;
+		handler.zoomBounds[1] = -15;
 		setTouchSceneHandler(handler);
-		translateSceneBounds[4] = -4;
-		translateSceneBounds[5] = -15;
+		setLighting(true);
 		glMediaServers = new HashMap<String, GLMediaServer>();
 	}
 
@@ -144,12 +146,12 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			glObjects.addFigure(glWall);
 		}
 		handler.translateScene[0] = -((maxX - minX) / 2 + minX);
-		handler.translateScene[1] = -((maxY - minY) / 2 + minY);
-		handler.translateScene[2] = -15;
-		translateSceneBounds[1] = -maxX;
-		translateSceneBounds[0] = -minX;
-		translateSceneBounds[3] = -maxY;
-		translateSceneBounds[2] = -minY;
+		handler.translateScene[1] = ((maxY - minY) / 2 + minY);
+		handler.zoom = -15;
+		handler.translateSceneBounds[0] = -minX;		
+		handler.translateSceneBounds[1] = -maxX;
+		handler.translateSceneBounds[2] = maxY;//-minY;
+		handler.translateSceneBounds[3] = minY;//-maxY;
 		
 		GLSquare laminat = new GLSquare(GLFigure.STYLE_PLANE);
 		laminat.position[0] = (maxX - minX) / 2 + minX;
