@@ -3,6 +3,7 @@ package de.remote.mediaserver.impl;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.mediaserver.api.IBrowser;
 import de.remote.mediaserver.api.IControl;
+import de.remote.mediaserver.api.IDVDPlayer;
 import de.remote.mediaserver.api.IMediaServer;
 import de.remote.mediaserver.api.IPlayList;
 import de.remote.mediaserver.api.IPlayer;
@@ -10,7 +11,7 @@ import de.remote.mediaserver.api.IPlayer;
 public class MediaServerImpl implements IMediaServer {
 
 	private TotemPlayer totem;
-	private MPlayer mplayer;
+	private MPlayerDVD mplayer;
 	private ControlImpl control;
 	private PlayListImpl playlist;
 	private String browserLocation;
@@ -34,7 +35,7 @@ public class MediaServerImpl implements IMediaServer {
 	}
 
 	@Override
-	public IPlayer getMPlayer() throws RemoteException {
+	public IDVDPlayer getMPlayer() throws RemoteException {
 		return mplayer;
 	}
 

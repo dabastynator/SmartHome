@@ -39,11 +39,6 @@ public abstract class AbstractPlayer implements IPlayer {
 	}
 
 	@Override
-	public void fullScreen() throws RemoteException, PlayerException {
-
-	}
-
-	@Override
 	public void addPlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
 		if (!listeners.contains(listener))

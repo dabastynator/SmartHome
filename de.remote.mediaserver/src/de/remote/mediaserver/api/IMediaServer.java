@@ -37,7 +37,7 @@ public interface IMediaServer extends RemoteAble {
 	 * @return player
 	 * @throws RemoteException
 	 */
-	public IPlayer getMPlayer() throws RemoteException;
+	public IDVDPlayer getMPlayer() throws RemoteException;
 
 	/**
 	 * get the object to control functions of the computer

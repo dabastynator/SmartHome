@@ -30,7 +30,7 @@ public class VLCPlayer extends AbstractPlayer{
 	}
 
 	@Override
-	public void fullScreen() throws RemoteException, PlayerException {
+	public void fullScreen(boolean full) throws RemoteException, PlayerException {
 		// TODO Auto-generated method stub
 		
 	}

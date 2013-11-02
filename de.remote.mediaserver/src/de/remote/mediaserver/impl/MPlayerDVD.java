@@ -7,10 +7,11 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import de.newsystem.rmi.protokol.RemoteException;
+import de.remote.mediaserver.api.IDVDPlayer;
 import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 
-public class MPlayerDVD extends MPlayer {
+public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 
 	public static enum ObserverState {
 		LOADING, PLAYING, ERROR, DOWN
@@ -21,15 +22,6 @@ public class MPlayerDVD extends MPlayer {
 	public MPlayerDVD(String playListfolder) {
 		super(playListfolder);
 	}
-	
-	@Override
-	public void nextTitle() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("switch_title -1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
-	}
 
 	@Override
 	public void playDVD() throws RemoteException, PlayerException {
@@ -38,7 +30,7 @@ public class MPlayerDVD extends MPlayer {
 		} catch (Exception e) {
 		}
 		try {
-			String[] args = new String[] { "/usr/bin/mplayer", "dvd://",
+			String[] args = new String[] { "/usr/bin/mplayer", "dvdnav://",
 					"/dev/dvd", "-slave", "-geometry", positionLeft + ":0" };
 			mplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
@@ -50,6 +42,7 @@ public class MPlayerDVD extends MPlayer {
 			mplayerIn.print("volume " + volume + " 1\n");
 			mplayerIn.flush();
 			fullscreen = 1;
+			fullScreen(true);
 		} catch (IOException e) {
 		}
 		while (playerObserver.state == ObserverState.LOADING) {
@@ -62,21 +55,47 @@ public class MPlayerDVD extends MPlayer {
 			throw new PlayerException(playerObserver.message);
 		if (playerObserver.state == ObserverState.DOWN)
 			throw new PlayerException("Player is down");
+		showMenu();
 	}
 
 	public static void main(String[] args) {
-		MPlayer mp = new MPlayerDVD("/home/sebastian/temp/playlists/");
+		MPlayerDVD mp = new MPlayerDVD("/home/sebastian/temp/playlists/");
 		try {
 			mp.playDVD();
-			Thread.sleep(4000);
-			mp.nextTitle();
+			System.out.println("======================================");
+			System.out.println("=============== dvd loaded ===========");
+			System.out.println("======================================");
+			Thread.sleep(10000);
+			mp.showMenu();
+			System.out.println("======================================");
+			System.out.println("================== MENU ==============");
+			System.out.println("======================================");
+			Thread.sleep(1000);
+			mp.menuDown();
+			System.out.println("======================================");
+			System.out.println("================== DOWN ==============");
+			System.out.println("======================================");
+			Thread.sleep(1000);
+			mp.menuDown();
+			System.out.println("======================================");
+			System.out.println("================== DOWN ==============");
+			System.out.println("======================================");
+			Thread.sleep(1000);
+			mp.menuDown();
+			System.out.println("======================================");
+			System.out.println("================== DOWN ==============");
+			System.out.println("======================================");
+			Thread.sleep(1000);
+			mp.menuEnter();
+			System.out.println("======================================");
+			System.out.println("================== ENTER =============");
+			System.out.println("======================================");
 			System.out.println("dvd loaded");
 			while (true) {
 				Thread.sleep(2000);
 				mp.nextAudio();
 				mp.volUp();
 				Thread.sleep(4000);
-				mp.nextTitle();
 			}
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
@@ -123,6 +142,42 @@ public class MPlayerDVD extends MPlayer {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void showMenu() throws RemoteException, PlayerException {
+		writeCommand("dvdnav menu");
+	}
+
+	@Override
+	public void menuUp() throws RemoteException, PlayerException {
+		writeCommand("dvdnav up");
+	}
+
+	@Override
+	public void menuDown() throws RemoteException, PlayerException {
+		writeCommand("dvdnav down");
+	}
+
+	@Override
+	public void menuLeft() throws RemoteException, PlayerException {
+		writeCommand("dvdnav left");
+	}
+
+	@Override
+	public void menuRight() throws RemoteException, PlayerException {
+		writeCommand("dvdnav right");
+	}
+
+	@Override
+	public void menuEnter() throws RemoteException, PlayerException {
+		writeCommand("dvdnav select");
+		fullScreen(true);
+	}
+
+	@Override
+	public void menuPrevious() throws RemoteException, PlayerException {
+		writeCommand("dvdnav prev");
 	}
 
 }

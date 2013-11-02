@@ -15,13 +15,12 @@ import de.remote.mediaserver.api.PlayerException;
 import de.remote.mediaserver.api.PlayingBean;
 import de.remote.mediaserver.api.PlayingBean.STATE;
 
-public abstract class MPlayer extends AbstractPlayer {
+public class MPlayer extends AbstractPlayer {
 
 	protected Process mplayerProcess;
 	protected PrintStream mplayerIn;
 	protected int fullscreen = 1;
 	protected int positionLeft = 0;
-	private boolean shuffle = false;
 	protected int volume = 50;
 	private int seekValue;
 	private Object playListfolder;
@@ -29,6 +28,14 @@ public abstract class MPlayer extends AbstractPlayer {
 	public MPlayer(String playListfolder) {
 		super();
 		this.playListfolder = playListfolder;
+	}
+
+	protected void writeCommand(String cmd) throws PlayerException {
+		if (mplayerIn == null)
+			throw new PlayerException("mplayer is down");
+		mplayerIn.print(cmd);
+		mplayerIn.print("\n");
+		mplayerIn.flush();
 	}
 
 	@Override
@@ -44,7 +51,10 @@ public abstract class MPlayer extends AbstractPlayer {
 			mplayerIn.print("loadfile \"" + file + "\" 0\n");
 			mplayerIn.flush();
 		}
-		writeVolume();
+		try {
+			writeVolume();
+		} catch (PlayerException e) {
+		}
 		super.play(file);
 	}
 
@@ -71,7 +81,7 @@ public abstract class MPlayer extends AbstractPlayer {
 		}
 	}
 
-	private void startPlayer() {
+	protected void startPlayer() {
 		try {
 			String[] args = new String[] { "/usr/bin/mplayer", "-slave",
 					"-quiet", "-idle", "-geometry", positionLeft + ":0" };
@@ -91,21 +101,13 @@ public abstract class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void playPause() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("pause");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeCommand("pause");
 		super.playPause();
 	}
 
 	@Override
 	public void quit() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("quit");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeCommand("quit");
 		mplayerIn = null;
 		mplayerProcess = null;
 		super.quit();
@@ -113,57 +115,39 @@ public abstract class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void next() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("pt_step 1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeCommand("pt_step 1");
 		super.next();
 	}
 
 	@Override
 	public void previous() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("pt_step -1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeCommand("pt_step -1");
 		super.previous();
 	}
 
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
 		if (seekValue <= 0)
 			seekValue = 5;
 		else if (seekValue < -600)
 			seekValue *= 5;
-		mplayerIn.print("seek " + seekValue + " 0");
+		writeCommand("seek " + seekValue + " 0");
 		playingBean.incrementCurrentTime(seekValue);
-		mplayerIn.print("\n");
-		mplayerIn.flush();
 	}
 
 	@Override
 	public void seekBackwards() throws RemoteException, PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
 		if (seekValue >= 0)
 			seekValue = -5;
 		else if (seekValue > -600)
 			seekValue *= 5;
-		mplayerIn.print("seek " + seekValue + " 0");
+		writeCommand("seek " + seekValue + " 0");
 		playingBean.incrementCurrentTime(seekValue);
-		mplayerIn.print("\n");
-		mplayerIn.flush();
 	}
 
 	@Override
 	public void volUp() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		volume += 7;
+		volume += 3;
 		if (volume > 100)
 			volume = 100;
 		writeVolume();
@@ -171,36 +155,27 @@ public abstract class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void volDown() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		volume -= 7;
+		volume -= 3;
 		if (volume < 0)
 			volume = 0;
 		writeVolume();
 	}
 
-	private void writeVolume() {
-		mplayerIn.print("volume " + volume + " 1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+	private void writeVolume() throws PlayerException {
+		writeCommand("volume " + volume + " 1");
 	}
 
 	@Override
-	public void fullScreen() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("vo_fullscreen " + (fullscreen++) % 2);
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+	public void fullScreen(boolean full) throws PlayerException {
+		if (full)
+			writeCommand("vo_fullscreen 1");
+		else
+			writeCommand("vo_fullscreen 0");
 	}
 
 	@Override
 	public void nextAudio() throws PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("switch_audio -1");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		writeCommand("switch_audio -1");
 	}
 
 	@Override
@@ -258,7 +233,6 @@ public abstract class MPlayer extends AbstractPlayer {
 			mplayerIn.print("loadlist " + pls + "\n");
 
 		writeVolume();
-		mplayerIn.flush();
 	}
 
 	private String firstLineOf(String pls) {
@@ -339,25 +313,15 @@ public abstract class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void useShuffle(boolean shuffle) throws RemoteException,
+	public void setPlayingPosition(int second) throws RemoteException,
 			PlayerException {
-		this.shuffle = shuffle;
-		try {
-			quit();
-		} catch (Exception e) {
-
-		}
-		startPlayer();
+		writeCommand("seek " + second + " 2");
+		playingBean.setCurrentTime(second);
 	}
 
 	@Override
-	public void setPlayingPosition(int second) throws RemoteException,
+	public void useShuffle(boolean shuffle) throws RemoteException,
 			PlayerException {
-		if (mplayerIn == null)
-			throw new PlayerException("mplayer is down");
-		mplayerIn.print("seek " + second + " 2");
-		mplayerIn.print("\n");
-		mplayerIn.flush();
-		playingBean.setCurrentTime(second);
+		throw new PlayerException("shuffle is not supported jet.");
 	}
 }

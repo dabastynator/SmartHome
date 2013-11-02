@@ -85,12 +85,13 @@ public interface IPlayer extends RemoteAble {
 	void volDown() throws RemoteException, PlayerException;
 
 	/**
-	 * switch to full screen, or close full screen
+	 * Set the player to fullscreen if full is true
 	 * 
+	 * @param full
 	 * @throws RemoteException
 	 * @throws PlayerException
 	 */
-	void fullScreen() throws RemoteException, PlayerException;
+	void fullScreen(boolean full) throws RemoteException, PlayerException;
 
 	/**
 	 * play next audio track
@@ -171,21 +172,5 @@ public interface IPlayer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	void setPlayingPosition(int second) throws RemoteException, PlayerException;
-
-	/**
-	 * Play dvd. Throws PlayerException if loading fails.
-	 * 
-	 * @throws RemoteException
-	 * @throws PlayerException
-	 */
-	void playDVD() throws RemoteException, PlayerException;
-
-	/**
-	 * Switch the DVD title. (Just for DVD)
-	 * 
-	 * @throws RemoteException
-	 * @throws PlayerException
-	 */
-	void nextTitle() throws RemoteException, PlayerException;
 
 }

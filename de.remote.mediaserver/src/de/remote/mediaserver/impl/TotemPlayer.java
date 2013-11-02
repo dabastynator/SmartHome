@@ -87,7 +87,7 @@ public class TotemPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void fullScreen() {
+	public void fullScreen(boolean full) {
 		try {
 			Runtime.getRuntime().exec(FULL_SCREEN);
 		} catch (IOException e) {
