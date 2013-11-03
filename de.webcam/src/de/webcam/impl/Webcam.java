@@ -6,7 +6,7 @@ import com.smaxe.uv.media.core.VideoFrame;
 import com.smaxe.uv.na.WebcamFactory;
 import com.smaxe.uv.na.webcam.IWebcam;
 
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 import de.webcam.api.WebcamException;
 
 /**

@@ -1,9 +1,9 @@
 package de.hcl.synchronize.api;
 
 import de.hcl.synchronize.api.IHCLClient.FileBean;
-import de.newsystem.rmi.api.Oneway;
-import de.newsystem.rmi.protokol.RemoteAble;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.api.Oneway;
+import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The session holds a list of clients to be synchronized.

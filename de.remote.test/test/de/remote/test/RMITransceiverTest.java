@@ -6,12 +6,11 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.newsystem.rmi.transceiver.DirectoryReceiver;
-import de.newsystem.rmi.transceiver.DirectorySender;
-import de.newsystem.rmi.transceiver.FileReceiver;
-import de.newsystem.rmi.transceiver.FileSender;
-import de.newsystem.rmi.transceiver.ReceiverProgress;
-
+import de.neo.rmi.transceiver.DirectoryReceiver;
+import de.neo.rmi.transceiver.DirectorySender;
+import de.neo.rmi.transceiver.FileReceiver;
+import de.neo.rmi.transceiver.FileSender;
+import de.neo.rmi.transceiver.ReceiverProgress;
 import junit.framework.TestCase;
 
 public class RMITransceiverTest extends TestCase {

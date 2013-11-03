@@ -2,7 +2,7 @@ package de.hcl.synchronize.jobs;
 
 import java.io.IOException;
 
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The home cloud job executes an action to synchronize a client

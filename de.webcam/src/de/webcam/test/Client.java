@@ -8,8 +8,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.api.Server;
+import de.neo.rmi.protokol.RemoteException;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import de.hcl.synchronize.api.IHCLServer;
 import de.hcl.synchronize.api.IHCLSession;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * the implementation of the server interface holds the list of clients.

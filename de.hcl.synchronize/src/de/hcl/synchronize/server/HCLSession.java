@@ -10,7 +10,7 @@ import de.hcl.synchronize.jobs.RenameJob;
 import de.hcl.synchronize.jobs.TransferJob;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The home cloud session holds a list of clients with same session ids. Clients

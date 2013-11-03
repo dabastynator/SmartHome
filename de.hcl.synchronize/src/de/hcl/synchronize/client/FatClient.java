@@ -10,7 +10,7 @@ import net.contentobjects.jnotify.JNotifyException;
 import net.contentobjects.jnotify.JNotifyListener;
 import de.hcl.synchronize.api.IHCLSession;
 import de.hcl.synchronize.log.HCLLogger;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The fat client listens to the directory without polling (JNotify is used for

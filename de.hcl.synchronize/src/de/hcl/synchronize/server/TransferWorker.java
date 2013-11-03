@@ -3,7 +3,7 @@ package de.hcl.synchronize.server;
 import java.io.IOException;
 
 import de.hcl.synchronize.jobs.HCLJob;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 public class TransferWorker {
 

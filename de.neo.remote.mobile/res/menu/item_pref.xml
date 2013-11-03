@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/opt_item_play"
+        android:title="@string/str_play">
+    </item>
+        <item
+        android:id="@+id/opt_item_addplaylist"
+        android:title="@string/str_add_to_playlist">
+    </item>
+    <item android:id="@+id/opt_item_download" android:title="@string/str_download"></item><item
+        android:id="@+id/opt_item_delete"
+        android:title="@string/str_delete">
+    </item>
+    
+
+</menu>

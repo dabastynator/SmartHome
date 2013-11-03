@@ -11,9 +11,9 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import de.hcl.synchronize.client.HCLClient;
-import de.remote.desktop.Connectable;
-import de.remote.desktop.menus.RegistryMenu;
-import de.remote.desktop.panels.RegistryPanel;
+import de.neo.remote.desktop.Connectable;
+import de.neo.remote.desktop.menus.RegistryMenu;
+import de.neo.remote.desktop.panels.RegistryPanel;
 
 /**
  * The synchronizer gui configures sessions, paths,

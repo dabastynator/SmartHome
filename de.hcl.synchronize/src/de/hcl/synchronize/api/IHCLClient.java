@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 
-import de.newsystem.rmi.protokol.RemoteAble;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The home cloud client executes all possible file activities. It enables

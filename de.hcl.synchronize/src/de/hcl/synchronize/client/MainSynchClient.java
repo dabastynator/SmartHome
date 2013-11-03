@@ -10,8 +10,8 @@ import de.hcl.synchronize.api.IHCLSession;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
 import de.hcl.synchronize.util.IniFile;
-import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.api.Server;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The main synchronization client reads the configuration file and creates the

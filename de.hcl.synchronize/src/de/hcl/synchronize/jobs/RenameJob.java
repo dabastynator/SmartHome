@@ -3,7 +3,7 @@ package de.hcl.synchronize.jobs;
 import java.io.IOException;
 
 import de.hcl.synchronize.api.IHCLClient;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 public class RenameJob implements HCLJob {
 

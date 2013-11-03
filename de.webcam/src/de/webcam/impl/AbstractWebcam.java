@@ -3,7 +3,7 @@ package de.webcam.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 import de.webcam.api.IWebcam;
 import de.webcam.api.IWebcamListener;
 

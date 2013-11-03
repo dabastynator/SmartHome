@@ -8,20 +8,20 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.newsystem.rmi.api.Oneway;
-import de.newsystem.rmi.api.RMILogger;
-import de.newsystem.rmi.api.RMILogger.RMILogListener;
-import de.newsystem.rmi.api.Registry;
-import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.api.RMILogger.LogPriority;
-import de.newsystem.rmi.dynamics.DynamicProxy;
-import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IBrowser;
-import de.remote.mediaserver.api.IChatListener;
-import de.remote.mediaserver.api.IChatServer;
-import de.remote.mediaserver.api.IThumbnailListener;
-import de.remote.mediaserver.impl.BrowserImpl;
-import de.remote.mediaserver.impl.ChatServerImpl;
+import de.neo.remote.mediaserver.api.IBrowser;
+import de.neo.remote.mediaserver.api.IChatListener;
+import de.neo.remote.mediaserver.api.IChatServer;
+import de.neo.remote.mediaserver.api.IThumbnailListener;
+import de.neo.remote.mediaserver.impl.BrowserImpl;
+import de.neo.remote.mediaserver.impl.ChatServerImpl;
+import de.neo.rmi.api.Oneway;
+import de.neo.rmi.api.RMILogger;
+import de.neo.rmi.api.Registry;
+import de.neo.rmi.api.Server;
+import de.neo.rmi.api.RMILogger.LogPriority;
+import de.neo.rmi.api.RMILogger.RMILogListener;
+import de.neo.rmi.dynamics.DynamicProxy;
+import de.neo.rmi.protokol.RemoteException;
 
 public class RMIChatTest extends TestCase {
 

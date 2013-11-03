@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_record">Record</string>
+    <string name="str_left">Left</string>
+    <string name="str_right">Right</string>
+    <string name="str_player">Player</string>
+    <string name="str_make_bright">Bildschirm hell</string>
+    <string name="str_make_dark">Bildschirm dunkel</string>
+    <string name="str_audio_track">Nächste Audio Spur</string>
+    <string name="str_move_right">Nach rechts</string>
+    <string name="str_move_left">Nach links</string>
+    <string name="str_shutdown">Ausschalten</string>
+    <string name="str_control">Kontrolle</string>
+    <string name="str_exit">Beenden</string>
+    <string name="str_play">Abspielen</string>
+    <string name="str_add_to_playlist">Zu Playlist hinzufügen</string>
+    <string name="str_delete">Löschen</string>
+    <string name="str_remove_from_playlist">Von Playlist entfernen</string>
+    <string name="str_show_playlist">Zeige Playlist</string>
+    <string name="str_delete_playlist">Lösche Playlist</string>
+    <string name="str_server_favorite">Als Favorit setzen</string>
+    <string name="str_server_edit">Bearbeiten</string>
+    <string name="str_server_name">Server</string>
+    <string name="str_add_new_server">Neuen Server anlegen</string>
+    <string name="str_ip">IP</string>
+    <string name="str_post">Senden</string>
+    <string name="str_create">Erstellen</string>
+    <string name="str_name">Name</string>
+    <string name="app_name">RemoteControl</string>
+    <string name="str_create_playlist">Neue Playlist anlegen</string>
+    <string name="str_clear_screen">Löschen</string>
+    <string name="str_chat_name">Name ändern</string>
+    <string name="str_download">Herunterladen</string>
+    <string name="str_webcam">Webcam</string>
+    <string name="str_upload">Hochladen</string>
+    <string name="str_power">Internet Steckdosen</string>
+    <string name="add_new_server">Neuen Server hinzufügen</string>
+    <string name="str_refresh">Neu Laden</string>
+</resources>

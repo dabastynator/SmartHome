@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_rmi"/>
+	<classpathentry excluding="de/webcam/impl/|de/webcam/server/|de/webcam/test/" including="de/webcam/api/" kind="src" path="src_webcam"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="src" path="src_glcommon"/>
+	<classpathentry kind="src" path="src_control"/>
+	<classpathentry excluding="de/neo/remote/mediaserver/impl/|de/neo/remote/mediaserver/server/" including="de/neo/remote/mediaserver/api/" kind="src" path="src_mediaserver"/>
+	<classpathentry kind="src" path="src_gpio"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

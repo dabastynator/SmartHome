@@ -16,10 +16,10 @@ import java.util.Map;
 import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener;
-import de.newsystem.rmi.api.Server;
-import de.newsystem.rmi.protokol.RemoteException;
-import de.newsystem.rmi.transceiver.FileReceiver;
-import de.newsystem.rmi.transceiver.FileSender;
+import de.neo.rmi.api.Server;
+import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.transceiver.FileReceiver;
+import de.neo.rmi.transceiver.FileSender;
 
 /**
  * the HCLClient implements the client and receives and sends files.

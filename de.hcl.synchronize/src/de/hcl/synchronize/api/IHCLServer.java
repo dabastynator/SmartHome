@@ -1,7 +1,7 @@
 package de.hcl.synchronize.api;
 
-import de.newsystem.rmi.protokol.RemoteAble;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The home cloud server holds a list of synchronization sessions.

@@ -7,10 +7,10 @@ import de.hcl.synchronize.client.MainSynchClient;
 import de.hcl.synchronize.gui.SynchronizerGui;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener;
-import de.newsystem.rmi.api.RMILogger;
-import de.newsystem.rmi.api.RMILogger.LogPriority;
-import de.newsystem.rmi.api.RMILogger.RMILogListener;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.api.RMILogger;
+import de.neo.rmi.api.RMILogger.LogPriority;
+import de.neo.rmi.api.RMILogger.RMILogListener;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The main synchronizer is the start class in the jar file and gets parameter.

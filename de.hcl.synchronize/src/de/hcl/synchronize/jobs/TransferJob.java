@@ -6,7 +6,7 @@ import de.hcl.synchronize.api.IHCLClient;
 import de.hcl.synchronize.api.IHCLClient.FileBean;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * the transfer job contains infromation about the job.

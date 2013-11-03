@@ -3,7 +3,7 @@ package de.hcl.synchronize.server;
 import java.io.IOException;
 
 import de.hcl.synchronize.api.IHCLServer;
-import de.newsystem.rmi.api.Server;
+import de.neo.rmi.api.Server;
 
 public class MainSynchServer {
 

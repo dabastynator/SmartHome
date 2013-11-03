@@ -14,7 +14,7 @@ import de.hcl.synchronize.api.IHCLSession;
 import de.hcl.synchronize.jobs.TransferJob;
 import de.hcl.synchronize.log.HCLLogger;
 import de.hcl.synchronize.log.IHCLLogListener.HCLType;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 public class Synchronizer {
 

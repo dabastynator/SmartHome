@@ -1,8 +1,8 @@
 package de.webcam.api;
 
-import de.newsystem.rmi.api.Oneway;
-import de.newsystem.rmi.protokol.RemoteAble;
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.api.Oneway;
+import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * the webcam listener listens for new pictures of the webcam.

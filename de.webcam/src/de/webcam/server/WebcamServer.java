@@ -1,6 +1,6 @@
 package de.webcam.server;
 
-import de.newsystem.rmi.api.Server;
+import de.neo.rmi.api.Server;
 import de.webcam.api.IWebcam;
 import de.webcam.impl.Webcam;
 

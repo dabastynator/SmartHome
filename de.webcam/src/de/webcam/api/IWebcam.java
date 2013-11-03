@@ -1,6 +1,6 @@
 package de.webcam.api;
 
-import de.newsystem.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.RemoteException;
 
 /**
  * The webcam provides functionality to capture pictures of a webcam.

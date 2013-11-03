@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/button_play"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="playPause"
+            android:src="@drawable/pause" />
+
+        <ImageView
+            android:id="@+id/button_pref"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="prev"
+            android:src="@drawable/prev" />
+
+        <ImageView
+            android:id="@+id/button_seek_bwd"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="seekBwd"
+            android:src="@drawable/seek_bwd" />
+
+        <ImageView
+            android:id="@+id/button_vol_down"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="volDown"
+            android:src="@drawable/voldown" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/layout_search"
+            android:layout_width="fill_parent"
+            android:layout_height="36dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <EditText
+                android:id="@+id/txt_search"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/button_search"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="6"
+                android:onClick="search"
+                android:src="@drawable/search" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_download"
+            android:layout_width="fill_parent"
+            android:layout_height="36dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/lbl_download"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="@string/str_download" />
+
+                <ProgressBar
+                    android:id="@+id/prg_donwload"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:max="100" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_cancel_download"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="6"
+                android:onClick="cancelDownload"
+                android:src="@drawable/cancel" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/fileList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:fadingEdge="vertical"
+            android:fastScrollEnabled="true"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/button_filesystem"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="showFileSystem"
+            android:src="@drawable/filesystem"
+            android:text="|>" />
+
+        <ImageView
+            android:id="@+id/button_playlist"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="showPlaylist"
+            android:src="@drawable/pls"
+            android:text="|>" />
+
+        <ImageView
+            android:id="@+id/button_totem"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="setTotem"
+            android:src="@drawable/totem"
+            android:text="|>" />
+
+        <ImageView
+            android:id="@+id/button_mplayer"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="setMPlayer"
+            android:src="@drawable/mplayer"
+            android:text="|>" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/button_quit"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="stopPlayer"
+            android:src="@drawable/stop" />
+
+        <ImageView
+            android:id="@+id/button_next"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="next"
+            android:src="@drawable/next" />
+
+        <ImageView
+            android:id="@+id/button_seek_fwd"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="seekFwd"
+            android:src="@drawable/seek_fwd" />
+
+        <ImageView
+            android:id="@+id/button_vol_up"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="volUp"
+            android:src="@drawable/volup" />
+    </LinearLayout>
+
+</LinearLayout>
