@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/power_widget"
-    android:minHeight="70dp"
-    android:minWidth="60dp"
-    android:updatePeriodMillis="180000" 
-    android:configure="de.remote.mobile.activities.SelectSwitchActivity">
-
-</appwidget-provider>
