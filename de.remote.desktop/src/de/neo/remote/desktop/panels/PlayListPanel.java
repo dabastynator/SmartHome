@@ -1,4 +1,4 @@
-package de.remote.desktop.panels;
+package de.neo.remote.desktop.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -13,10 +13,10 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
+import de.neo.remote.mediaserver.api.IPlayList;
+import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.mediaserver.api.PlayerException;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IPlayList;
-import de.remote.mediaserver.api.IPlayer;
-import de.remote.mediaserver.api.PlayerException;
 
 /**
  * the palylistpanel provides actions to edit playlists and to play a playlist

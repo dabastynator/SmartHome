@@ -1,4 +1,4 @@
-package de.remote.desktop.panels;
+package de.neo.remote.desktop.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -14,9 +14,9 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
 
+import de.neo.remote.mediaserver.api.IChatListener;
+import de.neo.remote.mediaserver.api.IChatServer;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IChatListener;
-import de.remote.mediaserver.api.IChatServer;
 
 /**
  * a panel to chat with other clients. the panel provides textfiels to show

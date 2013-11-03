@@ -1,4 +1,4 @@
-package de.remote.desktop;
+package de.neo.remote.desktop;
 
 /**
  * The connectable interface is able to connect to given registry ip.

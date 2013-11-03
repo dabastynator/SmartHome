@@ -1,4 +1,4 @@
-package de.remote.desktop;
+package de.neo.remote.desktop;
 
 import java.awt.BorderLayout;
 import java.awt.MenuBar;
@@ -14,26 +14,26 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
+import de.neo.remote.controlcenter.api.IControlCenter;
+import de.neo.remote.desktop.menus.ControlMenu;
+import de.neo.remote.desktop.menus.PlayerMenu;
+import de.neo.remote.desktop.menus.RegistryMenu;
+import de.neo.remote.desktop.panels.BrowserPanel;
+import de.neo.remote.desktop.panels.ChatPanel;
+import de.neo.remote.desktop.panels.PlayListPanel;
+import de.neo.remote.desktop.panels.PlayerPanel;
+import de.neo.remote.desktop.panels.RegistryPanel;
+import de.neo.remote.desktop.panels.WebcamPanel;
+import de.neo.remote.mediaserver.api.IBrowser;
+import de.neo.remote.mediaserver.api.IChatServer;
+import de.neo.remote.mediaserver.api.IMediaServer;
+import de.neo.remote.mediaserver.api.IPlayList;
+import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.mediaserver.api.IPlayerListener;
+import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.controlcenter.api.IControlCenter;
-import de.remote.desktop.menus.ControlMenu;
-import de.remote.desktop.menus.PlayerMenu;
-import de.remote.desktop.menus.RegistryMenu;
-import de.remote.desktop.panels.BrowserPanel;
-import de.remote.desktop.panels.ChatPanel;
-import de.remote.desktop.panels.PlayListPanel;
-import de.remote.desktop.panels.PlayerPanel;
-import de.remote.desktop.panels.RegistryPanel;
-import de.remote.desktop.panels.WebcamPanel;
-import de.remote.mediaserver.api.IBrowser;
-import de.remote.mediaserver.api.IChatServer;
-import de.remote.mediaserver.api.IMediaServer;
-import de.remote.mediaserver.api.IPlayList;
-import de.remote.mediaserver.api.IPlayer;
-import de.remote.mediaserver.api.IPlayerListener;
-import de.remote.mediaserver.api.PlayerException;
-import de.remote.mediaserver.api.PlayingBean;
 
 /**
  * The main frame for the gui. It creates all panels and menus that will be

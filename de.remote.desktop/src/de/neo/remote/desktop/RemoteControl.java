@@ -1,4 +1,4 @@
-package de.remote.desktop;
+package de.neo.remote.desktop;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -1,4 +1,4 @@
-package de.remote.desktop.menus;
+package de.neo.remote.desktop.menus;
 
 import java.awt.Menu;
 import java.awt.MenuItem;
@@ -6,8 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 
-import de.remote.desktop.Connectable;
-import de.remote.desktop.panels.RegistryPanel;
+import de.neo.remote.desktop.Connectable;
+import de.neo.remote.desktop.panels.RegistryPanel;
 
 /**
  * Menu to switch the current registry. All registers are listed in a map of the

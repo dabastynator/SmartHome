@@ -1,12 +1,12 @@
-package de.remote.desktop.menus;
+package de.neo.remote.desktop.menus;
 
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import de.neo.remote.mediaserver.api.IControl;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IControl;
 
 /**
  * Menu to handle standard commands for the computer. Provides items to handle

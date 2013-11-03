@@ -1,12 +1,12 @@
-package de.remote.desktop.menus;
+package de.neo.remote.desktop.menus;
 
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import de.remote.desktop.ControlFrame;
-import de.remote.mediaserver.api.IPlayer;
+import de.neo.remote.desktop.ControlFrame;
+import de.neo.remote.mediaserver.api.IPlayer;
 
 /**
  * Menu to switch the current player. There are two possible players: mplayer

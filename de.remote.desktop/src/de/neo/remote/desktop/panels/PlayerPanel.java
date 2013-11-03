@@ -1,4 +1,4 @@
-package de.remote.desktop.panels;
+package de.neo.remote.desktop.panels;
 
 import java.awt.GridLayout;
 import java.awt.Panel;
@@ -7,9 +7,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.mediaserver.api.PlayerException;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IPlayer;
-import de.remote.mediaserver.api.PlayerException;
 
 /**
  * the playerpanel contains buttons to control the current player.
@@ -165,9 +165,11 @@ public class PlayerPanel extends Panel {
 			}
 		});
 		this.fullscreen.addActionListener(new ActionListener() {
+			private boolean isFullscreen ;
+
 			public void actionPerformed(ActionEvent e) {
 				try {
-					PlayerPanel.this.player.fullScreen();
+					PlayerPanel.this.player.fullScreen(isFullscreen = !isFullscreen);
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
 				} catch (PlayerException e1) {

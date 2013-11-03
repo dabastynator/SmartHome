@@ -1,4 +1,4 @@
-package de.remote.desktop.panels;
+package de.neo.remote.desktop.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

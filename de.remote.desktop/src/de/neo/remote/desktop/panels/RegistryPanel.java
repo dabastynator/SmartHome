@@ -1,4 +1,4 @@
-package de.remote.desktop.panels;
+package de.neo.remote.desktop.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import de.remote.desktop.menus.RegistryMenu;
+import de.neo.remote.desktop.menus.RegistryMenu;
 
 /**
  * the server panel enables to edit all servers.
