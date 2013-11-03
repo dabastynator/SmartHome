@@ -1,16 +1,16 @@
-package de.remote.gpiopower;
+package de.neo.remote.gpiopower;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import de.neo.remote.controlcenter.api.IControlCenter;
+import de.neo.remote.gpiopower.GPIOPower.Switch;
+import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.controlcenter.api.IControlCenter;
-import de.remote.gpiopower.GPIOPower.Switch;
-import de.remote.gpiopower.api.IInternetSwitch;
 
 public class GPIOMain {
 

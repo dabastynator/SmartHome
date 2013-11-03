@@ -1,4 +1,4 @@
-package de.remote.gpiopower.api;
+package de.neo.remote.gpiopower.api;
 
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;

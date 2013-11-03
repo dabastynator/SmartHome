@@ -1,12 +1,12 @@
-package de.remote.gpiopower;
+package de.neo.remote.gpiopower;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.neo.remote.gpiopower.api.IInternetSwitch;
+import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.api.IInternetSwitch;
-import de.remote.gpiopower.api.IInternetSwitch.State;
 
 /**
  * Implements the gpio power by executing gpio commands

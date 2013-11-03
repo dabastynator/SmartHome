@@ -1,8 +1,8 @@
-package de.remote.gpiopower;
+package de.neo.remote.gpiopower;
 
+import de.neo.remote.controlcenter.api.IControlUnit;
+import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.controlcenter.api.IControlUnit;
-import de.remote.gpiopower.api.IInternetSwitch;
 
 public class GPIOControlUnit implements IControlUnit{
 

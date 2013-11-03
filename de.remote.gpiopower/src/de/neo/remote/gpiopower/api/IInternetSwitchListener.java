@@ -1,8 +1,8 @@
-package de.remote.gpiopower.api;
+package de.neo.remote.gpiopower.api;
 
+import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.api.IInternetSwitch.State;
 
 /**
  * The IGPIOListener listens for new states of gpio power object.

@@ -1,14 +1,14 @@
-package de.remote.gpiopower;
+package de.neo.remote.gpiopower;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import de.neo.remote.gpiopower.GPIOPower.Switch;
+import de.neo.remote.gpiopower.api.IInternetSwitch;
+import de.neo.remote.gpiopower.api.IInternetSwitchListener;
+import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.gpiopower.GPIOPower.Switch;
-import de.remote.gpiopower.api.IInternetSwitch;
-import de.remote.gpiopower.api.IInternetSwitchListener;
-import de.remote.gpiopower.api.IInternetSwitch.State;
 
 public class InternetSwitchImpl implements IInternetSwitch {
 
