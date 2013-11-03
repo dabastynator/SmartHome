@@ -1,14 +1,14 @@
-package de.remote.controlcenter;
+package de.neo.remote.controlcenter;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import de.neo.remote.controlcenter.api.IControlCenter;
+import de.neo.remote.controlcenter.impl.ControlCenterImpl;
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
 import de.newsystem.rmi.api.Server;
-import de.remote.controlcenter.api.IControlCenter;
-import de.remote.controlcenter.impl.ControlCenterImpl;
 
 /**
  * Main object to start and register the control center.

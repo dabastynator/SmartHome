@@ -1,4 +1,4 @@
-package de.remote.controlcenter.impl;
+package de.neo.remote.controlcenter.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,13 +15,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.neo.remote.controlcenter.api.GroundPlot;
+import de.neo.remote.controlcenter.api.IControlCenter;
+import de.neo.remote.controlcenter.api.IControlUnit;
+import de.neo.remote.controlcenter.api.GroundPlot.Feature;
+import de.neo.remote.controlcenter.api.GroundPlot.Point;
+import de.neo.remote.controlcenter.api.GroundPlot.Wall;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.controlcenter.api.GroundPlot;
-import de.remote.controlcenter.api.GroundPlot.Feature;
-import de.remote.controlcenter.api.GroundPlot.Point;
-import de.remote.controlcenter.api.GroundPlot.Wall;
-import de.remote.controlcenter.api.IControlCenter;
-import de.remote.controlcenter.api.IControlUnit;
 
 /**
  * Implement the control center interface.

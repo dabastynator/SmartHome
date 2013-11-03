@@ -1,4 +1,4 @@
-package de.remote.controlcenter.api;
+package de.neo.remote.controlcenter.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
