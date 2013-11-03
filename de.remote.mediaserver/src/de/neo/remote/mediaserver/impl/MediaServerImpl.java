@@ -1,12 +1,12 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
+import de.neo.remote.mediaserver.api.IBrowser;
+import de.neo.remote.mediaserver.api.IControl;
+import de.neo.remote.mediaserver.api.IDVDPlayer;
+import de.neo.remote.mediaserver.api.IMediaServer;
+import de.neo.remote.mediaserver.api.IPlayList;
+import de.neo.remote.mediaserver.api.IPlayer;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IBrowser;
-import de.remote.mediaserver.api.IControl;
-import de.remote.mediaserver.api.IDVDPlayer;
-import de.remote.mediaserver.api.IMediaServer;
-import de.remote.mediaserver.api.IPlayList;
-import de.remote.mediaserver.api.IPlayer;
 
 public class MediaServerImpl implements IMediaServer {
 

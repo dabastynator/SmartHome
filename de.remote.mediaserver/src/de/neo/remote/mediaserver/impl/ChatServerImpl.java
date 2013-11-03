@@ -1,13 +1,13 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.neo.remote.mediaserver.api.IChatListener;
+import de.neo.remote.mediaserver.api.IChatServer;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IChatListener;
-import de.remote.mediaserver.api.IChatServer;
 
 public class ChatServerImpl implements IChatServer {
 

@@ -1,7 +1,7 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
+import de.neo.remote.mediaserver.api.PlayerException;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.PlayerException;
 
 public class VLCPlayer extends AbstractPlayer{
 

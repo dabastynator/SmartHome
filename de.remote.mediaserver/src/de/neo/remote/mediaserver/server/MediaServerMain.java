@@ -1,8 +1,13 @@
-package de.remote.mediaserver.server;
+package de.neo.remote.mediaserver.server;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import de.neo.remote.mediaserver.api.IChatServer;
+import de.neo.remote.mediaserver.api.IMediaServer;
+import de.neo.remote.mediaserver.impl.ChatServerImpl;
+import de.neo.remote.mediaserver.impl.MediaControlUnit;
+import de.neo.remote.mediaserver.impl.MediaServerImpl;
 import de.newsystem.rmi.api.RMILogger;
 import de.newsystem.rmi.api.RMILogger.LogPriority;
 import de.newsystem.rmi.api.RMILogger.RMILogListener;
@@ -10,11 +15,6 @@ import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.controlcenter.api.IControlCenter;
 import de.remote.controlcenter.api.IControlUnit;
-import de.remote.mediaserver.api.IChatServer;
-import de.remote.mediaserver.api.IMediaServer;
-import de.remote.mediaserver.impl.ChatServerImpl;
-import de.remote.mediaserver.impl.MediaControlUnit;
-import de.remote.mediaserver.impl.MediaServerImpl;
 
 public class MediaServerMain {
 

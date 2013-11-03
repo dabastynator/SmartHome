@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,9 +10,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.neo.remote.mediaserver.api.IPlayList;
+import de.neo.remote.mediaserver.api.PlayerException;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IPlayList;
-import de.remote.mediaserver.api.PlayerException;
 
 public class PlayListImpl implements IPlayList {
 

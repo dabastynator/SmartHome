@@ -1,4 +1,4 @@
-package de.remote.mediaserver.api;
+package de.neo.remote.mediaserver.api;
 
 import de.newsystem.rmi.protokol.RemoteAble;
 import de.newsystem.rmi.protokol.RemoteException;

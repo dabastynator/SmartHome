@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +9,12 @@ import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
 
+import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.mediaserver.api.IPlayerListener;
+import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.mediaserver.api.PlayingBean.STATE;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IPlayer;
-import de.remote.mediaserver.api.IPlayerListener;
-import de.remote.mediaserver.api.PlayerException;
-import de.remote.mediaserver.api.PlayingBean;
-import de.remote.mediaserver.api.PlayingBean.STATE;
 
 /**
  * the abstract player implements basically functions of an player. this

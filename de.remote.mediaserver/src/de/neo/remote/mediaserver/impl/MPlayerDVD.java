@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import de.neo.remote.mediaserver.api.IDVDPlayer;
+import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.IDVDPlayer;
-import de.remote.mediaserver.api.PlayerException;
-import de.remote.mediaserver.api.PlayingBean;
 
 public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 
@@ -41,7 +41,6 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 			// set default volume
 			mplayerIn.print("volume " + volume + " 1\n");
 			mplayerIn.flush();
-			fullscreen = 1;
 			fullScreen(true);
 		} catch (IOException e) {
 		}
@@ -62,41 +61,21 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 		MPlayerDVD mp = new MPlayerDVD("/home/sebastian/temp/playlists/");
 		try {
 			mp.playDVD();
-			System.out.println("======================================");
-			System.out.println("=============== dvd loaded ===========");
-			System.out.println("======================================");
-			Thread.sleep(10000);
-			mp.showMenu();
-			System.out.println("======================================");
-			System.out.println("================== MENU ==============");
-			System.out.println("======================================");
-			Thread.sleep(1000);
-			mp.menuDown();
-			System.out.println("======================================");
-			System.out.println("================== DOWN ==============");
-			System.out.println("======================================");
-			Thread.sleep(1000);
-			mp.menuDown();
-			System.out.println("======================================");
-			System.out.println("================== DOWN ==============");
-			System.out.println("======================================");
-			Thread.sleep(1000);
-			mp.menuDown();
-			System.out.println("======================================");
-			System.out.println("================== DOWN ==============");
-			System.out.println("======================================");
-			Thread.sleep(1000);
+			Thread.sleep(2000);
+			System.out.println("enter");
 			mp.menuEnter();
-			System.out.println("======================================");
-			System.out.println("================== ENTER =============");
-			System.out.println("======================================");
-			System.out.println("dvd loaded");
-			while (true) {
-				Thread.sleep(2000);
-				mp.nextAudio();
-				mp.volUp();
-				Thread.sleep(4000);
-			}
+			Thread.sleep(2000);
+			System.out.println("no fullscreen");
+			mp.fullScreen(false);
+			Thread.sleep(16000);
+			System.out.println("remove subtitle");
+			mp.subtitleRemove();
+			Thread.sleep(4000);
+			System.out.println("next subtitle");
+			mp.subtitleNext();
+			Thread.sleep(4000);
+			System.out.println("next subtitle");
+			mp.ejectDVD();
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -124,7 +103,7 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = input.readLine()) != null) {
-					System.out.println(line);
+					// System.out.println(line);
 					if (line.startsWith("Failed to open /dev/dvd")) {
 						state = ObserverState.ERROR;
 						message = "Failed to open DVD";
@@ -178,6 +157,30 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 	@Override
 	public void menuPrevious() throws RemoteException, PlayerException {
 		writeCommand("dvdnav prev");
+	}
+
+	@Override
+	public void subtitleRemove() throws RemoteException, PlayerException {
+		writeCommand("sub_select -1");
+	}
+
+	@Override
+	public void subtitleNext() throws RemoteException, PlayerException {
+		writeCommand("sub_select -2");
+	}
+
+	@Override
+	public void ejectDVD() throws RemoteException {
+		try {
+			quit();
+		} catch (PlayerException e) {
+		}
+		try {
+			String[] args = new String[] { "/usr/bin/eject", "/dev/dvd" };
+			mplayerProcess = Runtime.getRuntime().exec(args);
+		} catch (IOException e) {
+		}
+
 	}
 
 }

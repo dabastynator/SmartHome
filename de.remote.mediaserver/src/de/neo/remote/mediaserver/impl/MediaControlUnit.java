@@ -1,8 +1,8 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
+import de.neo.remote.mediaserver.api.IMediaServer;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.remote.controlcenter.api.IControlUnit;
-import de.remote.mediaserver.api.IMediaServer;
 
 public class MediaControlUnit implements IControlUnit {
 

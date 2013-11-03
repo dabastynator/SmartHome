@@ -1,4 +1,4 @@
-package de.remote.mediaserver.api;
+package de.neo.remote.mediaserver.api;
 
 import de.newsystem.rmi.protokol.RemoteException;
 
@@ -72,4 +72,27 @@ public interface IDVDPlayer extends IPlayer {
 	 * @throws PlayerException
 	 */
 	void menuPrevious() throws RemoteException, PlayerException;
+
+	/**
+	 * Disable all subtitles.
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	public void subtitleRemove() throws RemoteException, PlayerException;
+
+	/**
+	 * Show next subtitle.
+	 * 
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	public void subtitleNext() throws RemoteException, PlayerException;
+
+	/**
+	 * Eject the dvd.
+	 * 
+	 * @throws RemoteException
+	 */
+	public void ejectDVD() throws RemoteException;
 }

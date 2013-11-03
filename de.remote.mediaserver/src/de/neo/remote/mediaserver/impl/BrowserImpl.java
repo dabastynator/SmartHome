@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -14,14 +14,14 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import de.neo.remote.mediaserver.api.IBrowser;
+import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.newsystem.rmi.api.Oneway;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.transceiver.DirectorySender;
 import de.newsystem.rmi.transceiver.FileReceiver;
 import de.newsystem.rmi.transceiver.FileSender;
-import de.remote.mediaserver.api.IBrowser;
-import de.remote.mediaserver.api.IThumbnailListener;
 
 public class BrowserImpl implements IBrowser {
 

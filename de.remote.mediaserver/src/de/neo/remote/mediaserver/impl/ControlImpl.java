@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.awt.AWTException;
 import java.awt.Robot;
@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import de.neo.remote.mediaserver.api.IControl;
 import de.newsystem.rmi.api.Server;
 import de.newsystem.rmi.protokol.RemoteException;
 import de.newsystem.rmi.protokol.ServerPort;
-import de.remote.mediaserver.api.IControl;
 
 public class ControlImpl implements IControl {
 

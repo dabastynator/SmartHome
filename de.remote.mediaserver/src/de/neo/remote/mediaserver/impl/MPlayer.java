@@ -1,4 +1,4 @@
-package de.remote.mediaserver.impl;
+package de.neo.remote.mediaserver.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,16 +10,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.mediaserver.api.PlayingBean.STATE;
 import de.newsystem.rmi.protokol.RemoteException;
-import de.remote.mediaserver.api.PlayerException;
-import de.remote.mediaserver.api.PlayingBean;
-import de.remote.mediaserver.api.PlayingBean.STATE;
 
 public class MPlayer extends AbstractPlayer {
 
 	protected Process mplayerProcess;
 	protected PrintStream mplayerIn;
-	protected int fullscreen = 1;
 	protected int positionLeft = 0;
 	protected int volume = 50;
 	private int seekValue;
@@ -93,7 +92,6 @@ public class MPlayer extends AbstractPlayer {
 			// set default volume
 			mplayerIn.print("volume " + volume + " 1\n");
 			mplayerIn.flush();
-			fullscreen = 1;
 		} catch (IOException e) {
 			// throw new PlayerException(e.getMessage());
 		}
