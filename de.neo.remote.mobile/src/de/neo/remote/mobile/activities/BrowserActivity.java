@@ -25,6 +25,8 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.mediaserver.api.IDVDPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BrowserAdapter;
@@ -42,7 +44,7 @@ import de.remote.mobile.R;
  */
 public class BrowserActivity extends BrowserBase {
 
-	private boolean isFullscreen ;
+	private boolean isFullscreen;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -257,118 +259,80 @@ public class BrowserActivity extends BrowserBase {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	/**
-	 * toggle playing and pausing status on player.
-	 * 
-	 * @param v
-	 */
-	public void playPause(View v) {
-		try {
-			binder.getLatestMediaServer().player.playPause();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+	public void showDVDBar(View v) {
+		IPlayer player = binder.getLatestMediaServer().player;
+		if (dvdLayout.getVisibility() == View.VISIBLE) {
+			dvdLayout.setVisibility(View.GONE);
+			dvdButton.setBackgroundDrawable(null);
+		} else {
+			if (player instanceof IDVDPlayer) {
+				try {
+					((IDVDPlayer) player).playDVD();
+					dvdLayout.setVisibility(View.VISIBLE);
+					dvdButton.setBackgroundResource(R.drawable.image_border);
+				} catch (Exception e) {
+					Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT)
+							.show();
+				}
+			} else
+				Toast.makeText(this, "player does not support dvds",
+						Toast.LENGTH_SHORT).show();
 		}
 	}
 
-	/**
-	 * quit player
-	 * 
-	 * @param v
-	 */
-	public void stopPlayer(View v) {
+	public void playerAction(View v) {
+		IPlayer player = binder.getLatestMediaServer().player;
 		try {
-			binder.getLatestMediaServer().player.quit();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * play next file
-	 * 
-	 * @param v
-	 */
-	public void next(View v) {
-		try {
-			binder.getLatestMediaServer().player.next();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * play previous file
-	 * 
-	 * @param v
-	 */
-	public void prev(View v) {
-		try {
-			binder.getLatestMediaServer().player.previous();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * seek backward
-	 * 
-	 * @param v
-	 */
-	public void seekBwd(View v) {
-		try {
-			binder.getLatestMediaServer().player.seekBackwards();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * seek forward
-	 * 
-	 * @param v
-	 */
-	public void seekFwd(View v) {
-		try {
-			binder.getLatestMediaServer().player.seekForwards();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * volume up
-	 * 
-	 * @param v
-	 */
-	public void volUp(View v) {
-		try {
-			binder.getLatestMediaServer().player.volUp();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * volume down
-	 * 
-	 * @param v
-	 */
-	public void volDown(View v) {
-		try {
-			binder.getLatestMediaServer().player.volDown();
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * switch fullscreen status
-	 * 
-	 * @param v
-	 */
-	public void fullScreen(View v) {
-		try {
-			binder.getLatestMediaServer().player.fullScreen(isFullscreen = !isFullscreen);
+			switch (v.getId()) {
+			case R.id.button_play:
+				player.playPause();
+				break;
+			case R.id.button_next:
+				player.next();
+				break;
+			case R.id.button_pref:
+				player.previous();
+				break;
+			case R.id.button_vol_up:
+				player.volUp();
+				break;
+			case R.id.button_vol_down:
+				player.volDown();
+				break;
+			case R.id.button_seek_bwd:
+				player.seekBackwards();
+				break;
+			case R.id.button_seek_fwd:
+				player.seekForwards();
+				break;
+			case R.id.button_full:
+				player.fullScreen(isFullscreen = !isFullscreen);
+				break;
+			case R.id.button_quit:
+				player.quit();
+				break;
+			case R.id.button_left:
+				if (player instanceof IDVDPlayer)
+					((IDVDPlayer) player).menuLeft();
+				break;
+			case R.id.button_right:
+				if (player instanceof IDVDPlayer)
+					((IDVDPlayer) player).menuRight();
+				break;
+			case R.id.button_up:
+				if (player instanceof IDVDPlayer)
+					((IDVDPlayer) player).menuUp();
+				break;
+			case R.id.button_down:
+				if (player instanceof IDVDPlayer)
+					((IDVDPlayer) player).menuDown();
+				;
+				break;
+			case R.id.button_enter:
+				if (player instanceof IDVDPlayer)
+					((IDVDPlayer) player).menuEnter();
+				break;
+			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
@@ -443,6 +407,22 @@ public class BrowserActivity extends BrowserBase {
 				break;
 			case R.id.opt_right:
 				mediaServer.player.moveRight();
+				break;
+			case R.id.opt_dvd_eject:
+				if (mediaServer.player instanceof IDVDPlayer)
+					((IDVDPlayer)mediaServer.player).ejectDVD();
+				break;
+			case R.id.opt_dvd_no_subtitle:
+				if (mediaServer.player instanceof IDVDPlayer)
+					((IDVDPlayer)mediaServer.player).subtitleRemove();
+				break;
+			case R.id.opt_dvd_next_subtitle:
+				if (mediaServer.player instanceof IDVDPlayer)
+					((IDVDPlayer)mediaServer.player).subtitleNext();
+				break;
+			case R.id.opt_dvd_menu:
+				if (mediaServer.player instanceof IDVDPlayer)
+					((IDVDPlayer)mediaServer.player).showMenu();
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;

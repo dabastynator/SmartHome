@@ -14,7 +14,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="playPause"
+            android:onClick="playerAction"
             android:src="@drawable/pause" />
 
         <ImageView
@@ -22,7 +22,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="prev"
+            android:onClick="playerAction"
             android:src="@drawable/prev" />
 
         <ImageView
@@ -30,7 +30,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="seekBwd"
+            android:onClick="playerAction"
             android:src="@drawable/seek_bwd" />
 
         <ImageView
@@ -38,7 +38,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="volDown"
+            android:onClick="playerAction"
             android:src="@drawable/voldown" />
     </LinearLayout>
 
@@ -169,7 +169,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="stopPlayer"
+            android:onClick="playerAction"
             android:src="@drawable/stop" />
 
         <ImageView
@@ -177,7 +177,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="next"
+            android:onClick="playerAction"
             android:src="@drawable/next" />
 
         <ImageView
@@ -185,7 +185,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="seekFwd"
+            android:onClick="playerAction"
             android:src="@drawable/seek_fwd" />
 
         <ImageView
@@ -193,7 +193,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="volUp"
+            android:onClick="playerAction"
             android:src="@drawable/volup" />
     </LinearLayout>
 

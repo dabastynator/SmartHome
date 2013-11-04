@@ -107,20 +107,64 @@
             android:text="|>" />
         
         <ImageView
-            android:id="@+id/button_vol_up"
+            android:id="@+id/button_dvd"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="volUp"
-            android:src="@drawable/volup" />
+            android:onClick="showDVDBar"
+            android:src="@drawable/dvd" />
         
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/layout_dvd_bar"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal" >
+
         <ImageView
-            android:id="@+id/button_vol_down"
+            android:id="@+id/button_left"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="volDown"
-            android:src="@drawable/voldown" />
+            android:onClick="playerAction"
+            android:src="@drawable/dir_left" />
+        
+         <ImageView
+            android:id="@+id/button_up"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="playerAction"
+            android:src="@drawable/dir_up" />
+         
+          <ImageView
+            android:id="@+id/button_enter"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="playerAction"
+            android:src="@drawable/enter" />
+         
+          <ImageView
+            android:id="@+id/button_down"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="playerAction"
+            android:src="@drawable/dir_down" />
+        
+         <ImageView
+            android:id="@+id/button_right"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="playerAction"
+            android:src="@drawable/dir_right" />
+
+        
+        
     </LinearLayout>
 
     <ListView
@@ -143,7 +187,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="playPause"
+            android:onClick="playerAction"
             android:src="@drawable/pause"
             android:text="|>" />
 
@@ -152,7 +196,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="stopPlayer"
+            android:onClick="playerAction"
             android:src="@drawable/stop"
             android:text="x" />
 
@@ -161,7 +205,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="prev"
+            android:onClick="playerAction"
             android:src="@drawable/prev"
             android:text="&lt;" />
 
@@ -170,7 +214,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="next"
+            android:onClick="playerAction"
             android:src="@drawable/next"
             android:text=">" />
 
@@ -179,7 +223,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="fullScreen"
+            android:onClick="playerAction"
             android:src="@drawable/full"
             android:text=">&lt;" />
     </LinearLayout>

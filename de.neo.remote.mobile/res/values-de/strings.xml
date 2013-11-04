@@ -36,4 +36,8 @@
     <string name="str_power">Internet Steckdosen</string>
     <string name="add_new_server">Neuen Server hinzufügen</string>
     <string name="str_refresh">Neu Laden</string>
+    <string name="str_eject">Auswerfen</string>
+    <string name="str_dvd_menu">Menü</string>
+    <string name="str_dvd_no_sub">Untertitel aus</string>
+    <string name="str_dvd_next_sub">Nächster Untertitel</string>
 </resources>

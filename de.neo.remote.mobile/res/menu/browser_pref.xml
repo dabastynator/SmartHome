@@ -28,6 +28,25 @@
         </menu>
     </item>
     <item
+        android:id="@+id/opt_dvd"
+        android:icon="@drawable/dvd"
+        android:title="DVD">
+        <menu>
+            <item
+                android:id="@+id/opt_dvd_eject"
+                android:title="@string/str_eject"/>
+            <item
+                android:id="@+id/opt_dvd_menu"
+                android:title="@string/str_dvd_menu"/>
+            <item
+                android:id="@+id/opt_dvd_no_subtitle"
+                android:title="@string/str_dvd_no_sub"/>
+            <item
+                android:id="@+id/opt_dvd_next_subtitle"
+                android:title="@string/str_dvd_next_sub"/>
+        </menu>
+    </item>
+    <item
         android:id="@+id/opt_record"
         android:icon="@drawable/mic_32"
         android:title="@string/str_record">
@@ -67,14 +86,6 @@
                 android:id="@+id/opt_left"
                 android:icon="@drawable/left"
                 android:title="@string/str_move_left"/>
-            <!--
-            <item
-                android:id="@+id/opt_shuffle_on"
-                android:title="Shuffle"/>
-            <item
-                android:id="@+id/opt_shuffle_off"
-                android:title="No shuffle"/>
-            -->
             <item
                 android:id="@+id/opt_mousepad"
                 android:title="Mousepad"/>

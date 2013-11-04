@@ -140,6 +140,10 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	protected String mediaServerName;
 
+	protected LinearLayout dvdLayout;
+
+	protected ImageView dvdButton;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -183,6 +187,8 @@ public abstract class BrowserBase extends BindedActivity {
 		searchText = (EditText) findViewById(R.id.txt_search);
 		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
 		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
+		dvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
+		dvdButton = (ImageView) findViewById(R.id.button_dvd);
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
 		playButton = (ImageView) findViewById(R.id.button_play);
 		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
