@@ -1,16 +1,24 @@
 <project>
 
-	<property name="lib.dir" value="./../de.remote.mediaserver/lib" />
-	<property name="lib.dir2" value="./../de.webcam/lib" />
-	<property name="lib.dir3" value="./../de.hcl.synchronize/lib" />
-	<property name="lib.center" value="./../de.remote.controlcenter/lib" />
+	<property name="src.rmi" value="./../de.neo.rmi/src" />
+	<property name="src.webcam" value="./../de.webcam/src" />
+	<property name="src.controlcenter" value="./../de.neo.remote.controlcenter/src" />
+	<property name="src.mediaserver" value="./../de.neo.remote.mediaserver/src" />
+	<property name="src.desktop" value="./../de.neo.remote.desktop/src" />
+	<property name="src.gpio" value="./../de.neo.remote.gpiopower/src" />
+
+	<property name="lib.mediaserver" value="./../de.neo.remote.mediaserver/lib" />
+	<property name="lib.webcam" value="./../de.webcam/lib" />
+	<property name="lib.center" value="./../de.neo.remote.controlcenter/lib" />
+
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
+	
+	<property name="jar.destiny" value="/opt/neo/" />
 
 	<path id="classpath">
-		<fileset dir="${lib.dir}" includes="**/*.jar" />
-		<fileset dir="${lib.dir2}" includes="**/*.jar" />
-		<fileset dir="${lib.dir3}" includes="**/*.jar" />
+		<fileset dir="${lib.mediaserver}" includes="**/*.jar" />
+		<fileset dir="${lib.webcam}" includes="**/*.jar" />
 		<fileset dir="${lib.center}" includes="**/*.jar" />
 	</path>
 
@@ -21,19 +29,19 @@
 	<target name="jar_rmi" depends="clean">
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
-		<javac srcdir="./../de.newsystem.rmi/src" destdir="${classes.dir}" includeantruntime="false" />
+		<javac srcdir="${src.rmi}" destdir="${classes.dir}" includeantruntime="false" />
 		<jar destfile="${jar.dir}/registry.jar" basedir="${classes.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="de.newsystem.rmi.api.Registry" />
+				<attribute name="Main-Class" value="de.neo.rmi.api.Registry" />
 			</manifest>
-			<fileset dir="./../de.newsystem.rmi/src" includes="**/*.java"/>
+			<fileset dir="${src.rmi}" includes="**/*.java" />
 		</jar>
 	</target>
 
 	<target name="jar_webcam" depends="jar_rmi">
-		<javac srcdir="./../de.webcam/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+		<javac srcdir="${src.webcam}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/webcam.jar" basedir="${classes.dir}">
-			<zipgroupfileset dir="${lib.dir2}" includes="*.jar" excludes="" />
+			<zipgroupfileset dir="${lib.webcam}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.webcam.server.WebcamServer" />
 			</manifest>
@@ -41,59 +49,52 @@
 	</target>
 
 	<target name="jar_controlcenter" depends="jar_rmi">
-		<javac srcdir="./../de.remote.controlcenter/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+		<javac srcdir="${src.controlcenter}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/controlcenter.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.center}" includes="*.jar" excludes="" />
 			<manifest>
-				<attribute name="Main-Class" value="de.remote.controlcenter.ControlCenterMain" />
+				<attribute name="Main-Class" value="de.neo.remote.controlcenter.ControlCenterMain" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="jar_mediaserver" depends="jar_controlcenter">
-		<javac srcdir="./../de.remote.mediaserver/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+		<javac srcdir="${src.mediaserver}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/mediaserver.jar" basedir="${classes.dir}">
-			<zipgroupfileset dir="${lib.dir}" includes="*.jar" excludes="" />
+			<zipgroupfileset dir="${lib.mediaserver}" includes="*.jar" excludes="" />
 			<manifest>
-				<attribute name="Main-Class" value="de.remote.mediaserver.server.MediaServerMain" />
-			</manifest>
-		</jar>
-	</target>
-
-	<target name="jar_synch" depends="jar_desktop">
-		<javac srcdir="./../de.hcl.synchronize/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
-		<jar destfile="${jar.dir}/synchronizer.jar" basedir="${classes.dir}">
-			<zipgroupfileset dir="${lib.dir3}" includes="*.jar" excludes="" />
-			<zipgroupfileset dir="${lib.dir3}" includes="*.zip" excludes="" />
-			<fileset dir="./../de.hcl.synchronize/" includes="icons/*.png" excludes="" />
-			<fileset dir="./../de.hcl.synchronize/" includes="lib/*" excludes="" />
-			<manifest>
-				<attribute name="Main-Class" value="de.hcl.synchronize.server.MainSynchronizer" />
+				<attribute name="Main-Class" value="de.neo.remote.mediaserver.server.MediaServerMain" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="jar_desktop" depends="jar_mediaserver,jar_webcam">
-		<javac srcdir="./../de.remote.desktop/src" destdir="${classes.dir}" includeantruntime="false" />
+		<javac srcdir="${src.desktop}" destdir="${classes.dir}" includeantruntime="false" />
 		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
-			<fileset dir="./../de.remote.desktop/" includes="res/*.png" excludes="" />
-			<zipgroupfileset dir="${lib.dir2}" includes="*.jar" excludes="" />
+			<fileset dir="${src.desktop}/.." includes="res/*.png" excludes="" />
+			<zipgroupfileset dir="${lib.webcam}" includes="*.jar" excludes="" />
 			<manifest>
-				<attribute name="Main-Class" value="de.remote.desktop.RemoteControl" />
+				<attribute name="Main-Class" value="de.neo.remote.desktop.RemoteControl" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="jar_gpio_power" depends="jar_controlcenter">
-		<javac srcdir="./../de.remote.gpiopower/src" destdir="${classes.dir}" includeantruntime="false" />
+		<javac srcdir="${src.gpio}" destdir="${classes.dir}" includeantruntime="false" />
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="de.remote.gpiopower.GPIOMain" />
+				<attribute name="Main-Class" value="de.neo.remote.gpiopower.GPIOMain" />
 			</manifest>
 		</jar>
 	</target>
 
-	<target name="build_remote" depends="jar_webcam,jar_mediaserver,jar_synch,jar_desktop,jar_gpio_power">
+	<target name="build_remote" depends="jar_webcam,jar_mediaserver,jar_desktop,jar_gpio_power">
+		<copy file="${jar.dir}/registry.jar" tofile="${jar.destiny}/registry.jar" overwrite="true"/>
+		<copy file="${jar.dir}/gpiopower.jar" tofile="${jar.destiny}/gpiopower.jar" overwrite="true"/>
+		<copy file="${jar.dir}/webcam.jar" tofile="${jar.destiny}/webcam.jar" overwrite="true"/>
+		<copy file="${jar.dir}/desktop.jar" tofile="${jar.destiny}/desktop.jar" overwrite="true"/>
+		<copy file="${jar.dir}/controlcenter.jar" tofile="${jar.destiny}/controlcenter.jar" overwrite="true"/>
+		<copy file="${jar.dir}/mediaserver.jar" tofile="${jar.destiny}/mediaserver.jar" overwrite="true"/>
 	</target>
 </project>
