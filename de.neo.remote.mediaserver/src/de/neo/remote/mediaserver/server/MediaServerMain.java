@@ -25,6 +25,7 @@ public class MediaServerMain {
 		String place = getParameter("--location", args);
 		String plsDirecotry = getParameter("--temp", args);
 		String registry = getParameter("--registry", args);
+		String type = getParameter("--type", args);
 		float[] position = getPosition(args);
 
 		String name = getParameter("--name", args);
@@ -44,7 +45,7 @@ public class MediaServerMain {
 
 		IMediaServer mediaServer = new MediaServerImpl(place, plsDirecotry);
 		IControlUnit mediaUnit = new MediaControlUnit(name, mediaServer,
-				position);
+				position, type);
 		IChatServer chat = new ChatServerImpl();
 
 		try {
@@ -120,6 +121,8 @@ public class MediaServerMain {
 		System.out.println("  --position    : Position of server x,y,z.");
 		System.out
 				.println("  --temp        : specify temprary location for playlists.");
+		System.out
+				.println("  --type        : specify visualization(remote, multimedia, box).");
 	}
 
 }

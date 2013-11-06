@@ -9,11 +9,14 @@ public class MediaControlUnit implements IControlUnit {
 	private String name;
 	private IMediaServer mediaServer;
 	private float[] position;
+	private String type;
 
-	public MediaControlUnit(String name, IMediaServer mediaServer, float[] position) {
+	public MediaControlUnit(String name, IMediaServer mediaServer,
+			float[] position, String type) {
 		this.name = name;
 		this.mediaServer = mediaServer;
 		this.position = position;
+		this.type = type;
 	}
 
 	@Override
@@ -34,7 +37,7 @@ public class MediaControlUnit implements IControlUnit {
 
 	@Override
 	public String getDescription() throws RemoteException {
-		return "Media server";
+		return type;
 	}
 
 	@Override
