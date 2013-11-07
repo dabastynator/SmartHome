@@ -24,6 +24,10 @@ public class OMXPlayer extends AbstractPlayer {
 	@Override
 	public void play(String file) {
 		try {
+			quit();
+		} catch (PlayerException e1) {
+		}
+		try {
 			String[] args = new String[] { "/usr/bin/omxplayer", file };
 			omxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
@@ -129,7 +133,7 @@ public class OMXPlayer extends AbstractPlayer {
 			String line = null;
 			try {
 				while ((line = omxStream.readLine()) != null) {
-					//System.out.println(line);
+					// System.out.println(line);
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
