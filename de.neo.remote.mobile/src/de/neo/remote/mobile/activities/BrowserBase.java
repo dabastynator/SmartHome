@@ -144,6 +144,8 @@ public abstract class BrowserBase extends BindedActivity {
 
 	protected ImageView dvdButton;
 
+	protected ImageView omxButton;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -193,6 +195,7 @@ public abstract class BrowserBase extends BindedActivity {
 		playButton = (ImageView) findViewById(R.id.button_play);
 		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
 		totemButton = (ImageView) findViewById(R.id.button_totem);
+		omxButton = (ImageView) findViewById(R.id.button_omxplayer);
 		filesystemButton = (ImageView) findViewById(R.id.button_filesystem);
 		playlistButton = (ImageView) findViewById(R.id.button_playlist);
 	}

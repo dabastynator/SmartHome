@@ -250,6 +250,7 @@ public class PlayerBinder extends Binder {
 						mediaServer.createBrowser());
 				mediaObjects.control = mediaServer.getControl();
 				mediaObjects.mplayer = mediaServer.getMPlayer();
+				mediaObjects.omxplayer = mediaServer.getOMXPlayer();
 				mediaObjects.player = mediaObjects.mplayer;
 				mediaObjects.pls = mediaServer.getPlayList();
 				mediaObjects.totem = mediaServer.getTotemPlayer();
@@ -281,5 +282,9 @@ public class PlayerBinder extends Binder {
 			}
 		}
 		return power;
+	}
+
+	public String getUnitDescription(String name) {
+		return service.unitMapDescription.get(name);
 	}
 }

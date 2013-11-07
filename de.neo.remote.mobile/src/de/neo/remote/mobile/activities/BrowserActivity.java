@@ -716,13 +716,23 @@ public class BrowserActivity extends BrowserBase {
 		mediaServer.player = mediaServer.totem;
 		totemButton.setBackgroundResource(R.drawable.image_border);
 		mplayerButton.setBackgroundDrawable(null);
+		omxButton.setBackgroundDrawable(null);
 	}
 
 	public void setMPlayer(View view) {
 		StationStuff mediaServer = binder.getLatestMediaServer();
-		mediaServer.player = mediaServer.totem;
+		mediaServer.player = mediaServer.mplayer;
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);
+		omxButton.setBackgroundDrawable(null);
+	}
+	
+	public void setOMXPlayer(View view){
+		StationStuff server = binder.getLatestMediaServer();
+		server.player = server.omxplayer;
+		omxButton.setBackgroundResource(R.drawable.image_border);
+		totemButton.setBackgroundDrawable(null);
+		mplayerButton.setBackgroundDrawable(null);
 	}
 
 	/**

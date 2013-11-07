@@ -80,8 +80,8 @@ public class RemoteService extends Service {
 	private WLANReceiver wlanReceiver;
 
 	protected Map<String, Object> unitMap;
-
 	protected Map<String, float[]> unitMapPostion;
+	protected Map<String, String> unitMapDescription;
 
 	/**
 	 * listener for player
@@ -195,6 +195,7 @@ public class RemoteService extends Service {
 		stationStuff = new HashMap<IMediaServer, StationStuff>();
 		unitMap = new HashMap<String, Object>();
 		unitMapPostion = new HashMap<String, float[]>();
+		unitMapDescription = new HashMap<String, String>();
 		actionListener = new ArrayList<IRemoteActionListener>();
 		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
@@ -275,6 +276,7 @@ public class RemoteService extends Service {
 		public IControl control;
 		public IPlayer mplayer;
 		public IPlayer totem;
+		public IPlayer omxplayer;
 		public String name;
 	}
 
@@ -319,16 +321,20 @@ public class RemoteService extends Service {
 		stationStuff.clear();
 		unitMap.clear();
 		unitMapPostion.clear();
+		unitMapDescription.clear();
 		for (int i = 0; i < stationSize; i++) {
 			try {
 				IControlUnit unit = controlCenter.getControlUnit(i);
 				Object object = unit.getRemoteableControlObject();
 				String name = unit.getName();
+				String description = unit.getDescription();
 				float[] position = unit.getPosition();
 				unitMap.put(name, object);
 				unitMapPostion.put(name, position);
+				unitMapDescription.put(name, description);
 			} catch (Exception e) {
-				Log.e("error", e.getMessage());
+				Log.e("error",
+						e.getClass().getSimpleName() + ": " + e.getMessage());
 			}
 		}
 	}

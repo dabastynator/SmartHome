@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import de.neo.opengl.common.AbstractSceneRenderer;
+import de.neo.opengl.common.figures.GLCube;
 import de.neo.opengl.common.figures.GLFigure;
 import de.neo.opengl.common.figures.GLFigure.GLClickListener;
 import de.neo.opengl.common.figures.GLPolynom;
@@ -53,20 +54,21 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	private GLGroup glObjects;
 	private SelectMediaServer selecter;
 
-	private Map<String, GLMediaServer> glMediaServers;
+	private Map<String, GLFigure> glMediaServers;
 	private TranslateSceneHandler handler;
 
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
 		super(context);
 		this.selecter = selecter;
-		setGradient(new float[]{0.3f, 0.3f, 1, 1}, new float[]{1, 1, 1, 1});
+		setGradient(new float[] { 0.3f, 0.3f, 1, 1 },
+				new float[] { 1, 1, 1, 1 });
 		handler = new TranslateSceneHandler();
-		handler.sceneRotation.rotateByAngleAxis(Math.PI/4, 1, 0, 0);
+		handler.sceneRotation.rotateByAngleAxis(Math.PI / 4, 1, 0, 0);
 		handler.zoomBounds[0] = -4;
 		handler.zoomBounds[1] = -15;
 		setTouchSceneHandler(handler);
 		setLighting(true);
-		glMediaServers = new HashMap<String, GLMediaServer>();
+		glMediaServers = new HashMap<String, GLFigure>();
 	}
 
 	@Override
@@ -90,18 +92,15 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				Object object = binder.getUnits().get(name);
 				float[] position = binder.getUnitPosition(name);
 				if (object instanceof IMediaServer) {
-					GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE, true);
-					glMediaServers.put(name, glMusic);
-					glMusic.setTexture(GLBox.BOX,
-							loadBitmap(R.drawable.textur_holz), 1);
-					glMusic.setTexture(GLFlatScreen.BOTTOM,
-							loadBitmap(R.drawable.textur_metal), 1);
-					glMusic.position[0] = position[0];
-					glMusic.position[1] = position[2];
-					glMusic.position[2] = -position[1];
+					GLFigure glServer = createGLMediaServer(
+							binder.getUnitDescription(name), name);
+					glServer.position[0] = position[0];
+					glServer.position[1] = position[2];
+					glServer.position[2] = -position[1];
 					MediaServerListener listener = new MediaServerListener(name);
-					glMusic.setOnClickListener(listener);
-					glObjects.addFigure(glMusic);
+					glServer.setOnClickListener(listener);
+					glObjects.addFigure(glServer);
+					glMediaServers.put(name, glServer);
 				}
 				if (object instanceof IInternetSwitch) {
 					IInternetSwitch internet = (IInternetSwitch) object;
@@ -121,6 +120,27 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			}
 		}
 		room.addFigure(glObjects);
+	}
+
+	private GLFigure createGLMediaServer(String description, String name) {
+		if ("multimedia".equals(description)) {
+			GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE,
+					true);
+			glMusic.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
+			glMusic.setTexture(GLFlatScreen.BOTTOM,
+					loadBitmap(R.drawable.textur_metal), 1);
+			return glMusic;
+		}
+		if("remote".equals(description)){
+			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
+			cube.setTexture(loadBitmap(R.drawable.ic_launcher));
+			cube.size[0] = cube.size[1] = cube.size[2] = 0.3f;
+			cube.setColor(1, 1, 1);
+			return cube;
+		}
+		GLBox box = new GLBox(GLFigure.STYLE_PLANE);
+		box.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
+		return box;
 	}
 
 	private void addGroundToScene(GroundPlot ground) {
@@ -148,20 +168,21 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		handler.translateScene[0] = -((maxX - minX) / 2 + minX);
 		handler.translateScene[1] = ((maxY - minY) / 2 + minY);
 		handler.zoom = -15;
-		handler.translateSceneBounds[0] = -minX;		
+		handler.translateSceneBounds[0] = -minX;
 		handler.translateSceneBounds[1] = -maxX;
-		handler.translateSceneBounds[2] = maxY;//-minY;
-		handler.translateSceneBounds[3] = minY;//-maxY;
-		
+		handler.translateSceneBounds[2] = maxY;// -minY;
+		handler.translateSceneBounds[3] = minY;// -maxY;
+
 		GLSquare laminat = new GLSquare(GLFigure.STYLE_PLANE);
 		laminat.position[0] = (maxX - minX) / 2 + minX;
-		laminat.position[2] = - (maxY - minY) / 2 - minY;
+		laminat.position[2] = -(maxY - minY) / 2 - minY;
 		laminat.position[1] = -0.03f;
 		laminat.size[0] = (maxX - minX);
 		laminat.size[1] = (maxY - minY);
-		laminat.rotation.rotateByAngleAxis(Math.PI/2, 1, 0, 0);
+		laminat.rotation.rotateByAngleAxis(Math.PI / 2, 1, 0, 0);
 		laminat.color[0] = laminat.color[1] = laminat.color[2] = 1;
-		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0], laminat.size[1]);
+		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0],
+				laminat.size[1]);
 		glObjects.addFigure(laminat);
 
 		for (Feature feature : ground.features) {
@@ -185,7 +206,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				figure.position[0] = feature.x;
 				figure.position[2] = -feature.y;
 				figure.position[1] = feature.z;
-				figure.rotation.rotateByAngleAxis(180 * feature.az/Math.PI, 0, 1, 0);
+				figure.rotation.rotateByAngleAxis(180 * feature.az / Math.PI,
+						0, 1, 0);
 				figure.color[3] = 0.5f;
 				glObjects.addFigure(figure);
 			}
@@ -208,8 +230,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(VIDEO)) {
-			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f, 0.67f,
-					2f);
+			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f,
+					0.67f, 2f);
 			video.setSwitchTexture(GLFlatScreen.SCREEN,
 					loadBitmap(R.drawable.textur_image_sunset), true);
 			video.setTexture(GLFlatScreen.BOTTOM,
@@ -271,10 +293,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	}
 
 	public void setPlayingBean(String mediaserver, PlayingBean bean) {
-		GLMediaServer glMedia = glMediaServers.get(mediaserver);
-		if (glMedia != null) {
+		GLFigure glFigure = glMediaServers.get(mediaserver);
+		if (glFigure instanceof GLMediaServer) {
 			Bitmap bitmap = createBitmapByText(getBeanString(bean));
-			glMedia.setTexture(GLFlatScreen.SCREEN, bitmap, 1);
+			((GLMediaServer) glFigure).setTexture(GLFlatScreen.SCREEN, bitmap,
+					1);
 		}
 	}
 
