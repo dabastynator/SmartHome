@@ -15,6 +15,7 @@ public class MediaServerImpl implements IMediaServer {
 	private ControlImpl control;
 	private PlayListImpl playlist;
 	private String browserLocation;
+	private OMXPlayer omxplayer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
@@ -22,6 +23,7 @@ public class MediaServerImpl implements IMediaServer {
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
+		omxplayer = new OMXPlayer();
 	}
 
 	@Override
@@ -47,6 +49,11 @@ public class MediaServerImpl implements IMediaServer {
 	@Override
 	public IPlayList getPlayList() throws RemoteException {
 		return playlist;
+	}
+
+	@Override
+	public IPlayer getOMXPlayer() throws RemoteException {
+		return omxplayer;
 	}
 
 }

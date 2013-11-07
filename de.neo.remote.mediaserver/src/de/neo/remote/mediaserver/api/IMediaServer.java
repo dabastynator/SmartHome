@@ -30,6 +30,13 @@ public interface IMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public IPlayer getTotemPlayer() throws RemoteException;
+	
+	/**
+	 * get the omxplayer, just on raspberry 
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IPlayer getOMXPlayer() throws RemoteException;
 
 	/**
 	 * get mplayer
