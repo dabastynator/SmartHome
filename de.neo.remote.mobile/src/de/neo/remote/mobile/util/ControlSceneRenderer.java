@@ -10,16 +10,17 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import de.neo.opengl.common.AbstractSceneRenderer;
-import de.neo.opengl.common.figures.GLCube;
 import de.neo.opengl.common.figures.GLFigure;
 import de.neo.opengl.common.figures.GLFigure.GLClickListener;
 import de.neo.opengl.common.figures.GLPolynom;
 import de.neo.opengl.common.figures.GLPolynom.GLPoint;
 import de.neo.opengl.common.figures.GLSquare;
 import de.neo.opengl.common.systems.GLBox;
+import de.neo.opengl.common.systems.GLCube;
 import de.neo.opengl.common.systems.GLFlatScreen;
 import de.neo.opengl.common.systems.GLFloorlamp;
 import de.neo.opengl.common.systems.GLGroup;
+import de.neo.opengl.common.systems.GLLaptop;
 import de.neo.opengl.common.systems.GLLavalamp;
 import de.neo.opengl.common.systems.GLMediaServer;
 import de.neo.opengl.common.systems.GLReadinglamp;
@@ -131,12 +132,21 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 					loadBitmap(R.drawable.textur_metal), 1);
 			return glMusic;
 		}
-		if("remote".equals(description)){
+		if ("remote".equals(description)) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
 			cube.setTexture(loadBitmap(R.drawable.ic_launcher));
 			cube.size[0] = cube.size[1] = cube.size[2] = 0.3f;
 			cube.setColor(1, 1, 1);
 			return cube;
+		}
+		if ("laptop".equals(description)) {
+			GLLaptop laptop = new GLLaptop(GLFigure.STYLE_PLANE,
+					(float) (3 * Math.PI / 4));
+			laptop.setTexture(GLLaptop.SURFACE_DISPLAY,
+					loadBitmap(R.drawable.textur_image_sunset));
+			laptop.setTexture(GLLaptop.SURFACE_KEYBOARD,
+					loadBitmap(R.drawable.textur_keyboard));
+			return laptop;
 		}
 		GLBox box = new GLBox(GLFigure.STYLE_PLANE);
 		box.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);

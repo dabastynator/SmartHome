@@ -63,15 +63,16 @@ public final class R {
         public static final int textur_image_africa=0x7f020031;
         public static final int textur_image_leaves=0x7f020032;
         public static final int textur_image_sunset=0x7f020033;
-        public static final int textur_mamor=0x7f020034;
-        public static final int textur_metal=0x7f020035;
-        public static final int textur_wood=0x7f020036;
-        public static final int totem=0x7f020037;
-        public static final int upload=0x7f020038;
-        public static final int voldown=0x7f020039;
-        public static final int volup=0x7f02003a;
-        public static final int webcam=0x7f02003b;
-        public static final int widget_shape=0x7f02003c;
+        public static final int textur_keyboard=0x7f020034;
+        public static final int textur_mamor=0x7f020035;
+        public static final int textur_metal=0x7f020036;
+        public static final int textur_wood=0x7f020037;
+        public static final int totem=0x7f020038;
+        public static final int upload=0x7f020039;
+        public static final int voldown=0x7f02003a;
+        public static final int volup=0x7f02003b;
+        public static final int webcam=0x7f02003c;
+        public static final int widget_shape=0x7f02003d;
     }
     public static final class id {
         public static final int btn_chat_post=0x7f070005;

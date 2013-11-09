@@ -327,6 +327,7 @@ public class RemoteService extends Service {
 				IControlUnit unit = controlCenter.getControlUnit(i);
 				Object object = unit.getRemoteableControlObject();
 				String name = unit.getName();
+				Log.e("control unit", name);
 				String description = unit.getDescription();
 				float[] position = unit.getPosition();
 				unitMap.put(name, object);
