@@ -11,8 +11,15 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
 
+	public static final String ARROW_UP = "\027[A";
+	public static final String ARROW_DOWN = "\027[B";
+	public static final String ARROW_LEFT = "\027[D";
+	public static final String ARROW_RIGHT = "\027[C";
+
 	protected Process omxProcess;
 	protected PrintStream omxIn;
+	private long lastSeekBack;
+	private long lastSeekForeward;
 
 	protected void writeCommand(String cmd) throws PlayerException {
 		if (omxIn == null)
@@ -48,14 +55,20 @@ public class OMXPlayer extends AbstractPlayer {
 
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
+		if (System.currentTimeMillis() - lastSeekForeward > 300)
+			writeCommand(ARROW_RIGHT);
+		else
+			writeCommand(ARROW_UP);
+		lastSeekForeward = System.currentTimeMillis();
 	}
 
 	@Override
 	public void seekBackwards() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
+		if (System.currentTimeMillis() - lastSeekBack > 300)
+			writeCommand(ARROW_LEFT);
+		else
+			writeCommand(ARROW_DOWN);
+		lastSeekBack = System.currentTimeMillis();
 	}
 
 	@Override
