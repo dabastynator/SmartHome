@@ -195,7 +195,12 @@ public class BrowserActivity extends BrowserBase {
 							+ mediaServer.name);
 				}
 				if (exeption != null) {
-					if (exeption.getMessage() != null
+					if (exeption instanceof NullPointerException)
+						Toast.makeText(
+								BrowserActivity.this,
+								"NullPointerException: Mediaserver might incorrectly configured",
+								Toast.LENGTH_SHORT).show();
+					else if (exeption.getMessage() != null
 							&& exeption.getMessage().length() > 0)
 						Toast.makeText(BrowserActivity.this,
 								exeption.getMessage(), Toast.LENGTH_SHORT)
@@ -205,6 +210,19 @@ public class BrowserActivity extends BrowserBase {
 								exeption.getClass().getSimpleName(),
 								Toast.LENGTH_SHORT).show();
 				}
+				IPlayer player = mediaServer.player;
+				totemButton.setBackgroundDrawable(null);
+				mplayerButton.setBackgroundDrawable(null);
+				if (omxButton != null)
+					omxButton.setBackgroundDrawable(null);
+				if (player == binder.getLatestMediaServer().mplayer)
+					mplayerButton
+							.setBackgroundResource(R.drawable.image_border);
+				if (player == binder.getLatestMediaServer().totem)
+					totemButton.setBackgroundResource(R.drawable.image_border);
+				if (player == binder.getLatestMediaServer().omxplayer
+						&& omxButton != null)
+					omxButton.setBackgroundResource(R.drawable.image_border);
 			}
 
 		}.execute(new String[] { gotoPath });
@@ -281,6 +299,8 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	public void playerAction(View v) {
+		if (binder == null || binder.getLatestMediaServer() == null)
+			return;
 		IPlayer player = binder.getLatestMediaServer().player;
 		try {
 			switch (v.getId()) {
@@ -385,10 +405,10 @@ public class BrowserActivity extends BrowserBase {
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
-				mediaServer.player = mediaServer.mplayer;
+				setMPlayer(null);
 				break;
 			case R.id.opt_totem:
-				mediaServer.player = mediaServer.totem;
+				setTotem(null);
 				break;
 			case R.id.opt_light_off:
 				mediaServer.control.displayDark();
@@ -410,19 +430,19 @@ public class BrowserActivity extends BrowserBase {
 				break;
 			case R.id.opt_dvd_eject:
 				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer)mediaServer.player).ejectDVD();
+					((IDVDPlayer) mediaServer.player).ejectDVD();
 				break;
 			case R.id.opt_dvd_no_subtitle:
 				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer)mediaServer.player).subtitleRemove();
+					((IDVDPlayer) mediaServer.player).subtitleRemove();
 				break;
 			case R.id.opt_dvd_next_subtitle:
 				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer)mediaServer.player).subtitleNext();
+					((IDVDPlayer) mediaServer.player).subtitleNext();
 				break;
 			case R.id.opt_dvd_menu:
 				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer)mediaServer.player).showMenu();
+					((IDVDPlayer) mediaServer.player).showMenu();
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
@@ -594,7 +614,8 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	void onBinderConnected() {
-		if (binder.getLatestMediaServer() != null)
+		super.onBinderConnected();
+		if (binder.getLatestMediaServer() != null && binder.getLatestMediaServer().name.equals(mediaServerName))
 			updateGUI(null);
 	}
 
@@ -716,7 +737,8 @@ public class BrowserActivity extends BrowserBase {
 		mediaServer.player = mediaServer.totem;
 		totemButton.setBackgroundResource(R.drawable.image_border);
 		mplayerButton.setBackgroundDrawable(null);
-		omxButton.setBackgroundDrawable(null);
+		if (omxButton != null)
+			omxButton.setBackgroundDrawable(null);
 	}
 
 	public void setMPlayer(View view) {
@@ -724,10 +746,11 @@ public class BrowserActivity extends BrowserBase {
 		mediaServer.player = mediaServer.mplayer;
 		mplayerButton.setBackgroundResource(R.drawable.image_border);
 		totemButton.setBackgroundDrawable(null);
-		omxButton.setBackgroundDrawable(null);
+		if (omxButton != null)
+			omxButton.setBackgroundDrawable(null);
 	}
-	
-	public void setOMXPlayer(View view){
+
+	public void setOMXPlayer(View view) {
 		StationStuff server = binder.getLatestMediaServer();
 		server.player = server.omxplayer;
 		omxButton.setBackgroundResource(R.drawable.image_border);

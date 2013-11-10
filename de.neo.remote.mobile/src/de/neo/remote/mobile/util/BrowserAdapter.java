@@ -66,7 +66,7 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 						BrowserAdapter.this.browser
 								.fireThumbnails(BrowserAdapter.this,
 										PREVIEW_SIZE, PREVIEW_SIZE);
-					} catch (RemoteException e) {
+					} catch (Exception e) {
 					}
 				}
 			}.start();

@@ -233,6 +233,7 @@ public abstract class BrowserBase extends BindedActivity {
 
 	@Override
 	void onBinderConnected() {
+		
 	}
 
 	private long max = 0;

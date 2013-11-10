@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IControl;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
-import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.ServerPort;
 import de.remote.mobile.R;
 
@@ -20,18 +19,12 @@ public class MouseActivity extends BindedActivity {
 	private float startY;
 	private DataOutputStream mouseMoveOutput;
 	private Socket socket;
-	private String mediaServerName;
 	private StationStuff mediaServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.remote_mouse_key);
-		
-		if (getIntent().getExtras() != null
-				&& getIntent().getExtras().containsKey(BrowserBase.EXTRA_MEDIA_NAME)) {
-			mediaServerName = getIntent().getExtras().getString(BrowserBase.EXTRA_MEDIA_NAME);
-		}
 	}
 
 	@Override
@@ -70,8 +63,10 @@ public class MouseActivity extends BindedActivity {
 		if (control != null)
 			try {
 				control.mousePress(IControl.LEFT_CLICK);
-			} catch (RemoteException e) {
-				Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				Toast.makeText(this,
+						e.getClass().getSimpleName() + ": " + e.getMessage(),
+						Toast.LENGTH_SHORT).show();
 			}
 	}
 
@@ -80,8 +75,10 @@ public class MouseActivity extends BindedActivity {
 		if (control != null)
 			try {
 				control.mousePress(IControl.RIGHT_CLICK);
-			} catch (RemoteException e) {
-				Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				Toast.makeText(this,
+						e.getClass().getSimpleName() + ": " + e.getMessage(),
+						Toast.LENGTH_SHORT).show();
 			}
 	}
 
@@ -97,13 +94,17 @@ public class MouseActivity extends BindedActivity {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		try {
-			mediaServer = binder.getMediaServerByName(mediaServerName);
+			mediaServer = binder.getLatestMediaServer();
+			if (mediaServer == null)
+				throw new Exception("No mediaserver active");
 			ServerPort sp = mediaServer.control.openMouseMoveStream();
 			socket = new Socket(sp.getIp(), sp.getPort());
 			mouseMoveOutput = new DataOutputStream(socket.getOutputStream());
 		} catch (Exception e) {
 			mouseMoveOutput = null;
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this,
+					e.getClass().getSimpleName() + ": " + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 

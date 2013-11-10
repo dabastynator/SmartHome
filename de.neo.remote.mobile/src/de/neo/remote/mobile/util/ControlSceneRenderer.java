@@ -8,6 +8,7 @@ import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import de.neo.opengl.common.AbstractSceneRenderer;
 import de.neo.opengl.common.figures.GLFigure;
@@ -339,8 +340,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				text = "";
 			canvas.drawText(line, 10, 20 + i * 30, textPaint);
 		}
-
-		return bitmap;
+		Matrix matrix = new Matrix(); 
+		matrix.preScale(1.0f, -1.0f); 
+		Bitmap mirroredBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
+		return mirroredBitmap;
 	}
 
 	private String getBeanString(PlayingBean bean) {
@@ -348,9 +351,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (bean == null)
 			return str;
 		if (bean.getTitle() != null)
-			str = str + "Title: " + bean.getTitle() + "\n";
+			str = str + "-- Title --\n" + bean.getTitle() + "\n";
 		if (bean.getArtist() != null)
-			str = str + "Artist: " + bean.getArtist() + "\n";
+			str = str + "-- Artist --\n" + bean.getArtist() + "\n";
 		if (bean.getAlbum() != null)
 			str = str + "Album: " + bean.getAlbum() + "\n";
 		if (str.length() == 0 && bean.getFile() != null)

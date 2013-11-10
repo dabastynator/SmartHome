@@ -8,8 +8,6 @@ import java.util.Map;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +25,6 @@ import de.neo.remote.mediaserver.api.IPlayerListener;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mobile.database.RemoteDatabase;
-import de.neo.remote.mobile.receivers.WLANReceiver;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
 import de.neo.rmi.api.RMILogger;
@@ -76,8 +73,6 @@ public class RemoteService extends Service {
 	protected ControlCenterBuffer controlCenter;
 
 	protected Map<IMediaServer, StationStuff> stationStuff;
-
-	private WLANReceiver wlanReceiver;
 
 	protected Map<String, Object> unitMap;
 	protected Map<String, float[]> unitMapPostion;
@@ -204,14 +199,10 @@ public class RemoteService extends Service {
 		uploadListener = new UploadProgressListenr();
 		actionListener.add(notificationHandler);
 		serverDB = new RemoteDatabase(this);
-		wlanReceiver = new WLANReceiver(this);
-		registerReceiver(wlanReceiver, new IntentFilter(
-				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 	}
 
 	@Override
 	public void onDestroy() {
-		unregisterReceiver(wlanReceiver);
 		disconnect();
 		for (IRemoteActionListener listener : actionListener) {
 			listener.onServerConnectionChanged(null, -1);
