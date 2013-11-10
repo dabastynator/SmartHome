@@ -177,7 +177,9 @@ public class DynamicProxy implements InvocationHandler {
 
 	@Override
 	public boolean equals(Object obj) {
-		return toString().equals(obj.toString());
+		String me = toString();
+		String other = obj.toString();
+		return me.equals(other);
 	}
 
 	@Override
