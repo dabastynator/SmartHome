@@ -11,15 +11,20 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
 
-	public static final String ARROW_UP = "\027[A";
-	public static final String ARROW_DOWN = "\027[B";
-	public static final String ARROW_LEFT = "\027[D";
-	public static final String ARROW_RIGHT = "\027[C";
+	public static final char ESCAPE = 0x1B;
+	public static final String ARROW_UP = ESCAPE + "[A";
+	public static final String ARROW_DOWN = ESCAPE + "[B";
+	public static final String ARROW_LEFT = ESCAPE + "[D";
+	public static final String ARROW_RIGHT = ESCAPE + "[C";
 
 	protected Process omxProcess;
 	protected PrintStream omxIn;
 	private long lastSeekBack;
 	private long lastSeekForeward;
+	
+	public OMXPlayer() {
+		System.out.println("Start omxplayer with escape sequenzes");
+	}
 
 	protected void writeCommand(String cmd) throws PlayerException {
 		if (omxIn == null)
