@@ -134,6 +134,9 @@ public class ControlCenterImpl implements IControlCenter {
 			}
 		}
 		controlUnits.removeAll(exceptionList);
+		if (exceptionList.size() > 0)
+			System.out.println("Lost unit. " + controlUnits.size()
+					+ " unit(s) left.");
 	}
 
 	@Override
@@ -143,8 +146,11 @@ public class ControlCenterImpl implements IControlCenter {
 
 	@Override
 	public void addControlUnit(IControlUnit controlUnit) throws RemoteException {
+		if (controlUnits.contains(controlUnit))
+			controlUnits.remove(controlUnit);
 		controlUnits.add(controlUnit);
-		System.out.println("Add control unit: " + controlUnit.getName());
+		System.out.println("Add " + controlUnits.size() + ". control unit: "
+				+ controlUnit.getName());
 	}
 
 	@Override
