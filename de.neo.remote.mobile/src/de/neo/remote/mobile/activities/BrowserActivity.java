@@ -2,6 +2,7 @@ package de.neo.remote.mobile.activities;
 
 import java.io.File;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -23,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
@@ -615,8 +617,78 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	void onBinderConnected() {
 		super.onBinderConnected();
-		if (binder.getLatestMediaServer() != null && binder.getLatestMediaServer().name.equals(mediaServerName))
+		if (binder.getLatestMediaServer() != null
+				&& binder.getLatestMediaServer().name.equals(mediaServerName)) {
 			updateGUI(null);
+		}
+		Bundle extras = getIntent().getExtras();
+		String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
+		if (youtubeURL != null) {
+			playYoutubeStream(youtubeURL);
+			getIntent().removeExtra(Intent.EXTRA_TEXT);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		if (progress != null) {
+			progress.dismiss();
+			progress = null;
+		}
+		super.onPause();
+	}
+
+	private void playYoutubeStream(String youtubeURL) {
+		AsyncTask<String, Integer, String> asyncTask = new AsyncTask<String, Integer, String>() {
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				progress = new ProgressDialog(BrowserActivity.this);
+				progress.setTitle("Stream Youtube");
+				progress.setMessage("Stream Youtube");
+				progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				progress.show();
+			}
+
+			@Override
+			protected void onPostExecute(String result) {
+				super.onPostExecute(result);
+				if (progress != null)
+					progress.dismiss();
+				if (result != null)
+					Toast.makeText(BrowserActivity.this,
+							"Error streaming youtuge: " + result,
+							Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			protected String doInBackground(String... youtubeURL) {
+				try {
+					if (binder == null)
+						throw new Exception("not bindet");
+					if (binder.getLatestMediaServer() == null)
+						throw new Exception("no mediaserver selected");
+					IPlayer player = binder.getLatestMediaServer().player;
+					if (player != null) {
+						player.playFromYoutube(youtubeURL[0]);
+					} else
+						throw new Exception("no player selected");
+				} catch (Exception e) {
+					return e.getMessage();
+				}
+				return null;
+			}
+
+		};
+		asyncTask.execute(youtubeURL);
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		setIntent(intent);
+		// now getIntent() should always return the last received intent
 	}
 
 	@Override

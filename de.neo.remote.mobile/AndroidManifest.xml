@@ -16,7 +16,16 @@
         <activity
             android:name="de.neo.remote.mobile.activities.BrowserActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="www.youtube.com"
+                    android:mimeType="text/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="de.neo.remote.mobile.activities.ControlSceneActivity"
@@ -58,7 +67,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
-        </activity>      
+        </activity>
         <activity
             android:name="de.neo.remote.mobile.activities.PowerActivity"
             android:icon="@drawable/chat"
@@ -107,7 +116,7 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_power_info" />
-        </receiver>        
+        </receiver>
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@ package de.neo.remote.mobile.activities;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -145,6 +146,8 @@ public abstract class BrowserBase extends BindedActivity {
 	protected ImageView dvdButton;
 
 	protected ImageView omxButton;
+	
+	protected ProgressDialog progress;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
