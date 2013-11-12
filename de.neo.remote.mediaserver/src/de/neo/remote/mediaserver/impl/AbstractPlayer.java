@@ -1,7 +1,9 @@
 package de.neo.remote.mediaserver.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,6 +127,21 @@ public abstract class AbstractPlayer implements IPlayer {
 		}
 	}
 
+	protected String getYoutubeStreamUrl(String url) throws RemoteException {
+		try {
+			String[] youtubeArgs = new String[] { "/usr/bin/youtube-dl", "-g",
+					url };
+			Process youtube = Runtime.getRuntime().exec(youtubeArgs);
+			InputStreamReader input = new InputStreamReader(
+					youtube.getInputStream());
+			BufferedReader reader = new BufferedReader(input);
+			return reader.readLine();
+		} catch (IOException e) {
+			throw new RemoteException("youtube", "Error play youtube stream :"
+					+ e.getMessage());
+		}
+	}
+
 	@Override
 	public void play(String file) {
 		if (playingBean != null) {
@@ -157,6 +174,11 @@ public abstract class AbstractPlayer implements IPlayer {
 			playingBean.setState(STATE.PLAY);
 			informPlayingBean(playingBean);
 		}
+	}
+
+	@Override
+	public void playFromYoutube(String url) throws RemoteException,
+			PlayerException {
 	}
 
 	class PlayingTimeCounter extends Thread {

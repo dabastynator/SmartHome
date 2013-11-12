@@ -196,6 +196,15 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
+	public void playFromYoutube(String url) throws RemoteException,
+			PlayerException {
+		if (mplayerIn == null)
+			startPlayer();
+		String youtubeStreamUrl = getYoutubeStreamUrl(url);
+		writeCommand("loadfile " + youtubeStreamUrl);
+	}
+
+	@Override
 	public void moveRight() throws PlayerException {
 		int time = 0;
 		if (playingBean != null)

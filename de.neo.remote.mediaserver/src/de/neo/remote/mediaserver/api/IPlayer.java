@@ -173,4 +173,13 @@ public interface IPlayer extends RemoteAble {
 	 */
 	void setPlayingPosition(int second) throws RemoteException, PlayerException;
 
+	/**
+	 * Play a stream from youtube by specified url.
+	 * 
+	 * @param url
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void playFromYoutube(String url) throws RemoteException, PlayerException;
+
 }

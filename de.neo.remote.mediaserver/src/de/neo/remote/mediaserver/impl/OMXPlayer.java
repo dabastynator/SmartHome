@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
@@ -19,12 +20,9 @@ public class OMXPlayer extends AbstractPlayer {
 
 	protected Process omxProcess;
 	protected PrintStream omxIn;
+	protected OMXObserver omxObserver;
 	private long lastSeekBack;
 	private long lastSeekForeward;
-	
-	public OMXPlayer() {
-		System.out.println("Start omxplayer with escape sequenzes");
-	}
 
 	protected void writeCommand(String cmd) throws PlayerException {
 		if (omxIn == null)
@@ -130,6 +128,28 @@ public class OMXPlayer extends AbstractPlayer {
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Override
+	public void playFromYoutube(String url) throws RemoteException,
+			PlayerException {
+		try {
+			quit();
+		} catch (PlayerException e1) {
+		}
+		try {
+			String tempUrl = getYoutubeStreamUrl(url);
+			String[] args = new String[] { "/usr/bin/omxplayer", tempUrl };
+			omxProcess = Runtime.getRuntime().exec(args);
+			// the standard input of MPlayer
+			omxIn = new PrintStream(omxProcess.getOutputStream());
+			// start player observer
+			omxObserver = new OMXObserver(omxProcess.getInputStream());
+			omxObserver.start();
+			// set default volume
+		} catch (IOException e) {
+			throw new PlayerException("Could not play youtube: " + e.getMessage());
+		}
+	}
 
 	@Override
 	public void quit() throws PlayerException {
@@ -149,9 +169,18 @@ public class OMXPlayer extends AbstractPlayer {
 		@Override
 		public void run() {
 			String line = null;
+			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = omxStream.readLine()) != null) {
-					// System.out.println(line);
+					if (line.startsWith("have a nice day ;)")){
+						bean.setState(PlayingBean.STATE.DOWN);
+						informPlayingBean(bean);
+					}
+					if (line.startsWith("Audio codec")){
+						bean.setState(PlayingBean.STATE.PLAY);
+						informPlayingBean(bean);
+					}
+						
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
