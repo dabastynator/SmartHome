@@ -24,11 +24,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
+import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BrowserAdapter;
@@ -621,6 +620,17 @@ public class BrowserActivity extends BrowserBase {
 				&& binder.getLatestMediaServer().name.equals(mediaServerName)) {
 			updateGUI(null);
 		}
+		Bundle extras = getIntent().getExtras();
+		String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
+		if (youtubeURL != null) {
+			playYoutubeStream(youtubeURL);
+			getIntent().removeExtra(Intent.EXTRA_TEXT);
+		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		Bundle extras = getIntent().getExtras();
 		String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 		if (youtubeURL != null) {

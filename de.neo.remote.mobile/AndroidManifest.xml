@@ -16,7 +16,7 @@
         <activity
             android:name="de.neo.remote.mobile.activities.BrowserActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
