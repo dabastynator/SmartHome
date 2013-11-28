@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -65,6 +66,7 @@ public abstract class BindedActivity extends Activity implements
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			binder.removeRemoteActionListener(BindedActivity.this);
+			Log.e("disconnect service", "lass: " + BindedActivity.this.getClass().getSimpleName());
 		}
 
 		@Override
@@ -98,6 +100,7 @@ public abstract class BindedActivity extends Activity implements
 			else if (!newConnection)
 				BindedActivity.this.onServerConnectionChanged(null, -1);
 		}
+		
 	};
 
 	protected void onCreate(android.os.Bundle savedInstanceState) {
@@ -155,7 +158,7 @@ public abstract class BindedActivity extends Activity implements
 	@Override
 	protected void onDestroy() {
 		serverDB.close();
-
+		
 		super.onDestroy();
 	}
 

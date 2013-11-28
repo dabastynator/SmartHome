@@ -2,7 +2,6 @@ package de.neo.remote.mobile.activities;
 
 import java.io.File;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -32,6 +31,8 @@ import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.remote.mobile.util.BufferBrowser;
+import de.neo.remote.mobile.util.PlayItemTask;
+import de.neo.remote.mobile.util.PlayYoutubeTask;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.neo.rmi.transceiver.AbstractReceiver.ReceiverState;
@@ -299,64 +300,89 @@ public class BrowserActivity extends BrowserBase {
 		}
 	}
 
-	public void playerAction(View v) {
+	public void playerAction(final View v) {
 		if (binder == null || binder.getLatestMediaServer() == null)
 			return;
-		IPlayer player = binder.getLatestMediaServer().player;
-		try {
-			switch (v.getId()) {
-			case R.id.button_play:
-				player.playPause();
-				break;
-			case R.id.button_next:
-				player.next();
-				break;
-			case R.id.button_pref:
-				player.previous();
-				break;
-			case R.id.button_vol_up:
-				player.volUp();
-				break;
-			case R.id.button_vol_down:
-				player.volDown();
-				break;
-			case R.id.button_seek_bwd:
-				player.seekBackwards();
-				break;
-			case R.id.button_seek_fwd:
-				player.seekForwards();
-				break;
-			case R.id.button_full:
-				player.fullScreen(isFullscreen = !isFullscreen);
-				break;
-			case R.id.button_quit:
-				player.quit();
-				break;
-			case R.id.button_left:
-				if (player instanceof IDVDPlayer)
-					((IDVDPlayer) player).menuLeft();
-				break;
-			case R.id.button_right:
-				if (player instanceof IDVDPlayer)
-					((IDVDPlayer) player).menuRight();
-				break;
-			case R.id.button_up:
-				if (player instanceof IDVDPlayer)
-					((IDVDPlayer) player).menuUp();
-				break;
-			case R.id.button_down:
-				if (player instanceof IDVDPlayer)
-					((IDVDPlayer) player).menuDown();
-				;
-				break;
-			case R.id.button_enter:
-				if (player instanceof IDVDPlayer)
-					((IDVDPlayer) player).menuEnter();
-				break;
+		final IPlayer player = binder.getLatestMediaServer().player;
+		AsyncTask<String, Integer, String> task = new AsyncTask<String, Integer, String>() {
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				if (v != null)
+					v.setBackgroundResource(R.drawable.image_border);
 			}
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		}
+
+			@Override
+			protected void onPostExecute(String result) {
+				super.onPostExecute(result);
+				if (v != null)
+					v.setBackgroundDrawable(null);
+				if (result != null)
+					Toast.makeText(BrowserActivity.this, result,
+							Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			protected String doInBackground(String... params) {
+				try {
+					switch (v.getId()) {
+					case R.id.button_play:
+						player.playPause();
+						break;
+					case R.id.button_next:
+						player.next();
+						break;
+					case R.id.button_pref:
+						player.previous();
+						break;
+					case R.id.button_vol_up:
+						player.volUp();
+						break;
+					case R.id.button_vol_down:
+						player.volDown();
+						break;
+					case R.id.button_seek_bwd:
+						player.seekBackwards();
+						break;
+					case R.id.button_seek_fwd:
+						player.seekForwards();
+						break;
+					case R.id.button_full:
+						player.fullScreen(isFullscreen = !isFullscreen);
+						break;
+					case R.id.button_quit:
+						player.quit();
+						break;
+					case R.id.button_left:
+						if (player instanceof IDVDPlayer)
+							((IDVDPlayer) player).menuLeft();
+						break;
+					case R.id.button_right:
+						if (player instanceof IDVDPlayer)
+							((IDVDPlayer) player).menuRight();
+						break;
+					case R.id.button_up:
+						if (player instanceof IDVDPlayer)
+							((IDVDPlayer) player).menuUp();
+						break;
+					case R.id.button_down:
+						if (player instanceof IDVDPlayer)
+							((IDVDPlayer) player).menuDown();
+						;
+						break;
+					case R.id.button_enter:
+						if (player instanceof IDVDPlayer)
+							((IDVDPlayer) player).menuEnter();
+						break;
+					}
+				} catch (Exception e) {
+					return e.getClass().getSimpleName() + ": " + e.getMessage();
+				}
+				return null;
+			}
+		};
+		task.execute(new String[] {});
 	}
 
 	/**
@@ -621,77 +647,28 @@ public class BrowserActivity extends BrowserBase {
 			updateGUI(null);
 		}
 		Bundle extras = getIntent().getExtras();
-		String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
-		if (youtubeURL != null) {
-			playYoutubeStream(youtubeURL);
-			getIntent().removeExtra(Intent.EXTRA_TEXT);
+		if (extras != null) {
+			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
+			if (youtubeURL != null) {
+				new PlayYoutubeTask(this, youtubeURL, binder)
+						.execute(new String[] {});
+				getIntent().removeExtra(Intent.EXTRA_TEXT);
+			}
 		}
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Bundle extras = getIntent().getExtras();
-		String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
-		if (youtubeURL != null) {
-			playYoutubeStream(youtubeURL);
-			getIntent().removeExtra(Intent.EXTRA_TEXT);
+		if (extras != null) {
+			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
+			if (youtubeURL != null) {
+				new PlayYoutubeTask(this, youtubeURL, binder)
+						.execute(new String[] {});
+				getIntent().removeExtra(Intent.EXTRA_TEXT);
+			}
 		}
-	}
-
-	@Override
-	protected void onPause() {
-		if (progress != null) {
-			progress.dismiss();
-			progress = null;
-		}
-		super.onPause();
-	}
-
-	private void playYoutubeStream(String youtubeURL) {
-		AsyncTask<String, Integer, String> asyncTask = new AsyncTask<String, Integer, String>() {
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				progress = new ProgressDialog(BrowserActivity.this);
-				progress.setTitle("Stream Youtube");
-				progress.setMessage("Stream Youtube");
-				progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-				progress.show();
-			}
-
-			@Override
-			protected void onPostExecute(String result) {
-				super.onPostExecute(result);
-				if (progress != null)
-					progress.dismiss();
-				if (result != null)
-					Toast.makeText(BrowserActivity.this,
-							"Error streaming youtuge: " + result,
-							Toast.LENGTH_SHORT).show();
-			}
-
-			@Override
-			protected String doInBackground(String... youtubeURL) {
-				try {
-					if (binder == null)
-						throw new Exception("not bindet");
-					if (binder.getLatestMediaServer() == null)
-						throw new Exception("no mediaserver selected");
-					IPlayer player = binder.getLatestMediaServer().player;
-					if (player != null) {
-						player.playFromYoutube(youtubeURL[0]);
-					} else
-						throw new Exception("no player selected");
-				} catch (Exception e) {
-					return e.getMessage();
-				}
-				return null;
-			}
-
-		};
-		asyncTask.execute(youtubeURL);
 	}
 
 	@Override
@@ -774,33 +751,22 @@ public class BrowserActivity extends BrowserBase {
 			StationStuff mediaServer = binder.getLatestMediaServer();
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
-			try {
-				if (viewerState == ViewerState.PLAYLISTS) {
-					mediaServer.player.playPlayList(mediaServer.pls
-							.getPlaylistFullpath(item));
-					Toast.makeText(BrowserActivity.this, "play playlist",
-							Toast.LENGTH_SHORT).show();
-				}
-				if (viewerState == ViewerState.PLS_ITEMS) {
-					mediaServer.player.play(plsFileMap.get(item));
-				}
-				if (viewerState == ViewerState.DIRECTORIES) {
+			if (viewerState == ViewerState.DIRECTORIES) {
+				try {
 					if (position < mediaServer.browser.getDirectories().length) {
 						selectedPosition = 0;
 						updateGUI(item);
 						return;
 					}
-					String file = mediaServer.browser.getFullLocation() + item;
-
-					mediaServer.player.play(file);
+				} catch (RemoteException e) {
+					e.printStackTrace();
 				}
-			} catch (RemoteException e) {
-				Toast.makeText(BrowserActivity.this, e.getMessage(),
-						Toast.LENGTH_SHORT).show();
-			} catch (PlayerException e) {
-				Toast.makeText(BrowserActivity.this, e.getMessage(),
-						Toast.LENGTH_SHORT).show();
 			}
+			if (viewerState == ViewerState.PLS_ITEMS)
+				item = plsFileMap.get(item);
+			PlayItemTask task = new PlayItemTask(BrowserActivity.this, item,
+					binder);
+			task.execute(new String[] {});
 		}
 	}
 

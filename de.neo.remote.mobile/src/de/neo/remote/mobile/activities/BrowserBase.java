@@ -96,7 +96,7 @@ public abstract class BrowserBase extends BindedActivity {
 	/**
 	 * current viewer state
 	 */
-	protected ViewerState viewerState = ViewerState.DIRECTORIES;
+	public ViewerState viewerState = ViewerState.DIRECTORIES;
 
 	/**
 	 * current selected item of the list view
@@ -146,7 +146,7 @@ public abstract class BrowserBase extends BindedActivity {
 	protected ImageView dvdButton;
 
 	protected ImageView omxButton;
-	
+
 	protected ProgressDialog progress;
 
 	@Override
@@ -236,7 +236,7 @@ public abstract class BrowserBase extends BindedActivity {
 
 	@Override
 	void onBinderConnected() {
-		
+
 	}
 
 	private long max = 0;
@@ -317,6 +317,27 @@ public abstract class BrowserBase extends BindedActivity {
 	@Override
 	public void onStopService() {
 
+	}
+
+	@Override
+	protected void onPause() {
+		dismissProgress();
+		super.onPause();
+	}
+
+	public void startProgress(String title, String message) {
+		dismissProgress();
+		progress = new ProgressDialog(this);
+		progress.setTitle(title);
+		progress.setMessage(message);
+		progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progress.show();
+	}
+
+	public void dismissProgress() {
+		if (progress != null)
+			progress.dismiss();
+		progress = null;
 	}
 
 }
