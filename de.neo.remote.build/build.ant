@@ -10,6 +10,7 @@
 	<property name="lib.mediaserver" value="./../de.neo.remote.mediaserver/lib" />
 	<property name="lib.webcam" value="./../de.webcam/lib" />
 	<property name="lib.center" value="./../de.neo.remote.controlcenter/lib" />
+	<property name="lib.gpio" value="./../de.neo.remote.gpiopower/lib" />
 
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
@@ -83,6 +84,7 @@
 		<javac srcdir="${src.gpio}" destdir="${classes.dir}" includeantruntime="false" />
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/gpiopower.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.gpio}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.neo.remote.gpiopower.GPIOMain" />
 			</manifest>
