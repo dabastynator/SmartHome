@@ -1,6 +1,7 @@
 package de.neo.remote.mobile.activities;
 
 import java.io.File;
+import java.util.Arrays;
 
 import android.content.Context;
 import android.content.Intent;
@@ -100,7 +101,9 @@ public class BrowserActivity extends BrowserBase {
 			System.arraycopy(files, 0, all, directories.length, files.length);
 			return all;
 		case PLAYLISTS:
-			return mediaServer.pls.getPlayLists();
+			String[] playLists = mediaServer.pls.getPlayLists();
+			Arrays.sort(playLists);
+			return  playLists;
 		case PLS_ITEMS:
 			plsFileMap.clear();
 			for (String item : mediaServer.pls.listContent(currentPlayList))

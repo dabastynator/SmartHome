@@ -309,6 +309,7 @@ public class RemoteService extends Service {
 			controlCenter.getGroundPlot();
 		} catch (RemoteException e1) {
 		}
+		currentMediaServer = null;
 		stationStuff.clear();
 		unitMap.clear();
 		unitMapPostion.clear();
