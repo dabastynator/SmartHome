@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.neo.remote.gpiopower.GPIOPower.Switch;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.gpiopower.api.IInternetSwitchListener;
-import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.rmi.protokol.RemoteException;
 
 public class InternetSwitchImpl implements IInternetSwitch {
+
+	public static final String FAMILY_REGEX = "[01]{5}";
 
 	/**
 	 * Listener for power switch change.
@@ -18,20 +18,31 @@ public class InternetSwitchImpl implements IInternetSwitch {
 	private List<IInternetSwitchListener> listeners = Collections
 			.synchronizedList(new ArrayList<IInternetSwitchListener>());
 	private String name;
-	private Switch _switch;
-	private GPIOPower power;
+	private SwitchPower power;
 	private String type;
+	private String familyCode;
+	private int switchNumber;
+	private State state;
+	private float[] position;
 
-	public InternetSwitchImpl(String name, GPIOPower power, Switch _switch, String type) {
+	public InternetSwitchImpl(String name, SwitchPower power,
+			String familyCode, int switchNumber, String type, float[] position) {
+		if (!familyCode.matches(FAMILY_REGEX))
+			throw new IllegalArgumentException("Invalid Familycode: "
+					+ familyCode + ". must match " + FAMILY_REGEX);
 		this.name = name;
 		this.power = power;
-		this._switch = _switch;
+		this.familyCode = familyCode;
+		this.switchNumber = switchNumber;
 		this.type = type;
+		this.position = position;
+		state = State.OFF;
 	}
 
 	@Override
 	public void setState(final State state) throws RemoteException {
-		power.setState(state, _switch);
+		power.setSwitchState(familyCode, switchNumber, state);
+		this.state = state;
 		new Thread() {
 			public void run() {
 				informListener(state);
@@ -41,7 +52,7 @@ public class InternetSwitchImpl implements IInternetSwitch {
 
 	@Override
 	public State getState() throws RemoteException {
-		return power.getState(_switch);
+		return state;
 	}
 
 	@Override
@@ -68,10 +79,18 @@ public class InternetSwitchImpl implements IInternetSwitch {
 		}
 		listeners.removeAll(exceptionList);
 	}
-	
+
 	@Override
-	public String getType(){
+	public String getType() {
 		return type;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public float[] getPosition() {
+		return position;
 	}
 
 }
