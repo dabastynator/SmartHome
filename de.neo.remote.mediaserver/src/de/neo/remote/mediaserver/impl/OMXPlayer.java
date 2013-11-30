@@ -12,6 +12,10 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
 
+	public OMXPlayer(String tempFolder) {
+		super(tempFolder);
+	}
+
 	public static final char ESCAPE = 0x1B;
 	public static final String ARROW_UP = ESCAPE + "[A";
 	public static final String ARROW_DOWN = ESCAPE + "[B";
@@ -127,6 +131,28 @@ public class OMXPlayer extends AbstractPlayer {
 			PlayerException {
 		// TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public void playFromArdMediathek(String url) throws RemoteException,
+			PlayerException {
+		try {
+			quit();
+		} catch (PlayerException e1) {
+		}
+		try {
+			String tempFile = openTemporaryArdFile(url);
+			String[] args = new String[] { "/usr/bin/omxplayer", tempFile };
+			omxProcess = Runtime.getRuntime().exec(args);
+			// the standard input of MPlayer
+			omxIn = new PrintStream(omxProcess.getOutputStream());
+			// start player observer
+			omxObserver = new OMXObserver(omxProcess.getInputStream());
+			omxObserver.start();
+			// set default volume
+		} catch (IOException e) {
+			throw new PlayerException("Could not play ard file: " + e.getMessage());
+		}
 	}
 	
 	@Override

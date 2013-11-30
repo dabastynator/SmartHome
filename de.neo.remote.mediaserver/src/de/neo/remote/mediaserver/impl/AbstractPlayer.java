@@ -26,6 +26,10 @@ import de.neo.rmi.protokol.RemoteException;
  */
 public abstract class AbstractPlayer implements IPlayer {
 
+	public static final String TATORT_DL_FILE = "/home/troubadix/Develop/tatort-dl.sh";
+
+	public static final String TATORT_TMP_FILE = "tatort_tmp.f4v";
+
 	/**
 	 * list of all listeners
 	 */
@@ -36,8 +40,17 @@ public abstract class AbstractPlayer implements IPlayer {
 	 */
 	protected PlayingBean playingBean;
 
-	public AbstractPlayer() {
+	private String tempFolder;
+
+	private Process tatortProcess;
+	
+	private String tatortURL;
+
+	public AbstractPlayer(String tempFolder) {
 		new PlayingTimeCounter().start();
+		this.tempFolder = tempFolder;
+		if (!this.tempFolder.endsWith(File.separator))
+			this.tempFolder += File.separator;
 	}
 
 	@Override
@@ -142,6 +155,38 @@ public abstract class AbstractPlayer implements IPlayer {
 		}
 	}
 
+	protected String openTemporaryArdFile(String url) throws RemoteException {
+		if (tatortURL != null && tatortURL.equals(url))
+			return tempFolder + TATORT_TMP_FILE;
+		try {
+			String tempFile = tempFolder + TATORT_TMP_FILE;
+			File file = new File(tempFile);
+			if (tatortProcess != null)
+				tatortProcess.destroy();
+			if (file.exists())
+				file.delete();
+			String[] tatortArgs = new String[] { TATORT_DL_FILE, url, tempFile };
+			tatortProcess = Runtime.getRuntime().exec(tatortArgs);
+			InputStreamReader input = new InputStreamReader(
+					tatortProcess.getInputStream());
+			BufferedReader reader = new BufferedReader(input);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("Error"))
+					throw new RemoteException("", "Stream ARD: " + line);
+				if (line.contains("Connected")){
+					Thread.sleep(2000);
+					return tempFile;
+				}
+			}
+			tatortURL = tempFile;
+			return tempFile;
+		} catch (Exception e) {
+			throw new RemoteException("youtube", "Error play youtube stream :"
+					+ e.getMessage());
+		}
+	}
+
 	@Override
 	public void play(String file) {
 		if (playingBean != null) {
@@ -179,6 +224,12 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void playFromYoutube(String url) throws RemoteException,
 			PlayerException {
+	}
+
+	@Override
+	public void playFromArdMediathek(String url) throws RemoteException,
+			PlayerException {
+
 	}
 
 	class PlayingTimeCounter extends Thread {

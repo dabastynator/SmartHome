@@ -182,4 +182,14 @@ public interface IPlayer extends RemoteAble {
 	 */
 	void playFromYoutube(String url) throws RemoteException, PlayerException;
 
+	/**
+	 * Play a stream from the ard mediathek by specified url.
+	 * 
+	 * @param url
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void playFromArdMediathek(String url) throws RemoteException,
+			PlayerException;
+
 }
