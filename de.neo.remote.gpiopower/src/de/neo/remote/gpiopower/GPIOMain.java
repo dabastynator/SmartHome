@@ -68,9 +68,9 @@ public class GPIOMain {
 		Document doc = factory.newDocumentBuilder().parse(file);
 		doc.getDocumentElement().normalize();
 		NodeList switches = doc.getElementsByTagName("Switch");
-		float[] position = new float[3];
 		for (int i = 0; i < switches.getLength(); i++) {
 			Element switchElement = (Element) switches.item(i);
+			float[] position = new float[3];
 			try {
 				String familyCode = switchElement.getAttribute("familyCode");
 				int switchNumber = Integer.parseInt(switchElement
