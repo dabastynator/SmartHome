@@ -28,6 +28,8 @@ public abstract class AbstractPlayer implements IPlayer {
 
 	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
 
+	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
+
 	public static final String TATORT_TMP_FILE = "tatort_tmp.f4v";
 
 	/**
@@ -140,18 +142,24 @@ public abstract class AbstractPlayer implements IPlayer {
 		}
 	}
 
-	protected String getYoutubeStreamUrl(String url) throws RemoteException {
+	protected String getStreamUrl(String script, String url)
+			throws PlayerException {
 		try {
-			String[] youtubeArgs = new String[] { "/usr/bin/youtube-dl", "-g",
-					url };
+			String[] youtubeArgs = new String[] { script, "-g", url };
 			Process youtube = Runtime.getRuntime().exec(youtubeArgs);
 			InputStreamReader input = new InputStreamReader(
-					youtube.getInputStream());
+					tatortProcess.getErrorStream());
 			BufferedReader reader = new BufferedReader(input);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("Error"))
+					throw new PlayerException("Stream ARD: " + line);
+			}
+			input = new InputStreamReader(youtube.getInputStream());
+			reader = new BufferedReader(input);
 			return reader.readLine();
 		} catch (IOException e) {
-			throw new RemoteException("youtube", "Error play youtube stream :"
-					+ e.getMessage());
+			throw new PlayerException("Error get stream :" + e.getMessage());
 		}
 	}
 

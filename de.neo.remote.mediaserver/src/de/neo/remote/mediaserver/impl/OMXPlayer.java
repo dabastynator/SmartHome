@@ -132,38 +132,45 @@ public class OMXPlayer extends AbstractPlayer {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	public void playFromArdMediathek(String url) throws RemoteException,
 			PlayerException {
-		try {
-			quit();
-		} catch (PlayerException e1) {
-		}
-		try {
-			String tempFile = openTemporaryArdFile(url);
-			String[] args = new String[] { "/usr/bin/omxplayer", tempFile };
-			omxProcess = Runtime.getRuntime().exec(args);
-			// the standard input of MPlayer
-			omxIn = new PrintStream(omxProcess.getOutputStream());
-			// start player observer
-			omxObserver = new OMXObserver(omxProcess.getInputStream());
-			omxObserver.start();
-			// set default volume
-		} catch (IOException e) {
-			throw new PlayerException("Could not play ard file: " + e.getMessage());
-		}
+//		try {
+//			quit();
+//		} catch (PlayerException e1) {
+//		}
+//		try {
+//			String tempFile = openTemporaryArdFile(url);
+//			String[] args = new String[] { "/usr/bin/omxplayer", tempFile };
+//			omxProcess = Runtime.getRuntime().exec(args);
+//			// the standard input of MPlayer
+//			omxIn = new PrintStream(omxProcess.getOutputStream());
+//			// start player observer
+//			omxObserver = new OMXObserver(omxProcess.getInputStream());
+//			omxObserver.start();
+//			// set default volume
+//		} catch (IOException e) {
+//			throw new PlayerException("Could not play ard file: "
+//					+ e.getMessage());
+//		}
+		streamFromUrl(TATORT_DL_FILE, url);
 	}
-	
+
 	@Override
 	public void playFromYoutube(String url) throws RemoteException,
 			PlayerException {
+		streamFromUrl(YOUTUBE_DL_FILE, url);
+	}
+
+	public void streamFromUrl(String script, String url)
+			throws RemoteException, PlayerException {
 		try {
 			quit();
 		} catch (PlayerException e1) {
 		}
 		try {
-			String tempUrl = getYoutubeStreamUrl(url);
+			String tempUrl = getStreamUrl(script, url);
 			String[] args = new String[] { "/usr/bin/omxplayer", tempUrl };
 			omxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
@@ -173,7 +180,7 @@ public class OMXPlayer extends AbstractPlayer {
 			omxObserver.start();
 			// set default volume
 		} catch (IOException e) {
-			throw new PlayerException("Could not play youtube: " + e.getMessage());
+			throw new PlayerException("Could not stream url: " + e.getMessage());
 		}
 	}
 
@@ -198,15 +205,15 @@ public class OMXPlayer extends AbstractPlayer {
 			PlayingBean bean = new PlayingBean();
 			try {
 				while ((line = omxStream.readLine()) != null) {
-					if (line.startsWith("have a nice day ;)")){
+					if (line.startsWith("have a nice day ;)")) {
 						bean.setState(PlayingBean.STATE.DOWN);
 						informPlayingBean(bean);
 					}
-					if (line.startsWith("Audio codec")){
+					if (line.startsWith("Audio codec")) {
 						bean.setState(PlayingBean.STATE.PLAY);
 						informPlayingBean(bean);
 					}
-						
+
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
