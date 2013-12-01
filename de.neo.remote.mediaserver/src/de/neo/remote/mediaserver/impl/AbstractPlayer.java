@@ -26,7 +26,7 @@ import de.neo.rmi.protokol.RemoteException;
  */
 public abstract class AbstractPlayer implements IPlayer {
 
-	public static final String TATORT_DL_FILE = "/home/troubadix/Develop/tatort-dl.sh";
+	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
 
 	public static final String TATORT_TMP_FILE = "tatort_tmp.f4v";
 
@@ -166,6 +166,9 @@ public abstract class AbstractPlayer implements IPlayer {
 				tatortProcess.destroy();
 			if (file.exists())
 				file.delete();
+			if (!new File(TATORT_DL_FILE).exists())
+				throw new IllegalStateException("Missing script: "
+						+ TATORT_DL_FILE);
 			System.out.println("-> start load process");
 			String[] tatortArgs = new String[] { TATORT_DL_FILE, url, tempFile };
 			tatortProcess = Runtime.getRuntime().exec(tatortArgs);
@@ -184,6 +187,7 @@ public abstract class AbstractPlayer implements IPlayer {
 					return tempFile;
 				}
 			}
+			System.out.println("-> end of request");
 			throw new RemoteException("", "Stream ARD: not Connected");
 		} catch (Exception e) {
 			throw new RemoteException("youtube", "Error play youtube stream :"
