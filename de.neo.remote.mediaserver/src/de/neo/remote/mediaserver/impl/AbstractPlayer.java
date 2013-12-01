@@ -156,6 +156,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	}
 
 	protected String openTemporaryArdFile(String url) throws RemoteException {
+		url = url.trim();
 		if (tatortURL != null && tatortURL.equals(url))
 			return tempFolder + TATORT_TMP_FILE;
 		try {
@@ -182,21 +183,19 @@ public abstract class AbstractPlayer implements IPlayer {
 			while ((line = reader.readLine()) != null) {
 				System.out.println("-> read line: " + line);
 				if (line.contains("Saving to")) {
-					Thread.sleep(2000);
-					tatortURL = tempFile;
+					Thread.sleep(10000);
+					tatortURL = url;
 					return tempFile;
 				}
 			}
 			input = new InputStreamReader(tatortProcess.getErrorStream());
 			reader = new BufferedReader(input);
-			System.out.println("-> read error request");
 			while ((line = reader.readLine()) != null) {
-				System.out.println("-> read line: " + line);
+				System.out.println("-> read error line: " + line);
 				if (line.contains("Error"))
 					throw new RemoteException("", "Stream ARD: " + line);
 			}
-			System.out.println("-> end of request");
-			throw new RemoteException("", "Stream ARD: not Connected");
+			throw new RemoteException("", "Stream ARD: not connected");
 		} catch (Exception e) {
 			throw new RemoteException("youtube", "Error play youtube stream :"
 					+ e.getMessage());
