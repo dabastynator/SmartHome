@@ -5,10 +5,6 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class VLCPlayer extends AbstractPlayer {
 
-	public VLCPlayer(String tempFolder) {
-		super(tempFolder);
-	}
-
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
 		// TODO Auto-generated method stub

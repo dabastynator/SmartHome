@@ -8,10 +8,6 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class TotemPlayer extends AbstractPlayer {
 
-	public TotemPlayer(String tempFolder) {
-		super(tempFolder);
-	}
-
 	private static final String QUIT = "totem --quit";
 	private static final String PLAY_PAUSE = "totem --play-pause";
 	private static final String PLAY = "totem";

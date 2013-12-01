@@ -12,10 +12,6 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
 
-	public OMXPlayer(String tempFolder) {
-		super(tempFolder);
-	}
-
 	public static final char ESCAPE = 0x1B;
 	public static final String ARROW_UP = ESCAPE + "[A";
 	public static final String ARROW_DOWN = ESCAPE + "[B";

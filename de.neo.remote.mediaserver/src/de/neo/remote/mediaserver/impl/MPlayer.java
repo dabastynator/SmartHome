@@ -25,7 +25,6 @@ public class MPlayer extends AbstractPlayer {
 	private Object playListfolder;
 
 	public MPlayer(String playListfolder) {
-		super(playListfolder);
 		this.playListfolder = playListfolder;
 	}
 

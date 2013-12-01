@@ -30,8 +30,6 @@ public abstract class AbstractPlayer implements IPlayer {
 
 	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
 
-	public static final String TATORT_TMP_FILE = "tatort_tmp.f4v";
-
 	/**
 	 * list of all listeners
 	 */
@@ -42,17 +40,8 @@ public abstract class AbstractPlayer implements IPlayer {
 	 */
 	protected PlayingBean playingBean;
 
-	private String tempFolder;
-
-	private Process tatortProcess;
-
-	private String tatortURL;
-
-	public AbstractPlayer(String tempFolder) {
+	public AbstractPlayer() {
 		new PlayingTimeCounter().start();
-		this.tempFolder = tempFolder;
-		if (!this.tempFolder.endsWith(File.separator))
-			this.tempFolder += File.separator;
 	}
 
 	@Override
@@ -160,51 +149,6 @@ public abstract class AbstractPlayer implements IPlayer {
 			return reader.readLine();
 		} catch (IOException e) {
 			throw new PlayerException("Error get stream :" + e.getMessage());
-		}
-	}
-
-	protected String openTemporaryArdFile(String url) throws RemoteException {
-		url = url.trim();
-		if (tatortURL != null && tatortURL.equals(url))
-			return tempFolder + TATORT_TMP_FILE;
-		try {
-			String tempFile = tempFolder + TATORT_TMP_FILE;
-			File file = new File(tempFile);
-			tatortURL = "";
-			if (tatortProcess != null)
-				tatortProcess.destroy();
-			if (file.exists())
-				file.delete();
-			if (!new File(TATORT_DL_FILE).exists())
-				throw new IllegalStateException("Missing script: "
-						+ TATORT_DL_FILE);
-			List<String> tatortArgs = new ArrayList<String>();
-			tatortArgs.add(TATORT_DL_FILE);
-			tatortArgs.add(url);
-			tatortArgs.add(tempFile);
-			ProcessBuilder pb = new ProcessBuilder(tatortArgs);
-			tatortProcess = pb.start();
-			InputStreamReader input = new InputStreamReader(
-					tatortProcess.getInputStream());
-			BufferedReader reader = new BufferedReader(input);
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.contains("Saving to")) {
-					Thread.sleep(15000);
-					tatortURL = url;
-					return tempFile;
-				}
-			}
-			input = new InputStreamReader(tatortProcess.getErrorStream());
-			reader = new BufferedReader(input);
-			while ((line = reader.readLine()) != null) {
-				if (line.contains("Error"))
-					throw new RemoteException("", "Stream ARD: " + line);
-			}
-			throw new RemoteException("", "Stream ARD: not connected");
-		} catch (Exception e) {
-			throw new RemoteException("youtube", "Error play youtube stream :"
-					+ e.getMessage());
 		}
 	}
 

@@ -18,12 +18,12 @@ public class MediaServerImpl implements IMediaServer {
 	private OMXPlayer omxplayer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
-		totem = new TotemPlayer(playlistLocation);
+		totem = new TotemPlayer();
 		mplayer = new MPlayerDVD(playlistLocation);
 		browserLocation = browseLocation;
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
-		omxplayer = new OMXPlayer(playlistLocation);
+		omxplayer = new OMXPlayer();
 	}
 
 	@Override
