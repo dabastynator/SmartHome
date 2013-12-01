@@ -43,7 +43,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	private String tempFolder;
 
 	private Process tatortProcess;
-	
+
 	private String tatortURL;
 
 	public AbstractPlayer(String tempFolder) {
@@ -175,9 +175,10 @@ public abstract class AbstractPlayer implements IPlayer {
 			String line = null;
 			System.out.println("-> read request");
 			while ((line = reader.readLine()) != null) {
+				System.out.println("-> read line: " + line);
 				if (line.contains("Error"))
 					throw new RemoteException("", "Stream ARD: " + line);
-				if (line.contains("Connected")){
+				if (line.contains("Connected")) {
 					Thread.sleep(2000);
 					tatortURL = tempFile;
 					return tempFile;
