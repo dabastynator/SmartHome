@@ -161,7 +161,6 @@ public abstract class AbstractPlayer implements IPlayer {
 		try {
 			String tempFile = tempFolder + TATORT_TMP_FILE;
 			File file = new File(tempFile);
-			System.out.println("-> destroy load process");
 			if (tatortProcess != null)
 				tatortProcess.destroy();
 			if (file.exists())
@@ -169,7 +168,6 @@ public abstract class AbstractPlayer implements IPlayer {
 			if (!new File(TATORT_DL_FILE).exists())
 				throw new IllegalStateException("Missing script: "
 						+ TATORT_DL_FILE);
-			System.out.println("-> start load process");
 			List<String> tatortArgs = new ArrayList<String>();
 			tatortArgs.add(TATORT_DL_FILE);
 			tatortArgs.add(url);
@@ -183,9 +181,7 @@ public abstract class AbstractPlayer implements IPlayer {
 			System.out.println("-> read request");
 			while ((line = reader.readLine()) != null) {
 				System.out.println("-> read line: " + line);
-				if (line.contains("Error"))
-					throw new RemoteException("", "Stream ARD: " + line);
-				if (line.contains("Connected")) {
+				if (line.contains("Saving to")) {
 					Thread.sleep(2000);
 					tatortURL = tempFile;
 					return tempFile;
@@ -198,11 +194,6 @@ public abstract class AbstractPlayer implements IPlayer {
 				System.out.println("-> read line: " + line);
 				if (line.contains("Error"))
 					throw new RemoteException("", "Stream ARD: " + line);
-				if (line.contains("Connected")) {
-					Thread.sleep(2000);
-					tatortURL = tempFile;
-					return tempFile;
-				}
 			}
 			System.out.println("-> end of request");
 			throw new RemoteException("", "Stream ARD: not Connected");
