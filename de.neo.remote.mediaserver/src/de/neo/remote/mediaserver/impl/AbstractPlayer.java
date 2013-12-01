@@ -145,17 +145,17 @@ public abstract class AbstractPlayer implements IPlayer {
 	protected String getStreamUrl(String script, String url)
 			throws PlayerException {
 		try {
-			String[] youtubeArgs = new String[] { script, "-g", url };
-			Process youtube = Runtime.getRuntime().exec(youtubeArgs);
+			String[] processArgs = new String[] { script, "-g", url };
+			Process process = Runtime.getRuntime().exec(processArgs);
 			InputStreamReader input = new InputStreamReader(
-					tatortProcess.getErrorStream());
+					process.getErrorStream());
 			BufferedReader reader = new BufferedReader(input);
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("Error"))
 					throw new PlayerException("Stream ARD: " + line);
 			}
-			input = new InputStreamReader(youtube.getInputStream());
+			input = new InputStreamReader(process.getInputStream());
 			reader = new BufferedReader(input);
 			return reader.readLine();
 		} catch (IOException e) {
