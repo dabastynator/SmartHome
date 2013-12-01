@@ -170,13 +170,30 @@ public abstract class AbstractPlayer implements IPlayer {
 				throw new IllegalStateException("Missing script: "
 						+ TATORT_DL_FILE);
 			System.out.println("-> start load process");
-			String[] tatortArgs = new String[] { TATORT_DL_FILE, url, tempFile };
-			tatortProcess = Runtime.getRuntime().exec(tatortArgs);
+			List<String> tatortArgs = new ArrayList<String>();
+			tatortArgs.add(TATORT_DL_FILE);
+			tatortArgs.add(url);
+			tatortArgs.add(tempFile);
+			ProcessBuilder pb = new ProcessBuilder(tatortArgs);
+			tatortProcess = pb.start();
 			InputStreamReader input = new InputStreamReader(
 					tatortProcess.getInputStream());
 			BufferedReader reader = new BufferedReader(input);
 			String line = null;
 			System.out.println("-> read request");
+			while ((line = reader.readLine()) != null) {
+				System.out.println("-> read line: " + line);
+				if (line.contains("Error"))
+					throw new RemoteException("", "Stream ARD: " + line);
+				if (line.contains("Connected")) {
+					Thread.sleep(2000);
+					tatortURL = tempFile;
+					return tempFile;
+				}
+			}
+			input = new InputStreamReader(tatortProcess.getErrorStream());
+			reader = new BufferedReader(input);
+			System.out.println("-> read error request");
 			while ((line = reader.readLine()) != null) {
 				System.out.println("-> read line: " + line);
 				if (line.contains("Error"))
