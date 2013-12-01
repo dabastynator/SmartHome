@@ -161,26 +161,29 @@ public abstract class AbstractPlayer implements IPlayer {
 		try {
 			String tempFile = tempFolder + TATORT_TMP_FILE;
 			File file = new File(tempFile);
+			System.out.println("-> destroy load process");
 			if (tatortProcess != null)
 				tatortProcess.destroy();
 			if (file.exists())
 				file.delete();
+			System.out.println("-> start load process");
 			String[] tatortArgs = new String[] { TATORT_DL_FILE, url, tempFile };
 			tatortProcess = Runtime.getRuntime().exec(tatortArgs);
 			InputStreamReader input = new InputStreamReader(
 					tatortProcess.getInputStream());
 			BufferedReader reader = new BufferedReader(input);
 			String line = null;
+			System.out.println("-> read request");
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("Error"))
 					throw new RemoteException("", "Stream ARD: " + line);
 				if (line.contains("Connected")){
 					Thread.sleep(2000);
+					tatortURL = tempFile;
 					return tempFile;
 				}
 			}
-			tatortURL = tempFile;
-			return tempFile;
+			throw new RemoteException("", "Stream ARD: not Connected");
 		} catch (Exception e) {
 			throw new RemoteException("youtube", "Error play youtube stream :"
 					+ e.getMessage());

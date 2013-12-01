@@ -141,7 +141,9 @@ public class OMXPlayer extends AbstractPlayer {
 		} catch (PlayerException e1) {
 		}
 		try {
+			System.out.println("Request ard temp file...");
 			String tempFile = openTemporaryArdFile(url);
+			System.out.println("Get file: " + tempFile);
 			String[] args = new String[] { "/usr/bin/omxplayer", tempFile };
 			omxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
