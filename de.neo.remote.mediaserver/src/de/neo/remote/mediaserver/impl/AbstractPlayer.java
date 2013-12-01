@@ -162,6 +162,7 @@ public abstract class AbstractPlayer implements IPlayer {
 		try {
 			String tempFile = tempFolder + TATORT_TMP_FILE;
 			File file = new File(tempFile);
+			tatortURL = "";
 			if (tatortProcess != null)
 				tatortProcess.destroy();
 			if (file.exists())
@@ -179,11 +180,9 @@ public abstract class AbstractPlayer implements IPlayer {
 					tatortProcess.getInputStream());
 			BufferedReader reader = new BufferedReader(input);
 			String line = null;
-			System.out.println("-> read request");
 			while ((line = reader.readLine()) != null) {
-				System.out.println("-> read line: " + line);
 				if (line.contains("Saving to")) {
-					Thread.sleep(10000);
+					Thread.sleep(15000);
 					tatortURL = url;
 					return tempFile;
 				}
@@ -191,7 +190,6 @@ public abstract class AbstractPlayer implements IPlayer {
 			input = new InputStreamReader(tatortProcess.getErrorStream());
 			reader = new BufferedReader(input);
 			while ((line = reader.readLine()) != null) {
-				System.out.println("-> read error line: " + line);
 				if (line.contains("Error"))
 					throw new RemoteException("", "Stream ARD: " + line);
 			}
