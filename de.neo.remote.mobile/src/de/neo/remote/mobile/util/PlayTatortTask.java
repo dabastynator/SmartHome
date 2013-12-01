@@ -47,7 +47,7 @@ public class PlayTatortTask extends AsyncTask<String, Integer, String> {
 			} else
 				throw new Exception("no player selected");
 		} catch (Exception e) {
-			return e.getMessage();
+			return e.getClass().getSimpleName() + ": " + e.getMessage();
 		}
 		return null;
 	}
