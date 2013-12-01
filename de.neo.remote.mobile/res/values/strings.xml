@@ -36,4 +36,5 @@
     <string name="add_new_server">add new server</string>
     <string name="str_power">Internet Power Switch</string>
     <string name="str_refresh">Refresh</string>
+    <string name="str_tatort">Stream ARD Mediathek</string>
 </resources>

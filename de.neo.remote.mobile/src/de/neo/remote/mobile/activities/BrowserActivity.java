@@ -33,6 +33,7 @@ import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.PlayItemTask;
+import de.neo.remote.mobile.util.PlayTatortTask;
 import de.neo.remote.mobile.util.PlayYoutubeTask;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
@@ -48,6 +49,8 @@ import de.remote.mobile.R;
 public class BrowserActivity extends BrowserBase {
 
 	private boolean isFullscreen;
+
+	private static final int GET_TATORT_URL_CODE = 5;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +106,7 @@ public class BrowserActivity extends BrowserBase {
 		case PLAYLISTS:
 			String[] playLists = mediaServer.pls.getPlayLists();
 			Arrays.sort(playLists);
-			return  playLists;
+			return playLists;
 		case PLS_ITEMS:
 			plsFileMap.clear();
 			for (String item : mediaServer.pls.listContent(currentPlayList))
@@ -500,6 +503,10 @@ public class BrowserActivity extends BrowserBase {
 				intent = new Intent(this, PowerActivity.class);
 				startActivity(intent);
 				break;
+			case R.id.opt_tatort:
+				intent = new Intent(this, GetTextActivity.class);
+				startActivityForResult(intent, GET_TATORT_URL_CODE);
+				break;
 			}
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -593,6 +600,11 @@ public class BrowserActivity extends BrowserBase {
 				Toast.makeText(BrowserActivity.this,
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
+			}
+			if (requestCode == GET_TATORT_URL_CODE && data != null){
+				String url = data.getExtras().getString(GetTextActivity.RESULT);
+				PlayTatortTask task = new PlayTatortTask(this, url, binder);
+				task.execute(new String[]{});
 			}
 			if (requestCode == FILE_REQUEST) {
 				Uri uri = data.getData();
