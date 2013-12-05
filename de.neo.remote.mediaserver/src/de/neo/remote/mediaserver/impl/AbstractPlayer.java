@@ -142,13 +142,16 @@ public abstract class AbstractPlayer implements IPlayer {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("Error"))
-					throw new PlayerException("Stream ARD: " + line);
+					throw new PlayerException("Error get stream :" + line);
 			}
 			input = new InputStreamReader(process.getInputStream());
 			reader = new BufferedReader(input);
-			return reader.readLine();
+			String streamUrl = reader.readLine();
+			if (streamUrl == null)
+				throw new PlayerException("Get invalid stream url: null");
+			return streamUrl;
 		} catch (IOException e) {
-			throw new PlayerException("Error get stream :" + e.getMessage());
+ 			throw new PlayerException("Error get stream :" + e.getMessage());
 		}
 	}
 

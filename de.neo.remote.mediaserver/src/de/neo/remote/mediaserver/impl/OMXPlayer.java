@@ -132,24 +132,6 @@ public class OMXPlayer extends AbstractPlayer {
 	@Override
 	public void playFromArdMediathek(String url) throws RemoteException,
 			PlayerException {
-//		try {
-//			quit();
-//		} catch (PlayerException e1) {
-//		}
-//		try {
-//			String tempFile = openTemporaryArdFile(url);
-//			String[] args = new String[] { "/usr/bin/omxplayer", tempFile };
-//			omxProcess = Runtime.getRuntime().exec(args);
-//			// the standard input of MPlayer
-//			omxIn = new PrintStream(omxProcess.getOutputStream());
-//			// start player observer
-//			omxObserver = new OMXObserver(omxProcess.getInputStream());
-//			omxObserver.start();
-//			// set default volume
-//		} catch (IOException e) {
-//			throw new PlayerException("Could not play ard file: "
-//					+ e.getMessage());
-//		}
 		streamFromUrl(TATORT_DL_FILE, url);
 	}
 

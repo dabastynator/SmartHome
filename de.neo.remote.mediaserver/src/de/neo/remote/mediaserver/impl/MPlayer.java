@@ -208,8 +208,8 @@ public class MPlayer extends AbstractPlayer {
 			PlayerException {
 		if (mplayerIn == null)
 			startPlayer();
-		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE, url);
-		writeCommand("loadfile " + youtubeStreamUrl);
+		String tatortStreamUrl = getStreamUrl(TATORT_DL_FILE, url);
+		writeCommand("loadfile " + tatortStreamUrl);
 	}
 
 	@Override
