@@ -13,7 +13,7 @@ import de.neo.remote.gpiopower.api.IInternetSwitch.State;
  */
 public class SwitchPower {
 
-	private static final String SWITCH_SENDER = "/home/troubadix/rcswitch-pi/send";
+	private static final String SWITCH_SENDER = "/usr/bin/send";
 
 	public synchronized void setSwitchState(String familyCode,
 			int switchNumber, State state) {
