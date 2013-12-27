@@ -22,6 +22,7 @@ import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.DirectorySender;
 import de.neo.rmi.transceiver.FileReceiver;
 import de.neo.rmi.transceiver.FileSender;
+import de.neo.rmi.transceiver.SenderProgress;
 
 public class BrowserImpl implements IBrowser {
 
@@ -30,7 +31,9 @@ public class BrowserImpl implements IBrowser {
 
 	/**
 	 * Create new browser
-	 * @param path to root directory for the browser
+	 * 
+	 * @param path
+	 *            to root directory for the browser
 	 */
 	public BrowserImpl(String string) {
 		if (!string.endsWith(File.separator))
@@ -99,6 +102,7 @@ public class BrowserImpl implements IBrowser {
 	public String publishFile(String file, int port) throws RemoteException,
 			IOException {
 		FileSender sender = new FileSender(new File(location + file), port, 1);
+		sender.getProgressListener().add(new BrowserSendListener());
 		sender.sendAsync();
 		return Server.getServer().getServerPort().getIp();
 	}
@@ -108,6 +112,7 @@ public class BrowserImpl implements IBrowser {
 			throws RemoteException, IOException {
 		DirectorySender sender = new DirectorySender(new File(location
 				+ directory), port, 1);
+		sender.getProgressListener().add(new BrowserSendListener());
 		sender.sendAsync();
 		return Server.getServer().getServerPort().getIp();
 	}
@@ -159,7 +164,7 @@ public class BrowserImpl implements IBrowser {
 										/ (double) src.getHeight());
 						int w = (int) (radio * src.getWidth());
 						int h = (int) (radio * src.getHeight());
-						if (w%2!=0)
+						if (w % 2 != 0)
 							w++;
 						BufferedImage thumbnail = scale(src, w, h);
 						int[] rgb = ((DataBufferInt) thumbnail.getData()
@@ -195,6 +200,32 @@ public class BrowserImpl implements IBrowser {
 				ret[j * width / 2 + i / 2] = px1 | (px2 << 16);
 			}
 		return ret;
+	}
+
+	public class BrowserSendListener implements SenderProgress {
+
+		@Override
+		public void startSending(long size) {
+		}
+
+		@Override
+		public void progressSending(long size) {
+		}
+
+		@Override
+		public void endSending(long size) {
+		}
+
+		@Override
+		public void exceptionOccurred(Exception e) {
+			System.out.println("Error occured sending file: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+		}
+
+		@Override
+		public void sendingCanceled() {
+		}
+
 	}
 
 	public static void main(String[] args) {
