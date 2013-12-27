@@ -73,6 +73,7 @@ public abstract class AbstractSender {
 				try {
 					sendSync();
 				} catch (IOException e) {
+					informException(e);
 				}
 			};
 		}.start();
