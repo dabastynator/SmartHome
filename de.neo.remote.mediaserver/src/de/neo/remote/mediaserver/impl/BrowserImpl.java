@@ -19,12 +19,15 @@ import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.neo.rmi.api.Oneway;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectorySender;
 import de.neo.rmi.transceiver.FileReceiver;
 import de.neo.rmi.transceiver.FileSender;
 import de.neo.rmi.transceiver.SenderProgress;
 
 public class BrowserImpl implements IBrowser {
+
+	public static final int DOWNLOAD_PORT = 5033;
 
 	private String location;
 	private String root;
@@ -99,22 +102,27 @@ public class BrowserImpl implements IBrowser {
 	}
 
 	@Override
-	public String publishFile(String file, int port) throws RemoteException,
+	public ServerPort publishFile(String file) throws RemoteException,
 			IOException {
-		FileSender sender = new FileSender(new File(location + file), port, 1);
+		FileSender sender = new FileSender(new File(location + file),
+				DOWNLOAD_PORT, 1);
 		sender.getProgressListener().add(new BrowserSendListener());
 		sender.sendAsync();
-		return Server.getServer().getServerPort().getIp();
+		ServerPort serverport = new ServerPort(Server.getServer()
+				.getServerPort().getIp(), DOWNLOAD_PORT);
+		return serverport;
 	}
 
 	@Override
-	public String publishDirectory(String directory, int port)
+	public ServerPort publishDirectory(String directory)
 			throws RemoteException, IOException {
 		DirectorySender sender = new DirectorySender(new File(location
-				+ directory), port, 1);
+				+ directory), DOWNLOAD_PORT, 1);
 		sender.getProgressListener().add(new BrowserSendListener());
 		sender.sendAsync();
-		return Server.getServer().getServerPort().getIp();
+		ServerPort serverport = new ServerPort(Server.getServer()
+				.getServerPort().getIp(), DOWNLOAD_PORT);
+		return serverport;
 	}
 
 	@Override

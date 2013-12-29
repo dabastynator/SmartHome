@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.ServerPort;
 
 /**
  * the browser browses throw a file system
@@ -59,18 +60,14 @@ public interface IBrowser extends RemoteAble {
 	String getFullLocation() throws RemoteException;
 
 	/**
-	 * publish given file, so a client can connect to the given port and
-	 * download the file. the implementation must return the ip of the server on
-	 * witch the file can be download.
+	 * 
 	 * 
 	 * @param file
-	 * @param port
-	 * @return ip of the file server
+	 * @return server ip and port for the download
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	String publishFile(String file, int port) throws RemoteException,
-			IOException;
+	ServerPort publishFile(String file) throws RemoteException, IOException;
 
 	/**
 	 * start download from published file. The implementation must connect to
@@ -86,17 +83,16 @@ public interface IBrowser extends RemoteAble {
 			throws RemoteException;
 
 	/**
-	 * publish given directory, so a client can connect to the given port and
-	 * download the directory. the implementation must return the ip of the
-	 * server on witch the directory can be download.
+	 * publish given file, so a client can connect to the returned port and ip
+	 * to download the file. the implementation must return the port and ip of
+	 * the server on witch the file can be download.
 	 * 
 	 * @param directory
-	 * @param port
-	 * @return ip of the file server
+	 * @return server ip and port for the download
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	String publishDirectory(String directory, int port) throws RemoteException,
+	ServerPort publishDirectory(String directory) throws RemoteException,
 			IOException;
 
 	/**
