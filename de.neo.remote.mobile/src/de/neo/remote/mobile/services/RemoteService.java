@@ -38,11 +38,6 @@ import de.neo.rmi.transceiver.SenderProgress;
 public class RemoteService extends Service {
 
 	/**
-	 * port for downloads
-	 */
-	protected static final int DOWNLOAD_PORT = 5021;
-
-	/**
 	 * name of current server
 	 */
 	protected int serverID;

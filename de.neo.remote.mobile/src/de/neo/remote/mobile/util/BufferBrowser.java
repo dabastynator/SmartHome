@@ -6,6 +6,7 @@ import java.util.Arrays;
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.ServerPort;
 
 /**
  * this proxy buffers temporary information about the current directory.
@@ -143,15 +144,15 @@ public class BufferBrowser implements IBrowser {
 	}
 
 	@Override
-	public String publishFile(String file, int port) throws RemoteException,
+	public ServerPort publishFile(String file) throws RemoteException,
 			IOException {
-		return browser.publishFile(file, port);
+		return browser.publishFile(file);
 	}
 
 	@Override
-	public String publishDirectory(String directory, int port)
+	public ServerPort publishDirectory(String directory)
 			throws RemoteException, IOException {
-		return browser.publishDirectory(directory, port);
+		return browser.publishDirectory(directory);
 	}
 
 	@Override

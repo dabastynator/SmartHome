@@ -20,6 +20,7 @@ import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
@@ -132,15 +133,15 @@ public class PlayerBinder extends Binder {
 	 */
 	public void downloadFile(IBrowser browser, String file) {
 		try {
-			String ip = browser.publishFile(file, RemoteService.DOWNLOAD_PORT);
+			ServerPort serverport = browser.publishFile(file);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
 			File newFile = new File(folder + File.separator + file.trim());
-			FileReceiver receiver = new FileReceiver(ip,
-					RemoteService.DOWNLOAD_PORT, 200000, newFile);
+			FileReceiver receiver = new FileReceiver(serverport.getIp(),
+					serverport.getPort(), 200000, newFile);
 			service.notificationHandler.setFile(file);
 			download(receiver);
 		} catch (Exception e) {
@@ -155,15 +156,14 @@ public class PlayerBinder extends Binder {
 	 */
 	public void downloadDirectory(IBrowser browser, String directory) {
 		try {
-			String ip = browser.publishDirectory(directory,
-					RemoteService.DOWNLOAD_PORT);
+			ServerPort serverport = browser.publishDirectory(directory);
 			String folder = Environment.getExternalStorageDirectory()
 					.toString() + File.separator + getServerName().trim();
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
-			DirectoryReceiver receiver = new DirectoryReceiver(ip,
-					RemoteService.DOWNLOAD_PORT, dir);
+			DirectoryReceiver receiver = new DirectoryReceiver(
+					serverport.getIp(), serverport.getPort(), dir);
 			service.notificationHandler.setFile(directory);
 			download(receiver);
 		} catch (Exception e) {
