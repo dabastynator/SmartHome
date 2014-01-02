@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -149,6 +150,8 @@ public abstract class BrowserBase extends BindedActivity {
 
 	protected ProgressDialog progress;
 
+	protected TextView downloadText;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -195,6 +198,7 @@ public abstract class BrowserBase extends BindedActivity {
 		dvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
 		dvdButton = (ImageView) findViewById(R.id.button_dvd);
 		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
+		downloadText = (TextView) findViewById(R.id.lbl_download);
 		playButton = (ImageView) findViewById(R.id.button_play);
 		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
 		totemButton = (ImageView) findViewById(R.id.button_totem);
@@ -265,10 +269,12 @@ public abstract class BrowserBase extends BindedActivity {
 	}
 
 	@Override
-	public void startReceive(long size) {
+	public void startReceive(long size, String file) {
 		max = size;
 		downloadLayout.setVisibility(View.VISIBLE);
 		downloadProgress.setProgress(0);
+		if (file != null)
+			downloadText.setText(file);
 	}
 
 	@Override
@@ -279,11 +285,13 @@ public abstract class BrowserBase extends BindedActivity {
 	}
 
 	@Override
-	public void progressReceive(long size) {
+	public void progressReceive(long size, String file) {
 		downloadLayout.setVisibility(View.VISIBLE);
 		if (max == 0)
 			max = binder.getReceiver().getFullSize();
 		downloadProgress.setProgress((int) ((100d * size) / max));
+		if (file != null)
+			downloadText.setText(file);
 	}
 
 	@Override

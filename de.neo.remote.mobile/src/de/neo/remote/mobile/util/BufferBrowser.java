@@ -167,4 +167,9 @@ public class BufferBrowser implements IBrowser {
 		browser.fireThumbnails(listener, width, height);
 	}
 
+	@Override
+	public ServerPort publishAbsoluteFile(String string) throws RemoteException, IOException {
+		return browser.publishAbsoluteFile(string);
+	}
+
 }

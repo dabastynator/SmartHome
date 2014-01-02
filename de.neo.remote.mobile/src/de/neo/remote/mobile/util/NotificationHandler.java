@@ -62,14 +62,14 @@ public class NotificationHandler implements IRemoteActionListener {
 	}
 
 	@Override
-	public void startReceive(final long size) {
+	public void startReceive(final long size, String file) {
 		fullSize = size;
 		makeLoadNotification("download " + file, 0, R.drawable.download);
 
 	}
 
 	@Override
-	public void progressReceive(final long size) {
+	public void progressReceive(final long size, String file) {
 		makeLoadNotification("download " + file, ((float) size)
 				/ ((float) fullSize), R.drawable.download);
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;
@@ -286,5 +287,55 @@ public class PlayerBinder extends Binder {
 
 	public String getUnitDescription(String name) {
 		return service.unitMapDescription.get(name);
+	}
+
+	public void downloadPlaylist(final IBrowser browser,
+			final String[] playlist, final String name) {
+		AsyncTask<String, Integer, Exception> downloader = new AsyncTask<String, Integer, Exception>() {
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				Toast.makeText(service, "download started", Toast.LENGTH_SHORT)
+						.show();
+			}
+
+			@Override
+			protected Exception doInBackground(String... playlist) {
+				try {
+					String folder = Environment.getExternalStorageDirectory()
+							.toString()
+							+ File.separator
+							+ getServerName().trim();
+					File base = new File(folder);
+					if (!base.exists())
+						base.mkdir();
+					String plsDir = folder + File.separator + name;
+					if (!new File(plsDir).exists())
+						new File(plsDir).mkdir();
+					for (int i = 0; i < playlist.length; i++) {
+						ServerPort serverport = browser
+								.publishAbsoluteFile(playlist[i]);
+						String[] split = playlist[i].split(File.separator);
+						String itemName = split[split.length - 1];
+						File newFile = new File(plsDir + File.separator
+								+ itemName);
+						FileReceiver receiver = new FileReceiver(
+								serverport.getIp(), serverport.getPort(),
+								200000, newFile);
+						// set maximum byte size to 1MB
+						receiver.setBufferSize(1000000);
+						receiver.getProgressListener().add(
+								service.downloadListener);
+						service.notificationHandler.setFile(itemName);
+						receiver.receiveSync();
+					}
+				} catch (Exception e) {
+					return e;
+				}
+				return null;
+			}
+		};
+		downloader.execute(playlist);
 	}
 }

@@ -73,7 +73,7 @@
         <LinearLayout
             android:id="@+id/layout_download"
             android:layout_width="fill_parent"
-            android:layout_height="36dp"
+            android:layout_height="50dp"
             android:orientation="horizontal"
             android:visibility="gone" >
 
@@ -87,6 +87,7 @@
                     android:id="@+id/lbl_download"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
+                    android:layout_margin="3dp"
                     android:layout_weight="1"
                     android:text="@string/str_download" />
 

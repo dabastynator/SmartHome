@@ -40,4 +40,5 @@
     <string name="str_dvd_menu">Menü</string>
     <string name="str_dvd_no_sub">Untertitel aus</string>
     <string name="str_dvd_next_sub">Nächster Untertitel</string>
+    <string name="str_search">Suchen</string>
 </resources>

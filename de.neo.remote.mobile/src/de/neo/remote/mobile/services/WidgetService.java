@@ -207,13 +207,13 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	@Override
-	public void startReceive(long size) {
+	public void startReceive(long size, String file) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void progressReceive(long size) {
+	public void progressReceive(long size, String file) {
 		// TODO Auto-generated method stub
 
 	}

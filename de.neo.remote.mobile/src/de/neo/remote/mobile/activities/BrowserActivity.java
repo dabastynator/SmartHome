@@ -461,6 +461,12 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_right:
 				mediaServer.player.moveRight();
 				break;
+			case R.id.opt_search:
+				searchLayout.setVisibility(View.VISIBLE);
+				searchText.requestFocus();
+				InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
+				break;
 			case R.id.opt_dvd_eject:
 				if (mediaServer.player instanceof IDVDPlayer)
 					((IDVDPlayer) mediaServer.player).ejectDVD();
@@ -533,7 +539,12 @@ public class BrowserActivity extends BrowserBase {
 						SelectPlaylistActivity.SELECT_PLS_CODE);
 				break;
 			case R.id.opt_item_download:
-				if (selectedPosition < mediaServer.browser.getDirectories().length)
+				if (viewerState == ViewerState.PLAYLISTS) {
+					binder.downloadPlaylist(mediaServer.browser,
+							mediaServer.pls.listContent(selectedItem),
+							selectedItem);
+				} else if (selectedPosition < mediaServer.browser
+						.getDirectories().length)
 					binder.downloadDirectory(mediaServer.browser, selectedItem);
 				else
 					binder.downloadFile(mediaServer.browser, selectedItem);
@@ -601,10 +612,10 @@ public class BrowserActivity extends BrowserBase {
 						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
 						.show();
 			}
-			if (requestCode == GET_TATORT_URL_CODE && data != null){
+			if (requestCode == GET_TATORT_URL_CODE && data != null) {
 				String url = data.getExtras().getString(GetTextActivity.RESULT);
 				PlayTatortTask task = new PlayTatortTask(this, url, binder);
-				task.execute(new String[]{});
+				task.execute(new String[] {});
 			}
 			if (requestCode == FILE_REQUEST) {
 				Uri uri = data.getData();

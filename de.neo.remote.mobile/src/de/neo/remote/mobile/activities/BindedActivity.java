@@ -171,11 +171,11 @@ public abstract class BindedActivity extends Activity implements
 	}
 
 	@Override
-	public void startReceive(long size) {
+	public void startReceive(long size, String file) {
 	}
 
 	@Override
-	public void progressReceive(long size) {
+	public void progressReceive(long size, String file) {
 	}
 
 	@Override

@@ -41,4 +41,5 @@
     <string name="str_dvd_menu">Menu</string>
     <string name="str_dvd_no_sub">Subtitle off</string>
     <string name="str_dvd_next_sub">Next subtitle</string>
+    <string name="str_search">Search</string>
 </resources>

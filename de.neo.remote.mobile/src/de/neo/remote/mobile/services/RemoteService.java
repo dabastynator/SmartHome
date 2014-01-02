@@ -382,21 +382,21 @@ public class RemoteService extends Service {
 	public class ProgressListener implements ReceiverProgress {
 
 		@Override
-		public void startReceive(final long size) {
+		public void startReceive(final long size, final String file) {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						l.startReceive(size);
+						l.startReceive(size, file);
 				}
 			});
 		}
 
 		@Override
-		public void progressReceive(final long size) {
+		public void progressReceive(final long size, final String file) {
 			handler.post(new Runnable() {
 				public void run() {
 					for (IRemoteActionListener l : actionListener)
-						l.progressReceive(size);
+						l.progressReceive(size, file);
 				}
 			});
 		}
