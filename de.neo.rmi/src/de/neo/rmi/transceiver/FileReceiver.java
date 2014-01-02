@@ -62,7 +62,7 @@ public class FileReceiver extends AbstractReceiver {
 			size <<= 8;
 			size ^= (long) b[j] & 0xFF;
 		}
-		informStart(size);
+		informStart(size, file.getName());
 
 		// receive file data from stream
 		byte[] data = new byte[(int) Math.min(Math.min(size, progressStep),
@@ -76,7 +76,7 @@ public class FileReceiver extends AbstractReceiver {
 			count += i;
 			if (count >= progressStep) {
 				count = 0;
-				informProgress(currentSize);
+				informProgress(currentSize, file.getName());
 			}
 			if (currentSize >= size)
 				break;

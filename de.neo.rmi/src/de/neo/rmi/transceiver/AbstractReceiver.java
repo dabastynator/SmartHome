@@ -163,10 +163,10 @@ public abstract class AbstractReceiver {
 	 * 
 	 * @param size
 	 */
-	protected void informStart(long size) {
+	protected void informStart(long size, String file) {
 		downloadSize = size;
 		for (ReceiverProgress listener : progressListener)
-			listener.startReceive(size);
+			listener.startReceive(size, file);
 	}
 
 	/**
@@ -174,10 +174,10 @@ public abstract class AbstractReceiver {
 	 * 
 	 * @param size
 	 */
-	protected void informProgress(long size) {
+	protected void informProgress(long size, String file) {
 		downloadProgress = size;
 		for (ReceiverProgress listener : progressListener)
-			listener.progressReceive(size);
+			listener.progressReceive(size, file);
 	}
 
 	/**

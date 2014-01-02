@@ -8,18 +8,20 @@ package de.neo.rmi.transceiver;
 public interface ReceiverProgress {
 
 	/**
-	 * start receive, complete size of the data will be given.
+	 * start receive, complete size of the data and file will be given.
 	 * 
 	 * @param size
+	 * @param file
 	 */
-	public void startReceive(long size);
+	public void startReceive(long size, String file);
 
 	/**
-	 * new progress will be set
+	 * new progress and current file will be set.
 	 * 
 	 * @param size
+	 * @param file
 	 */
-	public void progressReceive(long size);
+	public void progressReceive(long size, String file);
 
 	/**
 	 * the end of a transmission is reached.
@@ -32,7 +34,7 @@ public interface ReceiverProgress {
 	 * @param e
 	 */
 	public void exceptionOccurred(Exception e);
-	
+
 	/**
 	 * 
 	 */

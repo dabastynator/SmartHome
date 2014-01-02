@@ -13,10 +13,22 @@ import java.io.InputStream;
  */
 public class DirectoryReceiver extends FileReceiver {
 
+	private static final int SUB_PROGRESS = 20;
+
 	/**
 	 * the directory in witch the directory will be saved
 	 */
 	private File directory;
+
+	/**
+	 * Size of the current download file
+	 */
+	private long currentFileSize;
+
+	/**
+	 * Download progress, loaded files and directories
+	 */
+	private long currentProgress;
 
 	/**
 	 * allocate new directory receiver
@@ -44,6 +56,7 @@ public class DirectoryReceiver extends FileReceiver {
 	 */
 	private void receiveDirectory(DataInputStream dataInputStream,
 			File directory) throws IOException {
+		currentProgress = -1;
 		if (state == ReceiverState.CANCELD)
 			return;
 		// prepare destiny
@@ -52,32 +65,39 @@ public class DirectoryReceiver extends FileReceiver {
 		File newDirectory = new File(directory.getAbsolutePath()
 				+ File.separator + dataInputStream.readUTF());
 		newDirectory.mkdir();
-		
-		// read directory structure (file count, directory count, directory name)
+
+		// read directory structure (file count, directory count, directory
+		// name)
 		int subDirectories = dataInputStream.readInt();
 		int files = dataInputStream.readInt();
 		if (directory.getAbsolutePath()
 				.equals(this.directory.getAbsolutePath()))
-			super.informStart(subDirectories + files);
-		
-		// read all files in this directory
+			super.informStart((subDirectories + files) * SUB_PROGRESS,
+					directory.getName());
+
+		// read all directories in this directory
 		for (int i = 0; i < subDirectories; i++) {
-			receiveDirectory(dataInputStream, newDirectory);
 			if (directory.getAbsolutePath().equals(
-					this.directory.getAbsolutePath()))
-				super.informProgress(i);
+					this.directory.getAbsolutePath())) {
+				super.informProgress(i * SUB_PROGRESS, directory.getName());
+				currentProgress = i * SUB_PROGRESS;
+			}
+			receiveDirectory(dataInputStream, newDirectory);
 			if (state == ReceiverState.CANCELD)
 				return;
 		}
-		
-		// read all directories in this directory
+
+		// read all files in this directory
 		for (int i = 0; i < files; i++) {
 			this.file = new File(newDirectory.getAbsoluteFile()
 					+ File.separator + dataInputStream.readUTF());
-			super.receiveData(dataInputStream);
 			if (directory.getAbsolutePath().equals(
-					this.directory.getAbsolutePath()))
-				super.informProgress(subDirectories + i);
+					this.directory.getAbsolutePath())) {
+				super.informProgress((subDirectories + i) * SUB_PROGRESS,
+						this.file.getName());
+				currentProgress = (subDirectories + i) * SUB_PROGRESS;
+			}
+			super.receiveData(dataInputStream);
 			if (state == ReceiverState.CANCELD)
 				return;
 		}
@@ -87,7 +107,9 @@ public class DirectoryReceiver extends FileReceiver {
 	}
 
 	@Override
-	protected void informStart(long size) {
+	protected void informStart(long size, String file) {
+		currentFileSize = size;
+		progressStep = size / SUB_PROGRESS;
 	}
 
 	@Override
@@ -95,7 +117,10 @@ public class DirectoryReceiver extends FileReceiver {
 	}
 
 	@Override
-	protected void informProgress(long size) {
+	protected void informProgress(long size, String file) {
+		if (currentProgress >= 0)
+			super.informProgress(currentProgress + (SUB_PROGRESS * size)
+					/ currentFileSize, this.file.getName());
 	}
 
 }
