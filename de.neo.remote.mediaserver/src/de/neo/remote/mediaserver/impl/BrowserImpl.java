@@ -253,4 +253,14 @@ public class BrowserImpl implements IBrowser {
 		}
 
 	}
+
+	@Override
+	public ServerPort publishAbsoluteFile(String file) throws RemoteException, IOException {
+		FileSender sender = new FileSender(new File(file), DOWNLOAD_PORT, 1);
+		sender.getProgressListener().add(new BrowserSendListener());
+		sender.sendAsync();
+		ServerPort serverport = new ServerPort(Server.getServer()
+				.getServerPort().getIp(), DOWNLOAD_PORT);
+		return serverport;
+	}
 }

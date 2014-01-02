@@ -119,4 +119,15 @@ public interface IBrowser extends RemoteAble {
 	public void fireThumbnails(IThumbnailListener listener, int width,
 			int height) throws RemoteException;
 
+	/**
+	 * start download from published file with absolute path. The implementation
+	 * must connect to given ip and port to load the file.
+	 * 
+	 * @param file
+	 * @return server ip and port for download connection
+	 * @throws RemoteException
+	 * @throws IOException 
+	 */
+	public ServerPort publishAbsoluteFile(String file) throws RemoteException, IOException;
+
 }
