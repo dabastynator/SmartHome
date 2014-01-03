@@ -3,6 +3,7 @@ package de.neo.remote.mediaserver.impl;
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IControl;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
+import de.neo.remote.mediaserver.api.IImageViewer;
 import de.neo.remote.mediaserver.api.IMediaServer;
 import de.neo.remote.mediaserver.api.IPlayList;
 import de.neo.remote.mediaserver.api.IPlayer;
@@ -16,6 +17,7 @@ public class MediaServerImpl implements IMediaServer {
 	private PlayListImpl playlist;
 	private String browserLocation;
 	private OMXPlayer omxplayer;
+	private ImageViewerImpl imageViewer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
 		totem = new TotemPlayer();
@@ -24,6 +26,7 @@ public class MediaServerImpl implements IMediaServer {
 		control = new ControlImpl();
 		playlist = new PlayListImpl(playlistLocation);
 		omxplayer = new OMXPlayer();
+		imageViewer = new ImageViewerImpl();
 	}
 
 	@Override
@@ -54,6 +57,11 @@ public class MediaServerImpl implements IMediaServer {
 	@Override
 	public IPlayer getOMXPlayer() throws RemoteException {
 		return omxplayer;
+	}
+
+	@Override
+	public IImageViewer getImageViewer() throws RemoteException {
+		return imageViewer;
 	}
 
 }

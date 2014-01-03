@@ -24,15 +24,24 @@ public interface IMediaServer extends RemoteAble {
 	public IBrowser createBrowser() throws RemoteException;
 
 	/**
+	 * get image-viewer to show images.
+	 * 
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IImageViewer getImageViewer() throws RemoteException;
+
+	/**
 	 * get totem player
 	 * 
 	 * @return player
 	 * @throws RemoteException
 	 */
 	public IPlayer getTotemPlayer() throws RemoteException;
-	
+
 	/**
-	 * get the omxplayer, just on raspberry 
+	 * get the omxplayer, just on raspberry
+	 * 
 	 * @return
 	 * @throws RemoteException
 	 */
