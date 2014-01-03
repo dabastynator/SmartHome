@@ -27,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
+import de.neo.remote.mediaserver.api.IImageViewer;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
@@ -334,13 +335,24 @@ public class BrowserActivity extends BrowserBase {
 				try {
 					switch (v.getId()) {
 					case R.id.button_play:
-						player.playPause();
+						if (mediaState == MediaState.MUSIC_VIDEO)
+							player.playPause();
+						else
+							binder.getLatestMediaServer().imageViewer
+									.toggleDiashow(3 * 1000);
 						break;
 					case R.id.button_next:
-						player.next();
+						if (mediaState == MediaState.MUSIC_VIDEO)
+							player.next();
+						else
+							binder.getLatestMediaServer().imageViewer.next();
 						break;
 					case R.id.button_pref:
-						player.previous();
+						if (mediaState == MediaState.MUSIC_VIDEO)
+							player.previous();
+						else
+							binder.getLatestMediaServer().imageViewer
+									.previous();
 						break;
 					case R.id.button_vol_up:
 						player.volUp();
@@ -358,7 +370,12 @@ public class BrowserActivity extends BrowserBase {
 						player.fullScreen(isFullscreen = !isFullscreen);
 						break;
 					case R.id.button_quit:
-						player.quit();
+						if (mediaState == MediaState.MUSIC_VIDEO) {
+							player.quit();
+						} else {
+							mediaState = MediaState.MUSIC_VIDEO;
+							binder.getLatestMediaServer().imageViewer.quit();
+						}
 						break;
 					case R.id.button_left:
 						if (player instanceof IDVDPlayer)
@@ -702,6 +719,14 @@ public class BrowserActivity extends BrowserBase {
 		super.onNewIntent(intent);
 		setIntent(intent);
 		// now getIntent() should always return the last received intent
+	}
+
+	public static boolean isImage(String item) {
+		item = item.toLowerCase();
+		for (String extension : IImageViewer.IMAGE_EXTENSIONS)
+			if (item.endsWith(extension))
+				return true;
+		return false;
 	}
 
 	@Override

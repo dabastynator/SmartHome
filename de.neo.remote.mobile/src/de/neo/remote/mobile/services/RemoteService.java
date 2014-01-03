@@ -18,6 +18,7 @@ import de.neo.remote.gpiopower.api.IInternetSwitchListener;
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IChatServer;
 import de.neo.remote.mediaserver.api.IControl;
+import de.neo.remote.mediaserver.api.IImageViewer;
 import de.neo.remote.mediaserver.api.IMediaServer;
 import de.neo.remote.mediaserver.api.IPlayList;
 import de.neo.remote.mediaserver.api.IPlayer;
@@ -263,6 +264,7 @@ public class RemoteService extends Service {
 		public IPlayer mplayer;
 		public IPlayer totem;
 		public IPlayer omxplayer;
+		public IImageViewer imageViewer;
 		public String name;
 	}
 

@@ -255,6 +255,7 @@ public class PlayerBinder extends Binder {
 				mediaObjects.player = mediaObjects.mplayer;
 				mediaObjects.pls = mediaServer.getPlayList();
 				mediaObjects.totem = mediaServer.getTotemPlayer();
+				mediaObjects.imageViewer = mediaServer.getImageViewer();
 				mediaObjects.name = mediaServerName;
 				service.stationStuff.put(mediaServer, mediaObjects);
 			}

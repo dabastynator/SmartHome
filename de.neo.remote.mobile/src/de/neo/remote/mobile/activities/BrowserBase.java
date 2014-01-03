@@ -44,6 +44,11 @@ public abstract class BrowserBase extends BindedActivity {
 	public static final String VIEWER_STATE = "viewerstate";
 
 	/**
+	 * name of the media state field to store and restore the value
+	 */
+	public static final String MEDIA_STATE = "mediastate";
+
+	/**
 	 * name of the playlist field to store and restore the value
 	 */
 	public static final String PLAYLIST = "playlist";
@@ -67,6 +72,15 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	public enum ViewerState {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
+	}
+
+	/**
+	 * remote media state, either playing music / video or showing images.
+	 * 
+	 * @author sebastian
+	 */
+	public enum MediaState {
+		MUSIC_VIDEO, IMAGES
 	}
 
 	/**
@@ -98,6 +112,11 @@ public abstract class BrowserBase extends BindedActivity {
 	 * current viewer state
 	 */
 	public ViewerState viewerState = ViewerState.DIRECTORIES;
+
+	/**
+	 * current remote media state
+	 */
+	public MediaState mediaState = MediaState.MUSIC_VIDEO;
 
 	/**
 	 * current selected item of the list view
@@ -211,6 +230,7 @@ public abstract class BrowserBase extends BindedActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putInt(VIEWER_STATE, viewerState.ordinal());
+		outState.putInt(MEDIA_STATE, mediaState.ordinal());
 		outState.putString(PLAYLIST, currentPlayList);
 		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
 	}
@@ -219,6 +239,7 @@ public abstract class BrowserBase extends BindedActivity {
 	protected void onRestoreInstanceState(Bundle bundle) {
 		super.onRestoreInstanceState(bundle);
 		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
+		mediaState = MediaState.values()[bundle.getInt(MEDIA_STATE)];
 		currentPlayList = bundle.getString(PLAYLIST);
 		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
 	}
