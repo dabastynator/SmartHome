@@ -11,16 +11,13 @@ public class ImageViewerImpl implements IImageViewer {
 
 	public static final String IMAGE_VIEWER = "/usr/bin/eog";
 
-	public static final String[] IMAGE_EXTENSIONS = { "jpg", "jpeg", "png",
-			"gif", "tiff", "bmp" };
-
 	private File[] currentImageFolder;
 
 	private int currentImageIndex;
 
 	private Process viewerProgress;
 
-	private boolean isImage(String file) {
+	public static boolean isImage(String file) {
 		boolean isImage = false;
 		String[] split = file.split("\\.");
 		String fileExtension = split[split.length - 1].toLowerCase();

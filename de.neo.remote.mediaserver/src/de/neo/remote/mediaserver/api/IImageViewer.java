@@ -11,6 +11,12 @@ import de.neo.rmi.protokol.RemoteException;
 public interface IImageViewer extends RemoteAble {
 
 	/**
+	 * all possible image extensions.
+	 */
+	public static final String[] IMAGE_EXTENSIONS = { "jpg", "jpeg", "png",
+			"gif", "tiff", "bmp" };
+
+	/**
 	 * show given image-file
 	 * 
 	 * @param file
@@ -27,7 +33,7 @@ public interface IImageViewer extends RemoteAble {
 
 	/**
 	 * @param imageTime
-	 *            The time one image is on the screen.
+	 *            The time one image is on the screen in milliseconds.
 	 * @throws RemoteException
 	 */
 	void toggleDiashow(int imageTime) throws RemoteException, ImageException;
