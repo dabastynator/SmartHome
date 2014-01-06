@@ -38,7 +38,8 @@ public class OMXPlayer extends AbstractPlayer {
 		} catch (PlayerException e1) {
 		}
 		try {
-			String[] args = new String[] { "/usr/bin/omxplayer", file };
+			String[] args = new String[] { "/usr/bin/omxplayer", "-o", "local",
+					file };
 			omxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			omxIn = new PrintStream(omxProcess.getOutputStream());
@@ -149,7 +150,8 @@ public class OMXPlayer extends AbstractPlayer {
 		}
 		try {
 			String tempUrl = getStreamUrl(script, url);
-			String[] args = new String[] { "/usr/bin/omxplayer", tempUrl };
+			String[] args = new String[] { "/usr/bin/omxplayer", "-o", "local",
+					tempUrl };
 			omxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			omxIn = new PrintStream(omxProcess.getOutputStream());
