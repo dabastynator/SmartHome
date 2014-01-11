@@ -16,6 +16,10 @@ public interface IImageViewer extends RemoteAble {
 	public static final String[] IMAGE_EXTENSIONS = { "jpg", "jpeg", "png",
 			"gif", "tiff", "bmp" };
 
+	public enum Direction {
+		LEFT, RIGHT, DOWN, UP
+	};
+
 	/**
 	 * show given image-file
 	 * 
@@ -51,5 +55,30 @@ public interface IImageViewer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	void previous() throws RemoteException, ImageException;
+
+	/**
+	 * zoom into the current picture.
+	 * 
+	 * @throws RemoteException
+	 * @throws ImageException
+	 */
+	void zoomIn() throws RemoteException, ImageException;
+
+	/**
+	 * zoom out of current picture.
+	 * 
+	 * @throws RemoteException
+	 * @throws ImageException
+	 */
+	void zoomOut() throws RemoteException, ImageException;
+
+	/**
+	 * move section of the picture.
+	 * 
+	 * @param direction
+	 * @throws RemoteException
+	 * @throws ImageException
+	 */
+	void move(Direction direction) throws RemoteException, ImageException;
 
 }

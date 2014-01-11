@@ -1,5 +1,6 @@
 package de.neo.remote.mediaserver.impl;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -9,13 +10,15 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class ImageViewerImpl implements IImageViewer {
 
-	public static final String IMAGE_VIEWER = "/usr/bin/eog";
+	public static final String IMAGE_VIEWER = "/usr/bin/fim";
 
 	private File[] currentImageFolder;
 
 	private int currentImageIndex;
 
 	private Process viewerProgress;
+	
+	private DataOutputStream viewerStream;
 
 	public static boolean isImage(String file) {
 		boolean isImage = false;
@@ -124,6 +127,56 @@ public class ImageViewerImpl implements IImageViewer {
 		} catch (ImageException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void zoomIn() throws RemoteException, ImageException {
+		if (viewerStream == null)
+			throw new ImageException("Image-viewer is down");
+		try {
+			viewerStream.writeUTF("+");
+		} catch (IOException e) {
+			throw new ImageException("Cannot zoom: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public void zoomOut() throws RemoteException, ImageException {
+		if (viewerProgress == null)
+			throw new ImageException("Image-viewer is down");
+		try {
+			viewerStream.writeUTF("-");
+		} catch (IOException e) {
+			throw new ImageException("Cannot zoom: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public void move(Direction direction) throws RemoteException,
+			ImageException {
+		if (viewerProgress == null)
+			throw new ImageException("Image-viewer is down");
+		try {
+			switch(direction){
+			case DOWN:
+				viewerStream.writeUTF(OMXPlayer.ARROW_DOWN);
+				break;
+			case LEFT:
+				viewerStream.writeUTF(OMXPlayer.ARROW_LEFT);
+				break;
+			case RIGHT:
+				viewerStream.writeUTF(OMXPlayer.ARROW_RIGHT);
+				break;
+			case UP:
+				viewerStream.writeUTF(OMXPlayer.ARROW_UP);
+				break;
+			default:
+				break;
+			
+			}
+		} catch (IOException e) {
+			throw new ImageException("Cannot move: " + e.getMessage());
 		}
 	}
 
