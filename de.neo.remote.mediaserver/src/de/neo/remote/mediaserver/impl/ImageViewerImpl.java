@@ -41,7 +41,7 @@ public class ImageViewerImpl implements IImageViewer {
 			if (viewerProgress != null)
 				viewerProgress.destroy();
 			viewerProgress = Runtime.getRuntime().exec(
-					new String[] { IMAGE_VIEWER, "-f", file });
+					new String[] { IMAGE_VIEWER, "-a", file });
 		} catch (IOException e) {
 			throw new ImageException(e.getMessage());
 		}
@@ -81,7 +81,7 @@ public class ImageViewerImpl implements IImageViewer {
 					viewerProgress.destroy();
 				try {
 					viewerProgress = Runtime.getRuntime().exec(
-							new String[] { IMAGE_VIEWER, "-f", file });
+							new String[] { IMAGE_VIEWER, "-a", file });
 				} catch (IOException e) {
 					throw new ImageException(e.getMessage());
 				}
