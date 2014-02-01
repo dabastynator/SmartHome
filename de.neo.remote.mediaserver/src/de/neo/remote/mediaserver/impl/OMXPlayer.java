@@ -1,6 +1,7 @@
 package de.neo.remote.mediaserver.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +9,7 @@ import java.io.PrintStream;
 
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.mediaserver.api.PlayingBean.STATE;
 import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
@@ -45,7 +47,8 @@ public class OMXPlayer extends AbstractPlayer {
 			omxIn = new PrintStream(omxProcess.getOutputStream());
 			// start player observer
 			new OMXObserver(omxProcess.getInputStream()).start();
-			// set default volume
+			
+			informFile(new File(file));
 		} catch (IOException e) {
 		}
 		super.play(file);
@@ -158,7 +161,10 @@ public class OMXPlayer extends AbstractPlayer {
 			// start player observer
 			omxObserver = new OMXObserver(omxProcess.getInputStream());
 			omxObserver.start();
-			// set default volume
+			playingBean = new PlayingBean();
+			playingBean.setTitle(url);
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
 		} catch (IOException e) {
 			throw new PlayerException("Could not stream url: " + e.getMessage());
 		}
