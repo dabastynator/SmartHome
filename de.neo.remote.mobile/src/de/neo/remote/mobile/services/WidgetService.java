@@ -173,6 +173,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			remote.setTextViewText(R.id.lbl_widget_big, big);
 			remote.setTextViewText(R.id.lbl_widget_small, small);
 			remote.setTextViewText(R.id.lbl_widget_small2, small2);
+			RemoteWidgetProvider.setWidgetClick(remote, this);
 			if (playing)
 				remote.setImageViewResource(R.id.button_widget_play,
 						R.drawable.pause);

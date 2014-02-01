@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 import de.neo.remote.controlcenter.api.IControlCenter;
 import de.neo.remote.controlcenter.api.IControlUnit;
+import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.gpiopower.api.IInternetSwitchListener;
 import de.neo.remote.mediaserver.api.IBrowser;
@@ -322,6 +323,8 @@ public class RemoteService extends Service {
 				unitMap.put(name, object);
 				unitMapPostion.put(name, position);
 				unitMapDescription.put(name, description);
+				if (object instanceof IInternetSwitch)
+					((IInternetSwitch)object).registerPowerSwitchListener(internetSwitchListener);
 			} catch (Exception e) {
 				Log.e("error",
 						e.getClass().getSimpleName() + ": " + e.getMessage());

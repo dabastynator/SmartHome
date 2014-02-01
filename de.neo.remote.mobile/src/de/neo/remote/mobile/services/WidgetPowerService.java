@@ -138,6 +138,8 @@ public class WidgetPowerService extends Service implements
 			remotePowerViews.setImageViewResource(R.id.image_power_widget,
 					image);
 			remotePowerViews.setTextViewText(R.id.text_power_widget, text);
+			RemotePowerWidgetProvider.setSwitchIntent(remotePowerViews, this,
+					widgetID);
 			appWidgetManager.updateAppWidget(widgetID, remotePowerViews);
 		}
 	}
