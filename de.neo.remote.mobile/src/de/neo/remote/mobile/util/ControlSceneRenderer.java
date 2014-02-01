@@ -57,6 +57,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	private SelectMediaServer selecter;
 
 	private Map<String, GLFigure> glMediaServers;
+	private Map<String, GLSwitch> glSwitches;
 	private TranslateSceneHandler handler;
 
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
@@ -71,6 +72,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		setTouchSceneHandler(handler);
 		setLighting(true);
 		glMediaServers = new HashMap<String, GLFigure>();
+		glSwitches = new HashMap<String, GLSwitch>();
 	}
 
 	@Override
@@ -84,6 +86,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (glObjects != null)
 			room.removeFigure(glObjects);
 		glMediaServers.clear();
+		glSwitches.clear();
 		if (control == null)
 			return;
 		glObjects = new GLGroup();
@@ -116,6 +119,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 							light, internet);
 					light.setOnClickListener(listener);
 					glObjects.addFigure(light);
+					glSwitches.put(name, light);
 				}
 			} catch (RemoteException e) {
 
@@ -340,9 +344,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				text = "";
 			canvas.drawText(line, 10, 20 + i * 30, textPaint);
 		}
-		Matrix matrix = new Matrix(); 
-		matrix.preScale(1.0f, -1.0f); 
-		Bitmap mirroredBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
+		Matrix matrix = new Matrix();
+		matrix.preScale(1.0f, -1.0f);
+		Bitmap mirroredBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+				bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 		return mirroredBitmap;
 	}
 
@@ -361,6 +366,13 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (bean.getState() == STATE.PAUSE)
 			str = str + "Pause";
 		return str;
+	}
+
+	public void powerSwitchChanged(String _switch, State state) {
+		GLSwitch glSwitch = glSwitches.get(_switch);
+		if (glSwitch != null) {
+			glSwitch.setSwitch(state == State.ON);
+		}
 	}
 
 }

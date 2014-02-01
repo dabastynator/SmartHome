@@ -96,7 +96,7 @@ public class ControlSceneActivity extends BindedActivity {
 
 	@Override
 	public void onPowerSwitchChange(String _switch, State state) {
-		// TODO Auto-generated method stub
+		renderer.powerSwitchChanged(_switch, state);
 
 	}
 

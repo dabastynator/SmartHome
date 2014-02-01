@@ -250,6 +250,7 @@ public class RemoteService extends Service {
 		currentMediaServer = mediaObjects;
 		currentMediaServer.mplayer.addPlayerMessageListener(playerListener);
 		currentMediaServer.totem.addPlayerMessageListener(playerListener);
+		currentMediaServer.omxplayer.addPlayerMessageListener(playerListener);
 		try {
 			playerListener.playerMessage(currentMediaServer.player
 					.getPlayingBean());
