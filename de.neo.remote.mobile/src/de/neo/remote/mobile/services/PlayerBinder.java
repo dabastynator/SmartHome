@@ -18,12 +18,12 @@ import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.PlayerListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
+import de.neo.remote.mobile.tasks.DownloadTask;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.AbstractReceiver;
-import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
 import de.neo.rmi.transceiver.FileSender;
 
@@ -43,12 +43,12 @@ public class PlayerBinder extends Binder {
 	/**
 	 * the service of this binder
 	 */
-	private RemoteService service;
+	public RemoteService service;
 
 	/**
 	 * current receiver
 	 */
-	private AbstractReceiver receiver;
+	public AbstractReceiver receiver;
 
 	/**
 	 * allocate new binder.
@@ -133,21 +133,8 @@ public class PlayerBinder extends Binder {
 	 * @param file
 	 */
 	public void downloadFile(IBrowser browser, String file) {
-		try {
-			ServerPort serverport = browser.publishFile(file);
-			String folder = Environment.getExternalStorageDirectory()
-					.toString() + File.separator + getServerName().trim();
-			File dir = new File(folder);
-			if (!dir.exists())
-				dir.mkdir();
-			File newFile = new File(folder + File.separator + file.trim());
-			FileReceiver receiver = new FileReceiver(serverport.getIp(),
-					serverport.getPort(), 200000, newFile);
-			service.notificationHandler.setFile(file);
-			download(receiver);
-		} catch (Exception e) {
-			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
-		}
+		new DownloadTask(browser, file, null, getServerName(), this).execute();
+		service.notificationHandler.setFile(file);
 	}
 
 	/**
@@ -156,34 +143,9 @@ public class PlayerBinder extends Binder {
 	 * @param directory
 	 */
 	public void downloadDirectory(IBrowser browser, String directory) {
-		try {
-			ServerPort serverport = browser.publishDirectory(directory);
-			String folder = Environment.getExternalStorageDirectory()
-					.toString() + File.separator + getServerName().trim();
-			File dir = new File(folder);
-			if (!dir.exists())
-				dir.mkdir();
-			DirectoryReceiver receiver = new DirectoryReceiver(
-					serverport.getIp(), serverport.getPort(), dir);
-			service.notificationHandler.setFile(directory);
-			download(receiver);
-		} catch (Exception e) {
-			Toast.makeText(service, e.getMessage(), Toast.LENGTH_LONG).show();
-		}
-	}
-
-	/**
-	 * configure receiver and start the download
-	 * 
-	 * @param receiver
-	 */
-	private void download(FileReceiver receiver) {
-		this.receiver = receiver;
-		// set maximum byte size to 1MB
-		receiver.setBufferSize(1000000);
-		receiver.getProgressListener().add(service.downloadListener);
-		receiver.receiveAsync();
-		Toast.makeText(service, "download started", Toast.LENGTH_SHORT).show();
+		new DownloadTask(browser, null, directory, getServerName(), this)
+				.execute();
+		service.notificationHandler.setFile(directory);
 	}
 
 	/**
@@ -205,24 +167,40 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void uploadFile(IBrowser browser, File file) {
+	public void uploadFile(final IBrowser browser, final File file) {
 		try {
 			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1);
 			fileSender.getProgressListener().add(service.uploadListener);
 			fileSender.sendAsync();
-			browser.updloadFile(file.getName(), Server.getServer()
-					.getServerPort().getIp(), UPLOAD_PORT);
-			Toast.makeText(service, "upload started", Toast.LENGTH_SHORT)
+			new Thread() {
+				public void run() {
+					try {
+						browser.updloadFile(file.getName(), Server.getServer()
+								.getServerPort().getIp(), UPLOAD_PORT);
+					} catch (Exception e) {
+						showToastFromThread(
+								"upload remote error: " + e.getMessage(),
+								Toast.LENGTH_LONG);
+					}
+				};
+			}.start();
+			Toast.makeText(service, "upload file started", Toast.LENGTH_SHORT)
 					.show();
 		} catch (IOException e) {
-			e.printStackTrace();
 			Toast.makeText(service, "upload error: " + e.getMessage(),
-					Toast.LENGTH_SHORT).show();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			Toast.makeText(service, "upload error: " + e.getMessage(),
-					Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_LONG).show();
 		}
+	}
+
+	private void showToastFromThread(final String message, final int length) {
+		Runnable runnable = new Runnable() {
+
+			@Override
+			public void run() {
+				Toast.makeText(service, message, length).show();
+			}
+		};
+		service.handler.post(runnable);
 	}
 
 	public Map<String, Object> getUnits() {
@@ -243,8 +221,8 @@ public class PlayerBinder extends Binder {
 		if (object instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) object;
 			StationStuff mediaObjects = null;
-			if (service.stationStuff.containsKey(mediaServer)) {
-				mediaObjects = service.stationStuff.get(mediaServer);
+			if (service.stationStuff.containsKey(mediaServerName)) {
+				mediaObjects = service.stationStuff.get(mediaServerName);
 			} else {
 				mediaObjects = new StationStuff();
 				mediaObjects.browser = new BufferBrowser(
@@ -257,7 +235,7 @@ public class PlayerBinder extends Binder {
 				mediaObjects.totem = mediaServer.getTotemPlayer();
 				mediaObjects.imageViewer = mediaServer.getImageViewer();
 				mediaObjects.name = mediaServerName;
-				service.stationStuff.put(mediaServer, mediaObjects);
+				service.stationStuff.put(mediaServerName, mediaObjects);
 			}
 			service.setCurrentMediaServer(mediaObjects);
 			return mediaObjects;

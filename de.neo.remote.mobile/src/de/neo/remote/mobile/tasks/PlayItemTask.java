@@ -1,4 +1,4 @@
-package de.neo.remote.mobile.util;
+package de.neo.remote.mobile.tasks;
 
 import android.os.AsyncTask;
 import android.widget.Toast;

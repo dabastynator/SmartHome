@@ -69,7 +69,7 @@ public class RemoteService extends Service {
 	 */
 	protected ControlCenterBuffer controlCenter;
 
-	protected Map<IMediaServer, StationStuff> stationStuff;
+	protected Map<String, StationStuff> stationStuff;
 
 	protected Map<String, Object> unitMap;
 	protected Map<String, float[]> unitMapPostion;
@@ -85,7 +85,7 @@ public class RemoteService extends Service {
 	 */
 	protected NotificationHandler notificationHandler;
 
-	protected ProgressListener downloadListener;
+	public ProgressListener downloadListener;
 
 	protected IInternetSwitchListener internetSwitchListener;
 
@@ -184,7 +184,7 @@ public class RemoteService extends Service {
 		};
 		RMILogger.addLogListener(rmiLogListener);
 		binder = new PlayerBinder(this);
-		stationStuff = new HashMap<IMediaServer, StationStuff>();
+		stationStuff = new HashMap<String, StationStuff>();
 		unitMap = new HashMap<String, Object>();
 		unitMapPostion = new HashMap<String, float[]>();
 		unitMapDescription = new HashMap<String, String>();
@@ -237,24 +237,37 @@ public class RemoteService extends Service {
 		return localServer;
 	}
 
-	public void setCurrentMediaServer(StationStuff mediaObjects)
+	public void setCurrentMediaServer(final StationStuff mediaObjects)
 			throws RemoteException {
 		if (mediaObjects != null) {
-			try {
-				mediaObjects.mplayer
-						.removePlayerMessageListener(playerListener);
-				mediaObjects.totem.removePlayerMessageListener(playerListener);
-			} catch (RemoteException e) {
-			}
-		}
-		currentMediaServer = mediaObjects;
-		currentMediaServer.mplayer.addPlayerMessageListener(playerListener);
-		currentMediaServer.totem.addPlayerMessageListener(playerListener);
-		currentMediaServer.omxplayer.addPlayerMessageListener(playerListener);
-		try {
-			playerListener.playerMessage(currentMediaServer.player
-					.getPlayingBean());
-		} catch (PlayerException e) {
+			new Thread() {
+				@Override
+				public void run() {
+					StationStuff oldServer = currentMediaServer;
+					currentMediaServer = mediaObjects;
+					try {
+						if (oldServer != null) {
+							oldServer.totem
+									.removePlayerMessageListener(playerListener);
+							oldServer.mplayer
+									.removePlayerMessageListener(playerListener);
+						}
+					} catch (RemoteException e) {
+					}
+					try {
+						currentMediaServer.mplayer
+								.addPlayerMessageListener(playerListener);
+						currentMediaServer.totem
+								.addPlayerMessageListener(playerListener);
+						currentMediaServer.omxplayer
+								.addPlayerMessageListener(playerListener);
+						playerListener.playerMessage(currentMediaServer.player
+								.getPlayingBean());
+					} catch (PlayerException e) {
+					} catch (RemoteException e) {
+					}
+				}
+			}.start();
 		}
 	}
 
@@ -325,7 +338,8 @@ public class RemoteService extends Service {
 				unitMapPostion.put(name, position);
 				unitMapDescription.put(name, description);
 				if (object instanceof IInternetSwitch)
-					((IInternetSwitch)object).registerPowerSwitchListener(internetSwitchListener);
+					((IInternetSwitch) object)
+							.registerPowerSwitchListener(internetSwitchListener);
 			} catch (Exception e) {
 				Log.e("error",
 						e.getClass().getSimpleName() + ": " + e.getMessage());

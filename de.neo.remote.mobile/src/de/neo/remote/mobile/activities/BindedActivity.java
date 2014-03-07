@@ -36,7 +36,7 @@ public abstract class BindedActivity extends Activity implements
 	/**
 	 * binder object
 	 */
-	protected PlayerBinder binder;
+	public PlayerBinder binder;
 
 	/**
 	 * area that contains the download progress and cancel button

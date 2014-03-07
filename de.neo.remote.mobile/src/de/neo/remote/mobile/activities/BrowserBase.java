@@ -86,7 +86,7 @@ public abstract class BrowserBase extends BindedActivity {
 	/**
 	 * list view
 	 */
-	protected ListView listView;
+	public ListView listView;
 
 	/**
 	 * listener for remote actions
@@ -101,7 +101,7 @@ public abstract class BrowserBase extends BindedActivity {
 	/**
 	 * map to get full path string from a file name of a playlist item
 	 */
-	protected Map<String, String> plsFileMap = new HashMap<String, String>();
+	public Map<String, String> plsFileMap = new HashMap<String, String>();
 
 	/**
 	 * area that contains the search field and button
@@ -126,12 +126,12 @@ public abstract class BrowserBase extends BindedActivity {
 	/**
 	 * current shown playlist
 	 */
-	protected String currentPlayList;
+	public String currentPlayList;
 
 	/**
 	 * current selected item
 	 */
-	protected int selectedPosition;
+	public int selectedPosition;
 
 	/**
 	 * play / pause button
@@ -148,13 +148,13 @@ public abstract class BrowserBase extends BindedActivity {
 	 */
 	protected AI ai;
 
-	protected ImageView mplayerButton;
+	public ImageView mplayerButton;
 
-	protected ImageView totemButton;
+	public ImageView totemButton;
 
-	protected ImageView filesystemButton;
+	public ImageView filesystemButton;
 
-	protected ImageView playlistButton;
+	public ImageView playlistButton;
 
 	/**
 	 * Name of current music server
@@ -165,7 +165,7 @@ public abstract class BrowserBase extends BindedActivity {
 
 	protected ImageView dvdButton;
 
-	protected ImageView omxButton;
+	public ImageView omxButton;
 
 	protected ProgressDialog progress;
 
@@ -266,7 +266,7 @@ public abstract class BrowserBase extends BindedActivity {
 
 	private long max = 0;
 
-	protected PlayingBean playingBean;
+	public PlayingBean playingBean;
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {

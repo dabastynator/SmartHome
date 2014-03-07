@@ -1,7 +1,7 @@
 package de.neo.remote.mobile.activities;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Locale;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,11 +31,11 @@ import de.neo.remote.mediaserver.api.IImageViewer;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
-import de.neo.remote.mobile.util.BrowserAdapter;
+import de.neo.remote.mobile.tasks.BrowserLoadTask;
+import de.neo.remote.mobile.tasks.PlayItemTask;
+import de.neo.remote.mobile.tasks.PlayTatortTask;
+import de.neo.remote.mobile.tasks.PlayYoutubeTask;
 import de.neo.remote.mobile.util.BufferBrowser;
-import de.neo.remote.mobile.util.PlayItemTask;
-import de.neo.remote.mobile.util.PlayTatortTask;
-import de.neo.remote.mobile.util.PlayYoutubeTask;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.neo.rmi.transceiver.AbstractReceiver.ReceiverState;
@@ -87,42 +87,7 @@ public class BrowserActivity extends BrowserBase {
 		return true;
 	}
 
-	private String[] loadItems(String[] gotoPath) throws RemoteException,
-			PlayerException {
-		StationStuff mediaServer = binder.getLatestMediaServer();
-		if (mediaServer == null) {
-			disableScreen();
-			return new String[] {};
-		}
-		switch (viewerState) {
-		case DIRECTORIES:
-			if (gotoPath != null && gotoPath.length > 0 && gotoPath[0] != null)
-				mediaServer.browser.goTo(gotoPath[0]);
-			String[] directories = mediaServer.browser.getDirectories();
-			String[] files = mediaServer.browser.getFiles();
-			String[] all = new String[directories.length + files.length];
-			System.arraycopy(directories, 0, all, 0, directories.length);
-			System.arraycopy(files, 0, all, directories.length, files.length);
-			return all;
-		case PLAYLISTS:
-			String[] playLists = mediaServer.pls.getPlayLists();
-			Arrays.sort(playLists);
-			return playLists;
-		case PLS_ITEMS:
-			plsFileMap.clear();
-			for (String item : mediaServer.pls.listContent(currentPlayList))
-				if (item.indexOf("/") >= 0)
-					plsFileMap.put(item.substring(item.lastIndexOf("/") + 1),
-							item);
-				else
-					plsFileMap.put(item, item);
-			return plsFileMap.keySet().toArray(new String[] {});
-		default:
-			return new String[] {};
-		}
-	}
-
-	private void disableScreen() {
+	public void disableScreen() {
 		setTitle("No connection");
 		setProgressBarVisibility(false);
 		listView.setAdapter(new ArrayAdapter<String>(this,
@@ -134,154 +99,61 @@ public class BrowserActivity extends BrowserBase {
 	 * 
 	 * @param gotoPath
 	 */
-	private void updateGUI(final String gotoPath) {
-		if (binder.getLatestMediaServer() == null) {
-			disableScreen();
-			return;
-		}
-		new AsyncTask<String, Integer, String[]>() {
-
-			Exception exeption = null;
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				setProgressBarVisibility(true);
-				setTitle("loading...");
-			}
-
-			@Override
-			protected String[] doInBackground(String... params) {
-
-				try {
-					exeption = null;
-					return loadItems(params);
-				} catch (Exception e) {
-					exeption = e;
-					return new String[] {};
-				}
-			}
-
-			@Override
-			protected void onPostExecute(String[] result) {
-				super.onPostExecute(result);
-				StationStuff mediaServer = binder.getLatestMediaServer();
-				setProgressBarVisibility(false);
-				if (mediaServer == null) {
-					setTitle("No media server@"
-							+ binder.getLatestMediaServer().name);
-					listView.setAdapter(new BrowserAdapter(
-							BrowserActivity.this, null, new String[] {},
-							viewerState, playingBean));
-					return;
-				}
-				listView.setAdapter(new BrowserAdapter(BrowserActivity.this,
-						mediaServer.browser, result, viewerState, playingBean));
-				listView.setSelection(selectedPosition);
-				switch (viewerState) {
-				case DIRECTORIES:
-					try {
-						setTitle(mediaServer.browser.getLocation() + "@"
-								+ mediaServer.name);
-					} catch (RemoteException e) {
-						setTitle("no connection");
-					}
-					filesystemButton
-							.setBackgroundResource(R.drawable.image_border);
-					playlistButton.setBackgroundDrawable(null);
-					break;
-				case PLAYLISTS:
-					setTitle("Playlists@" + mediaServer.name);
-					playlistButton
-							.setBackgroundResource(R.drawable.image_border);
-					filesystemButton.setBackgroundDrawable(null);
-					break;
-				case PLS_ITEMS:
-					playlistButton
-							.setBackgroundResource(R.drawable.image_border);
-					filesystemButton.setBackgroundDrawable(null);
-					setTitle("Playlist: " + currentPlayList + "@"
-							+ mediaServer.name);
-				}
-				if (exeption != null) {
-					if (exeption instanceof NullPointerException)
-						Toast.makeText(
-								BrowserActivity.this,
-								"NullPointerException: Mediaserver might incorrectly configured",
-								Toast.LENGTH_SHORT).show();
-					else if (exeption.getMessage() != null
-							&& exeption.getMessage().length() > 0)
-						Toast.makeText(BrowserActivity.this,
-								exeption.getMessage(), Toast.LENGTH_SHORT)
-								.show();
-					else
-						Toast.makeText(BrowserActivity.this,
-								exeption.getClass().getSimpleName(),
-								Toast.LENGTH_SHORT).show();
-				}
-				IPlayer player = mediaServer.player;
-				totemButton.setBackgroundDrawable(null);
-				mplayerButton.setBackgroundDrawable(null);
-				if (omxButton != null)
-					omxButton.setBackgroundDrawable(null);
-				if (player == binder.getLatestMediaServer().mplayer)
-					mplayerButton
-							.setBackgroundResource(R.drawable.image_border);
-				if (player == binder.getLatestMediaServer().totem)
-					totemButton.setBackgroundResource(R.drawable.image_border);
-				if (player == binder.getLatestMediaServer().omxplayer
-						&& omxButton != null)
-					omxButton.setBackgroundResource(R.drawable.image_border);
-			}
-
-		}.execute(new String[] { gotoPath });
-	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		StationStuff mediaServer = binder.getLatestMediaServer();
-		try {
-			if (binder == null)
-				return super.onKeyDown(keyCode, event);
-			if (keyCode == KeyEvent.KEYCODE_BACK) {
-				if (searchLayout.getVisibility() == View.VISIBLE) {
-					searchLayout.setVisibility(View.GONE);
-					searchText.setText("");
-					return true;
-				}
-				selectedPosition = 0;
-				if (viewerState == ViewerState.DIRECTORIES)
-					if (mediaServer.browser.goBack()) {
-						updateGUI(null);
-						return true;
+		final StationStuff mediaServer = binder.getLatestMediaServer();
+		if (binder == null)
+			return super.onKeyDown(keyCode, event);
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (searchLayout.getVisibility() == View.VISIBLE) {
+				searchLayout.setVisibility(View.GONE);
+				searchText.setText("");
+				return true;
+			}
+			selectedPosition = 0;
+			if (viewerState == ViewerState.DIRECTORIES) {
+				new BrowserLoadTask(this, null, true).execute();
+				return true;
+			}
+			if (viewerState == ViewerState.PLAYLISTS) {
+				viewerState = ViewerState.DIRECTORIES;
+				new BrowserLoadTask(this, null, false).execute();
+				return true;
+			}
+			if (viewerState == ViewerState.PLS_ITEMS) {
+				viewerState = ViewerState.PLAYLISTS;
+				new BrowserLoadTask(this, null, false).execute();
+				return true;
+			}
+		}
+		if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+			searchLayout.setVisibility(View.VISIBLE);
+			searchText.requestFocus();
+			InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			mgr.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
+		}
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+			new Thread() {
+				public void run() {
+					try {
+						mediaServer.player.volDown();
+					} catch (Exception e) {
 					}
-				if (viewerState == ViewerState.PLAYLISTS) {
-					viewerState = ViewerState.DIRECTORIES;
-					updateGUI(null);
-					return true;
-				}
-				if (viewerState == ViewerState.PLS_ITEMS) {
-					viewerState = ViewerState.PLAYLISTS;
-					updateGUI(null);
-					return true;
-				}
-			}
-			if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-				searchLayout.setVisibility(View.VISIBLE);
-				searchText.requestFocus();
-				InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				mgr.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
-			}
-			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-				mediaServer.player.volDown();
-				return true;
-			}
-			if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-				mediaServer.player.volUp();
-				return true;
-			}
-		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+				};
+			}.start();
+			return true;
+		}
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+			new Thread() {
+				public void run() {
+					try {
+						mediaServer.player.volUp();
+					} catch (Exception e) {
+					}
+				};
+			}.start();
+			return true;
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -502,11 +374,11 @@ public class BrowserActivity extends BrowserBase {
 				break;
 			case R.id.opt_playlist:
 				viewerState = ViewerState.PLAYLISTS;
-				updateGUI(null);
+				new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_refresh:
 				binder.getMediaServerByName(mediaServerName);
-				updateGUI(null);
+				new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_record:
 				ai.record();
@@ -539,21 +411,30 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		StationStuff mediaServer = binder.getLatestMediaServer();
+		final StationStuff mediaServer = binder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_item_play:
-				mediaServer.player.play(mediaServer.browser.getFullLocation()
-						+ selectedItem);
+				new PlayItemTask(this, selectedItem, binder)
+						.execute(new String[] {});
 				Toast.makeText(BrowserActivity.this, "Ordner abspielen",
 						Toast.LENGTH_SHORT).show();
 				break;
 			case R.id.opt_item_addplaylist:
-				Intent i = new Intent(this, SelectPlaylistActivity.class);
-				i.putExtra(SelectPlaylistActivity.PLS_LIST,
-						mediaServer.pls.getPlayLists());
-				startActivityForResult(i,
-						SelectPlaylistActivity.SELECT_PLS_CODE);
+				new Thread() {
+					public void run() {
+						try {
+							Intent i = new Intent(BrowserActivity.this,
+									SelectPlaylistActivity.class);
+							i.putExtra(SelectPlaylistActivity.PLS_LIST,
+									mediaServer.pls.getPlayLists());
+							startActivityForResult(i,
+									SelectPlaylistActivity.SELECT_PLS_CODE);
+						} catch (RemoteException e) {
+						}
+					};
+				}.start();
+
 				break;
 			case R.id.opt_item_download:
 				if (viewerState == ViewerState.PLAYLISTS) {
@@ -568,14 +449,28 @@ public class BrowserActivity extends BrowserBase {
 				break;
 			case R.id.opt_item_delete:
 				selectedPosition = listView.getFirstVisiblePosition();
-				mediaServer.browser.delete(mediaServer.browser
-						.getFullLocation() + selectedItem);
+				new Thread() {
+					public void run() {
+						try {
+							mediaServer.browser.delete(mediaServer.browser
+									.getFullLocation() + selectedItem);
+						} catch (RemoteException e) {
+						}
+					};
+				}.start();
 				((BufferBrowser) mediaServer.browser).setDirty();
-				updateGUI(null);
+				new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_pls_delete:
-				mediaServer.pls.removePlayList(selectedItem);
-				updateGUI(null);
+				new Thread() {
+					public void run() {
+						try {
+							mediaServer.pls.removePlayList(selectedItem);
+						} catch (RemoteException e) {
+						}
+					};
+				}.start();
+				new BrowserLoadTask(this, null, false).execute();
 				Toast.makeText(BrowserActivity.this,
 						"Playlist '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -583,11 +478,19 @@ public class BrowserActivity extends BrowserBase {
 			case R.id.opt_pls_show:
 				viewerState = ViewerState.PLS_ITEMS;
 				currentPlayList = selectedItem;
-				updateGUI(null);
+				new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_pls_item_delete:
-				mediaServer.pls.removeItem(currentPlayList, selectedItem);
-				updateGUI(null);
+				new Thread() {
+					public void run() {
+						try {
+							mediaServer.pls.removeItem(currentPlayList,
+									selectedItem);
+						} catch (Exception e) {
+						}
+					};
+				}.start();
+				new BrowserLoadTask(this, null, false).execute();
 				Toast.makeText(BrowserActivity.this,
 						"Entry '" + selectedItem + "' deleted",
 						Toast.LENGTH_SHORT).show();
@@ -606,45 +509,52 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		StationStuff mediaServer = binder.getLatestMediaServer();
+		final StationStuff mediaServer = binder.getLatestMediaServer();
 		if (data == null)
 			return;
-		try {
-			if (requestCode == SelectPlaylistActivity.SELECT_PLS_CODE) {
-				if (data.getExtras() == null)
-					return;
-				String pls = data.getExtras().getString(
-						SelectPlaylistActivity.RESULT);
-				mediaServer.pls.extendPlayList(pls,
-						mediaServer.browser.getFullLocation() + selectedItem);
-				Toast.makeText(BrowserActivity.this, selectedItem + " added",
-						Toast.LENGTH_SHORT).show();
-			}
-			if (requestCode == GetTextActivity.RESULT_CODE && data != null
-					&& data.getExtras() != null) {
-				String pls = data.getExtras().getString(GetTextActivity.RESULT);
-				mediaServer.pls.addPlayList(pls);
-				updateGUI(null);
-				Toast.makeText(BrowserActivity.this,
-						"playlist '" + pls + "' added", Toast.LENGTH_SHORT)
-						.show();
-			}
-			if (requestCode == GET_TATORT_URL_CODE && data != null) {
-				String url = data.getExtras().getString(GetTextActivity.RESULT);
-				PlayTatortTask task = new PlayTatortTask(this, url, binder);
-				task.execute(new String[] {});
-			}
-			if (requestCode == FILE_REQUEST) {
-				Uri uri = data.getData();
-				binder.uploadFile(mediaServer.browser, new File(
-						getFilePathByUri(uri)));
-			}
-		} catch (RemoteException e) {
-			Toast.makeText(BrowserActivity.this, e.getMessage(),
+		if (requestCode == SelectPlaylistActivity.SELECT_PLS_CODE) {
+			if (data.getExtras() == null)
+				return;
+			final String pls = data.getExtras().getString(
+					SelectPlaylistActivity.RESULT);
+			new Thread() {
+				public void run() {
+					try {
+						mediaServer.pls.extendPlayList(pls,
+								mediaServer.browser.getFullLocation()
+										+ selectedItem);
+					} catch (Exception e) {
+					}
+				};
+			}.start();
+			Toast.makeText(BrowserActivity.this, selectedItem + " added",
 					Toast.LENGTH_SHORT).show();
-		} catch (PlayerException e) {
-			Toast.makeText(BrowserActivity.this, e.getMessage(),
-					Toast.LENGTH_SHORT).show();
+		}
+		if (requestCode == GetTextActivity.RESULT_CODE && data != null
+				&& data.getExtras() != null) {
+			final String pls = data.getExtras().getString(
+					GetTextActivity.RESULT);
+			new Thread() {
+				public void run() {
+					try {
+						mediaServer.pls.addPlayList(pls);
+					} catch (RemoteException e) {
+					}
+				};
+			}.start();
+			new BrowserLoadTask(this, null, false).execute();
+			Toast.makeText(BrowserActivity.this,
+					"playlist '" + pls + "' added", Toast.LENGTH_SHORT).show();
+		}
+		if (requestCode == GET_TATORT_URL_CODE && data != null) {
+			String url = data.getExtras().getString(GetTextActivity.RESULT);
+			PlayTatortTask task = new PlayTatortTask(this, url, binder);
+			task.execute(new String[] {});
+		}
+		if (requestCode == FILE_REQUEST) {
+			Uri uri = data.getData();
+			binder.uploadFile(mediaServer.browser, new File(
+					getFilePathByUri(uri)));
 		}
 	}
 
@@ -686,8 +596,8 @@ public class BrowserActivity extends BrowserBase {
 	void onBinderConnected() {
 		super.onBinderConnected();
 		if (binder.getLatestMediaServer() != null
-				&& binder.getLatestMediaServer().name.equals(mediaServerName)) {
-			updateGUI(null);
+				&& !binder.getLatestMediaServer().name.equals(mediaServerName)) {
+			new BrowserLoadTask(this, null, false).execute();
 		}
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -722,7 +632,7 @@ public class BrowserActivity extends BrowserBase {
 	}
 
 	public static boolean isImage(String item) {
-		item = item.toLowerCase();
+		item = item.toLowerCase(Locale.US);
 		for (String extension : IImageViewer.IMAGE_EXTENSIONS)
 			if (item.endsWith(extension))
 				return true;
@@ -760,7 +670,8 @@ public class BrowserActivity extends BrowserBase {
 					Toast.makeText(BrowserActivity.this, exeption.getMessage(),
 							Toast.LENGTH_SHORT).show();
 				if (binder.getLatestMediaServer() != null) {
-					updateGUI(null);
+					new BrowserLoadTask(BrowserActivity.this, null, false)
+							.execute();
 				} else {
 					disableScreen();
 				}
@@ -779,7 +690,7 @@ public class BrowserActivity extends BrowserBase {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			updateGUI(null);
+			new BrowserLoadTask(BrowserActivity.this, null, false).execute();
 			if (binder.getReceiver() != null
 					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
 				downloadLayout.setVisibility(View.VISIBLE);
@@ -806,7 +717,8 @@ public class BrowserActivity extends BrowserBase {
 				try {
 					if (position < mediaServer.browser.getDirectories().length) {
 						selectedPosition = 0;
-						updateGUI(item);
+						new BrowserLoadTask(BrowserActivity.this, item, false)
+								.execute();
 						return;
 					}
 				} catch (RemoteException e) {
@@ -823,12 +735,12 @@ public class BrowserActivity extends BrowserBase {
 
 	public void showFileSystem(View view) {
 		viewerState = ViewerState.DIRECTORIES;
-		updateGUI(null);
+		new BrowserLoadTask(this, null, false).execute();
 	}
 
 	public void showPlaylist(View view) {
 		viewerState = ViewerState.PLAYLISTS;
-		updateGUI(null);
+		new BrowserLoadTask(this, null, false).execute();
 	}
 
 	public void setTotem(View view) {
