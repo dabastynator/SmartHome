@@ -4,6 +4,7 @@
     <item
         android:id="@+id/item2"
         android:icon="@drawable/player"
+        android:showAsAction="never"
         android:title="@string/str_player">
         <menu>
             <item
@@ -16,6 +17,7 @@
     </item>
     <item
         android:id="@+id/item5"
+        android:showAsAction="ifRoom"
         android:icon="@drawable/pls_smal"
         android:title="Playlists">
         <menu>
@@ -30,6 +32,7 @@
     <item
         android:id="@+id/opt_dvd"
         android:icon="@drawable/dvd"
+        android:showAsAction="never"
         android:title="DVD">
         <menu>
             <item
@@ -49,15 +52,18 @@
     <item
         android:id="@+id/opt_record"
         android:icon="@drawable/mic_32"
+        android:showAsAction="ifRoom"
         android:title="@string/str_record">
     </item>
     <item
         android:id="@+id/opt_refresh"
+        android:showAsAction="ifRoom"
         android:icon="@drawable/refresh_32"
         android:title="@string/str_refresh">
     </item>
     <item
         android:id="@+id/opt_control"
+        android:showAsAction="ifRoom"
         android:icon="@drawable/control"
         android:title="@string/str_control">
         <menu>
