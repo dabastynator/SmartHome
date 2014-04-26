@@ -47,7 +47,7 @@ public class OMXPlayer extends AbstractPlayer {
 			omxIn = new PrintStream(omxProcess.getOutputStream());
 			// start player observer
 			new OMXObserver(omxProcess.getInputStream()).start();
-			
+
 			informFile(new File(file));
 		} catch (IOException e) {
 		}
@@ -136,16 +136,20 @@ public class OMXPlayer extends AbstractPlayer {
 	@Override
 	public void playFromArdMediathek(String url) throws RemoteException,
 			PlayerException {
-		streamFromUrl(TATORT_DL_FILE, url);
+		streamFromUrl(TATORT_DL_FILE, url, url);
 	}
 
 	@Override
 	public void playFromYoutube(String url) throws RemoteException,
 			PlayerException {
-		streamFromUrl(YOUTUBE_DL_FILE, url);
+		String[] split = url.split(" ");
+		String title = "";
+		for (int i = 0; i < split.length - 1; i++)
+			title = title + " " + split[i];
+		streamFromUrl(YOUTUBE_DL_FILE, split[split.length - 1], title);
 	}
 
-	public void streamFromUrl(String script, String url)
+	public void streamFromUrl(String script, String url, String title)
 			throws RemoteException, PlayerException {
 		try {
 			quit();
@@ -162,7 +166,8 @@ public class OMXPlayer extends AbstractPlayer {
 			omxObserver = new OMXObserver(omxProcess.getInputStream());
 			omxObserver.start();
 			playingBean = new PlayingBean();
-			playingBean.setTitle(url);
+			playingBean.setPath(url);
+			playingBean.setTitle(title);
 			playingBean.setState(STATE.PLAY);
 			informPlayingBean(playingBean);
 		} catch (IOException e) {
