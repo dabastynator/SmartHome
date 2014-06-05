@@ -199,10 +199,15 @@ public class MPlayer extends AbstractPlayer {
 			PlayerException {
 		if (mplayerIn == null)
 			startPlayer();
-		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE, url);
+		String[] split = url.split(" ");
+		String title = "";
+		for (int i = 0; i < split.length - 1; i++)
+			title = title + " " + split[i];
+		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE,
+				split[split.length - 1]);
 		writeCommand("loadfile " + youtubeStreamUrl);
 	}
-	
+
 	@Override
 	public void playFromArdMediathek(String url) throws RemoteException,
 			PlayerException {

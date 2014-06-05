@@ -31,7 +31,7 @@ public class MediaControlUnit implements IControlUnit {
 	}
 
 	@Override
-	public IMediaServer getRemoteableControlObject() throws RemoteException {
+	public IMediaServer getRemoteableControlObject() {
 		return mediaServer;
 	}
 
