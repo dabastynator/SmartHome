@@ -56,7 +56,7 @@ public class DynamicAdapter {
 	 * allocates new adapter
 	 * 
 	 * @param object
-	 * @param object2 
+	 * @param object2
 	 */
 	public DynamicAdapter(String id, Object object, Server server) {
 		this.id = id;
@@ -167,8 +167,9 @@ public class DynamicAdapter {
 	public static Method getCompatibleMethod(Class c, String methodName,
 			Class... paramTypes) {
 		Method[] methods = c.getMethods();
+		Method m = null;
 		for (int i = 0; i < methods.length; i++) {
-			Method m = methods[i];
+			m = methods[i];
 
 			if (!m.getName().equals(methodName)) {
 				continue;
@@ -196,12 +197,12 @@ public class DynamicAdapter {
 				}
 			}
 
-			if (found) {
+			if (found && !m.isBridge()) {
 				return m;
 			}
 		}
 
-		return null;
+		return m;
 	}
 
 }
