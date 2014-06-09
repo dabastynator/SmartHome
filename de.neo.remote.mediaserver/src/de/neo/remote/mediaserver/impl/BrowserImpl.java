@@ -7,7 +7,12 @@ import java.awt.GraphicsEnvironment;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +34,11 @@ public class BrowserImpl implements IBrowser {
 
 	public static final int DOWNLOAD_PORT = 5033;
 
+	public static final String THUMBNAILS = ".thumbnail";
+
 	private String location;
 	private String root;
+	private File thumbnails;
 
 	/**
 	 * Create new browser
@@ -38,10 +46,15 @@ public class BrowserImpl implements IBrowser {
 	 * @param path
 	 *            to root directory for the browser
 	 */
-	public BrowserImpl(String string) {
-		if (!string.endsWith(File.separator))
-			string += File.separator;
-		root = location = string;
+	public BrowserImpl(String directory, String temporaryFolder) {
+		if (!directory.endsWith(File.separator))
+			directory += File.separator;
+		root = location = directory;
+		if (!temporaryFolder.endsWith(File.separator))
+			temporaryFolder += File.separator;
+		thumbnails = new File(temporaryFolder + THUMBNAILS);
+		if (!thumbnails.exists())
+			thumbnails.mkdir();
 	}
 
 	@Override
@@ -159,33 +172,85 @@ public class BrowserImpl implements IBrowser {
 	public void fireThumbnails(IThumbnailListener listener, int width,
 			int height) throws RemoteException {
 		for (String fileName : new File(location).list()) {
-			File file = new File(location + fileName);
+			String absoluteFileName = location + fileName;
+			File file = new File(absoluteFileName);
+			File thumbnailFile = new File(getThumbnailFile(absoluteFileName));
 			if (file.isFile() && fileName.length() > 3) {
 				String extension = fileName.toUpperCase().substring(
 						fileName.length() - 3);
 				if (extension.equals("JPG") || extension.equals("PNG")
 						|| extension.equals("GIF")) {
-					try {
-						BufferedImage src = ImageIO.read(file);
-						double radio = Math.min(
-								width / (double) src.getWidth(), height
-										/ (double) src.getHeight());
-						int w = (int) (radio * src.getWidth());
-						int h = (int) (radio * src.getHeight());
-						if (w % 2 != 0)
-							w++;
-						BufferedImage thumbnail = scale(src, w, h);
-						int[] rgb = ((DataBufferInt) thumbnail.getData()
-								.getDataBuffer()).getData();
-						rgb = compressRGB565(rgb, w, h);
+					Thumbnail thumbnailData = null;
+					if (!thumbnailFile.exists())
+						thumbnailData = createThumbnail(file, thumbnailFile,
+								width, height);
+					else
+						thumbnailData = readThumbnail(thumbnailFile);
+					if (thumbnailData != null) {
 						System.out.println("send thumbnail: " + fileName);
-						listener.setThumbnail(fileName, w, h, rgb);
-					} catch (Exception e) {
-						file.getName();
+						listener.setThumbnail(fileName, thumbnailData.width,
+								thumbnailData.height, thumbnailData.rgb);
 					}
 				}
 			}
 		}
+	}
+
+	private Thumbnail readThumbnail(File thumbnailFile) {
+		try {
+			Thumbnail data = new Thumbnail();
+			DataInputStream input = new DataInputStream(new FileInputStream(thumbnailFile));
+			data.width = input.readInt();
+			data.height = input.readInt();
+			data.rgb = new int[data.width * data.height / 2];
+			for (int i=0;i<data.rgb.length;i++)
+				data.rgb[i] = input.readInt();
+			input.close();
+			return data;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private Thumbnail createThumbnail(File file, File thumbnailFile, int width,
+			int height) {
+		try {
+			BufferedImage src = ImageIO.read(file);
+			Thumbnail thumbnailData = new Thumbnail();
+			double radio = Math.min(width / (double) src.getWidth(), height
+					/ (double) src.getHeight());
+			thumbnailData.width = (int) (radio * src.getWidth());
+			thumbnailData.height = (int) (radio * src.getHeight());
+			if (thumbnailData.width % 2 != 0)
+				thumbnailData.width++;
+			BufferedImage thumbnail = scale(src, thumbnailData.width,
+					thumbnailData.height);
+			thumbnailData.rgb = ((DataBufferInt) thumbnail.getData().getDataBuffer())
+					.getData();
+			thumbnailData.rgb = compressRGB565(thumbnailData.rgb, thumbnailData.width, thumbnailData.height);
+			DataOutputStream stream = new DataOutputStream(
+					new FileOutputStream(thumbnailFile));
+			stream.writeInt(thumbnailData.width);
+			stream.writeInt(thumbnailData.height);
+			for (int i = 0; i < thumbnailData.rgb.length; i++)
+				stream.writeInt(thumbnailData.rgb[i]);
+			stream.close();
+			return thumbnailData;
+		} catch (Exception e) {
+			file.getName();
+		}
+		return null;
+	}
+
+	private String getThumbnailFile(String absoluteFileName) {
+		return thumbnails.getAbsolutePath() + File.separator
+				+ absoluteFileName.replace(File.separator, "_")
+				+ absoluteFileName.hashCode();
 	}
 
 	private int compressRGB565(int i) {
@@ -238,7 +303,8 @@ public class BrowserImpl implements IBrowser {
 
 	public static void main(String[] args) {
 		try {
-			BrowserImpl impl = new BrowserImpl("/home/sebastian/temp");
+			BrowserImpl impl = new BrowserImpl("/home/sebastian/temp",
+					"/home/sebastian/temp");
 			impl.fireThumbnails(new IThumbnailListener() {
 				@Override
 				@Oneway
@@ -263,5 +329,12 @@ public class BrowserImpl implements IBrowser {
 		ServerPort serverport = new ServerPort(Server.getServer()
 				.getServerPort().getIp(), DOWNLOAD_PORT);
 		return serverport;
+	}
+
+	private class Thumbnail {
+
+		public int width;
+		public int height;
+		public int[] rgb;
 	}
 }
