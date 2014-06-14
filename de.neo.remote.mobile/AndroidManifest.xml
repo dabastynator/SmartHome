@@ -47,15 +47,6 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name="de.neo.remote.mobile.activities.GetTextActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name="de.neo.remote.mobile.activities.MouseActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask" >
-        </activity>
-        <activity
             android:name="de.neo.remote.mobile.activities.SelectServerActivity"
             android:label="@string/app_name" >
         </activity>
@@ -70,17 +61,6 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="de.neo.remote.mobile.activities.PowerActivity"
-            android:icon="@drawable/chat"
-            android:label="@string/app_name"
-            android:launchMode="singleTask" >
-        </activity>
-        <activity
-            android:name="de.neo.remote.mobile.activities.WebcamActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask" >
         </activity>
 
         <service android:name="de.neo.remote.mobile.services.RemoteService" >

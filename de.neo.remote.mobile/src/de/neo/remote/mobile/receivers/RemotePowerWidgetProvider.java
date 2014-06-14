@@ -7,7 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
-import de.neo.remote.mobile.activities.PowerActivity;
+import de.neo.remote.mobile.activities.SelectSwitchActivity;
 import de.neo.remote.mobile.services.WidgetPowerService;
 import de.remote.mobile.R;
 
@@ -49,7 +49,7 @@ public class RemotePowerWidgetProvider extends AppWidgetProvider {
 		// set switch functionality
 		Intent switchIntent = new Intent(context, WidgetPowerService.class);
 		switchIntent.setAction(ACTION_SWITCH);
-		switchIntent.putExtra(PowerActivity.SWITCH_NUMBER, id);
+		switchIntent.putExtra(SelectSwitchActivity.SWITCH_NUMBER, id);
 		PendingIntent switchPending = PendingIntent.getService(context,
 				switchIntent.hashCode(), switchIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);

@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.ListView;
 import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
@@ -14,22 +15,32 @@ import de.neo.remote.mobile.services.WidgetPowerService;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.remote.mobile.R;
 
-public class SelectSwitchActivity extends PowerActivity {
+public class SelectSwitchActivity extends BindedActivity {
 
+	public static final String SWITCH_NUMBER = "switch_number";
 	public static final String WIDGET_PREFS = "prefs";
 
 	private int appWidgetId;
 
 	private SelectSwitchListener listener;
+	protected ListView switchList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		setContentView(R.layout.powerpoint);
+
+		findComponents();
+
 		Bundle extras = getIntent().getExtras();
 		appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 				AppWidgetManager.INVALID_APPWIDGET_ID);
 		listener = new SelectSwitchListener();
+	}
+
+	private void findComponents() {
+		switchList = (ListView) findViewById(R.id.list_switches);
 	}
 
 	@Override
@@ -64,7 +75,7 @@ public class SelectSwitchActivity extends PowerActivity {
 			Intent switchIntent = new Intent(SelectSwitchActivity.this,
 					WidgetPowerService.class);
 			switchIntent.setAction(RemotePowerWidgetProvider.ACTION_SWITCH);
-			switchIntent.putExtra(PowerActivity.SWITCH_NUMBER, appWidgetId);
+			switchIntent.putExtra(SWITCH_NUMBER, appWidgetId);
 			PendingIntent switchPending = PendingIntent.getService(
 					SelectSwitchActivity.this, switchIntent.hashCode(),
 					switchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -82,6 +93,18 @@ public class SelectSwitchActivity extends PowerActivity {
 			finish();
 			return false;
 		}
+
+	}
+
+	@Override
+	void onBinderConnected() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	void onStartConnecting() {
+		// TODO Auto-generated method stub
 
 	}
 

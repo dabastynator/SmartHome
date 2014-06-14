@@ -93,12 +93,6 @@
                 android:icon="@drawable/left"
                 android:title="@string/str_move_left"/>
             <item
-                android:id="@+id/opt_mousepad"
-                android:title="Mousepad"/>
-            <item
-                android:id="@+id/opt_power"
-                android:title="@string/str_power"/>
-            <item
                 android:id="@+id/opt_search"
                 android:title="@string/str_search"/>
             <item

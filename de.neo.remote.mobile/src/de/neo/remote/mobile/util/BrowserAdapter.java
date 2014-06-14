@@ -18,7 +18,7 @@ import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.BrowserBase.ViewerState;
+import de.neo.remote.mobile.activities.BrowserActivity.ViewerState;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -30,7 +30,7 @@ import de.remote.mobile.R;
 public class BrowserAdapter extends ArrayAdapter<String> implements
 		IThumbnailListener {
 
-	public static final int PREVIEW_SIZE = 80;
+	public static final int PREVIEW_SIZE = 128;
 
 	/**
 	 * current viewer state

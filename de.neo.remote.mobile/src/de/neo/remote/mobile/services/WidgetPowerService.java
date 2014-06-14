@@ -16,7 +16,6 @@ import android.widget.Toast;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
-import de.neo.remote.mobile.activities.PowerActivity;
 import de.neo.remote.mobile.activities.SelectSwitchActivity;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -73,7 +72,7 @@ public class WidgetPowerService extends Service implements
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent != null && intent.getAction() != null) {
-			int widgetID = intent.getIntExtra(PowerActivity.SWITCH_NUMBER, 0);
+			int widgetID = intent.getIntExtra(SelectSwitchActivity.SWITCH_NUMBER, 0);
 			executeCommand(intent.getAction(), widgetID);
 		} else {
 			remotePowerViews = new RemoteViews(getApplicationContext()

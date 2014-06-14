@@ -3,8 +3,8 @@ package de.neo.remote.mobile.tasks;
 import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mobile.activities.BrowserActivity;
-import de.neo.remote.mobile.activities.BrowserBase.MediaState;
-import de.neo.remote.mobile.activities.BrowserBase.ViewerState;
+import de.neo.remote.mobile.activities.BrowserActivity.MediaState;
+import de.neo.remote.mobile.activities.BrowserActivity.ViewerState;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 

@@ -1,9 +1,13 @@
 package de.neo.remote.mobile.activities;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,22 +23,33 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
 import de.neo.remote.mediaserver.api.IImageViewer;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.mediaserver.api.PlayingBean.STATE;
+import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.BrowserLoadTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayTatortTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
+import de.neo.remote.mobile.util.AI;
+import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
@@ -47,15 +62,152 @@ import de.remote.mobile.R;
  * 
  * @author sebastian
  */
-public class BrowserActivity extends BrowserBase {
+public class BrowserActivity extends BindedActivity {
 
+	public static final String EXTRA_MEDIA_NAME = "mediaServerName";
+	public static final String VIEWER_STATE = "viewerstate";
+	public static final String MEDIA_STATE = "mediastate";
+	public static final String PLAYLIST = "playlist";
+	public static final int FILE_REQUEST = 3;
+	public static final String LISTVIEW_POSITION = "listviewPosition";
+	public static final String SPINNER_POSITION = "spinnerPosition";
+
+	/**
+	 * viewer states of the browser
+	 * 
+	 * @author sebastian
+	 */
+	public enum ViewerState {
+		DIRECTORIES, PLAYLISTS, PLS_ITEMS
+	}
+
+	/**
+	 * remote media state, either playing music / video or showing images.
+	 * 
+	 * @author sebastian
+	 */
+	public enum MediaState {
+		MUSIC_VIDEO, IMAGES
+	}
+
+	/**
+	 * list view
+	 */
+	public ListView listView;
+
+	/**
+	 * listener for remote actions
+	 */
+	protected IRemoteActionListener remoteListener;
+
+	/**
+	 * search input field
+	 */
+	protected EditText searchText;
+
+	/**
+	 * map to get full path string from a file name of a playlist item
+	 */
+	public Map<String, String> plsFileMap = new HashMap<String, String>();
+
+	/**
+	 * area that contains the search field and button
+	 */
+	protected LinearLayout searchLayout;
+
+	/**
+	 * current viewer state
+	 */
+	public ViewerState viewerState = ViewerState.DIRECTORIES;
+
+	/**
+	 * current remote media state
+	 */
+	public MediaState mediaState = MediaState.MUSIC_VIDEO;
+
+	/**
+	 * current selected item of the list view
+	 */
+	protected String selectedItem;
+
+	/**
+	 * current shown playlist
+	 */
+	public String currentPlayList;
+
+	/**
+	 * current selected item
+	 */
+	public int selectedPosition;
+
+	/**
+	 * play / pause button
+	 */
+	protected ImageView playButton;
+
+	/**
+	 * progress bar for download progress
+	 */
+	protected ProgressBar downloadProgress;
+
+	/**
+	 * The artificial intelligence recognize speech
+	 */
+	protected AI ai;
+
+	public ImageView mplayerButton;
+
+	public ImageView totemButton;
+
+	public ImageView filesystemButton;
+
+	public ImageView playlistButton;
+
+	/**
+	 * Name of current music server
+	 */
+	protected String mediaServerName;
+
+	protected LinearLayout dvdLayout;
+
+	protected ImageView dvdButton;
+
+	public ImageView omxButton;
+
+	protected TextView downloadText;
+	
 	private boolean isFullscreen;
-
-	private static final int GET_TATORT_URL_CODE = 5;
+	
+	private long maxDonwloadSize = 0;
+	
+	/**
+	 * area that contains the download progress and cancel button
+	 */
+	protected LinearLayout downloadLayout;
+	public PlayingBean playingBean;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_PROGRESS);
+
+		setContentView(R.layout.main);
+
+		findComponents();
+		// listView.setBackgroundResource(R.drawable.idefix_dark);
+		// listView.setScrollingCacheEnabled(false);
+		// listView.setCacheColorHint(0);
+		registerForContextMenu(listView);
+
+		if (getIntent().getExtras() != null
+				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_NAME)) {
+			mediaServerName = getIntent().getExtras().getString(
+					EXTRA_MEDIA_NAME);
+		}
+
+		ai = new AI(this);
 
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(true);
@@ -77,6 +229,22 @@ public class BrowserActivity extends BrowserBase {
 			mi.inflate(R.menu.pls_pref, menu);
 		if (viewerState == ViewerState.PLS_ITEMS)
 			mi.inflate(R.menu.pls_item_pref, menu);
+	}
+	
+	@Override
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
+		if (binder == null || binder.getLatestMediaServer() == null
+				|| !mediaserver.equals(binder.getLatestMediaServer().name))
+			return;
+		if (bean == null || bean.getState() == STATE.PLAY)
+			playButton.setImageResource(R.drawable.pause);
+		else if (bean.getState() == STATE.PAUSE)
+			playButton.setImageResource(R.drawable.play);
+		playingBean = bean;
+		if (listView != null && listView.getAdapter() instanceof BrowserAdapter) {
+			BrowserAdapter adapter = (BrowserAdapter) listView.getAdapter();
+			adapter.setPlayingFile(bean);
+		}
 	}
 
 	@Override
@@ -390,17 +558,12 @@ public class BrowserActivity extends BrowserBase {
 						Intent.createChooser(intent, "File Chooser"),
 						FILE_REQUEST);
 				break;
-			case R.id.opt_mousepad:
-				intent = new Intent(this, MouseActivity.class);
-				startActivity(intent);
-				break;
-			case R.id.opt_power:
-				intent = new Intent(this, PowerActivity.class);
-				startActivity(intent);
-				break;
 			case R.id.opt_tatort:
-				intent = new Intent(this, GetTextActivity.class);
-				startActivityForResult(intent, GET_TATORT_URL_CODE);
+				askForStream();
+				break;
+
+			case R.id.opt_create_playlist:
+				createNewPlaylist();
 				break;
 			}
 		} catch (Exception e) {
@@ -409,6 +572,74 @@ public class BrowserActivity extends BrowserBase {
 		return super.onMenuItemSelected(featureId, item);
 	}
 
+	private void askForStream() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Get stream");
+		alert.setMessage("Input the stream url");
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		alert.setView(input);
+
+		alert.setPositiveButton(getResources().getString(android.R.string.ok),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String url = input.getText().toString();
+						PlayTatortTask task = new PlayTatortTask(
+								BrowserActivity.this, url, binder);
+						task.execute(new String[] {});
+					}
+				});
+
+		alert.setNegativeButton(
+				getResources().getString(android.R.string.cancel),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+					}
+				});
+
+		alert.show();
+	}
+	
+	/**
+	 * find components by their id
+	 */
+	private void findComponents() {
+		listView = (ListView) findViewById(R.id.fileList);
+		searchText = (EditText) findViewById(R.id.txt_search);
+		searchLayout = (LinearLayout) findViewById(R.id.layout_search);
+		downloadLayout = (LinearLayout) findViewById(R.id.layout_download);
+		dvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
+		dvdButton = (ImageView) findViewById(R.id.button_dvd);
+		downloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
+		downloadText = (TextView) findViewById(R.id.lbl_download);
+		playButton = (ImageView) findViewById(R.id.button_play);
+		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
+		totemButton = (ImageView) findViewById(R.id.button_totem);
+		omxButton = (ImageView) findViewById(R.id.button_omxplayer);
+		filesystemButton = (ImageView) findViewById(R.id.button_filesystem);
+		playlistButton = (ImageView) findViewById(R.id.button_playlist);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt(VIEWER_STATE, viewerState.ordinal());
+		outState.putInt(MEDIA_STATE, mediaState.ordinal());
+		outState.putString(PLAYLIST, currentPlayList);
+		outState.putInt(LISTVIEW_POSITION, listView.getFirstVisiblePosition());
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle bundle) {
+		super.onRestoreInstanceState(bundle);
+		viewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
+		mediaState = MediaState.values()[bundle.getInt(MEDIA_STATE)];
+		currentPlayList = bundle.getString(PLAYLIST);
+		selectedPosition = bundle.getInt(LISTVIEW_POSITION);
+	}
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		final StationStuff mediaServer = binder.getLatestMediaServer();
@@ -434,7 +665,6 @@ public class BrowserActivity extends BrowserBase {
 						}
 					};
 				}.start();
-
 				break;
 			case R.id.opt_item_download:
 				if (viewerState == ViewerState.PLAYLISTS) {
@@ -506,6 +736,52 @@ public class BrowserActivity extends BrowserBase {
 		return super.onContextItemSelected(item);
 	}
 
+	private void createNewPlaylist() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("New playlist");
+		alert.setMessage("Input new playlist name");
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		alert.setView(input);
+
+		if (binder == null)
+			return;
+		final StationStuff mediaServer = binder.getLatestMediaServer();
+		if (mediaServer == null)
+			return;
+
+		alert.setPositiveButton(getResources().getString(android.R.string.ok),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						final String pls = input.getText().toString();
+						new Thread() {
+							public void run() {
+								try {
+									mediaServer.pls.addPlayList(pls);
+								} catch (RemoteException e) {
+								}
+							};
+						}.start();
+						new BrowserLoadTask(BrowserActivity.this, null, false)
+								.execute();
+						Toast.makeText(BrowserActivity.this,
+								"playlist '" + pls + "' added",
+								Toast.LENGTH_SHORT).show();
+					}
+				});
+
+		alert.setNegativeButton(
+				getResources().getString(android.R.string.cancel),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+					}
+				});
+
+		alert.show();
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -529,27 +805,6 @@ public class BrowserActivity extends BrowserBase {
 			}.start();
 			Toast.makeText(BrowserActivity.this, selectedItem + " added",
 					Toast.LENGTH_SHORT).show();
-		}
-		if (requestCode == GetTextActivity.RESULT_CODE && data != null
-				&& data.getExtras() != null) {
-			final String pls = data.getExtras().getString(
-					GetTextActivity.RESULT);
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.pls.addPlayList(pls);
-					} catch (RemoteException e) {
-					}
-				};
-			}.start();
-			new BrowserLoadTask(this, null, false).execute();
-			Toast.makeText(BrowserActivity.this,
-					"playlist '" + pls + "' added", Toast.LENGTH_SHORT).show();
-		}
-		if (requestCode == GET_TATORT_URL_CODE && data != null) {
-			String url = data.getExtras().getString(GetTextActivity.RESULT);
-			PlayTatortTask task = new PlayTatortTask(this, url, binder);
-			task.execute(new String[] {});
 		}
 		if (requestCode == FILE_REQUEST) {
 			Uri uri = data.getData();
@@ -594,7 +849,6 @@ public class BrowserActivity extends BrowserBase {
 
 	@Override
 	void onBinderConnected() {
-		super.onBinderConnected();
 		if (binder.getLatestMediaServer() != null
 				&& !binder.getLatestMediaServer().name.equals(mediaServerName)) {
 			new BrowserLoadTask(this, null, false).execute();
@@ -613,6 +867,16 @@ public class BrowserActivity extends BrowserBase {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		@SuppressWarnings("unchecked")
+		ArrayAdapter<String> adapter = (ArrayAdapter<String>) listView
+				.getAdapter();
+		String s = searchText.getText().toString();
+		if (adapter != null && s != null) {
+			adapter.getFilter().filter(s);
+			adapter.notifyDataSetChanged();
+			if (s.length() > 0)
+				searchLayout.setVisibility(View.VISIBLE);
+		}
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
@@ -741,6 +1005,60 @@ public class BrowserActivity extends BrowserBase {
 	public void showPlaylist(View view) {
 		viewerState = ViewerState.PLAYLISTS;
 		new BrowserLoadTask(this, null, false).execute();
+	}
+	
+	@Override
+	public void startReceive(long size, String file) {
+		maxDonwloadSize = size;
+		downloadLayout.setVisibility(View.VISIBLE);
+		downloadProgress.setProgress(0);
+		if (file != null)
+			downloadText.setText(file);
+	}
+
+	@Override
+	public void startSending(long size) {
+		maxDonwloadSize = size;
+		downloadLayout.setVisibility(View.VISIBLE);
+		downloadProgress.setProgress(0);
+	}
+
+	@Override
+	public void progressReceive(long size, String file) {
+		downloadLayout.setVisibility(View.VISIBLE);
+		if (maxDonwloadSize == 0)
+			maxDonwloadSize = binder.getReceiver().getFullSize();
+		downloadProgress.setProgress((int) ((100d * size) / maxDonwloadSize));
+		if (file != null)
+			downloadText.setText(file);
+	}
+
+	@Override
+	public void progressSending(long size) {
+		downloadLayout.setVisibility(View.VISIBLE);
+		if (maxDonwloadSize == 0)
+			maxDonwloadSize = binder.getReceiver().getFullSize();
+		downloadProgress.setProgress((int) ((100d * size) / maxDonwloadSize));
+	}
+
+	@Override
+	public void endReceive(long size) {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void endSending(long size) {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void exceptionOccurred(Exception e) {
+		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void downloadCanceled() {
+		downloadLayout.setVisibility(View.GONE);
 	}
 
 	public void setTotem(View view) {

@@ -1,6 +1,7 @@
 package de.neo.remote.mobile.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -38,10 +39,7 @@ public abstract class BindedActivity extends Activity implements
 	 */
 	public PlayerBinder binder;
 
-	/**
-	 * area that contains the download progress and cancel button
-	 */
-	protected LinearLayout downloadLayout;
+	protected ProgressDialog progress;
 
 	/**
 	 * id of connected server
@@ -144,6 +142,27 @@ public abstract class BindedActivity extends Activity implements
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
+	
+	@Override
+	protected void onPause() {
+		dismissProgress();
+		super.onPause();
+	}
+
+	public void startProgress(String title, String message) {
+		dismissProgress();
+		progress = new ProgressDialog(this);
+		progress.setTitle(title);
+		progress.setMessage(message);
+		progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progress.show();
+	}
+
+	public void dismissProgress() {
+		if (progress != null)
+			progress.dismiss();
+		progress = null;
+	}
 
 	/**
 	 * perform on connection to the binder
@@ -219,4 +238,5 @@ public abstract class BindedActivity extends Activity implements
 		// TODO Auto-generated method stub
 		
 	}
+
 }
