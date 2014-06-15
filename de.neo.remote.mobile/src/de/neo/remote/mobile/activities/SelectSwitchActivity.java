@@ -15,7 +15,7 @@ import de.neo.remote.mobile.services.WidgetPowerService;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.remote.mobile.R;
 
-public class SelectSwitchActivity extends BindedActivity {
+public class SelectSwitchActivity extends AbstractConnectionActivity {
 
 	public static final String SWITCH_NUMBER = "switch_number";
 	public static final String WIDGET_PREFS = "prefs";
@@ -29,7 +29,7 @@ public class SelectSwitchActivity extends BindedActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.powerpoint);
+		setContentView(R.layout.switch_main);
 
 		findComponents();
 
@@ -71,7 +71,7 @@ public class SelectSwitchActivity extends BindedActivity {
 					.getInstance(SelectSwitchActivity.this);
 			RemoteViews views = new RemoteViews(
 					SelectSwitchActivity.this.getPackageName(),
-					R.layout.power_widget);
+					R.layout.switch_widget);
 			Intent switchIntent = new Intent(SelectSwitchActivity.this,
 					WidgetPowerService.class);
 			switchIntent.setAction(RemotePowerWidgetProvider.ACTION_SWITCH);

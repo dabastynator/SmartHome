@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="60dp"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:id="@+id/button_play"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/pause"
+        android:text="|>" />
+
+    <ImageView
+        android:id="@+id/button_quit"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/stop"
+        android:text="x" />
+
+    <ImageView
+        android:id="@+id/button_pref"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/prev"
+        android:text="&lt;" />
+
+    <ImageView
+        android:id="@+id/button_next"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/next"
+        android:text=">" />
+
+    <ImageView
+        android:id="@+id/button_full"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/full"
+        android:text=">&lt;" />
+
+</LinearLayout>

@@ -2,23 +2,28 @@ package de.neo.remote.mobile.tasks;
 
 import android.os.AsyncTask;
 import android.widget.Toast;
-import de.neo.remote.mobile.activities.BrowserActivity;
-import de.neo.remote.mobile.activities.BrowserActivity.MediaState;
-import de.neo.remote.mobile.activities.BrowserActivity.ViewerState;
+import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity.MediaState;
+import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
+import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
+import de.remote.mobile.R;
 
 public class PlayItemTask extends AsyncTask<String, Integer, String> {
 
-	private BrowserActivity browserActivity;
+	private MediaServerActivity browserActivity;
 	private String item;
 	private PlayerBinder binder;
+	private BrowserFragment browserFragment;
 
-	public PlayItemTask(BrowserActivity browserActivity, String item,
+	public PlayItemTask(MediaServerActivity browserActivity, String item,
 			PlayerBinder binder) {
 		this.item = item;
 		this.browserActivity = browserActivity;
 		this.binder = binder;
+		this.browserFragment = (BrowserFragment) browserActivity.getFragmentManager()
+				.findFragmentById(R.id.mediaserver_fragment_browser);
 	}
 
 	@Override
@@ -41,23 +46,23 @@ public class PlayItemTask extends AsyncTask<String, Integer, String> {
 	protected String doInBackground(String... params) {
 		StationStuff mediaServer = binder.getLatestMediaServer();
 		try {
-			if (BrowserActivity.isImage(item)) {
-				browserActivity.mediaState = MediaState.IMAGES;
+			if (MediaServerActivity.isImage(item)) {
+				browserFragment.mediaState = MediaState.IMAGES;
 				String file = mediaServer.browser.getFullLocation() + item;
 				mediaServer.imageViewer.show(file);
 			} else {
-				if (browserActivity.viewerState == ViewerState.PLAYLISTS) {
+				if (browserFragment.viewerState == ViewerState.PLAYLISTS) {
 					mediaServer.player.playPlayList(mediaServer.pls
 							.getPlaylistFullpath(item));
 				}
-				if (browserActivity.viewerState == ViewerState.PLS_ITEMS) {
+				if (browserFragment.viewerState == ViewerState.PLS_ITEMS) {
 					mediaServer.player.play(item);
 				}
-				if (browserActivity.viewerState == ViewerState.DIRECTORIES) {
+				if (browserFragment.viewerState == ViewerState.DIRECTORIES) {
 					String file = mediaServer.browser.getFullLocation() + item;
 					mediaServer.player.play(file);
 				}
-				browserActivity.mediaState = MediaState.MUSIC_VIDEO;
+				browserFragment.mediaState = MediaState.MUSIC_VIDEO;
 			}
 		} catch (Exception e) {
 			return e.getClass().getSimpleName() + ": " + e.getMessage();

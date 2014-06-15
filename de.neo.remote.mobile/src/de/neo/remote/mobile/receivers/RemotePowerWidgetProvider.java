@@ -37,7 +37,7 @@ public class RemotePowerWidgetProvider extends AppWidgetProvider {
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
 			RemoteViews views = new RemoteViews(context.getPackageName(),
-					R.layout.power_widget);
+					R.layout.switch_widget);
 
 			setSwitchIntent(views, context, appWidgetIds[i]);
 

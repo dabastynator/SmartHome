@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
@@ -26,7 +25,7 @@ import de.remote.mobile.R;
  * @author sebastian
  * 
  */
-public abstract class BindedActivity extends Activity implements
+public abstract class AbstractConnectionActivity extends Activity implements
 		IRemoteActionListener {
 
 	/**
@@ -63,8 +62,8 @@ public abstract class BindedActivity extends Activity implements
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			binder.removeRemoteActionListener(BindedActivity.this);
-			Log.e("disconnect service", "lass: " + BindedActivity.this.getClass().getSimpleName());
+			binder.removeRemoteActionListener(AbstractConnectionActivity.this);
+			Log.e("disconnect service", "lass: " + AbstractConnectionActivity.this.getClass().getSimpleName());
 		}
 
 		@Override
@@ -73,7 +72,7 @@ public abstract class BindedActivity extends Activity implements
 			boolean newConnection = !binder.isConnected();
 			onStartConnecting();
 			onBinderConnected();
-			binder.addRemoteActionListener(BindedActivity.this);
+			binder.addRemoteActionListener(AbstractConnectionActivity.this);
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
 					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
@@ -84,9 +83,9 @@ public abstract class BindedActivity extends Activity implements
 			else if (newConnection) {
 				serverID = serverDB.getServerDao().getFavoriteServer();
 				if (serverID == -1) {
-					Toast.makeText(BindedActivity.this, "no favorite server",
+					Toast.makeText(AbstractConnectionActivity.this, "no favorite server",
 							Toast.LENGTH_SHORT).show();
-					Intent intent = new Intent(BindedActivity.this,
+					Intent intent = new Intent(AbstractConnectionActivity.this,
 							SelectServerActivity.class);
 					startActivityForResult(intent,
 							SelectServerActivity.RESULT_CODE);
@@ -96,7 +95,7 @@ public abstract class BindedActivity extends Activity implements
 			if (serverID >= 0 && newConnection)
 				binder.connectToServer(serverID);
 			else if (!newConnection)
-				BindedActivity.this.onServerConnectionChanged(null, -1);
+				AbstractConnectionActivity.this.onServerConnectionChanged(null, -1);
 		}
 		
 	};

@@ -3,16 +3,16 @@ package de.neo.remote.mobile.tasks;
 import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
-import de.neo.remote.mobile.activities.BindedActivity;
+import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.PlayerBinder;
 
 public class PlayTatortTask extends AsyncTask<String, Integer, String> {
 
-	private BindedActivity browserBase;
+	private AbstractConnectionActivity browserBase;
 	private String tatortURL;
 	private PlayerBinder binder;
 
-	public PlayTatortTask(BindedActivity browserBase, String tatortURL,
+	public PlayTatortTask(AbstractConnectionActivity browserBase, String tatortURL,
 			PlayerBinder binder) {
 		this.tatortURL = tatortURL;
 		this.browserBase = browserBase;

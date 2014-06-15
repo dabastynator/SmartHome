@@ -18,7 +18,7 @@ import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.BrowserActivity.ViewerState;
+import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -53,7 +53,7 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 
 	public BrowserAdapter(Context context, IBrowser browser, String[] all,
 			ViewerState state, PlayingBean bean) {
-		super(context, R.layout.browser_row, R.id.lbl_item_name, all);
+		super(context, R.layout.mediaserver_browser_row, R.id.lbl_item_name, all);
 		handler = new Handler();
 		thumbnails.clear();
 		playingBean = bean;

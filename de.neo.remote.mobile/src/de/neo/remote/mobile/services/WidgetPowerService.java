@@ -65,7 +65,7 @@ public class WidgetPowerService extends Service implements
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 		remotePowerViews = new RemoteViews(getApplicationContext()
-				.getPackageName(), R.layout.power_widget);
+				.getPackageName(), R.layout.switch_widget);
 		updateWidget();
 	};
 
@@ -76,7 +76,7 @@ public class WidgetPowerService extends Service implements
 			executeCommand(intent.getAction(), widgetID);
 		} else {
 			remotePowerViews = new RemoteViews(getApplicationContext()
-					.getPackageName(), R.layout.power_widget);
+					.getPackageName(), R.layout.switch_widget);
 			updateWidget();
 		}
 		return super.onStartCommand(intent, flags, startId);

@@ -93,9 +93,6 @@
                 android:icon="@drawable/left"
                 android:title="@string/str_move_left"/>
             <item
-                android:id="@+id/opt_search"
-                android:title="@string/str_search"/>
-            <item
                 android:id="@+id/opt_tatort"
                 android:title="@string/str_tatort"/>
             <item

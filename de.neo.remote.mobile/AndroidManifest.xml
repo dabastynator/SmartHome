@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo" >
         <activity
-            android:name="de.neo.remote.mobile.activities.BrowserActivity"
+            android:name="de.neo.remote.mobile.activities.MediaServerActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:parentActivityName="de.neo.remote.mobile.activities.ControlSceneActivity" >

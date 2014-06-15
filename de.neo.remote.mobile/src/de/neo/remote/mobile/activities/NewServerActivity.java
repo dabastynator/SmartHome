@@ -45,9 +45,9 @@ public class NewServerActivity extends Activity {
 		serverDB = new RemoteDatabase(this);
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(
-						BrowserActivity.EXTRA_SERVER_ID)) {
+						MediaServerActivity.EXTRA_SERVER_ID)) {
 			int server = getIntent().getExtras().getInt(
-					BrowserActivity.EXTRA_SERVER_ID);
+					MediaServerActivity.EXTRA_SERVER_ID);
 			String ip = serverDB.getServerDao().getIpOfServer(server);
 			String name = serverDB.getServerDao().getNameOfServer(server);
 			oldServer = server;

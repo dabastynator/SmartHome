@@ -122,7 +122,7 @@ public class SelectServerActivity extends Activity {
 		case R.id.opt_server_edit:
 			Intent intent = new Intent(SelectServerActivity.this,
 					NewServerActivity.class);
-			intent.putExtra(BrowserActivity.EXTRA_SERVER_ID, selectedItem);
+			intent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, selectedItem);
 			startActivity(intent);
 			finish();
 			break;

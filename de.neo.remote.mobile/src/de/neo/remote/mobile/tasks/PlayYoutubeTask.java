@@ -3,16 +3,16 @@ package de.neo.remote.mobile.tasks;
 import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
-import de.neo.remote.mobile.activities.BindedActivity;
+import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.PlayerBinder;
 
 public class PlayYoutubeTask extends AsyncTask<String, Integer, String> {
 
-	private BindedActivity browserBase;
+	private AbstractConnectionActivity browserBase;
 	private String youtubeURL;
 	private PlayerBinder binder;
 
-	public PlayYoutubeTask(BindedActivity browserBase, String youtubeURL,
+	public PlayYoutubeTask(AbstractConnectionActivity browserBase, String youtubeURL,
 			PlayerBinder binder) {
 		this.youtubeURL = youtubeURL;
 		this.browserBase = browserBase;

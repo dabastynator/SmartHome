@@ -7,8 +7,9 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
-import de.neo.remote.mobile.activities.BrowserActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.ControlSceneActivity;
+import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.rmi.protokol.RemoteException;
@@ -17,13 +18,16 @@ import de.remote.mobile.R;
 public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 
 	Exception exeption = null;
-	private BrowserActivity activity;
+	private MediaServerActivity activity;
 	private String goTo;
 	private boolean goBack;
 	private String[] itemArray;
+	private BrowserFragment browser_fragment;
 
-	public BrowserLoadTask(BrowserActivity activity, String goTo, boolean goBack) {
+	public BrowserLoadTask(MediaServerActivity activity, String goTo, boolean goBack) {
 		this.activity = activity;
+		this.browser_fragment = (BrowserFragment) activity.getFragmentManager()
+				.findFragmentById(R.id.mediaserver_fragment_browser);
 		this.goTo = goTo;
 		this.goBack = goBack;
 	}
@@ -57,14 +61,14 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 		return "";
 	}
 
-	private String[] loadItems(String gotoPath)
-			throws RemoteException, PlayerException {
+	private String[] loadItems(String gotoPath) throws RemoteException,
+			PlayerException {
 		StationStuff mediaServer = activity.binder.getLatestMediaServer();
 		if (mediaServer == null) {
 			activity.disableScreen();
 			return new String[] {};
 		}
-		switch (activity.viewerState) {
+		switch (browser_fragment.viewerState) {
 		case DIRECTORIES:
 			if (gotoPath != null)
 				mediaServer.browser.goTo(gotoPath);
@@ -72,9 +76,10 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 				goBack = !mediaServer.browser.goBack();
 			mediaServer.browser.getLocation();
 			mediaServer.browser.getFullLocation();
-			String[] directories = mediaServer.browser.getDirectories();
+			String[] directories = mediaServer.browser.getDirectories();			
 			String[] files = mediaServer.browser.getFiles();
 			String[] all = new String[directories.length + files.length];
+			mediaServer.directoryCount = directories.length;
 			System.arraycopy(directories, 0, all, 0, directories.length);
 			System.arraycopy(files, 0, all, directories.length, files.length);
 			return all;
@@ -83,15 +88,16 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 			Arrays.sort(playLists);
 			return playLists;
 		case PLS_ITEMS:
-			activity.plsFileMap.clear();
+			browser_fragment.plsFileMap.clear();
 			for (String item : mediaServer.pls
-					.listContent(activity.currentPlayList))
+					.listContent(browser_fragment.currentPlayList))
 				if (item.indexOf("/") >= 0)
-					activity.plsFileMap.put(
+					browser_fragment.plsFileMap.put(
 							item.substring(item.lastIndexOf("/") + 1), item);
 				else
-					activity.plsFileMap.put(item, item);
-			return activity.plsFileMap.keySet().toArray(new String[] {});
+					browser_fragment.plsFileMap.put(item, item);
+			return browser_fragment.plsFileMap.keySet()
+					.toArray(new String[] {});
 		default:
 			return new String[] {};
 		}
@@ -109,17 +115,17 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 		if (mediaServer == null) {
 			activity.setTitle("No media server@"
 					+ activity.binder.getLatestMediaServer().name);
-			activity.listView
+			browser_fragment.browserContentView
 					.setAdapter(new BrowserAdapter(activity, null,
-							new String[] {}, activity.viewerState,
+							new String[] {}, browser_fragment.viewerState,
 							activity.playingBean));
 			return;
 		}
-		activity.listView.setAdapter(new BrowserAdapter(activity,
-				mediaServer.browser, itemArray, activity.viewerState,
+		browser_fragment.browserContentView.setAdapter(new BrowserAdapter(activity,
+				mediaServer.browser, itemArray, browser_fragment.viewerState,
 				activity.playingBean));
-		activity.listView.setSelection(activity.selectedPosition);
-		switch (activity.viewerState) {
+		browser_fragment.browserContentView.setSelection(browser_fragment.selectedPosition);
+		switch (browser_fragment.viewerState) {
 		case DIRECTORIES:
 			try {
 				activity.setTitle(mediaServer.browser.getLocation() + "@"
@@ -141,7 +147,7 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 			activity.playlistButton
 					.setBackgroundResource(R.drawable.image_border);
 			activity.filesystemButton.setBackgroundDrawable(null);
-			activity.setTitle("Playlist: " + activity.currentPlayList + "@"
+			activity.setTitle("Playlist: " + browser_fragment.currentPlayList + "@"
 					+ mediaServer.name);
 		}
 		if (exeption != null) {
@@ -172,5 +178,4 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 				&& activity.omxButton != null)
 			activity.omxButton.setBackgroundResource(R.drawable.image_border);
 	}
-
 }

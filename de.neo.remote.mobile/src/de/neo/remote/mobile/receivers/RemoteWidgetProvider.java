@@ -7,7 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
-import de.neo.remote.mobile.activities.BrowserActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.services.WidgetService;
 import de.remote.mobile.R;
 
@@ -78,7 +78,7 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 
 	public static void setWidgetClick(RemoteViews views, Context context) {
 		// enable to open browser activity on click to the big widget text
-		Intent browserIntent = new Intent(context, BrowserActivity.class);
+		Intent browserIntent = new Intent(context, MediaServerActivity.class);
 		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
 				browserIntent, 0);
 

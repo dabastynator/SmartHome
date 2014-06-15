@@ -13,7 +13,7 @@ import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
-public class ControlSceneActivity extends BindedActivity {
+public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	private AbstractSceneSurfaceView view;
 	private ControlSceneRenderer renderer;
@@ -152,8 +152,8 @@ public class ControlSceneActivity extends BindedActivity {
 				@Override
 				public void run() {
 					Intent intent = new Intent(ControlSceneActivity.this,
-							BrowserActivity.class);
-					intent.putExtra(BrowserActivity.EXTRA_MEDIA_NAME, name);
+							MediaServerActivity.class);
+					intent.putExtra(MediaServerActivity.EXTRA_MEDIA_NAME, name);
 					ControlSceneActivity.this.startActivity(intent);
 				}
 			});

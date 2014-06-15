@@ -20,7 +20,6 @@ import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IChatServer;
 import de.neo.remote.mediaserver.api.IControl;
 import de.neo.remote.mediaserver.api.IImageViewer;
-import de.neo.remote.mediaserver.api.IMediaServer;
 import de.neo.remote.mediaserver.api.IPlayList;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.IPlayerListener;
@@ -281,6 +280,7 @@ public class RemoteService extends Service {
 		public IPlayer omxplayer;
 		public IImageViewer imageViewer;
 		public String name;
+		public int directoryCount;
 	}
 
 	public void connectToServer(final int id) {

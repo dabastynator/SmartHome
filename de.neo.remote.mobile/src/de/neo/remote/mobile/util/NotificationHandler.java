@@ -9,7 +9,7 @@ import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.BrowserActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.remote.mobile.R;
 
@@ -139,9 +139,9 @@ public class NotificationHandler implements IRemoteActionListener {
 		int icon = R.drawable.browser;
 		Notification notification = new Notification(icon, "Player started",
 				System.currentTimeMillis());
-		Intent nIntent = new Intent(context, BrowserActivity.class);
+		Intent nIntent = new Intent(context, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
+		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pInent = PendingIntent
 				.getActivity(context, 0, nIntent, 0);
 		notification.setLatestEventInfo(context.getApplicationContext(), title,
@@ -185,9 +185,9 @@ public class NotificationHandler implements IRemoteActionListener {
 		notification.contentView.setTextViewText(R.id.status_text, text);
 		notification.contentView.setProgressBar(R.id.status_progress, 100,
 				(int) (progress * 100), false);
-		Intent nIntent = new Intent(context, BrowserActivity.class);
+		Intent nIntent = new Intent(context, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(BrowserActivity.EXTRA_SERVER_ID, serverID);
+		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pIntent = PendingIntent.getActivity(context, 0, nIntent,
 				0);
 		notification.contentIntent = pIntent;
