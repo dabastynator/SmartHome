@@ -1,55 +1,41 @@
 package de.neo.remote.mobile.tasks;
 
-import android.os.AsyncTask;
-import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.PlayerBinder;
 
-public class PlayTatortTask extends AsyncTask<String, Integer, String> {
+public class PlayTatortTask extends AbstractTask {
 
-	private AbstractConnectionActivity browserBase;
 	private String tatortURL;
 	private PlayerBinder binder;
 
-	public PlayTatortTask(AbstractConnectionActivity browserBase, String tatortURL,
-			PlayerBinder binder) {
+	public PlayTatortTask(AbstractConnectionActivity activity,
+			String tatortURL, PlayerBinder binder) {
+		super(activity, TaskMode.DialogTask);
 		this.tatortURL = tatortURL;
-		this.browserBase = browserBase;
 		this.binder = binder;
 	}
 
 	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		browserBase.startProgress("Start ARD stream", tatortURL);
+	protected String getDialogMsg() {
+		return tatortURL;
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
-		super.onPostExecute(result);
-		browserBase.dismissProgress();
-		if (result != null)
-			Toast.makeText(browserBase, "Error streaming ARD: " + result,
-					Toast.LENGTH_SHORT).show();
+	protected String getDialogTitle() {
+		return "Start ARD stream";
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
-		try {
-			if (binder == null)
-				throw new Exception("not bindet");
-			if (binder.getLatestMediaServer() == null)
-				throw new Exception("no mediaserver selected");
-			IPlayer player = binder.getLatestMediaServer().player;
-			if (player != null) {
-				player.playFromArdMediathek(tatortURL);
-			} else
-				throw new Exception("no player selected");
-		} catch (Exception e) {
-			return e.getClass().getSimpleName() + ": " + e.getMessage();
-		}
-		return null;
+	protected void onExecute() throws Exception {
+		if (binder == null)
+			throw new Exception("not bindet");
+		if (binder.getLatestMediaServer() == null)
+			throw new Exception("no mediaserver selected");
+		IPlayer player = binder.getLatestMediaServer().player;
+		if (player != null) {
+			player.playFromArdMediathek(tatortURL);
+		} else
+			throw new Exception("no player selected");
 	}
-
 }

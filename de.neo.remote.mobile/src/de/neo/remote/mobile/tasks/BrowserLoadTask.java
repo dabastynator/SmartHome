@@ -2,29 +2,24 @@ package de.neo.remote.mobile.tasks;
 
 import java.util.Arrays;
 
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.widget.Toast;
-import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.activities.MediaServerActivity;
-import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
-import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
+public class BrowserLoadTask extends AbstractTask {
 
-	Exception exeption = null;
 	private MediaServerActivity activity;
 	private String goTo;
 	private boolean goBack;
 	private String[] itemArray;
 	private BrowserFragment browser_fragment;
 
-	public BrowserLoadTask(MediaServerActivity activity, String goTo, boolean goBack) {
+	public BrowserLoadTask(MediaServerActivity activity, String goTo,
+			boolean goBack) {
+		super(activity, TaskMode.ActionBarTask);
 		this.activity = activity;
 		this.browser_fragment = (BrowserFragment) activity.getFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_browser);
@@ -33,32 +28,13 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 	}
 
 	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-
-		if (activity.binder.getLatestMediaServer() == null) {
-			activity.disableScreen();
-		} else {
-			activity.setProgressBarVisibility(true);
-			activity.setTitle("loading...");
-		}
-	}
-
-	public void execute() {
-		execute(new String[] {});
+	protected String getDialogTitle() {
+		return "loading...";
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
-
-		try {
-			exeption = null;
-			itemArray = loadItems(goTo);
-		} catch (Exception e) {
-			exeption = e;
-			itemArray = new String[] {};
-		}
-		return "";
+	protected void onExecute() throws Exception {
+		itemArray = loadItems(goTo);
 	}
 
 	private String[] loadItems(String gotoPath) throws RemoteException,
@@ -76,7 +52,7 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 				goBack = !mediaServer.browser.goBack();
 			mediaServer.browser.getLocation();
 			mediaServer.browser.getFullLocation();
-			String[] directories = mediaServer.browser.getDirectories();			
+			String[] directories = mediaServer.browser.getDirectories();
 			String[] files = mediaServer.browser.getFiles();
 			String[] all = new String[directories.length + files.length];
 			mediaServer.directoryCount = directories.length;
@@ -104,78 +80,10 @@ public class BrowserLoadTask extends AsyncTask<String, Integer, String> {
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(Exception result) {
 		super.onPostExecute(result);
-		if (goBack) {
-			Intent intent = new Intent(activity, ControlSceneActivity.class);
-			activity.startActivity(intent);
-		}
-		StationStuff mediaServer = activity.binder.getLatestMediaServer();
-		activity.setProgressBarVisibility(false);
-		if (mediaServer == null) {
-			activity.setTitle("No media server@"
-					+ activity.binder.getLatestMediaServer().name);
-			browser_fragment.browserContentView
-					.setAdapter(new BrowserAdapter(activity, null,
-							new String[] {}, browser_fragment.viewerState,
-							activity.playingBean));
-			return;
-		}
-		browser_fragment.browserContentView.setAdapter(new BrowserAdapter(activity,
-				mediaServer.browser, itemArray, browser_fragment.viewerState,
-				activity.playingBean));
-		browser_fragment.browserContentView.setSelection(browser_fragment.selectedPosition);
-		switch (browser_fragment.viewerState) {
-		case DIRECTORIES:
-			try {
-				activity.setTitle(mediaServer.browser.getLocation() + "@"
-						+ mediaServer.name);
-			} catch (RemoteException e) {
-				activity.setTitle("no connection");
-			}
-			activity.filesystemButton
-					.setBackgroundResource(R.drawable.image_border);
-			activity.playlistButton.setBackgroundDrawable(null);
-			break;
-		case PLAYLISTS:
-			activity.setTitle("Playlists@" + mediaServer.name);
-			activity.playlistButton
-					.setBackgroundResource(R.drawable.image_border);
-			activity.filesystemButton.setBackgroundDrawable(null);
-			break;
-		case PLS_ITEMS:
-			activity.playlistButton
-					.setBackgroundResource(R.drawable.image_border);
-			activity.filesystemButton.setBackgroundDrawable(null);
-			activity.setTitle("Playlist: " + browser_fragment.currentPlayList + "@"
-					+ mediaServer.name);
-		}
-		if (exeption != null) {
-			if (exeption instanceof NullPointerException)
-				Toast.makeText(
-						activity,
-						"NullPointerException: Mediaserver might incorrectly configured",
-						Toast.LENGTH_SHORT).show();
-			else if (exeption.getMessage() != null
-					&& exeption.getMessage().length() > 0)
-				Toast.makeText(activity, exeption.getMessage(),
-						Toast.LENGTH_SHORT).show();
-			else
-				Toast.makeText(activity, exeption.getClass().getSimpleName(),
-						Toast.LENGTH_SHORT).show();
-		}
-		IPlayer player = mediaServer.player;
-		activity.totemButton.setBackgroundDrawable(null);
-		activity.mplayerButton.setBackgroundDrawable(null);
-		if (activity.omxButton != null)
-			activity.omxButton.setBackgroundDrawable(null);
-		if (player == activity.binder.getLatestMediaServer().mplayer)
-			activity.mplayerButton
-					.setBackgroundResource(R.drawable.image_border);
-		if (player == activity.binder.getLatestMediaServer().totem)
-			activity.totemButton.setBackgroundResource(R.drawable.image_border);
-		if (player == activity.binder.getLatestMediaServer().omxplayer
-				&& activity.omxButton != null)
-			activity.omxButton.setBackgroundResource(R.drawable.image_border);
+		if (exception == null)
+			browser_fragment.onLoadedItems(itemArray, goBack);
 	}
+
 }

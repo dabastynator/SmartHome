@@ -148,13 +148,10 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		super.onPause();
 	}
 
-	public void startProgress(String title, String message) {
+	public ProgressDialog createProgress() {
 		dismissProgress();
 		progress = new ProgressDialog(this);
-		progress.setTitle(title);
-		progress.setMessage(message);
-		progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progress.show();
+		return progress;
 	}
 
 	public void dismissProgress() {
@@ -234,6 +231,11 @@ public abstract class AbstractConnectionActivity extends Activity implements
 
 	@Override
 	public void sendingCanceled() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void progressFinished(Object result) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -6,16 +6,23 @@
         android:width="1dp"
         android:color="#FF000000" />
 
-    <gradient
+    <solid android:color="#88000000"/>
+
+    <!--
+         <gradient
         android:angle="270"
         android:type="linear"
-        android:endColor="#FF000000"
-        android:startColor="#FF313131"/>
+        android:endColor="#FF313131"
+        android:startColor="#88313131"/>
+    -->
 
-    <corners
-        android:bottomLeftRadius="7dp"
-        android:bottomRightRadius="7dp"
-        android:topLeftRadius="7dp"
-        android:topRightRadius="7dp" />
+
+    <!--
+         <corners
+        android:bottomLeftRadius="3dp"
+        android:bottomRightRadius="3dp"
+        android:topLeftRadius="3dp"
+        android:topRightRadius="3dp" />
+    -->
 
 </shape>

@@ -1,55 +1,41 @@
 package de.neo.remote.mobile.tasks;
 
-import android.os.AsyncTask;
-import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.PlayerBinder;
 
-public class PlayYoutubeTask extends AsyncTask<String, Integer, String> {
+public class PlayYoutubeTask extends AbstractTask {
 
-	private AbstractConnectionActivity browserBase;
 	private String youtubeURL;
 	private PlayerBinder binder;
 
-	public PlayYoutubeTask(AbstractConnectionActivity browserBase, String youtubeURL,
-			PlayerBinder binder) {
+	public PlayYoutubeTask(AbstractConnectionActivity activity,
+			String youtubeURL, PlayerBinder binder) {
+		super(activity, TaskMode.DialogTask);
 		this.youtubeURL = youtubeURL;
-		this.browserBase = browserBase;
 		this.binder = binder;
 	}
 
 	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		browserBase.startProgress("Start youtube stream", youtubeURL);
+	protected String getDialogMsg() {
+		return youtubeURL;
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
-		super.onPostExecute(result);
-		browserBase.dismissProgress();
-		if (result != null)
-			Toast.makeText(browserBase, "Error streaming youtube: " + result,
-					Toast.LENGTH_SHORT).show();
+	protected String getDialogTitle() {
+		return "Start youtube stream";
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
-		try {
-			if (binder == null)
-				throw new Exception("not bindet");
-			if (binder.getLatestMediaServer() == null)
-				throw new Exception("no mediaserver selected");
-			IPlayer player = binder.getLatestMediaServer().player;
-			if (player != null) {
-				player.playFromYoutube(youtubeURL);
-			} else
-				throw new Exception("no player selected");
-		} catch (Exception e) {
-			return e.getClass().getSimpleName() + ": " + e.getMessage();
-		}
-		return null;
+	protected void onExecute() throws Exception {
+		if (binder == null)
+			throw new Exception("not bindet");
+		if (binder.getLatestMediaServer() == null)
+			throw new Exception("no mediaserver selected");
+		IPlayer player = binder.getLatestMediaServer().player;
+		if (player != null) {
+			player.playFromYoutube(youtubeURL);
+		} else
+			throw new Exception("no player selected");
 	}
-
 }

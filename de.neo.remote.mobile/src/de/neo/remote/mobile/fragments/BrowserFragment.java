@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.MediaState;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
@@ -116,6 +118,51 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		downloadText = (TextView) getActivity().findViewById(R.id.lbl_download);
 		dvdLayout = (LinearLayout) getActivity().findViewById(
 				R.id.layout_dvd_bar);
+	}
+
+	public void onLoadedItems(String[] itemArray, boolean goBack) {
+		MediaServerActivity activity = (MediaServerActivity) getActivity();
+		if (goBack) {
+			Intent intent = new Intent(activity, ControlSceneActivity.class);
+			activity.startActivity(intent);
+		}
+		StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		if (mediaServer == null) {
+			activity.setTitle("No media server@"
+					+ activity.binder.getLatestMediaServer().name);
+			browserContentView.setAdapter(new BrowserAdapter(activity, null,
+					new String[] {}, viewerState, activity.playingBean));
+			return;
+		}
+		browserContentView.setAdapter(new BrowserAdapter(activity,
+				mediaServer.browser, itemArray, viewerState,
+				activity.playingBean));
+		browserContentView.setSelection(selectedPosition);
+		switch (viewerState) {
+		case DIRECTORIES:
+			try {
+				activity.setTitle(mediaServer.browser.getLocation() + "@"
+						+ mediaServer.name);
+			} catch (RemoteException e) {
+				activity.setTitle("no connection");
+			}
+			activity.filesystemButton
+					.setBackgroundResource(R.drawable.image_border);
+			activity.playlistButton.setBackgroundDrawable(null);
+			break;
+		case PLAYLISTS:
+			activity.setTitle("Playlists@" + mediaServer.name);
+			activity.playlistButton
+					.setBackgroundResource(R.drawable.image_border);
+			activity.filesystemButton.setBackgroundDrawable(null);
+			break;
+		case PLS_ITEMS:
+			activity.playlistButton
+					.setBackgroundResource(R.drawable.image_border);
+			activity.filesystemButton.setBackgroundDrawable(null);
+			activity.setTitle("Playlist: " + currentPlayList + "@"
+					+ mediaServer.name);
+		}
 	}
 
 	public void onSaveInstanceState(Bundle outState) {
