@@ -1,48 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearLayout1"
+    style="?android:attr/buttonBarStyle"
     android:layout_width="fill_parent"
     android:layout_height="60dp"
     android:orientation="horizontal" >
 
-    <ImageView
+    <Button
         android:id="@+id/button_play"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/pause"
-        android:text="|>" />
+        android:background="@drawable/player_pause" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_quit"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/stop"
-        android:text="x" />
+        android:background="@drawable/player_stop" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_pref"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/prev"
-        android:text="&lt;" />
+        android:background="@drawable/player_prev" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_next"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/next"
-        android:text=">" />
+        android:background="@drawable/player_next" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_full"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/full"
-        android:text=">&lt;" />
+        android:background="@drawable/player_fullscreen" />
 
 </LinearLayout>

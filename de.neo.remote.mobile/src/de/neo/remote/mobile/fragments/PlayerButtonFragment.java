@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayingBean;
@@ -18,7 +19,7 @@ import de.remote.mobile.R;
 public class PlayerButtonFragment extends Fragment {
 
 	private boolean isFullscreen;
-	private ImageView playButton;
+	private Button playButton;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,7 +42,7 @@ public class PlayerButtonFragment extends Fragment {
 				R.id.button_left, R.id.button_right, R.id.button_up,
 				R.id.button_down, R.id.button_enter, R.id.button_vol_down,
 				R.id.button_vol_up, R.id.button_full, R.id.button_quit };
-		playButton = (ImageView) getActivity().findViewById(R.id.button_play);
+		playButton = (Button) getActivity().findViewById(R.id.button_play);
 		View.OnClickListener listener = new View.OnClickListener() {
 			public void onClick(View v) {
 				playerAction(v);
@@ -49,8 +50,13 @@ public class PlayerButtonFragment extends Fragment {
 		};
 		for (int playerButtonId : playerButtons) {
 			View playerButton = getActivity().findViewById(playerButtonId);
-			if (playerButton != null)
+			if (playerButton != null) {
 				playerButton.setOnClickListener(listener);
+//				int btnSize = Math.min(playerButton.getLayoutParams().width,
+//						playerButton.getLayoutParams().height);
+//				playerButton
+//						.setLayoutParams(new LinearLayout.LayoutParams(btnSize, btnSize));
+			}
 		}
 	}
 
@@ -61,23 +67,6 @@ public class PlayerButtonFragment extends Fragment {
 			return;
 		final IPlayer player = activity.binder.getLatestMediaServer().player;
 		AsyncTask<String, Integer, String> task = new AsyncTask<String, Integer, String>() {
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				if (v != null)
-					v.setBackgroundResource(R.drawable.image_border);
-			}
-
-			@Override
-			protected void onPostExecute(String result) {
-				super.onPostExecute(result);
-				if (v != null)
-					v.setBackgroundDrawable(null);
-				if (result != null)
-					Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
-							.show();
-			}
 
 			@Override
 			protected String doInBackground(String... params) {
@@ -144,9 +133,9 @@ public class PlayerButtonFragment extends Fragment {
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 		if (playButton != null) {
 			if (bean == null || bean.getState() == STATE.PLAY)
-				playButton.setImageResource(R.drawable.pause);
+				playButton.setBackgroundResource(R.drawable.player_pause);
 			else if (bean.getState() == STATE.PAUSE)
-				playButton.setImageResource(R.drawable.play);
+				playButton.setBackgroundResource(R.drawable.player_play);
 		}
 	}
 }

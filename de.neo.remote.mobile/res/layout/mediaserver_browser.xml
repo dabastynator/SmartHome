@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:orientation="horizontal" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -71,59 +72,65 @@
             android:layout_height="0dp"
             android:layout_weight="1" >
 
-            <ImageView
+            <Button
                 android:id="@+id/button_up"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/dir_up" />
+                android:src="@drawable/player_up" />
         </TableRow>
 
         <TableRow
             android:id="@+id/tableRow2"
+            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1" >
 
-            <ImageView
+            <Button
                 android:id="@+id/button_left"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/dir_left" />
+                android:src="@drawable/player_left" />
 
-            <ImageView
+            <Button
                 android:id="@+id/button_enter"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/enter" />
+                android:src="@drawable/player_enter" />
 
-            <ImageView
+            <Button
                 android:id="@+id/button_right"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/dir_right" />
+                android:src="@drawable/player_right" />
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow2"
+            android:id="@+id/tableRow3"
+            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1" >
 
-            <ImageView
+            <Button
                 android:id="@+id/button_down"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/dir_down" />
+                android:src="@drawable/player_down" />
         </TableRow>
     </TableLayout>
 

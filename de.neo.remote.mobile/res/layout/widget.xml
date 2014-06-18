@@ -41,43 +41,49 @@
         android:paddingLeft="15dp"
         android:text="Static Text" >
     </TextView>
+
     <LinearLayout
         android:id="@+id/linearLayout1"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="fill_parent"
-        android:layout_height="55dp" 
+        android:layout_height="55dp"
         android:orientation="horizontal" >
 
-        <ImageView
+        <Button
             android:id="@+id/button_widget_play"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:layout_margin="2dp"
-            android:src="@drawable/pause" />
+            android:layout_weight="2"
+            android:background="@drawable/player_pause" />
 
-        <ImageView
+        <Button
             android:id="@+id/button_widget_quit"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:layout_margin="2dp"
-            android:src="@drawable/stop" />
+            android:layout_weight="2"
+            android:background="@drawable/player_stop" />
 
-        <ImageView
+        <Button
             android:id="@+id/button_widget_prev"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:layout_margin="2dp"
-            android:src="@drawable/prev" />
+            android:layout_weight="2"
+            android:background="@drawable/player_prev" />
 
-        <ImageView
+        <Button
             android:id="@+id/button_widget_next"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:layout_margin="2dp"
-            android:src="@drawable/next" />
+            android:layout_weight="2"
+            android:background="@drawable/player_next" />
     </LinearLayout>
 
 </LinearLayout>

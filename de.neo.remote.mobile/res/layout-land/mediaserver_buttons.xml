@@ -1,35 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/buttonBarStyle"
     android:layout_width="64dp"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ImageView
+    <Button
         android:id="@+id/button_play"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/pause" />
+        android:background="@drawable/player_pause" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_pref"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/prev" />
+        android:background="@drawable/player_prev" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_seek_bwd"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/seek_bwd" />
+        android:background="@drawable/player_seek_bw" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_vol_down"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:src="@drawable/voldown" />
+        android:background="@drawable/player_vol_down" />
 
 </LinearLayout>

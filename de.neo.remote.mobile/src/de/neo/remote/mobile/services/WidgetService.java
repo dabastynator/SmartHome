@@ -175,11 +175,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			remote.setTextViewText(R.id.lbl_widget_small2, small2);
 			RemoteWidgetProvider.setWidgetClick(remote, this);
 			if (playing)
-				remote.setImageViewResource(R.id.button_widget_play,
-						R.drawable.pause);
+				remote.setInt(R.id.button_widget_play, "setBackgroundResource",
+						R.drawable.player_pause);
 			else
-				remote.setImageViewResource(R.id.button_widget_play,
-						R.drawable.play);
+				remote.setInt(R.id.button_widget_play, "setBackgroundResource",
+						R.drawable.player_play);
 			appWidgetManager.updateAppWidget(thisWidget, remote);
 		}
 	}
@@ -253,25 +253,25 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void startSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void progressSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void sendingCanceled() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

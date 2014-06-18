@@ -86,11 +86,11 @@
                 android:title="@string/str_audio_track"/>
             <item
                 android:id="@+id/opt_right"
-                android:icon="@drawable/right"
+                android:icon="@drawable/player_right"
                 android:title="@string/str_move_right"/>
             <item
                 android:id="@+id/opt_left"
-                android:icon="@drawable/left"
+                android:icon="@drawable/player_left"
                 android:title="@string/str_move_left"/>
             <item
                 android:id="@+id/opt_tatort"
