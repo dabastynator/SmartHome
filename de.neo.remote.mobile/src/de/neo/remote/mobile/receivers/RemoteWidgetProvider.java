@@ -57,7 +57,7 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
 			RemoteViews views = new RemoteViews(context.getPackageName(),
-					R.layout.widget);
+					R.layout.mediaserver_widget);
 
 			setWidgetClick(views, context);
 

@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="?android:attr/buttonBarStyle"
-    android:layout_width="64dp"
+    android:layout_width="@dimen/player_button_size"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:gravity="center_vertical" >
 
     <Button
         android:id="@+id/button_play"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
         android:background="@drawable/player_pause" />
 
     <Button
         android:id="@+id/button_pref"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_play"
         android:background="@drawable/player_prev" />
 
     <Button
         android:id="@+id/button_seek_bwd"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_pref"
         android:background="@drawable/player_seek_bw" />
 
     <Button
         android:id="@+id/button_vol_down"
         style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_seek_bwd"
         android:background="@drawable/player_vol_down" />
 
-</LinearLayout>
+</RelativeLayout>

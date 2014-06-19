@@ -70,7 +70,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 		remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
-				R.layout.widget);
+				R.layout.mediaserver_widget);
 		initializeWidgets();
 	};
 
@@ -112,7 +112,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			executeCommand(intent.getAction());
 		else {
 			remoteViews = new RemoteViews(getApplicationContext()
-					.getPackageName(), R.layout.widget);
+					.getPackageName(), R.layout.mediaserver_widget);
 			initializeWidgets();
 		}
 		return super.onStartCommand(intent, flags, startId);

@@ -74,8 +74,8 @@
 
             <Button
                 android:id="@+id/button_up"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/player_button_size"
+                android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
                 android:src="@drawable/player_up" />
@@ -91,8 +91,8 @@
             <Button
                 android:id="@+id/button_left"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/player_button_size"
+                android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
                 android:src="@drawable/player_left" />
@@ -100,8 +100,8 @@
             <Button
                 android:id="@+id/button_enter"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/player_button_size"
+                android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
                 android:src="@drawable/player_enter" />
@@ -109,8 +109,8 @@
             <Button
                 android:id="@+id/button_right"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/player_button_size"
+                android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
                 android:src="@drawable/player_right" />
@@ -126,8 +126,8 @@
             <Button
                 android:id="@+id/button_down"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/player_button_size"
+                android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
                 android:src="@drawable/player_down" />
