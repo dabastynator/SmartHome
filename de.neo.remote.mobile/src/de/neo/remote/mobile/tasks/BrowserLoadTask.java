@@ -2,6 +2,7 @@ package de.neo.remote.mobile.tasks;
 
 import java.util.Arrays;
 
+import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.fragments.BrowserFragment;
@@ -84,6 +85,20 @@ public class BrowserLoadTask extends AbstractTask {
 		super.onPostExecute(result);
 		if (exception == null)
 			browser_fragment.onLoadedItems(itemArray, goBack);
+		StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		IPlayer player = mediaServer.player;
+		activity.totemButton.setBackgroundResource(0);
+		activity.mplayerButton.setBackgroundResource(0);
+		if (activity.omxButton != null)
+		activity.omxButton.setBackgroundResource(0);
+		if (player == activity.binder.getLatestMediaServer().mplayer)
+		activity.mplayerButton
+		.setBackgroundResource(R.drawable.image_border);
+		if (player == activity.binder.getLatestMediaServer().totem)
+		activity.totemButton.setBackgroundResource(R.drawable.image_border);
+		if (player == activity.binder.getLatestMediaServer().omxplayer
+		&& activity.omxButton != null)
+		activity.omxButton.setBackgroundResource(R.drawable.image_border);
 	}
 
 }

@@ -11,7 +11,7 @@ import android.widget.ListView;
 import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
-import de.neo.remote.mobile.services.WidgetPowerService;
+import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.remote.mobile.R;
 
@@ -73,7 +73,7 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 					SelectSwitchActivity.this.getPackageName(),
 					R.layout.switch_widget);
 			Intent switchIntent = new Intent(SelectSwitchActivity.this,
-					WidgetPowerService.class);
+					WidgetService.class);
 			switchIntent.setAction(RemotePowerWidgetProvider.ACTION_SWITCH);
 			switchIntent.putExtra(SWITCH_NUMBER, appWidgetId);
 			PendingIntent switchPending = PendingIntent.getService(

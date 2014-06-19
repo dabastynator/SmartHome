@@ -1,18 +1,24 @@
 package de.neo.remote.mobile.services;
 
+import java.util.Map;
+
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
+import de.neo.remote.mobile.activities.SelectSwitchActivity;
+import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.rmi.protokol.RemoteException;
@@ -63,6 +69,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}
 	};
 
+	private RemoteViews remoteSwitchViews;
+
 	@Override
 	public void onCreate() {
 		// bind service
@@ -72,6 +80,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
 				R.layout.mediaserver_widget);
 		initializeWidgets();
+		remoteSwitchViews = new RemoteViews(getApplicationContext()
+				.getPackageName(), R.layout.switch_widget);
+		updateSwitchWidget();
 	};
 
 	protected void updateWidget(PlayingBean playing) {
@@ -109,11 +120,14 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent != null && intent.getAction() != null)
-			executeCommand(intent.getAction());
+			executeCommand(intent.getAction(), intent);
 		else {
 			remoteViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.mediaserver_widget);
 			initializeWidgets();
+			remoteSwitchViews = new RemoteViews(getApplicationContext()
+					.getPackageName(), R.layout.switch_widget);
+			updateSwitchWidget();
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}
@@ -124,7 +138,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	 * @param action
 	 * @return true if action is known
 	 */
-	private void executeCommand(final String action) {
+	private void executeCommand(final String action, final Intent intent) {
 		new Thread() {
 			public void run() {
 				try {
@@ -141,6 +155,10 @@ public class WidgetService extends Service implements IRemoteActionListener {
 						binder.getLatestMediaServer().player.next();
 					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
 						binder.getLatestMediaServer().player.previous();
+					else if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)){
+						int widgetID = intent.getIntExtra(SelectSwitchActivity.SWITCH_NUMBER, 0);
+						switchPower(widgetID);
+					}
 				} catch (final Exception e) {
 					handler.post(new Runnable() {
 						public void run() {
@@ -246,8 +264,121 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onPowerSwitchChange(String switchName, State state) {
-		// TODO Auto-generated method stub
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
 
+		ComponentName thisWidget = new ComponentName(getApplicationContext(),
+				RemotePowerWidgetProvider.class);
+		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+
+		// update each of the app widgets with the remote adapter
+		for (int i = 0; i < appWidgetIds.length; ++i) {
+
+			String name = prefs.getString(appWidgetIds[i] + "", null);
+			if (switchName.equals(name)) {
+				if (state == State.ON)
+					updateSwitchWidget(appWidgetIds[i], R.drawable.light_on,
+							name);
+				else
+					updateSwitchWidget(appWidgetIds[i], R.drawable.light_off,
+							name);
+			}
+		}
+	}
+
+	private void updateSwitchWidget() {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+
+		ComponentName thisWidget = new ComponentName(getApplicationContext(),
+				RemotePowerWidgetProvider.class);
+		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+		// update each of the app widgets with the remote adapter
+		Thread thread = new Thread() {
+			public void run() {
+				for (int i = 0; i < appWidgetIds.length; ++i) {
+					try {
+						updateSwitchWidget(appWidgetIds[i]);
+					} catch (Exception e) {
+						// e.printStackTrace();
+						System.err.println(e.getClass().getSimpleName() + ": "
+								+ e.getMessage());
+					}
+				}
+			};
+		};
+		thread.start();
+	}
+
+	private void updateSwitchWidget(int widgetID) throws Exception {
+		if (binder == null)
+			throw new Exception("not conneced");
+		Map<String, IInternetSwitch> powers = binder.getPower();
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+		String switchName = prefs.getString(widgetID + "", null);
+		if (switchName == null)
+			return;
+		updateSwitchWidget(widgetID, R.drawable.light_off, switchName);
+		if (powers == null)
+			throw new Exception(binder.getServerName() + " has no power server");
+		IInternetSwitch power = powers.get(switchName);
+		if (power == null)
+			throw new Exception(binder.getServerName()
+					+ " has no switch called " + switchName);
+		State state = power.getState();
+		if (state == State.ON)
+			updateSwitchWidget(widgetID, R.drawable.light_on, switchName);
+		else
+			updateSwitchWidget(widgetID, R.drawable.light_off, switchName);
+	}
+
+	private void updateSwitchWidget(int widgetID, int image, String text) {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+		if (remoteSwitchViews != null) {
+			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+					image);
+			remoteSwitchViews.setTextViewText(R.id.text_power_widget, text);
+			RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
+					widgetID);
+			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
+		}
+	}
+	
+	private void switchPower(int widgetID) throws Exception {
+		if (binder == null)
+			throw new Exception("not connected");
+		Map<String, IInternetSwitch> powers = binder.getPower();
+		SharedPreferences prefs = getSharedPreferences(
+				SelectSwitchActivity.WIDGET_PREFS, 0);
+		String name = prefs.getString(widgetID + "", null);
+		if (name == null)
+			return;
+		IInternetSwitch power = powers.get(name);
+		if (power == null)
+			throw new Exception("Switch " + name + " is unknown");
+		State state = power.getState();
+		if (state == State.ON)
+			state = State.OFF;
+		else
+			state = State.ON;
+		power.setState(state);
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+		if (remoteSwitchViews != null) {
+			if (state == State.ON)
+				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+						R.drawable.light_on);
+			else
+				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+						R.drawable.light_off);
+			remoteSwitchViews.setTextViewText(R.id.text_power_widget, name);
+			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
+		}
 	}
 
 	@Override

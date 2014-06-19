@@ -73,8 +73,6 @@
         </service>
         <service android:name="de.neo.remote.mobile.services.WidgetService" >
         </service>
-        <service android:name="de.neo.remote.mobile.services.WidgetPowerService" >
-        </service>
 
         <receiver
             android:name="de.neo.remote.mobile.receivers.RemoteWidgetProvider"

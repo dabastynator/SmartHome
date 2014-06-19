@@ -68,45 +68,18 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		MUSIC_VIDEO, IMAGES
 	}
 
-	/**
-	 * listener for remote actions
-	 */
 	protected IRemoteActionListener remoteListener;
-
-	/**
-	 * progress bar for download progress
-	 */
 	protected ProgressBar downloadProgress;
-
-	/**
-	 * The artificial intelligence recognize speech
-	 */
 	protected AI ai;
-
 	public ImageView mplayerButton;
-
 	public ImageView totemButton;
-
 	public ImageView filesystemButton;
-
 	public ImageView playlistButton;
-
-	/**
-	 * Name of current music server
-	 */
 	protected String mediaServerName;
-
 	protected LinearLayout dvdLayout;
-
 	protected ImageView dvdButton;
-
 	public ImageView omxButton;
-
 	protected TextView downloadText;
-
-	/**
-	 * area that contains the download progress and cancel button
-	 */
 	protected LinearLayout downloadLayout;
 	public PlayingBean playingBean;
 	private BrowserFragment browserFragment;
@@ -134,9 +107,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(true);
-
-		// set listener
-
 	}
 
 	@Override
@@ -425,11 +395,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				});
 
 		alert.show();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	/**

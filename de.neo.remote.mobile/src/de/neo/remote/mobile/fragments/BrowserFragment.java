@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -148,18 +147,18 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 			}
 			activity.filesystemButton
 					.setBackgroundResource(R.drawable.image_border);
-			activity.playlistButton.setBackgroundDrawable(null);
+			activity.playlistButton.setBackgroundResource(0);
 			break;
 		case PLAYLISTS:
 			activity.setTitle("Playlists@" + mediaServer.name);
 			activity.playlistButton
 					.setBackgroundResource(R.drawable.image_border);
-			activity.filesystemButton.setBackgroundDrawable(null);
+			activity.filesystemButton.setBackgroundResource(0);
 			break;
 		case PLS_ITEMS:
 			activity.playlistButton
 					.setBackgroundResource(R.drawable.image_border);
-			activity.filesystemButton.setBackgroundDrawable(null);
+			activity.filesystemButton.setBackgroundResource(0);
 			activity.setTitle("Playlist: " + currentPlayList + "@"
 					+ mediaServer.name);
 		}
@@ -301,7 +300,6 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		final StationStuff mediaServer = activity.binder.getLatestMediaServer();
 		if (activity.binder == null)
 			return false;
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
