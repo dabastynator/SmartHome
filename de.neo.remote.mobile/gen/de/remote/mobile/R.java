@@ -92,20 +92,21 @@ public final class R {
         public static final int pls=0x7f020048;
         public static final int pls_smal=0x7f020049;
         public static final int refresh_32=0x7f02004a;
-        public static final int search=0x7f02004b;
-        public static final int server=0x7f02004c;
-        public static final int textur_holz=0x7f02004d;
-        public static final int textur_image_africa=0x7f02004e;
-        public static final int textur_image_leaves=0x7f02004f;
-        public static final int textur_image_sunset=0x7f020050;
-        public static final int textur_keyboard=0x7f020051;
-        public static final int textur_mamor=0x7f020052;
-        public static final int textur_metal=0x7f020053;
-        public static final int textur_wood=0x7f020054;
-        public static final int totem=0x7f020055;
-        public static final int upload=0x7f020056;
-        public static final int webcam=0x7f020057;
-        public static final int widget_shape=0x7f020058;
+        public static final int remote_icon=0x7f02004b;
+        public static final int search=0x7f02004c;
+        public static final int server=0x7f02004d;
+        public static final int textur_holz=0x7f02004e;
+        public static final int textur_image_africa=0x7f02004f;
+        public static final int textur_image_leaves=0x7f020050;
+        public static final int textur_image_sunset=0x7f020051;
+        public static final int textur_keyboard=0x7f020052;
+        public static final int textur_mamor=0x7f020053;
+        public static final int textur_metal=0x7f020054;
+        public static final int textur_wood=0x7f020055;
+        public static final int totem=0x7f020056;
+        public static final int upload=0x7f020057;
+        public static final int webcam=0x7f020058;
+        public static final int widget_shape=0x7f020059;
     }
     public static final class id {
         public static final int btn_switch_state=0x7f08003e;

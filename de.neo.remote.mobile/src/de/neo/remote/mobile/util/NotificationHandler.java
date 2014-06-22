@@ -1,6 +1,7 @@
 package de.neo.remote.mobile.util;
 
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -136,17 +137,17 @@ public class NotificationHandler implements IRemoteActionListener {
 	protected void makePlayingNotification(String title, String body) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.browser;
-		Notification notification = new Notification(icon, "Player started",
-				System.currentTimeMillis());
 		Intent nIntent = new Intent(context, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pInent = PendingIntent
 				.getActivity(context, 0, nIntent, 0);
-		notification.setLatestEventInfo(context.getApplicationContext(), title,
-				body, pInent);
-		nm.notify(PLAYING_NOTIFICATION_ID, notification);
+		Builder builder = new Notification.Builder(context);
+		builder.setSmallIcon(R.drawable.remote_icon);
+		builder.setContentTitle(title);
+		builder.setContentText(body);
+		builder.setContentIntent(pInent);
+		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
 	}
 
 	public void removeNotification() {
