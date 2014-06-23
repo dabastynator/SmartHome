@@ -93,10 +93,7 @@ public class SelectServerActivity extends Activity {
 		SQLiteDatabase db = serverDB.getReadableDatabase();
 		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
 				null, null, null, null, null);
-		startManagingCursor(c);
-
 		serverList.setAdapter(new ServerCursorAdapter(this, c));
-		
 		db.close();
 	}
 

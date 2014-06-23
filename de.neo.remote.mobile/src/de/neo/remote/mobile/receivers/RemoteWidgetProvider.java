@@ -18,29 +18,12 @@ import de.remote.mobile.R;
  */
 public class RemoteWidgetProvider extends AppWidgetProvider {
 
-	/**
-	 * click on play action
-	 */
 	public static final String ACTION_PLAY = "de.remote.mobile.ACTION_PLAY";
-
-	/**
-	 * click on stop action
-	 */
 	public static final String ACTION_STOP = "de.remote.mobile.ACTION_STOP";
-
-	/**
-	 * click on next action
-	 */
 	public static final String ACTION_NEXT = "de.remote.mobile.ACTION_NEXT";
-
-	/**
-	 * click on prev action
-	 */
 	public static final String ACTION_PREV = "de.remote.mobile.ACTION_PREV";
-
-	/**
-	 * click on update action
-	 */
+	public static final String ACTION_VOLUP = "de.remote.mobile.ACTION_VOL_UP";
+	public static final String ACTION_VOLDOWN = "de.remote.mobile.ACTION_VOL_DOWN";
 	public static final String ACTION_UPDATE = "actionUpdate";
 
 	@Override
@@ -67,8 +50,8 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
 
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent,
-					PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+					0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
 
 			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
@@ -100,21 +83,21 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 
 		views.setOnClickPendingIntent(R.id.button_widget_quit, stopPending);
 
-		// set next functionality
+		// set vol up functionality
 		Intent nextIntent = new Intent(context, WidgetService.class);
-		nextIntent.setAction(ACTION_NEXT);
+		nextIntent.setAction(ACTION_VOLUP);
 		PendingIntent nextPending = PendingIntent.getService(context, 0,
 				nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		views.setOnClickPendingIntent(R.id.button_widget_next, nextPending);
+		views.setOnClickPendingIntent(R.id.button_widget_vol_up, nextPending);
 
-		// set prev functionality
+		// set vol down functionality
 		Intent prevIntent = new Intent(context, WidgetService.class);
-		prevIntent.setAction(ACTION_PREV);
+		prevIntent.setAction(ACTION_VOLDOWN);
 		PendingIntent prevPending = PendingIntent.getService(context, 0,
 				prevIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		views.setOnClickPendingIntent(R.id.button_widget_prev, prevPending);
+		views.setOnClickPendingIntent(R.id.button_widget_vol_down, prevPending);
 	}
 
 	@Override

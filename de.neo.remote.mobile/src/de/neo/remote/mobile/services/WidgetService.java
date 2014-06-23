@@ -144,9 +144,16 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				try {
 					if (binder == null)
 						throw new RemoteException("not binded", "not binded");
-					if (binder.getLatestMediaServer().player == null)
-						throw new RemoteException("not connected",
-								"not connected");
+					if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
+						int widgetID = intent.getIntExtra(
+								SelectSwitchActivity.SWITCH_NUMBER, 0);
+						switchPower(widgetID);
+						return;
+					}
+					if (binder.getLatestMediaServer() == null
+							|| binder.getLatestMediaServer().player == null)
+						throw new RemoteException("no mediaplayer selected",
+								"no mediaplayer selected");
 					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
 						binder.getLatestMediaServer().player.playPause();
 					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
@@ -155,11 +162,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 						binder.getLatestMediaServer().player.next();
 					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
 						binder.getLatestMediaServer().player.previous();
-					else if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)){
-						int widgetID = intent.getIntExtra(SelectSwitchActivity.SWITCH_NUMBER, 0);
-						switchPower(widgetID);
-					}
+					else if (action.equals(RemoteWidgetProvider.ACTION_VOLDOWN))
+						binder.getLatestMediaServer().player.volDown();
+					else if (action.equals(RemoteWidgetProvider.ACTION_VOLUP))
+						binder.getLatestMediaServer().player.volUp();
 				} catch (final Exception e) {
+					e.printStackTrace();
 					handler.post(new Runnable() {
 						public void run() {
 							Toast.makeText(WidgetService.this, e.getMessage(),
@@ -348,7 +356,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 		}
 	}
-	
+
 	private void switchPower(int widgetID) throws Exception {
 		if (binder == null)
 			throw new Exception("not connected");

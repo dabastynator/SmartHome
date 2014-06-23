@@ -133,10 +133,10 @@ public final class R {
         public static final int button_up=0x7f08000f;
         public static final int button_vol_down=0x7f08001b;
         public static final int button_vol_up=0x7f080020;
-        public static final int button_widget_next=0x7f080032;
         public static final int button_widget_play=0x7f08002f;
-        public static final int button_widget_prev=0x7f080031;
         public static final int button_widget_quit=0x7f080030;
+        public static final int button_widget_vol_down=0x7f080031;
+        public static final int button_widget_vol_up=0x7f080032;
         public static final int fileList=0x7f08000c;
         public static final int imageButton1=0x7f08003a;
         public static final int image_power_widget=0x7f080040;

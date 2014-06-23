@@ -68,23 +68,23 @@
             android:gravity="center_horizontal" />
 
         <Button
-            android:id="@+id/button_widget_prev"
+            android:id="@+id/button_widget_vol_down"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="@dimen/player_button_widget_size"
             android:layout_height="@dimen/player_button_widget_size"
             android:layout_margin="2dp"
             android:layout_toRightOf="@id/button_widget_quit"
-            android:background="@drawable/player_prev"
+            android:background="@drawable/player_vol_down"
             android:gravity="center_horizontal" />
 
         <Button
-            android:id="@+id/button_widget_next"
+            android:id="@+id/button_widget_vol_up"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="@dimen/player_button_widget_size"
             android:layout_height="@dimen/player_button_widget_size"
             android:layout_margin="2dp"
-            android:layout_toRightOf="@id/button_widget_prev"
-            android:background="@drawable/player_next"
+            android:layout_toRightOf="@id/button_widget_vol_down"
+            android:background="@drawable/player_vol_up"
             android:gravity="center_horizontal" />
     </RelativeLayout>
 
