@@ -315,12 +315,14 @@ public class MPlayer extends AbstractPlayer {
 						bean.setAlbum(line.substring(8).trim());
 					if (line.equals("Starting playback...")) {
 						bean.setState(PlayingBean.STATE.PLAY);
+						loadThumbnail(bean);
 						informPlayingBean(bean);
 					}
 					if (line.startsWith("ICY Info")) {
 						bean.setCurrentTime(0);
 						bean.parseICYInfo(line);
 						bean.setState(STATE.PLAY);
+						loadThumbnail(bean);
 						informPlayingBean(bean);
 					}
 				}
@@ -330,6 +332,7 @@ public class MPlayer extends AbstractPlayer {
 				e.printStackTrace();
 			}
 		}
+
 	}
 
 	@Override

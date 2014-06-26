@@ -1,21 +1,30 @@
 package de.neo.remote.mediaserver.impl;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.IPlayerListener;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
+import de.neo.remote.mediaserver.impl.ThumbnailHandler.Thumbnail;
 import de.neo.rmi.protokol.RemoteException;
 
 /**
@@ -29,6 +38,8 @@ public abstract class AbstractPlayer implements IPlayer {
 	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
 
 	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
+
+	public static final int THUMBNAIL_SIZE = 128;
 
 	/**
 	 * list of all listeners
@@ -151,7 +162,7 @@ public abstract class AbstractPlayer implements IPlayer {
 				throw new PlayerException("Get invalid stream url: null");
 			return streamUrl;
 		} catch (IOException e) {
- 			throw new PlayerException("Error get stream :" + e.getMessage());
+			throw new PlayerException("Error get stream :" + e.getMessage());
 		}
 	}
 
@@ -187,6 +198,50 @@ public abstract class AbstractPlayer implements IPlayer {
 			playingBean.setState(STATE.PLAY);
 			informPlayingBean(playingBean);
 		}
+	}
+
+	protected void loadThumbnail(PlayingBean bean) {
+		if (bean.getArtist() != null) {
+			try {
+				Thumbnail thumbnail = ThumbnailHandler.instance()
+						.searchStringThumbnail(bean.getArtist());
+				if (thumbnail == null) {
+					BufferedImage image = searchImageFromGoogle(bean
+							.getArtist());
+					thumbnail = ThumbnailHandler.instance()
+							.manageStringThumbnail(bean.getArtist(), image,
+									THUMBNAIL_SIZE);
+
+				}
+				bean.setThumbnailSize(thumbnail.width, thumbnail.height);
+				bean.setThumbnailRGB(thumbnail.rgb);
+			} catch (Exception e) {
+				System.out.println("No thumbnail for " + bean.getArtist());
+			}
+		}
+	}
+
+	public static BufferedImage searchImageFromGoogle(String search)
+			throws IOException, JSONException {
+		URL url = new URL(
+				"https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
+						+ URLEncoder.encode(search, "UTF-8"));
+		URLConnection connection = url.openConnection();
+
+		String line;
+		StringBuilder builder = new StringBuilder();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		while ((line = reader.readLine()) != null) {
+			builder.append(line);
+		}
+
+		JSONObject json = new JSONObject(builder.toString());
+		String imageUrl = json.getJSONObject("responseData")
+				.getJSONArray("results").getJSONObject(0).getString("url");
+
+		BufferedImage image = ImageIO.read(new URL(imageUrl));
+		return image;
 	}
 
 	@Override

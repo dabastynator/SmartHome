@@ -1,26 +1,13 @@
 package de.neo.remote.mediaserver.impl;
 
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
+import de.neo.remote.mediaserver.impl.ThumbnailHandler.Thumbnail;
 import de.neo.rmi.api.Oneway;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
@@ -34,11 +21,8 @@ public class BrowserImpl implements IBrowser {
 
 	public static final int DOWNLOAD_PORT = 5033;
 
-	public static final String THUMBNAILS = ".thumbnail";
-
 	private String location;
 	private String root;
-	private File thumbnails;
 
 	/**
 	 * Create new browser
@@ -46,15 +30,10 @@ public class BrowserImpl implements IBrowser {
 	 * @param path
 	 *            to root directory for the browser
 	 */
-	public BrowserImpl(String directory, String temporaryFolder) {
+	public BrowserImpl(String directory) {
 		if (!directory.endsWith(File.separator))
 			directory += File.separator;
 		root = location = directory;
-		if (!temporaryFolder.endsWith(File.separator))
-			temporaryFolder += File.separator;
-		thumbnails = new File(temporaryFolder + THUMBNAILS);
-		if (!thumbnails.exists())
-			thumbnails.mkdir();
 	}
 
 	@Override
@@ -146,46 +125,19 @@ public class BrowserImpl implements IBrowser {
 		receiver.receiveAsync();
 	}
 
-	private BufferedImage scale(BufferedImage source, int width, int high) {
-		int w = width;
-		int h = high;
-		BufferedImage bi = getCompatibleImage(w, h);
-		Graphics2D g2d = bi.createGraphics();
-		double xScale = (double) w / source.getWidth();
-		double yScale = (double) h / source.getHeight();
-		AffineTransform at = AffineTransform.getScaleInstance(xScale, yScale);
-		g2d.drawRenderedImage(source, at);
-		g2d.dispose();
-		return bi;
-	}
-
-	private BufferedImage getCompatibleImage(int w, int h) {
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
-		GraphicsDevice gd = ge.getDefaultScreenDevice();
-		GraphicsConfiguration gc = gd.getDefaultConfiguration();
-		BufferedImage image = gc.createCompatibleImage(w, h);
-		return image;
-	}
-
 	@Override
 	public void fireThumbnails(IThumbnailListener listener, int width,
 			int height) throws RemoteException {
 		for (String fileName : new File(location).list()) {
 			String absoluteFileName = location + fileName;
 			File file = new File(absoluteFileName);
-			File thumbnailFile = new File(getThumbnailFile(absoluteFileName));
 			if (file.isFile() && fileName.length() > 3) {
 				String extension = fileName.toUpperCase().substring(
 						fileName.length() - 3);
 				if (extension.equals("JPG") || extension.equals("PNG")
 						|| extension.equals("GIF")) {
-					Thumbnail thumbnailData = null;
-					if (!thumbnailFile.exists())
-						thumbnailData = createThumbnail(file, thumbnailFile,
-								width, height);
-					else
-						thumbnailData = readThumbnail(thumbnailFile);
+					Thumbnail thumbnailData = ThumbnailHandler.instance()
+							.manageImageThumbnail(file, width, height);
 					if (thumbnailData != null) {
 						System.out.println("send thumbnail: " + fileName);
 						listener.setThumbnail(fileName, thumbnailData.width,
@@ -194,85 +146,6 @@ public class BrowserImpl implements IBrowser {
 				}
 			}
 		}
-	}
-
-	private Thumbnail readThumbnail(File thumbnailFile) {
-		try {
-			Thumbnail data = new Thumbnail();
-			DataInputStream input = new DataInputStream(new FileInputStream(thumbnailFile));
-			data.width = input.readInt();
-			data.height = input.readInt();
-			data.rgb = new int[data.width * data.height / 2];
-			for (int i=0;i<data.rgb.length;i++)
-				data.rgb[i] = input.readInt();
-			input.close();
-			return data;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private Thumbnail createThumbnail(File file, File thumbnailFile, int width,
-			int height) {
-		try {
-			BufferedImage src = ImageIO.read(file);
-			Thumbnail thumbnailData = new Thumbnail();
-			double radio = Math.min(width / (double) src.getWidth(), height
-					/ (double) src.getHeight());
-			thumbnailData.width = (int) (radio * src.getWidth());
-			thumbnailData.height = (int) (radio * src.getHeight());
-			if (thumbnailData.width % 2 != 0)
-				thumbnailData.width++;
-			BufferedImage thumbnail = scale(src, thumbnailData.width,
-					thumbnailData.height);
-			thumbnailData.rgb = ((DataBufferInt) thumbnail.getData().getDataBuffer())
-					.getData();
-			thumbnailData.rgb = compressRGB565(thumbnailData.rgb, thumbnailData.width, thumbnailData.height);
-			DataOutputStream stream = new DataOutputStream(
-					new FileOutputStream(thumbnailFile));
-			stream.writeInt(thumbnailData.width);
-			stream.writeInt(thumbnailData.height);
-			for (int i = 0; i < thumbnailData.rgb.length; i++)
-				stream.writeInt(thumbnailData.rgb[i]);
-			stream.close();
-			return thumbnailData;
-		} catch (Exception e) {
-			file.getName();
-		}
-		return null;
-	}
-
-	private String getThumbnailFile(String absoluteFileName) {
-		return thumbnails.getAbsolutePath() + File.separator
-				+ absoluteFileName.replace(File.separator, "_")
-				+ absoluteFileName.hashCode();
-	}
-
-	private int compressRGB565(int i) {
-		int ret = 0;
-		// blue 5 bit
-		ret |= (0x000000F8 & i) >> 3;
-		// green 6 bit
-		ret |= (0x0000FC00 & i) >> 2 + 3;
-		// red 5 bit
-		ret |= (0x00F80000 & i) >> 3 + 2 + 3;
-		return ret;
-	}
-
-	private int[] compressRGB565(int[] rgb, int width, int height) {
-		int[] ret = new int[width * height / 2];
-		for (int j = 0; j < height; j++)
-			for (int i = 0; i < width; i += 2) {
-				int px1 = compressRGB565(rgb[j * width + i]);
-				int px2 = compressRGB565(rgb[j * width + i + 1]);
-				ret[j * width / 2 + i / 2] = px1 | (px2 << 16);
-			}
-		return ret;
 	}
 
 	public class BrowserSendListener implements SenderProgress {
@@ -303,8 +176,7 @@ public class BrowserImpl implements IBrowser {
 
 	public static void main(String[] args) {
 		try {
-			BrowserImpl impl = new BrowserImpl("/home/sebastian/temp",
-					"/home/sebastian/temp");
+			BrowserImpl impl = new BrowserImpl("/home/sebastian/temp");
 			impl.fireThumbnails(new IThumbnailListener() {
 				@Override
 				@Oneway
@@ -331,10 +203,4 @@ public class BrowserImpl implements IBrowser {
 		return serverport;
 	}
 
-	private class Thumbnail {
-
-		public int width;
-		public int height;
-		public int[] rgb;
-	}
 }

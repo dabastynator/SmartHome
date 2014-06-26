@@ -31,7 +31,8 @@ public class PlayListImpl implements IPlayList {
 		File playlistFolder = new File(playlistLocation);
 		for (File pls : playlistFolder.listFiles()) {
 			String n = pls.getName();
-			plsList.add(n.substring(0, n.length() - 4));
+			if (!n.startsWith("."))
+				plsList.add(n.substring(0, n.length() - 4));
 		}
 		return plsList.toArray(new String[plsList.size()]);
 	}
@@ -54,7 +55,7 @@ public class PlayListImpl implements IPlayList {
 			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF,
 					true));
 			File fileF = new File(file);
-			if (!fileF.exists()){
+			if (!fileF.exists()) {
 				fileStream.close();
 				throw new PlayerException("the file '" + file
 						+ "' does not exist");

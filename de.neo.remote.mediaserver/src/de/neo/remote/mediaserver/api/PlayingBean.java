@@ -67,6 +67,17 @@ public class PlayingBean implements Serializable {
 	 * length of file in seconds
 	 */
 	private int lengthTime;
+	
+	/**
+	 * x and y size of the thumbnail 
+	 */
+	private int thumbnailWidth;
+	private int thumbnailHeight;
+	
+	/**
+	 * rgb content of the thumbnail in RGB_565
+	 */
+	private int[] thumbnailRGB;
 
 	/**
 	 * allocate new bean
@@ -91,6 +102,9 @@ public class PlayingBean implements Serializable {
 		path = bean.getPath();
 		startTime = bean.getCurrentTime();
 		lengthTime = bean.getLengthTime();
+		thumbnailWidth = bean.getThumbnailWidth();
+		thumbnailHeight = bean.getThumbnailHeight();
+		thumbnailRGB = bean.getThumbnailRGB();
 	}
 
 	/**
@@ -244,6 +258,27 @@ public class PlayingBean implements Serializable {
 
 	public void incrementCurrentTime(int seekValue) {
 		startTime += seekValue;
+	}
+
+	public int getThumbnailWidth() {
+		return thumbnailWidth;
+	}
+	
+	public int getThumbnailHeight() {
+		return thumbnailHeight;
+	}
+
+	public void setThumbnailSize(int width, int height) {
+		thumbnailWidth = width;
+		thumbnailHeight = height;
+	}
+
+	public int[] getThumbnailRGB() {
+		return thumbnailRGB;
+	}
+
+	public void setThumbnailRGB(int[] thumbnailRGB) {
+		this.thumbnailRGB = thumbnailRGB;
 	}
 
 }

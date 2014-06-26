@@ -17,7 +17,6 @@ public class MediaServerImpl implements IMediaServer {
 	private PlayListImpl playlist;
 	private String browserLocation;
 	private OMXPlayer omxplayer;
-	private String playlistLocation;
 	private ImageViewerImpl imageViewer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
@@ -28,12 +27,12 @@ public class MediaServerImpl implements IMediaServer {
 		playlist = new PlayListImpl(playlistLocation);
 		omxplayer = new OMXPlayer();
 		imageViewer = new ImageViewerImpl();
-		this.playlistLocation = playlistLocation;
+		ThumbnailHandler.init(playlistLocation);
 	}
 
 	@Override
 	public IBrowser createBrowser() throws RemoteException {
-		return new BrowserImpl(browserLocation, playlistLocation);
+		return new BrowserImpl(browserLocation);
 	}
 
 	@Override
