@@ -1,11 +1,14 @@
 package de.neo.remote.mobile.util;
 
+import java.nio.IntBuffer;
+
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
@@ -120,12 +123,22 @@ public class NotificationHandler implements IRemoteActionListener {
 			sb.append(" <" + playing.getAlbum() + ">");
 		final String msg = sb.toString();
 		final String title = t;
+		Bitmap thumbnail = null;
+		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0
+				&& playing.getThumbnailRGB() != null) {
+			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(),
+					playing.getThumbnailHeight(), Bitmap.Config.RGB_565);
+			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
+																		// is my
+																		// array
+			thumbnail.copyPixelsFromBuffer(buf);
+		}
 		if (playing.getState() == STATE.DOWN) {
 			NotificationManager nm = (NotificationManager) context
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
 		} else
-			makePlayingNotification(title, msg);
+			makePlayingNotification(title, msg, thumbnail);
 	}
 
 	/**
@@ -133,8 +146,10 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * 
 	 * @param title
 	 * @param body
+	 * @param thumbnail
 	 */
-	protected void makePlayingNotification(String title, String body) {
+	protected void makePlayingNotification(String title, String body,
+			Bitmap thumbnail) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent nIntent = new Intent(context, MediaServerActivity.class);
@@ -147,6 +162,8 @@ public class NotificationHandler implements IRemoteActionListener {
 		builder.setContentTitle(title);
 		builder.setContentText(body);
 		builder.setContentIntent(pInent);
+		if (thumbnail != null)
+			builder.setLargeIcon(thumbnail);
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
 	}
 

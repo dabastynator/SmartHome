@@ -118,6 +118,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			buttonFragment.onPlayingBeanChanged(mediaserver, bean);
 		if (buttonFragmentRight != null)
 			buttonFragmentRight.onPlayingBeanChanged(mediaserver, bean);
+		if (browserFragment != null)
+			browserFragment.onPlayingBeanChanged(mediaserver, bean);
 		playingBean = bean;
 	}
 

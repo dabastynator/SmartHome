@@ -437,7 +437,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 	}
 
 	@Override
-	public void onPlayingBeanChanged(String mediasesrver, PlayingBean bean) {
+	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 		playingBean = bean;
 		if (browserContentView != null
 				&& browserContentView.getAdapter() instanceof BrowserAdapter) {

@@ -1,5 +1,6 @@
 package de.neo.remote.mobile.services;
 
+import java.nio.IntBuffer;
 import java.util.Map;
 
 import android.app.Service;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -64,7 +66,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				updateWidget(null);
 			else
 				setWidgetText("not connected", "no connection with any server",
-						"", false);
+						"", false, null);
 
 		}
 	};
@@ -90,7 +92,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			setWidgetText(
 					"no music station",
 					"no music station specified at server "
-							+ binder.getServerName(), "", false);
+							+ binder.getServerName(), "", false, null);
 			return;
 		}
 		if (binder.getLatestMediaServer().player != null && playing == null)
@@ -98,7 +100,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			setWidgetText("no file playing",
 					"at music station " + binder.getLatestMediaServer().name,
-					"", false);
+					"", false, null);
 			return;
 		}
 		String title = "playing";
@@ -114,7 +116,18 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		String album = "";
 		if (playing.getAlbum() != null)
 			album = playing.getAlbum();
-		setWidgetText(title, author, album, playing.getState() == STATE.PLAY);
+		Bitmap thumbnail = null;
+		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0
+				&& playing.getThumbnailRGB() != null) {
+			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(),
+					playing.getThumbnailHeight(), Bitmap.Config.RGB_565);
+			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
+																		// is my
+																		// array
+			thumbnail.copyPixelsFromBuffer(buf);
+		}
+		setWidgetText(title, author, album, playing.getState() == STATE.PLAY,
+				thumbnail);
 	}
 
 	@Override
@@ -184,11 +197,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			updateWidget(null);
 		else
 			setWidgetText("not connected", "no connection with any server", "",
-					false);
+					false, null);
 	}
 
 	protected void setWidgetText(String big, String small, String small2,
-			boolean playing) {
+			boolean playing, Bitmap thumbnail) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
@@ -199,6 +212,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			remote.setTextViewText(R.id.lbl_widget_big, big);
 			remote.setTextViewText(R.id.lbl_widget_small, small);
 			remote.setTextViewText(R.id.lbl_widget_small2, small2);
+			if (thumbnail != null)
+				remote.setImageViewBitmap(R.id.img_widget_thumbnail, thumbnail);
+			else
+				remote.setImageViewResource(R.id.img_widget_thumbnail,
+						R.drawable.audio);
 			RemoteWidgetProvider.setWidgetClick(remote, this);
 			if (playing)
 				remote.setInt(R.id.button_widget_play, "setBackgroundResource",
@@ -266,7 +284,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void onStopService() {
 		setWidgetText("not connected", "no connection with any server", "",
-				false);
+				false, null);
 		stopSelf();
 	}
 
