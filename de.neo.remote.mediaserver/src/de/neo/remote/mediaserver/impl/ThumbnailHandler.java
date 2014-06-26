@@ -239,7 +239,8 @@ public class ThumbnailHandler {
 
 	private File getStringThumbnailFile(String string)
 			throws UnsupportedEncodingException {
-		String path = "string_" + URLEncoder.encode(string, "UTF-8");
+		String path = thumbnails.getAbsolutePath() + File.separator + "string_"
+				+ URLEncoder.encode(string, "UTF-8");
 		return new File(path);
 	}
 
