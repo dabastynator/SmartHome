@@ -20,6 +20,7 @@ public class MediaServerImpl implements IMediaServer {
 	private ImageViewerImpl imageViewer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation) {
+		ThumbnailHandler.init(playlistLocation);
 		totem = new TotemPlayer();
 		mplayer = new MPlayerDVD(playlistLocation);
 		browserLocation = browseLocation;
@@ -27,7 +28,6 @@ public class MediaServerImpl implements IMediaServer {
 		playlist = new PlayListImpl(playlistLocation);
 		omxplayer = new OMXPlayer();
 		imageViewer = new ImageViewerImpl();
-		ThumbnailHandler.init(playlistLocation);
 	}
 
 	@Override

@@ -7,7 +7,10 @@ import java.util.List;
 
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
+import de.neo.remote.mediaserver.impl.ThumbnailHandler.ImageThumbnailJob;
 import de.neo.remote.mediaserver.impl.ThumbnailHandler.Thumbnail;
+import de.neo.remote.mediaserver.impl.ThumbnailHandler.ThumbnailJob;
+import de.neo.remote.mediaserver.impl.ThumbnailHandler.ThumbnailListener;
 import de.neo.rmi.api.Oneway;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
@@ -17,7 +20,7 @@ import de.neo.rmi.transceiver.FileReceiver;
 import de.neo.rmi.transceiver.FileSender;
 import de.neo.rmi.transceiver.SenderProgress;
 
-public class BrowserImpl implements IBrowser {
+public class BrowserImpl implements IBrowser, ThumbnailListener {
 
 	public static final int DOWNLOAD_PORT = 5033;
 
@@ -34,6 +37,7 @@ public class BrowserImpl implements IBrowser {
 		if (!directory.endsWith(File.separator))
 			directory += File.separator;
 		root = location = directory;
+		ThumbnailHandler.instance().calculationListener().add(this);
 	}
 
 	@Override
@@ -136,13 +140,9 @@ public class BrowserImpl implements IBrowser {
 						fileName.length() - 3);
 				if (extension.equals("JPG") || extension.equals("PNG")
 						|| extension.equals("GIF")) {
-					Thumbnail thumbnailData = ThumbnailHandler.instance()
-							.manageImageThumbnail(file, width, height);
-					if (thumbnailData != null) {
-						System.out.println("send thumbnail: " + fileName);
-						listener.setThumbnail(fileName, thumbnailData.width,
-								thumbnailData.height, thumbnailData.rgb);
-					}
+					BrowserThumbnailJob job = new BrowserThumbnailJob(file,
+							width, height, listener, fileName);
+					ThumbnailHandler.instance().queueThumbnailJob(job);
 				}
 			}
 		}
@@ -201,6 +201,33 @@ public class BrowserImpl implements IBrowser {
 		ServerPort serverport = new ServerPort(Server.getServer()
 				.getServerPort().getIp(), DOWNLOAD_PORT);
 		return serverport;
+	}
+
+	@Override
+	public void onThumbnailCalculation(ThumbnailJob job) {
+		if (job instanceof BrowserThumbnailJob) {
+			BrowserThumbnailJob browserJob = (BrowserThumbnailJob) job;
+			try {
+				browserJob.listener.setThumbnail(browserJob.fileName,
+						job.thumbnail.width, job.thumbnail.height,
+						job.thumbnail.rgb);
+			} catch (RemoteException e) {
+			}
+		}
+	}
+
+	private static class BrowserThumbnailJob extends ImageThumbnailJob {
+
+		private IThumbnailListener listener;
+		private String fileName;
+
+		public BrowserThumbnailJob(File imageFile, int width, int height,
+				IThumbnailListener listener, String fileName) {
+			super(imageFile, width, height);
+			this.listener = listener;
+			this.fileName = fileName;
+		}
+
 	}
 
 }

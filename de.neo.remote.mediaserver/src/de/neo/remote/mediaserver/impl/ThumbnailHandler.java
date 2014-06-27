@@ -13,6 +13,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -31,6 +35,8 @@ public class ThumbnailHandler {
 	}
 
 	private File thumbnails;
+	private List<ThumbnailListener> listener = new ArrayList<>();
+	private ThumbnailQueue queue = new ThumbnailQueue();
 
 	private ThumbnailHandler(String temporaryFolder) {
 		if (!temporaryFolder.endsWith(File.separator))
@@ -38,6 +44,20 @@ public class ThumbnailHandler {
 		thumbnails = new File(temporaryFolder + THUMBNAILS);
 		if (!thumbnails.exists())
 			thumbnails.mkdir();
+		queue.start();
+	}
+
+	public List<ThumbnailListener> calculationListener() {
+		return listener;
+	}
+	
+	public void informListener(ThumbnailJob job) {
+		for (ThumbnailListener l : listener) {
+			try {
+				l.onThumbnailCalculation(job);
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	private File getThumbnailFile(File file, int w, int h) {
@@ -47,42 +67,22 @@ public class ThumbnailHandler {
 		return new File(path);
 	}
 
-	public class Thumbnail {
+	public static class Thumbnail {
 
 		public int width;
 		public int height;
 		public int[] rgb;
 	}
 
-	public Thumbnail manageImageThumbnail(File file, int width, int height) {
-		Thumbnail thumbnail = null;
-		File thumbnailFile = getThumbnailFile(file, width, height);
-		if (!thumbnailFile.exists())
-			thumbnail = createThumbnail(file, thumbnailFile, width, height);
-		else
-			thumbnail = readThumbnail(thumbnailFile);
-		return thumbnail;
+	public void manageImageThumbnail(File file, int width, int height) {
+		ImageThumbnailJob job = new ImageThumbnailJob(file, width, height);
+		queueThumbnailJob(job);
 	}
 
-	public Thumbnail manageStringThumbnail(String string, BufferedImage image,
-			int size) {
-		Thumbnail thumbnail = new Thumbnail();
-		try {
-			File thumbnailFile = getStringThumbnailFile(string);
-			BufferedImage thumbnailImage = toBufferedImage(createThumbnail(
-					image, size));
-			int rgb[] = readImageIntArray(thumbnailImage);
-			rgb = compressRGB565(rgb, size, size);
-			thumbnail.width = size;
-			thumbnail.height = size;
-			thumbnail.rgb = rgb;
-			writeThumbnail(thumbnailFile, thumbnail);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return thumbnail;
+	public void queueThumbnailJob(ThumbnailJob job) {
+		queue.queueJob(job);		
 	}
+
 
 	private Thumbnail createThumbnail(File file, File thumbnailFile, int width,
 			int height) {
@@ -109,7 +109,7 @@ public class ThumbnailHandler {
 		return null;
 	}
 
-	private void writeThumbnail(File thumbnailFile, Thumbnail thumbnailData)
+	void writeThumbnail(File thumbnailFile, Thumbnail thumbnailData)
 			throws IOException {
 		DataOutputStream stream = new DataOutputStream(new FileOutputStream(
 				thumbnailFile));
@@ -120,7 +120,7 @@ public class ThumbnailHandler {
 		stream.close();
 	}
 
-	private BufferedImage toBufferedImage(Image img) {
+	BufferedImage toBufferedImage(Image img) {
 		if (img instanceof BufferedImage) {
 			return (BufferedImage) img;
 		}
@@ -138,7 +138,7 @@ public class ThumbnailHandler {
 		return bimage;
 	}
 
-	private Image createThumbnail(BufferedImage sourceImage, int size) {
+	public Image createThumbnail(BufferedImage sourceImage, int size) {
 		int width = sourceImage.getWidth();
 		int height = sourceImage.getHeight();
 
@@ -195,7 +195,7 @@ public class ThumbnailHandler {
 		return ret;
 	}
 
-	private int[] readImageIntArray(BufferedImage image) {
+	public int[] readImageIntArray(BufferedImage image) {
 		int rgb[] = new int[image.getWidth() * image.getHeight()];
 		for (int i = 0; i < rgb.length; i++)
 			rgb[i] = image.getRGB(i % image.getWidth(), i / image.getWidth());
@@ -237,11 +237,79 @@ public class ThumbnailHandler {
 		return thumbnail;
 	}
 
-	private File getStringThumbnailFile(String string)
+	File getStringThumbnailFile(String string)
 			throws UnsupportedEncodingException {
 		String path = thumbnails.getAbsolutePath() + File.separator + "string_"
 				+ URLEncoder.encode(string, "UTF-8");
 		return new File(path);
 	}
 
+	public interface ThumbnailListener {
+		public void onThumbnailCalculation(ThumbnailJob job);
+	}
+
+	private class ThumbnailQueue extends Thread {
+
+		private List<ThumbnailJob> jobs = Collections
+				.synchronizedList(new LinkedList<ThumbnailJob>());
+
+		@Override
+		synchronized public void run() {
+			while (true) {
+				if (jobs.size() > 0) {
+					ThumbnailJob job = jobs.get(0);
+					jobs.remove(0);
+					job.calculateThumbnail();
+					instance().informListener(job);
+				} else {
+					try {
+						this.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+			}
+		}
+
+		synchronized public void queueJob(ThumbnailJob job) {
+			jobs.add(job);
+			this.notify();
+		}
+
+	}
+
+	public static abstract class ThumbnailJob {
+
+		public Thumbnail thumbnail;
+
+		protected abstract void calculateThumbnail();
+
+	}
+
+	public static class ImageThumbnailJob extends ThumbnailJob {
+
+		private File imageFile;
+		private int width;
+		private int height;
+
+		public ImageThumbnailJob(File imageFile, int width, int height) {
+			this.imageFile = imageFile;
+			this.width = width;
+			this.height = height;
+		}
+
+		@Override
+		protected void calculateThumbnail() {
+			File thumbnailFile = instance().getThumbnailFile(imageFile, width,
+					height);
+			if (!thumbnailFile.exists())
+				thumbnail = instance().createThumbnail(imageFile,
+						thumbnailFile, width, height);
+			else
+				thumbnail = instance().readThumbnail(thumbnailFile);
+		}
+
+	}
 }
