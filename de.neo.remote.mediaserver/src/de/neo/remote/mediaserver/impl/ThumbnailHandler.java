@@ -50,7 +50,7 @@ public class ThumbnailHandler {
 	public List<ThumbnailListener> calculationListener() {
 		return listener;
 	}
-	
+
 	public void informListener(ThumbnailJob job) {
 		for (ThumbnailListener l : listener) {
 			try {
@@ -76,27 +76,32 @@ public class ThumbnailHandler {
 
 	public void manageImageThumbnail(File file, int width, int height) {
 		ImageThumbnailJob job = new ImageThumbnailJob(file, width, height);
+
 		queueThumbnailJob(job);
 	}
 
 	public void queueThumbnailJob(ThumbnailJob job) {
-		queue.queueJob(job);		
+		if (job.needsCalculation()) {
+			for (ThumbnailJob j : queue.jobs) {
+				if (job.equals(j))
+					return;
+			}
+			queue.queueJob(job);
+		} else {
+			job.readThumbnail();
+			informListener(job);
+		}
 	}
-
 
 	private Thumbnail createThumbnail(File file, File thumbnailFile, int width,
 			int height) {
 		try {
 			BufferedImage src = ImageIO.read(file);
 			Thumbnail thumbnailData = new Thumbnail();
-			double radio = Math.min(width / (double) src.getWidth(), height
-					/ (double) src.getHeight());
-			thumbnailData.width = (int) (radio * src.getWidth());
-			thumbnailData.height = (int) (radio * src.getHeight());
-			if (thumbnailData.width % 2 != 0)
-				thumbnailData.width++;
 			BufferedImage thumbnail = toBufferedImage(createThumbnail(src,
-					thumbnailData.width));
+					width));
+			thumbnailData.width = thumbnail.getWidth();
+			thumbnailData.height = thumbnail.getHeight();
 			thumbnailData.rgb = ((DataBufferInt) thumbnail.getData()
 					.getDataBuffer()).getData();
 			thumbnailData.rgb = compressRGB565(thumbnailData.rgb,
@@ -141,36 +146,14 @@ public class ThumbnailHandler {
 	public Image createThumbnail(BufferedImage sourceImage, int size) {
 		int width = sourceImage.getWidth();
 		int height = sourceImage.getHeight();
-
-		if (width > height) {
-			float extraSize = height - size;
-			float percentHight = (extraSize / height) * size;
-			float percentWidth = width - ((width / size) * percentHight);
-			BufferedImage img = new BufferedImage((int) percentWidth, size,
-					BufferedImage.TYPE_INT_RGB);
-			Image scaledImage = sourceImage.getScaledInstance(
-					(int) percentWidth, size, Image.SCALE_SMOOTH);
-			img.createGraphics().drawImage(scaledImage, 0, 0, null);
-			BufferedImage img2 = new BufferedImage(size, size,
-					BufferedImage.TYPE_INT_RGB);
-			img2 = img.getSubimage((int) ((percentWidth - size) / 2), 0, size,
-					size);
-			return img2;
-		} else {
-			float extraSize = width - size;
-			float percentWidth = (extraSize / width) * size;
-			float percentHight = height - ((height / size) * percentWidth);
-			BufferedImage img = new BufferedImage(size, (int) percentHight,
-					BufferedImage.TYPE_INT_RGB);
-			Image scaledImage = sourceImage.getScaledInstance(size,
-					(int) percentHight, Image.SCALE_SMOOTH);
-			img.createGraphics().drawImage(scaledImage, 0, 0, null);
-			BufferedImage img2 = new BufferedImage(size, size,
-					BufferedImage.TYPE_INT_RGB);
-			img2 = img.getSubimage(0, (int) ((percentHight - size) / 2), size,
-					size);
-			return img2;
-		}
+		int bigSize = Math.min(width, height);
+		int diffWidth = width - bigSize;
+		int diffHeight = height - bigSize;
+		BufferedImage bigImg = sourceImage.getSubimage(diffWidth / 2,
+				diffHeight / 2, bigSize, bigSize);
+		Image smallImg = bigImg.getScaledInstance(Math.min(size, width),
+				Math.min(size, height), Image.SCALE_SMOOTH);
+		return smallImg;
 	}
 
 	private static int compressRGB565(int i) {
@@ -286,6 +269,10 @@ public class ThumbnailHandler {
 
 		protected abstract void calculateThumbnail();
 
+		protected abstract Thumbnail readThumbnail();
+
+		protected abstract boolean needsCalculation();
+
 	}
 
 	public static class ImageThumbnailJob extends ThumbnailJob {
@@ -309,6 +296,35 @@ public class ThumbnailHandler {
 						thumbnailFile, width, height);
 			else
 				thumbnail = instance().readThumbnail(thumbnailFile);
+		}
+
+		@Override
+		protected Thumbnail readThumbnail() {
+			File thumbnailFile = instance().getThumbnailFile(imageFile, width,
+					height);
+			if (thumbnailFile.exists()) {
+				thumbnail = instance().readThumbnail(thumbnailFile);
+				return thumbnail;
+			}
+			return null;
+		}
+
+		@Override
+		protected boolean needsCalculation() {
+			File thumbnailFile = instance().getThumbnailFile(imageFile, width,
+					height);
+			return !thumbnailFile.exists();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof ImageThumbnailJob) {
+				ImageThumbnailJob img = (ImageThumbnailJob) obj;
+				return img.imageFile.getAbsoluteFile().equals(
+						imageFile.getAbsoluteFile())
+						&& width == img.width && height == img.height;
+			}
+			return super.equals(obj);
 		}
 
 	}

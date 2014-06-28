@@ -318,5 +318,28 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 			}
 		}
 
+		@Override
+		protected Thumbnail readThumbnail() {
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
+					bean.getArtist());
+			return thumbnail;
+		}
+
+		@Override
+		protected boolean needsCalculation() {
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
+					bean.getArtist());
+			return thumbnail == null;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof PlayerThumbnailJob) {
+				PlayerThumbnailJob pJob = (PlayerThumbnailJob) obj;
+				return pJob.bean.getArtist().equals(bean.getArtist());
+			}
+			return super.equals(obj);
+		}
+
 	}
 }
