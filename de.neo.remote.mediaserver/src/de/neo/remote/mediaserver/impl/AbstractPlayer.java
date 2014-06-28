@@ -208,7 +208,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 			try {
 				bean.setThumbnailRGB(null);
 				bean.setThumbnailSize(0, 0);
-				PlayerThumbnailJob job = new PlayerThumbnailJob(bean);
+				PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
 				ThumbnailHandler.instance().queueThumbnailJob(job);
 			} catch (Exception e) {
 				System.out.println("No thumbnail for " + bean.getArtist()
@@ -255,7 +255,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	public void onThumbnailCalculation(ThumbnailJob job) {
 		if (job instanceof PlayerThumbnailJob) {
 			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
-			if (playingBean == playerJob.bean && playerJob.bean != null
+			if (playerJob.player == this && playerJob.bean != null
 					&& playerJob.thumbnail != null) {
 				playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
 				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width,
@@ -286,9 +286,11 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	class PlayerThumbnailJob extends ThumbnailJob {
 
 		private PlayingBean bean;
+		private AbstractPlayer player;
 
-		public PlayerThumbnailJob(PlayingBean bean) {
+		public PlayerThumbnailJob(PlayingBean bean, AbstractPlayer player) {
 			this.bean = bean;
+			this.player = player;
 		}
 
 		@Override
@@ -317,6 +319,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					ThumbnailHandler.instance().writeThumbnail(thumbnailFile,
 							thumbnail);
 				} catch (IOException | JSONException e) {
+					System.out.println("Could not build thumbnail for '"
+							+ bean.getArtist() + "': " + e.getMessage());
 				}
 			}
 		}
