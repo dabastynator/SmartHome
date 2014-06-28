@@ -325,6 +325,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		protected Thumbnail readThumbnail() {
 			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
 					bean.getArtist());
+			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
+			bean.setThumbnailRGB(thumbnail.rgb);
 			return thumbnail;
 		}
 
@@ -332,8 +334,6 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		protected boolean needsCalculation() {
 			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
 					bean.getArtist());
-			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
-			bean.setThumbnailRGB(thumbnail.rgb);
 			return thumbnail == null;
 		}
 
