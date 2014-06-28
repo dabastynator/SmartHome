@@ -204,7 +204,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	protected void loadThumbnail(PlayingBean bean) {
-		if (bean.getArtist() != null) {
+		if (bean.getArtist() != null && bean.getArtist().length() > 0) {
 			try {
 				bean.setThumbnailRGB(null);
 				bean.setThumbnailSize(0, 0);

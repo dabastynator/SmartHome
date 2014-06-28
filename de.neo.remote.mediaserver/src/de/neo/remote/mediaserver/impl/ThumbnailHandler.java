@@ -242,8 +242,14 @@ public class ThumbnailHandler {
 				if (jobs.size() > 0) {
 					ThumbnailJob job = jobs.get(0);
 					jobs.remove(0);
-					job.calculateThumbnail();
-					instance().informListener(job);
+					try {
+						job.calculateThumbnail();
+						instance().informListener(job);
+					} catch (Exception e) {
+						System.out
+								.println("Uncatched exception in thumbnail execution: "
+										+ job.getClass().getSimpleName());
+					}
 				} else {
 					try {
 						this.wait();
