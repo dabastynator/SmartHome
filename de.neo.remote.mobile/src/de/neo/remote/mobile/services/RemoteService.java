@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
@@ -196,9 +195,6 @@ public class RemoteService extends Service {
 		uploadListener = new UploadProgressListenr();
 		actionListener.add(notificationHandler);
 		serverDB = new RemoteDatabase(this);
-		
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
 	}
 
 	@Override

@@ -76,6 +76,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onCreate() {
+		super.onCreate();
 		// bind service
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);

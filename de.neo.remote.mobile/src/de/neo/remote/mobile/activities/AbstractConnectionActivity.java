@@ -103,10 +103,14 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	protected void onCreate(android.os.Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// bind service
+		// bind remote service
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
+		
+		// start widget service
+		intent = new Intent(this, RemoteService.class);
+		startService(intent);
 
 		serverDB = new RemoteDatabase(this);
 	};

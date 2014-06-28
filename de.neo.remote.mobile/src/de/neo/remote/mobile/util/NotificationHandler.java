@@ -3,12 +3,13 @@ package de.neo.remote.mobile.util;
 import java.nio.IntBuffer;
 
 import android.app.Notification;
-import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
@@ -157,7 +158,7 @@ public class NotificationHandler implements IRemoteActionListener {
 		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pInent = PendingIntent
 				.getActivity(context, 0, nIntent, 0);
-		Builder builder = new Notification.Builder(context);
+		Builder builder = new NotificationCompat.Builder(context);
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentTitle(title);
 		builder.setContentText(body);

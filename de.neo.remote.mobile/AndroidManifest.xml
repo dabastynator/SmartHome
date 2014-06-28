@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="16"
+        android:minSdkVersion="15"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -71,7 +71,9 @@
             </intent-filter>
             -->
         </service>
-        <service android:name="de.neo.remote.mobile.services.WidgetService" >
+        <service
+            android:name="de.neo.remote.mobile.services.WidgetService"
+            android:enabled="true" >
         </service>
 
         <receiver
@@ -80,6 +82,9 @@
             android:label="Remote Music" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.HOME" />
             </intent-filter>
 
             <meta-data
