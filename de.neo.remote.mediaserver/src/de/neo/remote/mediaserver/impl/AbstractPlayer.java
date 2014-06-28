@@ -206,6 +206,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	protected void loadThumbnail(PlayingBean bean) {
 		if (bean.getArtist() != null) {
 			try {
+				bean.setThumbnailRGB(null);
+				bean.setThumbnailSize(0, 0);
 				PlayerThumbnailJob job = new PlayerThumbnailJob(bean);
 				ThumbnailHandler.instance().queueThumbnailJob(job);
 			} catch (Exception e) {
@@ -253,7 +255,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	public void onThumbnailCalculation(ThumbnailJob job) {
 		if (job instanceof PlayerThumbnailJob) {
 			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
-			if (playerJob.bean != null && playerJob.thumbnail != null) {
+			if (playingBean == playerJob.bean && playerJob.bean != null
+					&& playerJob.thumbnail != null) {
 				playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
 				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width,
 						playerJob.thumbnail.height);
@@ -329,6 +332,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		protected boolean needsCalculation() {
 			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
 					bean.getArtist());
+			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
+			bean.setThumbnailRGB(thumbnail.rgb);
 			return thumbnail == null;
 		}
 
