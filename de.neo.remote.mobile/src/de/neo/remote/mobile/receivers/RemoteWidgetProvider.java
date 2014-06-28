@@ -106,5 +106,12 @@ public class RemoteWidgetProvider extends AppWidgetProvider {
 		AppWidgetManager manager = AppWidgetManager.getInstance(context);
 		onUpdate(context, manager, null);
 	}
+	
+	@Override
+	public void onEnabled(Context context) {
+		super.onEnabled(context);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		onUpdate(context, manager, null);
+	}
 
 }

@@ -5,7 +5,10 @@
     android:layout_height="70dp"
     android:layout_margin="1dip"
     android:background="@drawable/widget_shape"
-    android:padding="3dip" >
+    android:paddingTop="3dip"
+    android:paddingBottom="3dip"
+    android:paddingLeft="0dip"
+    android:paddingRight="0dip" >
 
     <ImageView
         android:id="@+id/image_power_widget"
@@ -19,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:textColor="@android:color/white"
-        style="@android:style/TextAppearance.Small"
+        android:textSize="11dp"
         android:gravity="bottom|center_horizontal"
         android:text="Switch" />
 

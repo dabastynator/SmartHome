@@ -63,10 +63,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			binder = (PlayerBinder) service;
 			binder.addRemoteActionListener(WidgetService.this);
 			if (binder.isConnected())
-				updateWidget(null);
+				updateMusicWidget(null);
 			else
-				setWidgetText("not connected", "no connection with any server",
+				setMusicWidgetText("not connected", "no connection with any server",
 						"", false, null);
+			updateSwitchWidget();
 
 		}
 	};
@@ -81,15 +82,15 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 		remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
 				R.layout.mediaserver_widget);
-		initializeWidgets();
+		initializeMusicWidgets();
 		remoteSwitchViews = new RemoteViews(getApplicationContext()
 				.getPackageName(), R.layout.switch_widget);
 		updateSwitchWidget();
 	};
 
-	protected void updateWidget(PlayingBean playing) {
+	protected void updateMusicWidget(PlayingBean playing) {
 		if (binder.getLatestMediaServer() == null) {
-			setWidgetText(
+			setMusicWidgetText(
 					"no music station",
 					"no music station specified at server "
 							+ binder.getServerName(), "", false, null);
@@ -98,7 +99,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder.getLatestMediaServer().player != null && playing == null)
 			playing = binder.getPlayingFile();
 		if (playing == null || playing.getState() == STATE.DOWN) {
-			setWidgetText("no file playing",
+			setMusicWidgetText("no file playing",
 					"at music station " + binder.getLatestMediaServer().name,
 					"", false, null);
 			return;
@@ -126,7 +127,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 																		// array
 			thumbnail.copyPixelsFromBuffer(buf);
 		}
-		setWidgetText(title, author, album, playing.getState() == STATE.PLAY,
+		setMusicWidgetText(title, author, album, playing.getState() == STATE.PLAY,
 				thumbnail);
 	}
 
@@ -137,7 +138,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		else {
 			remoteViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.mediaserver_widget);
-			initializeWidgets();
+			initializeMusicWidgets();
 			remoteSwitchViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.switch_widget);
 			updateSwitchWidget();
@@ -192,15 +193,15 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}.start();
 	}
 
-	private void initializeWidgets() {
+	private void initializeMusicWidgets() {
 		if (binder != null && binder.isConnected())
-			updateWidget(null);
+			updateMusicWidget(null);
 		else
-			setWidgetText("not connected", "no connection with any server", "",
+			setMusicWidgetText("not connected", "no connection with any server", "",
 					false, null);
 	}
 
-	protected void setWidgetText(String big, String small, String small2,
+	protected void setMusicWidgetText(String big, String small, String small2,
 			boolean playing, Bitmap thumbnail) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
@@ -243,12 +244,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		updateWidget(bean);
+		updateMusicWidget(bean);
 	}
 
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
-		initializeWidgets();
+		initializeMusicWidgets();
 	}
 
 	@Override
@@ -283,7 +284,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onStopService() {
-		setWidgetText("not connected", "no connection with any server", "",
+		setMusicWidgetText("not connected", "no connection with any server", "",
 				false, null);
 		stopSelf();
 	}
