@@ -108,15 +108,17 @@ public abstract class AbstractTask extends
 			if (result instanceof RemoteException)
 				errorDialog.setTitle("Remote error");
 			else
-				errorDialog.setTitle(result.getClass().getSimpleName());
-			errorDialog.setMessage(result.getMessage());
+				errorDialog.setTitle(getDialogTitle());
+			errorDialog.setMessage(result.getClass().getSimpleName() + ": "
+					+ result.getMessage());
 			errorDialog.setPositiveButton(
 					activity.getResources().getString(android.R.string.ok),
 					new OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 						}
 					});
-			errorDialog.show();
+			if (!activity.isFinishing())
+				errorDialog.show();
 		}
 	}
 

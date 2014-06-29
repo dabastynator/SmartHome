@@ -15,49 +15,14 @@ import de.neo.rmi.protokol.ServerPort;
  */
 public class BufferBrowser implements IBrowser {
 
-	/**
-	 * browser object
-	 */
 	private IBrowser browser;
-
-	/**
-	 * state of directory
-	 */
 	private boolean isDirtyDirectory;
-
-	/**
-	 * state of file
-	 */
 	private boolean isDirtyFile;
-
-	/**
-	 * temporary directories
-	 */
 	private String[] directories;
-
-	/**
-	 * temporary files
-	 */
 	private String[] files;
-
-	/**
-	 * state of location
-	 */
 	private boolean isDirtyLocation;
-
-	/**
-	 * temporary location
-	 */
 	private String location;
-
-	/**
-	 * state of full location
-	 */
 	private boolean isDirtyFullLocation;
-
-	/**
-	 * temporary full location
-	 */
 	private String fullLocation;
 
 	/**
@@ -168,8 +133,19 @@ public class BufferBrowser implements IBrowser {
 	}
 
 	@Override
-	public ServerPort publishAbsoluteFile(String string) throws RemoteException, IOException {
+	public ServerPort publishAbsoluteFile(String string)
+			throws RemoteException, IOException {
 		return browser.publishAbsoluteFile(string);
+	}
+
+	public String[] getDirectoriesInt() {
+		return directories;
+	}
+
+	public String getLocationInt() {
+		if (isDirtyLocation)
+			return "no connection";
+		return location;
 	}
 
 }

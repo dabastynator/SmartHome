@@ -17,7 +17,6 @@ public class DownloadTask extends AsyncTask<String, String, String> {
 	private String file;
 	private String directory;
 	private String serverName;
-	private Exception exception;
 	private PlayerBinder binder;
 
 	public DownloadTask(IBrowser browser, String file, String directory,
@@ -56,7 +55,6 @@ public class DownloadTask extends AsyncTask<String, String, String> {
 			}
 			download(receiver);
 		} catch (Exception e) {
-			exception = e;
 		}
 		return null;
 	}
@@ -76,7 +74,7 @@ public class DownloadTask extends AsyncTask<String, String, String> {
 	}
 
 	@Override
-	protected void onProgressUpdate(String[] values) {
+	protected void onProgressUpdate(String... values) {
 		Toast.makeText(binder.service, values[0], Toast.LENGTH_SHORT).show();
 	}
 

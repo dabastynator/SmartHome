@@ -82,10 +82,8 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 	private LinearLayout downloadLayout;
 	private ProgressBar downloadProgress;
 	private TextView downloadText;
-	private LinearLayout dvdLayout;
+//	private LinearLayout dvdLayout;
 	private long maxDonwloadSize = 0;
-
-	private PlayingBean playingBean;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,8 +113,6 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		downloadProgress = (ProgressBar) getActivity().findViewById(
 				R.id.prg_donwload);
 		downloadText = (TextView) getActivity().findViewById(R.id.lbl_download);
-		dvdLayout = (LinearLayout) getActivity().findViewById(
-				R.id.layout_dvd_bar);
 	}
 
 	public void onLoadedItems(String[] itemArray, boolean goBack) {
@@ -139,12 +135,8 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		browserContentView.setSelection(selectedPosition);
 		switch (viewerState) {
 		case DIRECTORIES:
-			try {
-				activity.setTitle(mediaServer.browser.getLocation() + "@"
+				activity.setTitle(mediaServer.browser.getLocationInt() + "@"
 						+ mediaServer.name);
-			} catch (RemoteException e) {
-				activity.setTitle("no connection");
-			}
 			activity.filesystemButton
 					.setBackgroundResource(R.drawable.image_border);
 			activity.playlistButton.setBackgroundResource(0);
@@ -356,15 +348,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
 			if (viewerState == ViewerState.DIRECTORIES) {
-				try {
-					if (position < mediaServer.browser.getDirectories().length) {
+					if (position < mediaServer.browser.getDirectoriesInt().length) {
 						selectedPosition = 0;
 						new BrowserLoadTask(activity, item, false).execute();
 						return;
 					}
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
 			}
 			if (viewerState == ViewerState.PLS_ITEMS)
 				item = plsFileMap.get(item);
@@ -438,7 +426,6 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		playingBean = bean;
 		if (browserContentView != null
 				&& browserContentView.getAdapter() instanceof BrowserAdapter) {
 			BrowserAdapter adapter = (BrowserAdapter) browserContentView

@@ -180,7 +180,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		IPlayer player = binder.getLatestMediaServer().player;
 		if (dvdLayout.getVisibility() == View.VISIBLE) {
 			dvdLayout.setVisibility(View.GONE);
-			dvdButton.setBackgroundDrawable(null);
+			dvdButton.setBackgroundResource(0);
 		} else {
 			if (player instanceof IDVDPlayer) {
 				try {
@@ -196,8 +196,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 						Toast.LENGTH_SHORT).show();
 		}
 	}
-
-	
 
 	@Override
 	protected void onDestroy() {
@@ -330,6 +328,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				.findFragmentById(R.id.mediaserver_fragment_button);
 		buttonFragmentRight = (PlayerButtonFragment) getFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button_right);
+		dvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
 	}
 
 	@Override
@@ -381,8 +380,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 								}
 							};
 						}.start();
-						new BrowserLoadTask(MediaServerActivity.this, null, false)
-								.execute();
+						new BrowserLoadTask(MediaServerActivity.this, null,
+								false).execute();
 						Toast.makeText(MediaServerActivity.this,
 								"playlist '" + pls + "' added",
 								Toast.LENGTH_SHORT).show();
@@ -510,8 +509,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			@Override
 			protected void onPostExecute(String[] result) {
 				if (exeption != null)
-					Toast.makeText(MediaServerActivity.this, exeption.getMessage(),
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(MediaServerActivity.this,
+							exeption.getMessage(), Toast.LENGTH_SHORT).show();
 				if (binder.getLatestMediaServer() != null) {
 					new BrowserLoadTask(MediaServerActivity.this, null, false)
 							.execute();
@@ -533,7 +532,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	public class ShowFolderRunnable implements Runnable {
 		@Override
 		public void run() {
-			new BrowserLoadTask(MediaServerActivity.this, null, false).execute();
+			new BrowserLoadTask(MediaServerActivity.this, null, false)
+					.execute();
 			if (binder.getReceiver() != null
 					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
 				downloadLayout.setVisibility(View.VISIBLE);
@@ -560,28 +560,34 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	public void setTotem(View view) {
 		StationStuff mediaServer = binder.getLatestMediaServer();
-		mediaServer.player = mediaServer.totem;
-		totemButton.setBackgroundResource(R.drawable.image_border);
-		mplayerButton.setBackgroundDrawable(null);
-		if (omxButton != null)
-			omxButton.setBackgroundDrawable(null);
+		if (mediaServer != null) {
+			mediaServer.player = mediaServer.totem;
+			totemButton.setBackgroundResource(R.drawable.image_border);
+			mplayerButton.setBackgroundResource(0);
+			if (omxButton != null)
+				omxButton.setBackgroundResource(0);
+		}
 	}
 
 	public void setMPlayer(View view) {
 		StationStuff mediaServer = binder.getLatestMediaServer();
-		mediaServer.player = mediaServer.mplayer;
-		mplayerButton.setBackgroundResource(R.drawable.image_border);
-		totemButton.setBackgroundDrawable(null);
-		if (omxButton != null)
-			omxButton.setBackgroundDrawable(null);
+		if (mediaServer != null) {
+			mediaServer.player = mediaServer.mplayer;
+			mplayerButton.setBackgroundResource(R.drawable.image_border);
+			totemButton.setBackgroundResource(0);
+			if (omxButton != null)
+				omxButton.setBackgroundResource(0);
+		}
 	}
 
 	public void setOMXPlayer(View view) {
 		StationStuff server = binder.getLatestMediaServer();
-		server.player = server.omxplayer;
-		omxButton.setBackgroundResource(R.drawable.image_border);
-		totemButton.setBackgroundDrawable(null);
-		mplayerButton.setBackgroundDrawable(null);
+		if (server != null) {
+			server.player = server.omxplayer;
+			omxButton.setBackgroundResource(R.drawable.image_border);
+			totemButton.setBackgroundResource(0);
+			mplayerButton.setBackgroundResource(0);
+		}
 	}
 
 }

@@ -16,7 +16,6 @@ import de.neo.remote.controlcenter.api.IControlUnit;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.gpiopower.api.IInternetSwitchListener;
-import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IChatServer;
 import de.neo.remote.mediaserver.api.IControl;
 import de.neo.remote.mediaserver.api.IImageViewer;
@@ -26,6 +25,7 @@ import de.neo.remote.mediaserver.api.IPlayerListener;
 import de.neo.remote.mediaserver.api.PlayerException;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mobile.database.RemoteDatabase;
+import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
 import de.neo.rmi.api.RMILogger;
@@ -271,7 +271,7 @@ public class RemoteService extends Service {
 	}
 
 	public static class StationStuff {
-		public IBrowser browser;
+		public BufferBrowser browser;
 		public IPlayer player;
 		public IPlayList pls;
 		public IControl control;

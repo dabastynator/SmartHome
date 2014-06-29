@@ -33,15 +33,12 @@ import de.remote.mobile.R;
  */
 public class WidgetService extends Service implements IRemoteActionListener {
 
+	public static boolean DEBUGGING = true;
+
 	/**
 	 * binder for connection with the remote service
 	 */
 	private PlayerBinder binder;
-
-	/**
-	 * list of all remote views
-	 */
-	private RemoteViews remoteViews;
 
 	/**
 	 * the handler executes runnables in the ui thread
@@ -65,8 +62,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			if (binder.isConnected())
 				updateMusicWidget(null);
 			else
-				setMusicWidgetText("not connected", "no connection with any server",
-						"", false, null);
+				setMusicWidgetText("not connected",
+						"no connection with any server", "", false, null);
 			updateSwitchWidget();
 
 		}
@@ -81,8 +78,6 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
-		remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
-				R.layout.mediaserver_widget);
 		initializeMusicWidgets();
 		remoteSwitchViews = new RemoteViews(getApplicationContext()
 				.getPackageName(), R.layout.switch_widget);
@@ -128,8 +123,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 																		// array
 			thumbnail.copyPixelsFromBuffer(buf);
 		}
-		setMusicWidgetText(title, author, album, playing.getState() == STATE.PLAY,
-				thumbnail);
+		setMusicWidgetText(title, author, album,
+				playing.getState() == STATE.PLAY, thumbnail);
 	}
 
 	@Override
@@ -137,8 +132,6 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (intent != null && intent.getAction() != null)
 			executeCommand(intent.getAction(), intent);
 		else {
-			remoteViews = new RemoteViews(getApplicationContext()
-					.getPackageName(), R.layout.mediaserver_widget);
 			initializeMusicWidgets();
 			remoteSwitchViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.switch_widget);
@@ -198,35 +191,39 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder != null && binder.isConnected())
 			updateMusicWidget(null);
 		else
-			setMusicWidgetText("not connected", "no connection with any server", "",
-					false, null);
+			setMusicWidgetText("not connected",
+					"no connection with any server", "", false, null);
 	}
 
 	protected void setMusicWidgetText(String big, String small, String small2,
 			boolean playing, Bitmap thumbnail) {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
-				.getApplicationContext());
 		ComponentName thisWidget = new ComponentName(getApplicationContext(),
 				RemoteWidgetProvider.class);
 		// for (RemoteViews remote : remoteViewsList)
-		RemoteViews remote = remoteViews;
-		if (remote != null) {
-			remote.setTextViewText(R.id.lbl_widget_big, big);
-			remote.setTextViewText(R.id.lbl_widget_small, small);
-			remote.setTextViewText(R.id.lbl_widget_small2, small2);
+		RemoteViews remoteViews = new RemoteViews(getApplicationContext()
+				.getPackageName(), R.layout.mediaserver_widget);
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
+				.getApplicationContext());
+		if (remoteViews != null) {
+			remoteViews.setTextViewText(R.id.lbl_widget_big, big);
+			remoteViews.setTextViewText(R.id.lbl_widget_small, small);
+			remoteViews.setTextViewText(R.id.lbl_widget_small2, small2);
 			if (thumbnail != null)
-				remote.setImageViewBitmap(R.id.img_widget_thumbnail, thumbnail);
+				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail,
+						thumbnail);
 			else
-				remote.setImageViewResource(R.id.img_widget_thumbnail,
+				remoteViews.setImageViewResource(R.id.img_widget_thumbnail,
 						R.drawable.audio);
-			RemoteWidgetProvider.setWidgetClick(remote, this);
+			RemoteWidgetProvider.setWidgetClick(remoteViews, this);
 			if (playing)
-				remote.setInt(R.id.button_widget_play, "setBackgroundResource",
-						R.drawable.player_pause);
+				remoteViews.setInt(R.id.button_widget_play,
+						"setBackgroundResource", R.drawable.player_pause);
 			else
-				remote.setInt(R.id.button_widget_play, "setBackgroundResource",
-						R.drawable.player_play);
-			appWidgetManager.updateAppWidget(thisWidget, remote);
+				remoteViews.setInt(R.id.button_widget_play,
+						"setBackgroundResource", R.drawable.player_play);
+			appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+			if (DEBUGGING)
+				Toast.makeText(this, small, Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -285,8 +282,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onStopService() {
-		setMusicWidgetText("not connected", "no connection with any server", "",
-				false, null);
+		setMusicWidgetText("not connected", "no connection with any server",
+				"", false, null);
 		stopSelf();
 	}
 
@@ -377,18 +374,27 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}
 	}
 
-	private void switchPower(int widgetID) throws Exception {
+	private void switchPower(final int widgetID) throws Exception {
 		if (binder == null)
 			throw new Exception("not connected");
 		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
-		String name = prefs.getString(widgetID + "", null);
+		final String name = prefs.getString(widgetID + "", null);
 		if (name == null)
 			return;
 		IInternetSwitch power = powers.get(name);
 		if (power == null)
 			throw new Exception("Switch " + name + " is unknown");
+		if (DEBUGGING)
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(getApplicationContext(),
+							"Switch " + name + " id=" + widgetID,
+							Toast.LENGTH_SHORT).show();
+				}
+			});
 		State state = power.getState();
 		if (state == State.ON)
 			state = State.OFF;

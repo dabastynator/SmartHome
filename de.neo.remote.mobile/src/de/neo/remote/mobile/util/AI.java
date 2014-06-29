@@ -153,6 +153,11 @@ public class AI implements IVoiceRecognition {
 	 */
 	public class AIException extends Exception {
 
+		/**
+		 * generated
+		 */
+		private static final long serialVersionUID = -4124586628955545951L;
+
 		public AIException(String string) {
 			super(string);
 		}

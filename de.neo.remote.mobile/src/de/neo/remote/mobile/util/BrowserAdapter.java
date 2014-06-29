@@ -40,7 +40,7 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	/**
 	 * browser object
 	 */
-	private IBrowser browser;
+	private BufferBrowser browser;
 
 	private Handler handler;
 
@@ -51,9 +51,10 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	private static Map<String, Bitmap> thumbnails = Collections
 			.synchronizedMap(new HashMap<String, Bitmap>());
 
-	public BrowserAdapter(Context context, IBrowser browser, String[] all,
+	public BrowserAdapter(Context context, BufferBrowser browser, String[] all,
 			ViewerState state, PlayingBean bean) {
-		super(context, R.layout.mediaserver_browser_row, R.id.lbl_item_name, all);
+		super(context, R.layout.mediaserver_browser_row, R.id.lbl_item_name,
+				all);
 		handler = new Handler();
 		thumbnails.clear();
 		playingBean = bean;
@@ -77,50 +78,46 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = super.getView(position, convertView, parent);
-		try {
-			ImageView image = (ImageView) v.findViewById(R.id.img_item);
-			String file = ((TextView) v.findViewById(R.id.lbl_item_name))
-					.getText().toString();
-			if (thumbnails.containsKey(file))
-				image.setImageBitmap(thumbnails.get(file));
-			else
-				switch (viewerState) {
-				case DIRECTORIES:
-					if (position < browser.getDirectories().length)
-						image.setImageResource(R.drawable.folder);
-					else {
-						if (playingBean != null
-								&& playingBean.getState() != STATE.DOWN
-								&& playingBean.getPath() != null
-								&& playingBean.getPath().equals(path + file)) {
-							image.setImageResource(R.drawable.playing);
-						} else if (file.toUpperCase(Locale.US).endsWith("MP3")
-								|| file.toUpperCase(Locale.US).endsWith("OGG")
-								|| file.toUpperCase(Locale.US).endsWith("WAV"))
-							image.setImageResource(R.drawable.music);
-						else if (file.toUpperCase(Locale.US).endsWith("AVI")
-								|| file.toUpperCase(Locale.US).endsWith("MPEG")
-								|| file.toUpperCase(Locale.US).endsWith("MPG"))
-							image.setImageResource(R.drawable.movie);
-						else if (file.toUpperCase(Locale.US).endsWith("JPG")
-								|| file.toUpperCase(Locale.US).endsWith("GIF")
-								|| file.toUpperCase(Locale.US).endsWith("BMP")
-								|| file.toUpperCase(Locale.US).endsWith("PNG"))
-							image.setImageResource(R.drawable.camera);
-						else
-							image.setImageResource(R.drawable.file);
-					}
-					break;
-				case PLAYLISTS:
-					image.setImageResource(R.drawable.pls);
-					break;
-				case PLS_ITEMS:
-					image.setImageResource(R.drawable.music);
-					break;
+		ImageView image = (ImageView) v.findViewById(R.id.img_item);
+		String file = ((TextView) v.findViewById(R.id.lbl_item_name)).getText()
+				.toString();
+		if (thumbnails.containsKey(file))
+			image.setImageBitmap(thumbnails.get(file));
+		else
+			switch (viewerState) {
+			case DIRECTORIES:
+				if (position < browser.getDirectoriesInt().length)
+					image.setImageResource(R.drawable.folder);
+				else {
+					if (playingBean != null
+							&& playingBean.getState() != STATE.DOWN
+							&& playingBean.getPath() != null
+							&& playingBean.getPath().equals(path + file)) {
+						image.setImageResource(R.drawable.playing);
+					} else if (file.toUpperCase(Locale.US).endsWith("MP3")
+							|| file.toUpperCase(Locale.US).endsWith("OGG")
+							|| file.toUpperCase(Locale.US).endsWith("WAV"))
+						image.setImageResource(R.drawable.music);
+					else if (file.toUpperCase(Locale.US).endsWith("AVI")
+							|| file.toUpperCase(Locale.US).endsWith("MPEG")
+							|| file.toUpperCase(Locale.US).endsWith("MPG"))
+						image.setImageResource(R.drawable.movie);
+					else if (file.toUpperCase(Locale.US).endsWith("JPG")
+							|| file.toUpperCase(Locale.US).endsWith("GIF")
+							|| file.toUpperCase(Locale.US).endsWith("BMP")
+							|| file.toUpperCase(Locale.US).endsWith("PNG"))
+						image.setImageResource(R.drawable.camera);
+					else
+						image.setImageResource(R.drawable.file);
 				}
-		} catch (RemoteException e) {
-
-		}
+				break;
+			case PLAYLISTS:
+				image.setImageResource(R.drawable.pls);
+				break;
+			case PLS_ITEMS:
+				image.setImageResource(R.drawable.music);
+				break;
+			}
 		return v;
 	}
 
