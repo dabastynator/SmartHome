@@ -139,7 +139,7 @@ public class NotificationHandler implements IRemoteActionListener {
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
 		} else
-			makePlayingNotification(title, msg, thumbnail);
+			makePlayingNotification(title, msg, thumbnail, playing.getStartTime());
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * @param thumbnail
 	 */
 	protected void makePlayingNotification(String title, String body,
-			Bitmap thumbnail) {
+			Bitmap thumbnail, long when) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent nIntent = new Intent(context, MediaServerActivity.class);
@@ -163,6 +163,7 @@ public class NotificationHandler implements IRemoteActionListener {
 		builder.setContentTitle(title);
 		builder.setContentText(body);
 		builder.setContentIntent(pInent);
+		builder.setWhen(when);
 		if (thumbnail != null)
 			builder.setLargeIcon(thumbnail);
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
