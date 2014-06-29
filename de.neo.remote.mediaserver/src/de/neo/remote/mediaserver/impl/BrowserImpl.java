@@ -3,12 +3,12 @@ package de.neo.remote.mediaserver.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.neo.remote.mediaserver.api.IBrowser;
 import de.neo.remote.mediaserver.api.IThumbnailListener;
 import de.neo.remote.mediaserver.impl.ThumbnailHandler.ImageThumbnailJob;
-import de.neo.remote.mediaserver.impl.ThumbnailHandler.Thumbnail;
 import de.neo.remote.mediaserver.impl.ThumbnailHandler.ThumbnailJob;
 import de.neo.remote.mediaserver.impl.ThumbnailHandler.ThumbnailListener;
 import de.neo.rmi.api.Oneway;
@@ -26,6 +26,7 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 
 	private String location;
 	private String root;
+	private List<String> currentFiles;
 
 	/**
 	 * Create new browser
@@ -37,6 +38,7 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 		if (!directory.endsWith(File.separator))
 			directory += File.separator;
 		root = location = directory;
+		currentFiles = Collections.synchronizedList(new ArrayList<String>());
 		ThumbnailHandler.instance().calculationListener().add(this);
 	}
 
@@ -132,8 +134,10 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 	@Override
 	public void fireThumbnails(IThumbnailListener listener, int width,
 			int height) throws RemoteException {
+		currentFiles.clear();
 		for (String fileName : new File(location).list()) {
 			String absoluteFileName = location + fileName;
+			currentFiles.add(absoluteFileName);
 			File file = new File(absoluteFileName);
 			if (file.isFile() && fileName.length() > 3) {
 				String extension = fileName.toUpperCase().substring(
@@ -207,12 +211,13 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 	public void onThumbnailCalculation(ThumbnailJob job) {
 		if (job instanceof BrowserThumbnailJob) {
 			BrowserThumbnailJob browserJob = (BrowserThumbnailJob) job;
-			try {
-				browserJob.listener.setThumbnail(browserJob.fileName,
-						job.thumbnail.width, job.thumbnail.height,
-						job.thumbnail.rgb);
-			} catch (RemoteException e) {
-			}
+			if (currentFiles.contains(browserJob.imageFile.getAbsolutePath()))
+				try {
+					browserJob.listener.setThumbnail(browserJob.fileName,
+							job.thumbnail.width, job.thumbnail.height,
+							job.thumbnail.rgb);
+				} catch (RemoteException e) {
+				}
 		}
 	}
 

@@ -283,9 +283,9 @@ public class ThumbnailHandler {
 
 	public static class ImageThumbnailJob extends ThumbnailJob {
 
-		private File imageFile;
-		private int width;
-		private int height;
+		public File imageFile;
+		public int width;
+		public int height;
 
 		public ImageThumbnailJob(File imageFile, int width, int height) {
 			this.imageFile = imageFile;
