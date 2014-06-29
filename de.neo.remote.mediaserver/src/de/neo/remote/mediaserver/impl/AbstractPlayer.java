@@ -184,6 +184,12 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		if (playingBean == null)
 			playingBean = new PlayingBean();
 		playingBean.setState(STATE.DOWN);
+		playingBean.setArtist(null);
+		playingBean.setTitle(null);
+		playingBean.setAlbum(null);
+		playingBean.setFile(null);
+		playingBean.setPath(null);
+		playingBean.setRadio(null);
 		informPlayingBean(playingBean);
 	}
 
