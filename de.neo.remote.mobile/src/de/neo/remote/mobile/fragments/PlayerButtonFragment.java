@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 import de.neo.remote.mediaserver.api.IDVDPlayer;
 import de.neo.remote.mediaserver.api.IPlayer;
 import de.neo.remote.mediaserver.api.PlayingBean;
@@ -50,10 +51,11 @@ public class PlayerButtonFragment extends Fragment {
 			View playerButton = getActivity().findViewById(playerButtonId);
 			if (playerButton != null) {
 				playerButton.setOnClickListener(listener);
-//				int btnSize = Math.min(playerButton.getLayoutParams().width,
-//						playerButton.getLayoutParams().height);
-//				playerButton
-//						.setLayoutParams(new LinearLayout.LayoutParams(btnSize, btnSize));
+				// int btnSize = Math.min(playerButton.getLayoutParams().width,
+				// playerButton.getLayoutParams().height);
+				// playerButton
+				// .setLayoutParams(new LinearLayout.LayoutParams(btnSize,
+				// btnSize));
 			}
 		}
 	}
@@ -123,6 +125,14 @@ public class PlayerButtonFragment extends Fragment {
 					return e.getClass().getSimpleName() + ": " + e.getMessage();
 				}
 				return null;
+			}
+
+			@Override
+			protected void onPostExecute(String result) {
+				super.onPostExecute(result);
+				if (result != null && result.length() > 0)
+					Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
+							.show();
 			}
 		};
 		task.execute(new String[] {});
