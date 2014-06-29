@@ -177,16 +177,18 @@ public class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void moveLeft() throws PlayerException {
-		int time = 0;
+		long time = 0;
 		if (playingBean != null)
-			time = Math.max(playingBean.getCurrentTime() - 3, 0);
+			time = Math
+					.max(System.currentTimeMillis()
+							- playingBean.getStartTime() - 3, 0);
 		quit();
 		positionLeft -= 1680;
 		startPlayer();
 		if (playingBean != null && playingBean.getPath() != null) {
 			play(playingBean.getPath());
 			try {
-				setPlayingPosition(time);
+				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -219,16 +221,18 @@ public class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void moveRight() throws PlayerException {
-		int time = 0;
+		long time = 0;
 		if (playingBean != null)
-			time = Math.max(playingBean.getCurrentTime() - 3, 0);
+			time = Math
+					.max(System.currentTimeMillis()
+							- playingBean.getStartTime() - 3, 0);
 		quit();
 		positionLeft += 1680;
 		startPlayer();
 		if (playingBean != null && playingBean.getPath() != null) {
 			play(playingBean.getPath());
 			try {
-				setPlayingPosition(time);
+				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -305,7 +309,7 @@ public class MPlayer extends AbstractPlayer {
 						if (playingBean != null
 								&& playingBean.getPath() != null
 								&& playingBean.getPath().equals(bean.getPath()))
-							bean.setCurrentTime(playingBean.getCurrentTime());
+							bean.setStartTime(playingBean.getStartTime());
 					}
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8).trim());
@@ -315,11 +319,12 @@ public class MPlayer extends AbstractPlayer {
 						bean.setAlbum(line.substring(8).trim());
 					if (line.equals("Starting playback...")) {
 						bean.setState(PlayingBean.STATE.PLAY);
+						bean.setStartTime(System.currentTimeMillis());
 						loadThumbnail(bean);
 						informPlayingBean(bean);
 					}
 					if (line.startsWith("ICY Info")) {
-						bean.setCurrentTime(0);
+						bean.setStartTime(System.currentTimeMillis());
 						bean.parseICYInfo(line);
 						bean.setState(STATE.PLAY);
 						loadThumbnail(bean);
@@ -339,7 +344,6 @@ public class MPlayer extends AbstractPlayer {
 	public void setPlayingPosition(int second) throws RemoteException,
 			PlayerException {
 		writeCommand("seek " + second + " 2");
-		playingBean.setCurrentTime(second);
 	}
 
 	@Override

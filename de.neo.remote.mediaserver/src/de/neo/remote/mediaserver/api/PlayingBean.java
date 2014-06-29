@@ -61,7 +61,7 @@ public class PlayingBean implements Serializable {
 	/**
 	 * current playing time in seconds
 	 */
-	private int startTime;
+	private long startTime;
 
 	/**
 	 * length of file in seconds
@@ -83,6 +83,7 @@ public class PlayingBean implements Serializable {
 	 * allocate new bean
 	 */
 	public PlayingBean() {
+		startTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class PlayingBean implements Serializable {
 		radio = bean.getRadio();
 		state = bean.getState();
 		path = bean.getPath();
-		startTime = bean.getCurrentTime();
+		startTime = bean.getStartTime();
 		lengthTime = bean.getLengthTime();
 		thumbnailWidth = bean.getThumbnailWidth();
 		thumbnailHeight = bean.getThumbnailHeight();
@@ -220,14 +221,14 @@ public class PlayingBean implements Serializable {
 		this.path = path;
 	}
 
-	public int getCurrentTime() {
+	public long getStartTime() {
 		return startTime;
 	}
 
-	public void setCurrentTime(int startTime) {
-		this.startTime = startTime;
-		if (startTime < 2) {
-			startTime = 2;
+	public void setStartTime(long l) {
+		this.startTime = l;
+		if (l < 2) {
+			l = 2;
 		}
 	}
 
@@ -248,7 +249,7 @@ public class PlayingBean implements Serializable {
 		this.state = null;
 		this.path = null;
 		this.lengthTime = -1;
-		this.startTime = 0;
+		this.startTime = System.currentTimeMillis();
 		String title = line.substring(23);
 		title = title.substring(0, title.indexOf('\''));
 		String[] split = title.split("-");

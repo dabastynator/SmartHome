@@ -174,7 +174,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		if (playingBean != null) {
 			playingBean.setState(STATE.PLAY);
 			playingBean.setFile(file);
-			playingBean.setCurrentTime(0);
+			playingBean.setStartTime(System.currentTimeMillis());
 			informPlayingBean(playingBean);
 		}
 	}
