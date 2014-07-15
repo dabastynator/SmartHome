@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="str_record">Record</string>
     <string name="str_left">Left</string>
     <string name="str_right">Right</string>
@@ -13,6 +14,9 @@
     <string name="str_control">Control</string>
     <string name="str_exit">Exit</string>
     <string name="str_play">Play</string>
+    <string name="str_pause">Pause</string>
+    <string name="str_vol_down">Leiser</string>
+    <string name="str_vol_up">Lauter</string>
     <string name="str_add_to_playlist">Add to playlist</string>
     <string name="str_delete">Delete</string>
     <string name="str_remove_from_playlist">Remove from playlist</string>
@@ -31,10 +35,11 @@
     <string name="str_clear_screen">Clear</string>
     <string name="str_chat_name">Change name</string>
     <string name="str_download">Download</string>
-    <string name="str_webcam">Webcam</string>
     <string name="str_upload">Upload</string>
+    <string name="str_webcam">Webcam</string>
     <string name="add_new_server">add new server</string>
     <string name="str_power">Internet Power Switch</string>
     <string name="str_refresh">Refresh</string>
     <string name="str_tatort">Stream ARD Mediathek</string>
+
 </resources>

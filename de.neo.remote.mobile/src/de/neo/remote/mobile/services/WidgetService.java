@@ -33,7 +33,7 @@ import de.remote.mobile.R;
  */
 public class WidgetService extends Service implements IRemoteActionListener {
 
-	public static boolean DEBUGGING = true;
+	public static boolean DEBUGGING = false;
 
 	/**
 	 * binder for connection with the remote service

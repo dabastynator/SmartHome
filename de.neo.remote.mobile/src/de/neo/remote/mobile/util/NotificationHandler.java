@@ -2,7 +2,6 @@ package de.neo.remote.mobile.util;
 
 import java.nio.IntBuffer;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -10,12 +9,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
-import android.widget.RemoteViews;
 import de.neo.remote.gpiopower.api.IInternetSwitch.State;
 import de.neo.remote.mediaserver.api.PlayingBean;
 import de.neo.remote.mediaserver.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
+import de.neo.remote.mobile.services.WidgetService;
 import de.remote.mobile.R;
 
 /**
@@ -69,14 +69,17 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void startReceive(final long size, String file) {
 		fullSize = size;
-		makeLoadNotification("download " + file, 0, R.drawable.download);
+		makeLoadNotification(
+				context.getResources().getString(R.string.str_download), file,
+				0, R.drawable.download);
 
 	}
 
 	@Override
 	public void progressReceive(final long size, String file) {
-		makeLoadNotification("download " + file, ((float) size)
-				/ ((float) fullSize), R.drawable.download);
+		makeLoadNotification(
+				context.getResources().getString(R.string.str_download), file,
+				((float) size) / ((float) fullSize), R.drawable.download);
 
 	}
 
@@ -139,7 +142,8 @@ public class NotificationHandler implements IRemoteActionListener {
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
 		} else
-			makePlayingNotification(title, msg, thumbnail, playing.getStartTime());
+			makePlayingNotification(title, msg, thumbnail,
+					playing.getStartTime(), playing.getState() == STATE.PLAY);
 	}
 
 	/**
@@ -150,7 +154,7 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * @param thumbnail
 	 */
 	protected void makePlayingNotification(String title, String body,
-			Bitmap thumbnail, long when) {
+			Bitmap thumbnail, long when, boolean playing) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent nIntent = new Intent(context, MediaServerActivity.class);
@@ -158,12 +162,35 @@ public class NotificationHandler implements IRemoteActionListener {
 		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pInent = PendingIntent
 				.getActivity(context, 0, nIntent, 0);
+		Intent playIntent = new Intent(context, WidgetService.class);
+		playIntent.setAction(RemoteWidgetProvider.ACTION_PLAY);
+		PendingIntent playPending = PendingIntent.getService(context, 0,
+				playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent nextIntent = new Intent(context, WidgetService.class);
+		nextIntent.setAction(RemoteWidgetProvider.ACTION_VOLUP);
+		PendingIntent nextPending = PendingIntent.getService(context, 0,
+				nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent prevIntent = new Intent(context, WidgetService.class);
+		prevIntent.setAction(RemoteWidgetProvider.ACTION_VOLDOWN);
+		PendingIntent prevPending = PendingIntent.getService(context, 0,
+				prevIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
 		Builder builder = new NotificationCompat.Builder(context);
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentTitle(title);
 		builder.setContentText(body);
 		builder.setContentIntent(pInent);
 		builder.setWhen(when);
+		if (playing)
+			builder.addAction(R.drawable.player_small_pause,
+					context.getString(R.string.str_pause), playPending);
+		else
+			builder.addAction(R.drawable.player_small_play,
+					context.getString(R.string.str_play), playPending);
+		builder.addAction(R.drawable.player_small_vol_down,
+				context.getString(R.string.str_vol_down), prevPending);
+		builder.addAction(R.drawable.player_small_vol_up,
+				context.getString(R.string.str_vol_up), nextPending);
 		if (thumbnail != null)
 			builder.setLargeIcon(thumbnail);
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
@@ -192,26 +219,23 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * @param title
 	 * @param body
 	 */
-	protected void makeLoadNotification(String text, float progress,
-			int imgResource) {
+	protected void makeLoadNotification(String title, String text,
+			float progress, int imgResource) {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification notification = new Notification(imgResource,
-				"Download started", System.currentTimeMillis());
-		notification.contentView = new RemoteViews(context.getPackageName(),
-				R.layout.download_progress);
-		notification.contentView.setImageViewResource(R.id.status_icon,
-				imgResource);
-		notification.contentView.setTextViewText(R.id.status_text, text);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				(int) (progress * 100), false);
 		Intent nIntent = new Intent(context, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
 		PendingIntent pIntent = PendingIntent.getActivity(context, 0, nIntent,
 				0);
-		notification.contentIntent = pIntent;
-		nm.notify(DOWNLOAD_NOTIFICATION_ID, notification);
+
+		Builder builder = new NotificationCompat.Builder(context);
+		builder.setContentTitle(title);
+		builder.setContentText(text);
+		builder.setProgress(100, (int) (progress * 100), false);
+		builder.setSmallIcon(imgResource);
+		builder.setContentIntent(pIntent);
+		nm.notify(DOWNLOAD_NOTIFICATION_ID, builder.build());
 	}
 
 	@Override
@@ -223,13 +247,16 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void startSending(long size) {
 		fullSize = size;
-		makeLoadNotification("upload " + file, 0, R.drawable.upload);
+		makeLoadNotification(
+				context.getResources().getString(R.string.str_upload), file, 0,
+				R.drawable.upload);
 	}
 
 	@Override
 	public void progressSending(long size) {
-		makeLoadNotification("upload " + file, ((float) size)
-				/ ((float) fullSize), R.drawable.upload);
+		makeLoadNotification(
+				context.getResources().getString(R.string.str_upload), file,
+				((float) size) / ((float) fullSize), R.drawable.upload);
 	}
 
 	@Override
