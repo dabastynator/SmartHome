@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 public class DownloadTask extends AsyncTask<String, String, String> {
 
+	public static final int BUFFER_SIZE = 1024 * 512;
+	public static final int PROGRESS_STEP = 1024 * 1024;
+
 	private IBrowser browser;
 	private String file;
 	private String directory;
@@ -41,7 +44,7 @@ public class DownloadTask extends AsyncTask<String, String, String> {
 					dir.mkdir();
 				File newFile = new File(folder + File.separator + file.trim());
 				receiver = new FileReceiver(serverport.getIp(),
-						serverport.getPort(), 200000, newFile);
+						serverport.getPort(), PROGRESS_STEP, newFile);
 			}
 			if (directory != null) {
 				ServerPort serverport = browser.publishDirectory(directory);
@@ -66,8 +69,7 @@ public class DownloadTask extends AsyncTask<String, String, String> {
 	 */
 	private void download(FileReceiver receiver) {
 		binder.receiver = receiver;
-		// set maximum byte size to 1MB
-		receiver.setBufferSize(1000000);
+		receiver.setBufferSize(BUFFER_SIZE);
 		receiver.getProgressListener().add(binder.service.downloadListener);
 		receiver.receiveAsync();
 		onProgressUpdate(new String[] { "download started" });

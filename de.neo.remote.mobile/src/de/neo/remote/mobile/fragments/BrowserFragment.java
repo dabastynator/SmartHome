@@ -82,7 +82,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 	private LinearLayout downloadLayout;
 	private ProgressBar downloadProgress;
 	private TextView downloadText;
-//	private LinearLayout dvdLayout;
+	// private LinearLayout dvdLayout;
 	private long maxDonwloadSize = 0;
 
 	@Override
@@ -123,8 +123,9 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		}
 		StationStuff mediaServer = activity.binder.getLatestMediaServer();
 		if (mediaServer == null) {
-			activity.setTitle("No media server@"
-					+ activity.binder.getLatestMediaServer().name);
+			activity.setTitle(getActivity().getResources().getString(
+					R.string.str_no_mediaserver)
+					+ "@" + activity.binder.getLatestMediaServer().name);
 			browserContentView.setAdapter(new BrowserAdapter(activity, null,
 					new String[] {}, viewerState, activity.playingBean));
 			return;
@@ -135,8 +136,8 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		browserContentView.setSelection(selectedPosition);
 		switch (viewerState) {
 		case DIRECTORIES:
-				activity.setTitle(mediaServer.browser.getLocationInt() + "@"
-						+ mediaServer.name);
+			activity.setTitle(mediaServer.browser.getLocationInt() + "@"
+					+ mediaServer.name);
 			activity.filesystemButton
 					.setBackgroundResource(R.drawable.image_border);
 			activity.playlistButton.setBackgroundResource(0);
@@ -178,7 +179,10 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		case R.id.opt_item_play:
 			new PlayItemTask(activity, selectedItem, activity.binder)
 					.execute(new String[] {});
-			Toast.makeText(activity, "Ordner abspielen", Toast.LENGTH_SHORT)
+			Toast.makeText(
+					activity,
+					getActivity().getResources().getString(
+							R.string.str_play_directory), Toast.LENGTH_SHORT)
 					.show();
 			break;
 		case R.id.opt_item_addplaylist:
@@ -218,8 +222,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 				};
 			}.start();
 			new BrowserLoadTask(activity, null, false).execute();
-			Toast.makeText(activity, "Playlist '" + selectedItem + "' deleted",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(
+					activity,
+					activity.getResources().getString(
+							R.string.str_playlist_deleted)
+							+ ": " + selectedItem, Toast.LENGTH_SHORT).show();
 			break;
 		case R.id.opt_pls_show:
 			viewerState = ViewerState.PLS_ITEMS;
@@ -237,9 +244,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 				};
 			}.start();
 			new BrowserLoadTask(activity, null, false).execute();
-			Toast.makeText(getActivity(),
-					"Entry '" + selectedItem + "' deleted", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(
+					getActivity(),
+					getActivity().getResources().getString(
+							R.string.str_entry_deleted)
+							+ ": " + selectedItem, Toast.LENGTH_SHORT).show();
 			break;
 		}
 		return super.onContextItemSelected(item);
@@ -267,8 +276,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 					}
 				};
 			}.start();
-			Toast.makeText(activity, selectedItem + " added",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(
+					activity,
+					getActivity().getResources().getString(
+							R.string.str_entry_add)
+							+ " :" + selectedItem, Toast.LENGTH_SHORT).show();
 		}
 		if (requestCode == MediaServerActivity.FILE_REQUEST) {
 			Uri uri = data.getData();
@@ -348,11 +360,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
 			if (viewerState == ViewerState.DIRECTORIES) {
-					if (position < mediaServer.browser.getDirectoriesInt().length) {
-						selectedPosition = 0;
-						new BrowserLoadTask(activity, item, false).execute();
-						return;
-					}
+				if (position < mediaServer.browser.getDirectoriesInt().length) {
+					selectedPosition = 0;
+					new BrowserLoadTask(activity, item, false).execute();
+					return;
+				}
 			}
 			if (viewerState == ViewerState.PLS_ITEMS)
 				item = plsFileMap.get(item);
@@ -369,6 +381,9 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		downloadProgress.setProgress(0);
 		if (file != null)
 			downloadText.setText(file);
+		else
+			downloadText.setText(getActivity().getResources().getString(
+					R.string.str_download));
 	}
 
 	@Override
@@ -376,6 +391,8 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 		maxDonwloadSize = size;
 		downloadLayout.setVisibility(View.VISIBLE);
 		downloadProgress.setProgress(0);
+		downloadText.setText(getActivity().getResources().getString(
+				R.string.str_upload));
 	}
 
 	@Override

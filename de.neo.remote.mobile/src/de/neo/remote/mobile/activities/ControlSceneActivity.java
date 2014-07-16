@@ -32,7 +32,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		view = new AbstractSceneSurfaceView(this, savedInstanceState, renderer);
 		setContentView(view);
 
-		setTitle("connecting...");
+		setTitle(getResources().getString(R.string.str_connecting));
 		setProgressBarVisibility(true);
 	}
 
@@ -55,10 +55,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	private void updateGLView() {
 		if (binder.getControlCenter() == null) {
-			setTitle("No control center...");
+			setTitle(getResources().getString(R.string.str_no_controlcenter));
 			setProgressBarVisibility(false);
 		} else {
-			setTitle("loading...");
+			setTitle(getResources().getString(R.string.str_load_controlcenter));
 			setProgressBarVisibility(true);
 			new Thread(new UpdateGLViewRunner()).start();
 		}
@@ -68,7 +68,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_control_refresh:
-			setTitle("refresh...");
+			setTitle(getResources().getString(R.string.str_refresh));
 			setProgressBarVisibility(true);
 			new Thread() {
 				public void run() {
@@ -108,7 +108,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	void onStartConnecting() {
-		setTitle("connecting...");
+		setTitle(getResources().getString(R.string.str_connecting));
 		setProgressBarVisibility(true);
 	}
 
@@ -122,9 +122,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 					@Override
 					public void run() {
 						if (binder.getControlCenter() != null)
-							Toast.makeText(ControlSceneActivity.this,
-									"load center done", Toast.LENGTH_SHORT)
-									.show();
+							Toast.makeText(
+									ControlSceneActivity.this,
+									getResources().getString(
+											R.string.str_loaded_controlcenter),
+									Toast.LENGTH_SHORT).show();
 						setTitle("Controlcenter@" + binder.getServerName());
 						setProgressBarVisibility(false);
 					}
@@ -136,7 +138,8 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 						Toast.makeText(ControlSceneActivity.this,
 								"error load center: " + e.getMessage(),
 								Toast.LENGTH_LONG).show();
-						setTitle("Not connected");
+						setTitle(getResources().getString(
+								R.string.str_no_conneciton));
 						setProgressBarVisibility(false);
 					}
 				});

@@ -169,8 +169,9 @@ public class PlayerBinder extends Binder {
 	 */
 	public void uploadFile(final IBrowser browser, final File file) {
 		try {
-			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1);
+			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1, DownloadTask.PROGRESS_STEP);
 			fileSender.getProgressListener().add(service.uploadListener);
+			fileSender.setBufferSize(DownloadTask.BUFFER_SIZE);
 			fileSender.sendAsync();
 			new Thread() {
 				public void run() {

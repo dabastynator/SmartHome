@@ -132,7 +132,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void disableScreen() {
-		setTitle("No connection");
+		setTitle(getResources().getString(R.string.str_no_conneciton));
 		setProgressBarVisibility(false);
 	}
 
@@ -355,8 +355,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	private void createNewPlaylist() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("New playlist");
-		alert.setMessage("Input new playlist name");
+		alert.setTitle(getResources().getString(R.string.str_playlist_add));
+		alert.setMessage(getResources().getString(R.string.str_playlist_name));
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
@@ -382,9 +382,12 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 						}.start();
 						new BrowserLoadTask(MediaServerActivity.this, null,
 								false).execute();
-						Toast.makeText(MediaServerActivity.this,
-								"playlist '" + pls + "' added",
-								Toast.LENGTH_SHORT).show();
+						Toast.makeText(
+								MediaServerActivity.this,
+								getResources().getString(
+										R.string.str_playlist_added)
+										+ ": " + pls, Toast.LENGTH_SHORT)
+								.show();
 					}
 				});
 
@@ -426,7 +429,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onStartConnecting() {
-		setTitle("connecting...");
+		setTitle(getResources().getString(R.string.str_connecting));
 		setProgressBarVisibility(true);
 		if (browserFragment != null)
 			browserFragment.browserContentView
@@ -492,7 +495,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			protected void onPreExecute() {
 				super.onPreExecute();
 				setProgressBarVisibility(true);
-				setTitle("loading media objects...");
+				setTitle(getResources().getString(
+						R.string.str_load_mediaobjects));
 			}
 
 			@Override
@@ -590,4 +594,66 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		}
 	}
 
+	@Override
+	public void startSending(long size) {
+		super.startSending(size);
+		if (browserFragment != null)
+			browserFragment.startSending(size);
+	}
+
+	@Override
+	public void progressSending(long size) {
+		super.progressSending(size);
+		if (browserFragment != null)
+			browserFragment.progressSending(size);
+	}
+
+	@Override
+	public void endSending(long size) {
+		super.endSending(size);
+		if (browserFragment != null)
+			browserFragment.endSending(size);
+	}
+
+	@Override
+	public void sendingCanceled() {
+		super.sendingCanceled();
+		if (browserFragment != null)
+			browserFragment.sendingCanceled();
+	}
+
+	@Override
+	public void progressReceive(long size, String file) {
+		super.progressReceive(size, file);
+		if (browserFragment != null)
+			browserFragment.progressReceive(size, file);
+	}
+
+	@Override
+	public void endReceive(long size) {
+		super.endReceive(size);
+		if (browserFragment != null)
+			browserFragment.endReceive(size);
+	}
+
+	@Override
+	public void exceptionOccurred(Exception e) {
+		super.exceptionOccurred(e);
+		if (browserFragment != null)
+			browserFragment.exceptionOccurred(e);
+	}
+
+	@Override
+	public void downloadCanceled() {
+		super.downloadCanceled();
+		if (browserFragment != null)
+			browserFragment.downloadCanceled();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (browserFragment != null)
+			browserFragment.onActivityResult(requestCode, resultCode, data);
+	}
 }

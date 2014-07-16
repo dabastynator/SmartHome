@@ -30,7 +30,7 @@ public class BrowserLoadTask extends AbstractTask {
 
 	@Override
 	protected String getDialogTitle() {
-		return "loading...";
+		return activity.getResources().getString(R.string.str_loading);
 	}
 
 	@Override

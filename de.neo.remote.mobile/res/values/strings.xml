@@ -39,7 +39,22 @@
     <string name="str_webcam">Webcam</string>
     <string name="add_new_server">add new server</string>
     <string name="str_power">Internet Power Switch</string>
-    <string name="str_refresh">Refresh</string>
     <string name="str_tatort">Stream ARD Mediathek</string>
+    <string name="str_play_directory">Ordner abspielen</string>
+    <string name="str_entry_deleted">Eintrag gelöscht</string>
+    <string name="str_entry_add">Eintrag hinzugefügt</string>
+    <string name="str_playlist_deleted">Playlist gelöscht</string>
+    <string name="str_playlist_added">Playlist hinzugefügt</string>
+    <string name="str_playlist_add">Playlist hinzufügen</string>
+    <string name="str_playlist_name">Gib den Namen der neuen Playlist ein</string>
+    <string name="str_connecting">Verbinden...</string>
+    <string name="str_load_mediaobjects">Lade Mediaserver...</string>
+    <string name="str_load_controlcenter">Lade Controlcenter</string>
+    <string name="str_loaded_controlcenter">Controlcenter geladen</string>
+    <string name="str_loading">Lade</string>
+    <string name="str_no_conneciton">Keine Verbindung</string>
+    <string name="str_no_mediaserver">Kein Mediaserver</string>
+    <string name="str_refresh">Neu Laden</string>
+    <string name="str_no_controlcenter">Kein Controlcenter</string>
 
 </resources>
