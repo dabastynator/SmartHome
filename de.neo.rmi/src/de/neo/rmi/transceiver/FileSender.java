@@ -30,10 +30,12 @@ public class FileSender extends AbstractSender {
 	 * @param file
 	 * @param port
 	 * @param times
+	 * @param progress
 	 * @throws IOException
 	 */
-	public FileSender(File file, int port, int times) throws IOException {
-		super(port, times);
+	public FileSender(File file, int port, int times, long progress)
+			throws IOException {
+		super(port, times, progress);
 		if (file.exists() == false)
 			throw new IOException("the file " + file.getName()
 					+ " does not exist");
@@ -42,6 +44,18 @@ public class FileSender extends AbstractSender {
 
 	/**
 	 * allocate new file sender
+	 * 
+	 * @param file
+	 * @param port
+	 * @param times
+	 * @throws IOException
+	 */
+	public FileSender(File file, int port, int times) throws IOException {
+		this(file, port, times, Long.MAX_VALUE);
+	}
+
+	/**
+	 * new file sender.
 	 * 
 	 * @param file
 	 * @param port
@@ -73,11 +87,19 @@ public class FileSender extends AbstractSender {
 		informStart(length);
 
 		// send data
-		int bufferSize = (int) Math.min(length, maxSize);
+		int bufferSize = (int) Math
+				.min(Math.min(length, maxSize), progressStep);
+		long count = 0, currentSize = 0;
 		byte[] data = new byte[bufferSize];
 		int read = 0;
 		while ((read = input.read(data, 0, bufferSize)) >= 0) {
 			output.write(data, 0, read);
+			currentSize += read;
+			count += read;
+			if (count >= progressStep) {
+				informProgress(currentSize);
+				count = 0;
+			}
 		}
 
 		output.flush();
