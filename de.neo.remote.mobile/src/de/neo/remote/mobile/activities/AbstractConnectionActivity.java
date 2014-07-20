@@ -63,7 +63,9 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			binder.removeRemoteActionListener(AbstractConnectionActivity.this);
-			Log.e("disconnect service", "lass: " + AbstractConnectionActivity.this.getClass().getSimpleName());
+			Log.e("disconnect service", "lass: "
+					+ AbstractConnectionActivity.this.getClass()
+							.getSimpleName());
 		}
 
 		@Override
@@ -83,7 +85,10 @@ public abstract class AbstractConnectionActivity extends Activity implements
 			else if (newConnection) {
 				serverID = serverDB.getServerDao().getFavoriteServer();
 				if (serverID == -1) {
-					Toast.makeText(AbstractConnectionActivity.this, "no favorite server",
+					Toast.makeText(
+							AbstractConnectionActivity.this,
+							getResources().getString(
+									R.string.str_no_favorite_server),
 							Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(AbstractConnectionActivity.this,
 							SelectServerActivity.class);
@@ -95,9 +100,10 @@ public abstract class AbstractConnectionActivity extends Activity implements
 			if (serverID >= 0 && newConnection)
 				binder.connectToServer(serverID);
 			else if (!newConnection)
-				AbstractConnectionActivity.this.onServerConnectionChanged(null, -1);
+				AbstractConnectionActivity.this.onServerConnectionChanged(null,
+						-1);
 		}
-		
+
 	};
 
 	protected void onCreate(android.os.Bundle savedInstanceState) {
@@ -107,7 +113,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
-		
+
 		// start widget service
 		intent = new Intent(this, RemoteService.class);
 		startService(intent);
@@ -145,7 +151,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
 	@Override
 	protected void onPause() {
 		dismissProgress();
@@ -177,7 +183,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	@Override
 	protected void onDestroy() {
 		serverDB.close();
-		
+
 		super.onDestroy();
 	}
 
@@ -208,7 +214,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	@Override
 	public void downloadCanceled() {
 	}
-	
+
 	@Override
 	public void onPowerSwitchChange(String _switch, State state) {
 		// TODO Auto-generated method stub
@@ -218,30 +224,30 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	@Override
 	public void startSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void progressSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endSending(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void sendingCanceled() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void progressFinished(Object result) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

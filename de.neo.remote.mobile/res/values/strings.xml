@@ -53,8 +53,17 @@
     <string name="str_loaded_controlcenter">Controlcenter geladen</string>
     <string name="str_loading">Lade</string>
     <string name="str_no_conneciton">Keine Verbindung</string>
+    <string name="str_no_conneciton_with_server">Keine Verbindung mit einem Server</string>
     <string name="str_no_mediaserver">Kein Mediaserver</string>
+    <string name="str_no_mediaserver_at">Kein Mediaserver festgelegt bei </string>
+    <string name="str_no_file_playing">Keine Datei abgespielt</string>
     <string name="str_refresh">Neu Laden</string>
     <string name="str_no_controlcenter">Kein Controlcenter</string>
+    <string name="str_no_favorite_server">Kein bevorzuger Server vorhanden</string>
+    <string name="str_error_load_server">Fehler beim Verbinungsaufbau</string>
+    <string name="str_input_stream">Stream starten</string>
+    <string name="str_input_stream_url">Gib die URL des Stream ein</string>
+    <string name="str_server_added">Server hinzugefügt</string>
+    <string name="str_has_no_switch"> hat keinen Schalter </string>
 
 </resources>

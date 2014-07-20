@@ -135,8 +135,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						Toast.makeText(ControlSceneActivity.this,
-								"error load center: " + e.getMessage(),
+						Toast.makeText(
+								ControlSceneActivity.this,
+								getResources().getString(
+										R.string.str_error_load_server)
+										+ ": " + e.getMessage(),
 								Toast.LENGTH_LONG).show();
 						setTitle(getResources().getString(
 								R.string.str_no_conneciton));

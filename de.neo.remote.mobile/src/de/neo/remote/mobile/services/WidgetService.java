@@ -62,8 +62,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			if (binder.isConnected())
 				updateMusicWidget(null);
 			else
-				setMusicWidgetText("not connected",
-						"no connection with any server", "", false, null);
+				setMusicWidgetText(
+						getResources().getString(R.string.str_no_conneciton),
+						getResources().getString(
+								R.string.str_no_conneciton_with_server), "",
+						false, null);
 			updateSwitchWidget();
 
 		}
@@ -87,17 +90,18 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	protected void updateMusicWidget(PlayingBean playing) {
 		if (binder.getLatestMediaServer() == null) {
 			setMusicWidgetText(
-					"no music station",
-					"no music station specified at server "
-							+ binder.getServerName(), "", false, null);
+					getResources().getString(R.string.str_no_mediaserver),
+					getResources().getString(R.string.str_no_mediaserver)
+							+ " (" + binder.getServerName() + ")", "", false,
+					null);
 			return;
 		}
 		if (binder.getLatestMediaServer().player != null && playing == null)
 			playing = binder.getPlayingFile();
 		if (playing == null || playing.getState() == STATE.DOWN) {
-			setMusicWidgetText("no file playing",
-					"at music station " + binder.getLatestMediaServer().name,
-					"", false, null);
+			setMusicWidgetText(
+					getResources().getString(R.string.str_no_file_playing),
+					binder.getLatestMediaServer().name, "", false, null);
 			return;
 		}
 		String title = "playing";
@@ -160,8 +164,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 					}
 					if (binder.getLatestMediaServer() == null
 							|| binder.getLatestMediaServer().player == null)
-						throw new RemoteException("no mediaplayer selected",
-								"no mediaplayer selected");
+						throw new RemoteException(getResources().getString(
+								R.string.str_no_mediaserver), getResources()
+								.getString(R.string.str_no_mediaserver));
 					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
 						binder.getLatestMediaServer().player.playPause();
 					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
@@ -191,8 +196,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder != null && binder.isConnected())
 			updateMusicWidget(null);
 		else
-			setMusicWidgetText("not connected",
-					"no connection with any server", "", false, null);
+			setMusicWidgetText(
+					getResources().getString(R.string.str_no_conneciton),
+					getResources().getString(
+							R.string.str_no_conneciton_with_server), "", false,
+					null);
 	}
 
 	protected void setMusicWidgetText(String big, String small, String small2,
@@ -282,8 +290,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public void onStopService() {
-		setMusicWidgetText("not connected", "no connection with any server",
-				"", false, null);
+		setMusicWidgetText(
+				getResources().getString(R.string.str_no_conneciton),
+				getResources()
+						.getString(R.string.str_no_conneciton_with_server), "",
+				false, null);
 		stopSelf();
 	}
 
@@ -340,7 +351,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	private void updateSwitchWidget(int widgetID) throws Exception {
 		if (binder == null)
-			throw new Exception("not conneced");
+			throw new Exception(getResources().getString(
+					R.string.str_no_conneciton));
 		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
@@ -348,12 +360,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (switchName == null)
 			return;
 		updateSwitchWidget(widgetID, R.drawable.light_off, switchName);
-		if (powers == null)
-			throw new Exception(binder.getServerName() + " has no power server");
-		IInternetSwitch power = powers.get(switchName);
-		if (power == null)
+		if (powers == null || !powers.containsKey(switchName))
 			throw new Exception(binder.getServerName()
-					+ " has no switch called " + switchName);
+					+ getResources().getString(R.string.str_has_no_switch)
+					+ switchName);
+		IInternetSwitch power = powers.get(switchName);
 		State state = power.getState();
 		if (state == State.ON)
 			updateSwitchWidget(widgetID, R.drawable.light_on, switchName);
@@ -376,7 +387,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	private void switchPower(final int widgetID) throws Exception {
 		if (binder == null)
-			throw new Exception("not connected");
+			throw new Exception(getResources().getString(
+					R.string.str_no_conneciton));
 		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
@@ -385,7 +397,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			return;
 		IInternetSwitch power = powers.get(name);
 		if (power == null)
-			throw new Exception("Switch " + name + " is unknown");
+			throw new Exception(binder.getServerName()
+					+ getResources().getString(R.string.str_has_no_switch)
+					+ name);
 		if (DEBUGGING)
 			handler.post(new Runnable() {
 				@Override

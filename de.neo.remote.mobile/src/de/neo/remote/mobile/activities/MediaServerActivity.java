@@ -285,8 +285,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	private void askForStream() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Get stream");
-		alert.setMessage("Input the stream url");
+		alert.setTitle(getResources().getString(R.string.str_input_stream));
+		alert.setMessage(getResources().getString(R.string.str_input_stream_url));
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);

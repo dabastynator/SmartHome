@@ -75,8 +75,10 @@ public class NewServerActivity extends Activity {
 			serverDB.getServerDao().deleteServer(oldServer);
 		serverDB.getServerDao().insertServer(serverName,
 				ip.getText().toString());
-		Toast.makeText(this, "server '" + serverName + "' added",
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(
+				this,
+				getResources().getString(R.string.str_server_added) + ": "
+						+ serverName, Toast.LENGTH_SHORT).show();
 		// Intent i = new Intent(this, SelectServerActivity.class);
 		// startActivity(i);
 		finish();
