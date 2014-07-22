@@ -10,6 +10,7 @@ import de.neo.remote.mediaserver.api.IMediaServer;
 import de.neo.remote.mediaserver.impl.ChatServerImpl;
 import de.neo.remote.mediaserver.impl.MediaControlUnit;
 import de.neo.remote.mediaserver.impl.MediaServerImpl;
+import de.neo.rmi.api.IRegistryConnection;
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.api.RMILogger.LogPriority;
@@ -48,28 +49,11 @@ public class MediaServerMain {
 				position, type);
 		IChatServer chat = new ChatServerImpl();
 
-		try {
-			// connect to registry and start server
-			server.forceConnectToRegistry(registry);
-			server.startServer(IMediaServer.STATION_PORT);
+		server.startServer(IMediaServer.STATION_PORT);
 
-			// register objects at registry
-			IControlCenter center = (IControlCenter) server.forceFind(
-					IControlCenter.ID, IControlCenter.class);
-			if (center == null) {
-				System.err
-						.println("Error: No control center found in registry. Can't add music station to any list");
-				System.exit(1);
-			}
-			center.addControlUnit(mediaUnit);
-			server.register(IChatServer.ID, chat);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		MediaServerRegistryConnection connector = new MediaServerRegistryConnection(
+				mediaUnit, chat);
+		server.manageConnector(connector, registry);
 
 	}
 
@@ -123,6 +107,50 @@ public class MediaServerMain {
 				.println("  --temp        : specify temprary location for playlists.");
 		System.out
 				.println("  --type        : specify visualization(remote, multimedia, box).");
+	}
+
+	private static class MediaServerRegistryConnection implements
+			IRegistryConnection {
+
+		private IControlUnit mediaUnit;
+		private IChatServer chat;
+
+		public MediaServerRegistryConnection(IControlUnit mediaUnit,
+				IChatServer chat) {
+			this.mediaUnit = mediaUnit;
+			this.chat = chat;
+		}
+
+		@Override
+		public void onRegistryConnected(Server server) {
+			try {
+				// register objects at registry
+				IControlCenter center = (IControlCenter) server.forceFind(
+						IControlCenter.ID, IControlCenter.class);
+				if (center == null) {
+					System.err
+							.println("Error: No control center found in registry. Can't add music station to any list");
+					System.exit(1);
+				}
+				center.addControlUnit(mediaUnit);
+				server.register(IChatServer.ID, chat);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void onRegistryLost() {
+			RMILogger.performLog(LogPriority.WARNING,
+					"connection to registry lost", "");
+		}
+
+		@Override
+		public boolean isManaged() {
+			return true;
+		}
+
 	}
 
 }
