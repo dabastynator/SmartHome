@@ -520,4 +520,9 @@ public class Server {
 		}
 	}
 
+	public void manageConnector(IRegistryConnection connector, String registry) {
+		ConnectorManager manager = new ConnectorManager(this, connector, registry);
+		manager.start();
+	}
+
 }
