@@ -14,7 +14,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.controlcenter.api.IControlCenter;
+import de.neo.remote.controlcenter.api.IControlUnit;
 import de.neo.remote.gpiopower.api.IInternetSwitch;
+import de.neo.rmi.api.IRegistryConnection;
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.api.RMILogger.RMILogListener;
@@ -36,22 +38,19 @@ public class GPIOMain {
 			});
 			String registry = getParameter("--registry", args);
 			Server server = Server.getServer();
-			server.forceConnectToRegistry(registry);
 			server.startServer(IInternetSwitch.PORT);
-			IControlCenter control = (IControlCenter) server.forceFind(
-					IControlCenter.ID, IControlCenter.class);
-			if (control == null)
-				throw new RemoteException(IControlCenter.ID,
-						"not found in registry");
 
 			String configFile = getParameter("--config", args);
+			List<IControlUnit> units = new ArrayList<IControlUnit>();
 			for (InternetSwitchImpl remoteSwitch : loadSwitchesFromFile(
 					configFile, switchPower)) {
 				GPIOControlUnit unit = new GPIOControlUnit(
 						remoteSwitch.getName(), "Internet switch",
 						remoteSwitch, remoteSwitch.getPosition());
-				control.addControlUnit(unit);
+				units.add(unit);
 			}
+			GPIORegistryConnection connector = new GPIORegistryConnection(units);
+			server.manageConnector(connector, registry);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -135,6 +134,46 @@ public class GPIOMain {
 		System.out.println("Usage:  ");
 		System.out.println("  --registry    : ip of registry.");
 		System.out.println("  --config      : configuration file.");
+	}
+
+	private static class GPIORegistryConnection implements IRegistryConnection {
+
+		private List<IControlUnit> units;
+
+		public GPIORegistryConnection(List<IControlUnit> units) {
+			this.units = units;
+		}
+
+		@Override
+		public void onRegistryConnected(Server server) {
+			try {
+				// register objects at registry
+				IControlCenter center = (IControlCenter) server.forceFind(
+						IControlCenter.ID, IControlCenter.class);
+				if (center == null) {
+					System.err
+							.println("Error: No control center found in registry. Can't add music station to any list");
+					System.exit(1);
+				}
+				for (IControlUnit unit : units)
+					center.addControlUnit(unit);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void onRegistryLost() {
+			RMILogger.performLog(LogPriority.WARNING,
+					"connection to registry lost", "");
+		}
+
+		@Override
+		public boolean isManaged() {
+			return true;
+		}
+
 	}
 
 }
