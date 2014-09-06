@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.api.IInternetSwitch;
