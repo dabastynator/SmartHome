@@ -1,0 +1,360 @@
+package de.neo.remote.mediaserver;
+
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import org.farng.mp3.MP3File;
+import org.farng.mp3.TagException;
+import org.farng.mp3.id3.AbstractID3v2;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.neo.remote.api.IPlayer;
+import de.neo.remote.api.IPlayerListener;
+import de.neo.remote.api.PlayerException;
+import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.PlayingBean.STATE;
+import de.neo.remote.mediaserver.ThumbnailHandler.Thumbnail;
+import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailJob;
+import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailListener;
+import de.neo.rmi.protokol.RemoteException;
+
+/**
+ * the abstract player implements basically functions of an player. this
+ * contains handling of listeners, current playing file
+ * 
+ * @author sebastian
+ */
+public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
+
+	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
+
+	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
+
+	public static final int THUMBNAIL_SIZE = 128;
+
+	/**
+	 * list of all listeners
+	 */
+	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
+
+	/**
+	 * current playing file
+	 */
+	protected PlayingBean playingBean;
+
+	public AbstractPlayer() {
+		new PlayingTimeCounter().start();
+		ThumbnailHandler.instance().calculationListener().add(this);
+	}
+
+	@Override
+	public void addPlayerMessageListener(IPlayerListener listener)
+			throws RemoteException {
+		if (!listeners.contains(listener))
+			listeners.add(listener);
+	}
+
+	@Override
+	public void removePlayerMessageListener(IPlayerListener listener)
+			throws RemoteException {
+		listeners.remove(listener);
+	}
+
+	/**
+	 * read file tags with the ID3 library
+	 * 
+	 * @param file
+	 * @return playingbean
+	 * @throws IOException
+	 */
+	protected PlayingBean readFileInformations(File file) throws IOException {
+		PlayingBean bean = new PlayingBean();
+		try {
+			MP3File mp3File = new MP3File(file);
+			bean.setFile(file.getName().trim());
+			bean.setPath(file.getPath());
+			AbstractID3v2 id3v2Tag = mp3File.getID3v2Tag();
+			if (id3v2Tag != null) {
+				if (id3v2Tag.getAuthorComposer() != null)
+					bean.setArtist(id3v2Tag.getAuthorComposer().trim());
+				if (id3v2Tag.getSongTitle() != null)
+					bean.setTitle(id3v2Tag.getSongTitle().trim());
+				if (id3v2Tag.getAlbumTitle() != null)
+					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
+			}
+		} catch (TagException e) {
+			System.out.println(e);
+		}
+		return bean;
+	}
+
+	/**
+	 * inform all listeners about the current playing file. the information
+	 * about the file will be read.
+	 * 
+	 * @param bean
+	 * @throws IOException
+	 */
+	protected void informFile(File file) throws IOException {
+		PlayingBean bean = readFileInformations(file);
+		bean.setState(STATE.PLAY);
+		informPlayingBean(bean);
+	}
+
+	/**
+	 * inform all listeners about the current playing file. a new bean will be
+	 * created.
+	 * 
+	 * @param bean
+	 */
+	protected void informPlayingBean(PlayingBean bean) {
+		this.playingBean = new PlayingBean(bean);
+		List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
+		for (IPlayerListener listener : listeners)
+			try {
+				listener.playerMessage(playingBean);
+			} catch (RemoteException e) {
+				exceptionList.add(listener);
+			}
+		listeners.removeAll(exceptionList);
+	}
+
+	@Override
+	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
+		return playingBean;
+	}
+
+	@Override
+	public void playPause() throws PlayerException {
+		if (playingBean != null) {
+			playingBean
+					.setState((playingBean.getState() == STATE.PLAY) ? STATE.PAUSE
+							: STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	protected String getStreamUrl(String script, String url)
+			throws PlayerException {
+		try {
+			String[] processArgs = new String[] { script, "-g", url };
+			Process process = Runtime.getRuntime().exec(processArgs);
+			InputStreamReader input = new InputStreamReader(
+					process.getErrorStream());
+			BufferedReader reader = new BufferedReader(input);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("Error"))
+					throw new PlayerException("Error get stream :" + line);
+			}
+			input = new InputStreamReader(process.getInputStream());
+			reader = new BufferedReader(input);
+			String streamUrl = reader.readLine();
+			if (streamUrl == null)
+				throw new PlayerException("Get invalid stream url: null");
+			return streamUrl;
+		} catch (IOException e) {
+			throw new PlayerException("Error get stream :" + e.getMessage());
+		}
+	}
+
+	@Override
+	public void play(String file) {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			playingBean.setFile(file);
+			playingBean.setStartTime(System.currentTimeMillis());
+			informPlayingBean(playingBean);
+		}
+	}
+
+	@Override
+	public void quit() throws PlayerException {
+		if (playingBean == null)
+			playingBean = new PlayingBean();
+		playingBean.setState(STATE.DOWN);
+		playingBean.setArtist(null);
+		playingBean.setTitle(null);
+		playingBean.setAlbum(null);
+		playingBean.setFile(null);
+		playingBean.setPath(null);
+		playingBean.setRadio(null);
+		informPlayingBean(playingBean);
+	}
+
+	@Override
+	public void next() throws PlayerException {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	@Override
+	public void previous() throws PlayerException {
+		if (playingBean != null) {
+			playingBean.setState(STATE.PLAY);
+			informPlayingBean(playingBean);
+		}
+	}
+
+	protected void loadThumbnail(PlayingBean bean) {
+		if (bean.getArtist() != null && bean.getArtist().length() > 0) {
+			try {
+				bean.setThumbnailRGB(null);
+				bean.setThumbnailSize(0, 0);
+				PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
+				ThumbnailHandler.instance().queueThumbnailJob(job);
+			} catch (Exception e) {
+				System.out.println("No thumbnail for " + bean.getArtist()
+						+ " (" + e.getClass().getSimpleName() + ")");
+			}
+		}
+	}
+
+	public static BufferedImage searchImageFromGoogle(String search)
+			throws IOException, JSONException {
+		URL url = new URL(
+				"https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
+						+ URLEncoder.encode(search, "UTF-8"));
+		URLConnection connection = url.openConnection();
+
+		String line;
+		StringBuilder builder = new StringBuilder();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		while ((line = reader.readLine()) != null) {
+			builder.append(line);
+		}
+
+		JSONObject json = new JSONObject(builder.toString());
+		String imageUrl = json.getJSONObject("responseData")
+				.getJSONArray("results").getJSONObject(0).getString("url");
+
+		BufferedImage image = ImageIO.read(new URL(imageUrl));
+		return image;
+	}
+
+	@Override
+	public void playFromYoutube(String url) throws RemoteException,
+			PlayerException {
+	}
+
+	@Override
+	public void playFromArdMediathek(String url) throws RemoteException,
+			PlayerException {
+
+	}
+
+	@Override
+	public void onThumbnailCalculation(ThumbnailJob job) {
+		if (job instanceof PlayerThumbnailJob) {
+			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
+			if (playerJob.player == this && playerJob.bean != null
+					&& playerJob.thumbnail != null) {
+				playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
+				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width,
+						playerJob.thumbnail.height);
+				informPlayingBean(playerJob.bean);
+			}
+		}
+	}
+
+	class PlayingTimeCounter extends Thread {
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if (playingBean != null && playingBean.getState() == STATE.PLAY) {
+					playingBean.incrementCurrentTime(1);
+				}
+			}
+		}
+
+	}
+
+	class PlayerThumbnailJob extends ThumbnailJob {
+
+		private PlayingBean bean;
+		private AbstractPlayer player;
+
+		public PlayerThumbnailJob(PlayingBean bean, AbstractPlayer player) {
+			this.bean = bean;
+			this.player = player;
+		}
+
+		@Override
+		protected void calculateThumbnail() {
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
+					bean.getArtist());
+			if (thumbnail == null) {
+				try {
+					BufferedImage image = searchImageFromGoogle(bean
+							.getArtist());
+					thumbnail = new Thumbnail();
+					File thumbnailFile = ThumbnailHandler.instance()
+							.getStringThumbnailFile(bean.getArtist());
+					BufferedImage thumbnailImage = ThumbnailHandler.instance()
+							.toBufferedImage(
+									ThumbnailHandler.instance()
+											.createThumbnail(image,
+													THUMBNAIL_SIZE));
+					int rgb[] = ThumbnailHandler.instance().readImageIntArray(
+							thumbnailImage);
+					rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE,
+							THUMBNAIL_SIZE);
+					thumbnail.width = THUMBNAIL_SIZE;
+					thumbnail.height = THUMBNAIL_SIZE;
+					thumbnail.rgb = rgb;
+					ThumbnailHandler.instance().writeThumbnail(thumbnailFile,
+							thumbnail);
+				} catch (IOException | JSONException e) {
+					System.out.println("Could not build thumbnail for '"
+							+ bean.getArtist() + "': " + e.getMessage());
+				}
+			}
+		}
+
+		@Override
+		protected Thumbnail readThumbnail() {
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
+					bean.getArtist());
+			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
+			bean.setThumbnailRGB(thumbnail.rgb);
+			return thumbnail;
+		}
+
+		@Override
+		protected boolean needsCalculation() {
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
+					bean.getArtist());
+			return thumbnail == null;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof PlayerThumbnailJob) {
+				PlayerThumbnailJob pJob = (PlayerThumbnailJob) obj;
+				return pJob.bean.getArtist().equals(bean.getArtist());
+			}
+			return super.equals(obj);
+		}
+
+	}
+}

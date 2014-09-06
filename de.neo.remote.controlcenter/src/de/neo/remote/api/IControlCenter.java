@@ -1,4 +1,4 @@
-package de.neo.remote.controlcenter.api;
+package de.neo.remote.api;
 
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
