@@ -37,7 +37,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	private GroundPlot ground;
 
 	public ControlCenterImpl(Node root) {
-		readGround((Element) root);
+		ground = readGround((Element) root);
 		start();
 	}
 
