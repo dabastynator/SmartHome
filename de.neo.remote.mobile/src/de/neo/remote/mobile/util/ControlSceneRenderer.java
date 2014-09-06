@@ -28,16 +28,16 @@ import de.neo.opengl.common.systems.GLReadinglamp;
 import de.neo.opengl.common.systems.GLSwitch;
 import de.neo.opengl.common.systems.GLTableround;
 import de.neo.opengl.common.touchhandler.TranslateSceneHandler;
-import de.neo.remote.controlcenter.api.GroundPlot;
-import de.neo.remote.controlcenter.api.GroundPlot.Feature;
-import de.neo.remote.controlcenter.api.GroundPlot.Point;
-import de.neo.remote.controlcenter.api.GroundPlot.Wall;
-import de.neo.remote.controlcenter.api.IControlCenter;
-import de.neo.remote.gpiopower.api.IInternetSwitch;
-import de.neo.remote.gpiopower.api.IInternetSwitch.State;
-import de.neo.remote.mediaserver.api.IMediaServer;
-import de.neo.remote.mediaserver.api.PlayingBean;
-import de.neo.remote.mediaserver.api.PlayingBean.STATE;
+import de.neo.remote.api.GroundPlot;
+import de.neo.remote.api.GroundPlot.Feature;
+import de.neo.remote.api.GroundPlot.Point;
+import de.neo.remote.api.GroundPlot.Wall;
+import de.neo.remote.api.IControlCenter;
+import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IMediaServer;
+import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.rmi.protokol.RemoteException;
@@ -294,9 +294,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			new Thread() {
 				public void run() {
 					try {
-						de.neo.remote.gpiopower.api.IInternetSwitch.State state = de.neo.remote.gpiopower.api.IInternetSwitch.State.OFF;
+						de.neo.remote.api.IInternetSwitch.State state = de.neo.remote.api.IInternetSwitch.State.OFF;
 						if (lightOn)
-							state = de.neo.remote.gpiopower.api.IInternetSwitch.State.ON;
+							state = de.neo.remote.api.IInternetSwitch.State.ON;
 						internet.setState(state);
 					} catch (RemoteException e) {
 					}

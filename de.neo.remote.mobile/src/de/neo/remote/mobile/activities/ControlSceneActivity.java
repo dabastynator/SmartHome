@@ -8,8 +8,8 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 import de.neo.opengl.common.AbstractSceneSurfaceView;
-import de.neo.remote.gpiopower.api.IInternetSwitch.State;
-import de.neo.remote.mediaserver.api.PlayingBean;
+import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 

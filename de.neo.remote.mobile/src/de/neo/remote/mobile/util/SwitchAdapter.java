@@ -13,8 +13,8 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import de.neo.remote.gpiopower.api.IInternetSwitch;
-import de.neo.remote.gpiopower.api.IInternetSwitch.State;
+import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.mobile.activities.SelectSwitchActivity.SelectSwitchListener;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
@@ -22,14 +22,12 @@ import de.remote.mobile.R;
 public class SwitchAdapter extends ArrayAdapter<String> {
 
 	private Map<String, IInternetSwitch> power;
-	private String[] switchNames;
 	private SelectSwitchListener listener = null;
 
 	public SwitchAdapter(Context context, String[] all,
 			Map<String, IInternetSwitch> power) {
 		super(context, R.layout.switch_row, R.id.lbl_switch_name, all);
 		this.power = power;
-		this.switchNames = all;
 	}
 
 	public SwitchAdapter(Context context, String[] all,

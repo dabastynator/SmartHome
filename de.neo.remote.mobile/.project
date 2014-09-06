@@ -32,24 +32,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src_control</name>
+			<name>src_api</name>
 			<type>2</type>
-			<locationURI>WORKSPACE_LOC/remote/de.neo.remote.controlcenter/src</locationURI>
+			<location>/home/sebastian/Workspace/remote/de.neo.remote/src</location>
 		</link>
 		<link>
 			<name>src_glcommon</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/mobile/de.neo.opengl.common/src</locationURI>
-		</link>
-		<link>
-			<name>src_gpio</name>
-			<type>2</type>
-			<locationURI>WORKSPACE_LOC/remote/de.neo.remote.gpiopower/src</locationURI>
-		</link>
-		<link>
-			<name>src_mediaserver</name>
-			<type>2</type>
-			<locationURI>WORKSPACE_LOC/remote/de.neo.remote.mediaserver/src</locationURI>
 		</link>
 		<link>
 			<name>src_opengl</name>
@@ -60,11 +50,6 @@
 			<name>src_rmi</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/remote/de.neo.rmi/src</locationURI>
-		</link>
-		<link>
-			<name>src_webcam</name>
-			<type>2</type>
-			<locationURI>WORKSPACE_LOC/remote/de.webcam/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

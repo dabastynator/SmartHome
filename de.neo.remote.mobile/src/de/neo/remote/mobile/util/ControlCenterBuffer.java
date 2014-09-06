@@ -1,8 +1,8 @@
 package de.neo.remote.mobile.util;
 
-import de.neo.remote.controlcenter.api.GroundPlot;
-import de.neo.remote.controlcenter.api.IControlCenter;
-import de.neo.remote.controlcenter.api.IControlUnit;
+import de.neo.remote.api.GroundPlot;
+import de.neo.remote.api.IControlCenter;
+import de.neo.remote.api.IControlUnit;
 import de.neo.rmi.protokol.RemoteException;
 
 public class ControlCenterBuffer implements IControlCenter {

@@ -2,9 +2,9 @@ package de.neo.remote.mobile.util;
 
 import android.content.Context;
 import android.widget.Toast;
-import de.neo.remote.gpiopower.api.IInternetSwitch;
-import de.neo.remote.gpiopower.api.IInternetSwitch.State;
-import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.PlayerException;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.remote.mobile.util.VoiceRecognizer.IVoiceRecognition;
 import de.neo.rmi.protokol.RemoteException;

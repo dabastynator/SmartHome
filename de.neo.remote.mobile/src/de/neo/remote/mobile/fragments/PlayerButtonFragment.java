@@ -8,10 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-import de.neo.remote.mediaserver.api.IDVDPlayer;
-import de.neo.remote.mediaserver.api.IPlayer;
-import de.neo.remote.mediaserver.api.PlayingBean;
-import de.neo.remote.mediaserver.api.PlayingBean.STATE;
+import de.neo.remote.api.IDVDPlayer;
+import de.neo.remote.api.IPlayer;
+import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.remote.mobile.R;
 

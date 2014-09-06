@@ -3,8 +3,8 @@ package de.neo.remote.mobile.util;
 import java.io.IOException;
 import java.util.Arrays;
 
-import de.neo.remote.mediaserver.api.IBrowser;
-import de.neo.remote.mediaserver.api.IThumbnailListener;
+import de.neo.remote.api.IBrowser;
+import de.neo.remote.api.IThumbnailListener;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.ServerPort;
 

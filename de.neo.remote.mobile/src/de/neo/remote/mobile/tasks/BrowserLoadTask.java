@@ -2,8 +2,8 @@ package de.neo.remote.mobile.tasks;
 
 import java.util.Arrays;
 
-import de.neo.remote.mediaserver.api.IPlayer;
-import de.neo.remote.mediaserver.api.PlayerException;
+import de.neo.remote.api.IPlayer;
+import de.neo.remote.api.PlayerException;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;

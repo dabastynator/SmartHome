@@ -1,6 +1,6 @@
 package de.neo.remote.mobile.tasks;
 
-import de.neo.remote.mediaserver.api.IPlayer;
+import de.neo.remote.api.IPlayer;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.PlayerBinder;
 

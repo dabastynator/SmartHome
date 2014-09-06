@@ -2,14 +2,14 @@ package de.neo.remote.mobile.tasks;
 
 import java.io.File;
 
-import de.neo.remote.mediaserver.api.IBrowser;
+import android.os.AsyncTask;
+import android.os.Environment;
+import android.widget.Toast;
+import de.neo.remote.api.IBrowser;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.widget.Toast;
 
 public class DownloadTask extends AsyncTask<String, String, String> {
 

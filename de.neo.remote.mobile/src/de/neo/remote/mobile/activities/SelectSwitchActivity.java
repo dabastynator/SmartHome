@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.RemoteViews;
-import de.neo.remote.gpiopower.api.IInternetSwitch;
+import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.util.SwitchAdapter;
