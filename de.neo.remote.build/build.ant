@@ -10,7 +10,7 @@
 
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
-	
+
 	<property name="jar.destiny" value="/opt/neo/" />
 
 	<path id="classpath">
@@ -65,10 +65,9 @@
 		</jar>
 	</target>
 
-	<target name="build_remote" depends="jar_webcam,jar_remote,jar_desktop">
-		<copy file="${jar.dir}/registry.jar" tofile="${jar.destiny}/registry.jar" overwrite="true"/>
-		<copy file="${jar.dir}/webcam.jar" tofile="${jar.destiny}/webcam.jar" overwrite="true"/>
-		<copy file="${jar.dir}/desktop.jar" tofile="${jar.destiny}/desktop.jar" overwrite="true"/>
-		<copy file="${jar.dir}/remote.jar" tofile="${jar.destiny}/remote.jar" overwrite="true"/>
+	<target name="build_remote" depends="jar_webcam,jar_remote">
+		<copy file="${jar.dir}/registry.jar" tofile="${jar.destiny}/registry.jar" overwrite="true" />
+		<copy file="${jar.dir}/webcam.jar" tofile="${jar.destiny}/webcam.jar" overwrite="true" />
+		<copy file="${jar.dir}/remote.jar" tofile="${jar.destiny}/remote.jar" overwrite="true" />
 	</target>
 </project>
