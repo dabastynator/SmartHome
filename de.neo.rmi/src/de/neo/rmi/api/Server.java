@@ -182,8 +182,8 @@ public class Server {
 			} catch (SocketException e) {
 				connected = false;
 				RMILogger.performLog(LogPriority.WARNING,
-						"connection to registry refused. retry after " + waitTime + "ms",
-						null);
+						"connection to registry refused. retry after "
+								+ waitTime + "ms", null);
 				try {
 					Thread.sleep(waitTime);
 					waitTime = Math.min(waitTime * 2, maxTime);
@@ -248,14 +248,9 @@ public class Server {
 			registeredIDList.add(id);
 			RMILogger
 					.performLog(LogPriority.INFORMATION, "register object", id);
-		} catch (IOException e) {
-			e.printStackTrace();
-			RMILogger.performLog(LogPriority.ERROR,
-					"register object " + e.getMessage(), id);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			RMILogger.performLog(LogPriority.ERROR,
-					"register object " + e.getMessage(), id);
+		} catch (IOException | ClassNotFoundException e) {
+			RMILogger.performLog(LogPriority.ERROR, "Error register object: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage(), id);
 		}
 	}
 
@@ -344,7 +339,7 @@ public class Server {
 									+ sleepTime + "ms", id);
 					Thread.sleep(sleepTime);
 					sleepTime = Math.min(sleepTime * 2, 60 * 1000);
-				}else
+				} else
 					result = reply.getObject();
 			}
 			// connect to server
@@ -406,7 +401,9 @@ public class Server {
 								handlers.add(handler);
 								handler.handle();
 							} catch (IOException e) {
-								e.printStackTrace();
+								RMILogger.performLog(LogPriority.ERROR,
+										"Error creating new connection handler: "
+												+ e.getMessage(), null);
 							}
 						}
 					}).start();
@@ -521,7 +518,8 @@ public class Server {
 	}
 
 	public void manageConnector(IRegistryConnection connector, String registry) {
-		ConnectorManager manager = new ConnectorManager(this, connector, registry);
+		ConnectorManager manager = new ConnectorManager(this, connector,
+				registry);
 		manager.start();
 	}
 

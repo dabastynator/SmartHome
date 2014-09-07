@@ -107,7 +107,8 @@ public class ConnectionHandler {
 				} else {
 					Reply r = new Reply();
 					r.setError(new RemoteException(request.getObject(),
-							"no such object found: " + request.getObject() + " at " + server.getServerPort()));
+							"no such object found: " + request.getObject()
+									+ " at " + server.getServerPort()));
 					out.writeObject(r);
 				}
 			}
@@ -119,14 +120,18 @@ public class ConnectionHandler {
 				RMILogger.performLog(LogPriority.WARNING,
 						"Client connection closed by server", null);
 			else
-				e.printStackTrace();
+				RMILogger.performLog(
+						LogPriority.ERROR,
+						"Unknown request error: "
+								+ e.getClass().getSimpleName() + ": "
+								+ e.getMessage(), null);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR,
+					"Request-ClassNotFoundException: " + e.getMessage(), null);
 		} finally {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}
@@ -140,13 +145,15 @@ public class ConnectionHandler {
 	/**
 	 * set id for remoteable result. if there is already an adapter use the old
 	 * one.
-	 * @param adapter 
+	 * 
+	 * @param adapter
 	 * 
 	 * @param reply
 	 */
 	private void configureReply(Reply reply, Object result) {
-		if (reply.getResult() instanceof Proxy){
-			DynamicProxy dp = (DynamicProxy) Proxy.getInvocationHandler(reply.getResult());
+		if (reply.getResult() instanceof Proxy) {
+			DynamicProxy dp = (DynamicProxy) Proxy.getInvocationHandler(reply
+					.getResult());
 			reply.addNewId(dp.getId());
 			reply.setServerPort(dp.getServerPort());
 			reply.setResult(null);
@@ -156,7 +163,8 @@ public class ConnectionHandler {
 			reply.setServerPort(server.getServerPort());
 		} else {
 			String id = getNextId();
-			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result, server);
+			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result,
+					server);
 			server.getAdapterMap().put(id, dynamicAdapter);
 			server.getAdapterObjectIdMap().put(result, id);
 			reply.addNewId(id);

@@ -115,7 +115,6 @@ public class ServerConnection {
 				// wait for free socket
 				wait();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 	}

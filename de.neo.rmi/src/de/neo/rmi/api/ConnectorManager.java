@@ -31,8 +31,6 @@ public class ConnectorManager extends Thread {
 				testConnection();
 				Thread.sleep(PING_TIME);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

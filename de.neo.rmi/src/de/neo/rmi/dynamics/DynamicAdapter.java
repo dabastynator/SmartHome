@@ -7,7 +7,9 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.Server;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.handler.ServerConnection;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.Reply;
@@ -84,14 +86,13 @@ public class DynamicAdapter {
 			reply.setResult(result);
 			if (method.getReturnType() != void.class)
 				reply.setReturnType(method.getReturnType());
-		} catch (SecurityException e) {
+		} catch (SecurityException | NoSuchMethodException | IOException
+				| IllegalAccessException e) {
 			reply.setError(new RemoteException(request.getObject(), e
 					.getMessage()));
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			e.printStackTrace();
+			RMILogger.performLog(LogPriority.ERROR, "Error requesing method '"
+					+ request.getMethod() + "': "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage(), id);
 		} catch (IllegalArgumentException e) {
 			reply.setError(new RemoteException(request.getObject(), e
 					.getMessage()));
@@ -107,20 +108,8 @@ public class DynamicAdapter {
 						+ "("
 						+ request.getParams()[0].getClass().getInterfaces()[0]
 								.getSimpleName() + ")");
-		} catch (IllegalAccessException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			reply.setError(e.getTargetException());
-		} catch (UnknownHostException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			e.printStackTrace();
-		} catch (IOException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			e.printStackTrace();
 		}
 		return reply;
 	}

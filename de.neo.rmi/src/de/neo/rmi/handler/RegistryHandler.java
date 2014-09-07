@@ -79,7 +79,11 @@ public class RegistryHandler {
 				RMILogger.performLog(LogPriority.INFORMATION,
 						"registry closed", null);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			RMILogger
+					.performLog(
+							LogPriority.ERROR,
+							"RegistryRequest-ClassNotFoundException: "
+									+ e.getMessage(), null);
 		}
 	}
 
@@ -87,8 +91,6 @@ public class RegistryHandler {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
