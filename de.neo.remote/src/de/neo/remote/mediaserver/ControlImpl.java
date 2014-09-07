@@ -32,7 +32,6 @@ public class ControlImpl implements IControl {
 		try {
 			Runtime.getRuntime().exec(SHUTDOWN);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -41,7 +40,6 @@ public class ControlImpl implements IControl {
 		try {
 			Runtime.getRuntime().exec(MAKE_DARK);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -51,7 +49,6 @@ public class ControlImpl implements IControl {
 			Runtime.getRuntime().exec(MAKE_BRIDE);
 			Runtime.getRuntime().exec(EXIT_SCREENSAVER);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 

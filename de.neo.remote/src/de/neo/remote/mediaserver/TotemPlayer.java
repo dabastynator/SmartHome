@@ -34,7 +34,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(PLAY_PAUSE);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		super.playPause();
 	}
@@ -44,7 +43,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(QUIT);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -53,7 +51,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(NEXT);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		super.next();
 	}
@@ -63,7 +60,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(PREVIOUS);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		super.previous();
 	}
@@ -73,7 +69,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(VOL_UP);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -82,7 +77,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(VOL_DOWN);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -91,7 +85,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(FULL_SCREEN);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -116,7 +109,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(new String[] { PLAY, pls });
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -125,7 +117,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(SEEK_FWD);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -134,7 +125,6 @@ public class TotemPlayer extends AbstractPlayer {
 		try {
 			Runtime.getRuntime().exec(SEEK_BWD);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -147,6 +137,6 @@ public class TotemPlayer extends AbstractPlayer {
 	@Override
 	public void setPlayingPosition(int second) throws RemoteException,
 			PlayerException {
-		throw new PlayerException("not supported function for totem");		
+		throw new PlayerException("not supported function for totem");
 	}
 }

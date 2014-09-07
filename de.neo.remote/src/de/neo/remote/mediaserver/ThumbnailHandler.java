@@ -8,7 +8,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -20,6 +19,9 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import de.neo.remote.RemoteLogger;
+import de.neo.rmi.api.RMILogger.LogPriority;
+
 public class ThumbnailHandler {
 
 	public static final String THUMBNAILS = ".thumbnail";
@@ -30,21 +32,22 @@ public class ThumbnailHandler {
 		return handler;
 	}
 
-	public static void init(String temporaryFolder) {
-		handler = new ThumbnailHandler(temporaryFolder);
+	public static void init(String temporaryFolder, boolean startWorker) {
+		handler = new ThumbnailHandler(temporaryFolder, startWorker);
 	}
 
 	private File thumbnails;
 	private List<ThumbnailListener> listener = new ArrayList<>();
 	private ThumbnailQueue queue = new ThumbnailQueue();
 
-	private ThumbnailHandler(String temporaryFolder) {
+	private ThumbnailHandler(String temporaryFolder, boolean startWorker) {
 		if (!temporaryFolder.endsWith(File.separator))
 			temporaryFolder += File.separator;
 		thumbnails = new File(temporaryFolder + THUMBNAILS);
 		if (!thumbnails.exists())
 			thumbnails.mkdir();
-		queue.start();
+		if (startWorker)
+			queue.start();
 	}
 
 	public List<ThumbnailListener> calculationListener() {
@@ -197,12 +200,11 @@ public class ThumbnailHandler {
 				data.rgb[i] = input.readInt();
 			input.close();
 			return data;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RemoteLogger.performLog(
+					LogPriority.ERROR,
+					"Cant read file for thumbnail: "
+							+ thumbnailFile.getAbsolutePath(), "Mediaserver");
 		}
 		return null;
 	}
@@ -214,8 +216,8 @@ public class ThumbnailHandler {
 			if (thumbnailFile.exists())
 				thumbnail = readThumbnail(thumbnailFile);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+					.getSimpleName() + ": " + e.getMessage(), "Mediaserver");
 		}
 		return thumbnail;
 	}
@@ -238,6 +240,8 @@ public class ThumbnailHandler {
 
 		@Override
 		synchronized public void run() {
+			RemoteLogger.performLog(LogPriority.ERROR,
+					"Start thumbnail worker for calculation", "Thumbnail");
 			while (true) {
 				if (jobs.size() > 0) {
 					ThumbnailJob job = jobs.get(0);
@@ -246,16 +250,15 @@ public class ThumbnailHandler {
 						job.calculateThumbnail();
 						instance().informListener(job);
 					} catch (Exception e) {
-						System.out
-								.println("Uncatched exception in thumbnail execution: "
-										+ job.getClass().getSimpleName());
+						RemoteLogger.performLog(LogPriority.ERROR,
+								"Uncatched exception in thumbnail execution: "
+										+ job.getClass().getSimpleName(),
+								"Mediaserver");
 					}
 				} else {
 					try {
 						this.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 				}
 

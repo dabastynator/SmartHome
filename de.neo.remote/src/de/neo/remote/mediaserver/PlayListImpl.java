@@ -10,8 +10,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IPlayList;
 import de.neo.remote.api.PlayerException;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 public class PlayListImpl implements IPlayList {
@@ -43,7 +45,8 @@ public class PlayListImpl implements IPlayList {
 		try {
 			pls.createNewFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+					.getSimpleName() + ": " + e.getMessage(), "Mediaserver");
 		}
 	}
 
@@ -126,7 +129,8 @@ public class PlayListImpl implements IPlayList {
 		} catch (FileNotFoundException e) {
 			throw new PlayerException("Playlist '" + pls + "' does not exist");
 		} catch (IOException e) {
-			e.printStackTrace();
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+					.getSimpleName() + ": " + e.getMessage(), "Mediaserver");
 		}
 	}
 

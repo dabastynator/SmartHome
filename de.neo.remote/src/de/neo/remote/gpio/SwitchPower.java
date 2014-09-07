@@ -3,7 +3,9 @@ package de.neo.remote.gpio;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.rmi.api.RMILogger.LogPriority;
 
 /**
  * Implements the gpio power by executing switch commands
@@ -18,8 +20,6 @@ public class SwitchPower {
 	public synchronized void setSwitchState(String familyCode,
 			int switchNumber, State state) {
 		try {
-			System.out.println("Set switch " + familyCode + " " + switchNumber
-					+ " to " + state);
 			Process sender = Runtime
 					.getRuntime()
 					.exec(new String[] { SWITCH_SENDER, familyCode,
@@ -27,8 +27,16 @@ public class SwitchPower {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					sender.getErrorStream()));
 			String line = null;
-			while ((line = reader.readLine()) != null)
-				System.out.println("Error: " + line);
+			boolean success = true;
+			while ((line = reader.readLine()) != null) {
+				RemoteLogger.performLog(LogPriority.ERROR, line,
+						"Internetswitch");
+				success = false;
+			}
+			if (success)
+				RemoteLogger.performLog(LogPriority.INFORMATION, "Set switch "
+						+ familyCode + " " + switchNumber + " to " + state,
+						"Internetswitch");
 			reader.close();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getSimpleName() + ": "

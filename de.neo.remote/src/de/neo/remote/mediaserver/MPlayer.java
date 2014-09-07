@@ -10,9 +10,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 public class MPlayer extends AbstractPlayer {
@@ -70,12 +72,14 @@ public class MPlayer extends AbstractPlayer {
 			while ((line = input.readLine()) != null)
 				output.println(line);
 			while ((line = error.readLine()) != null)
-				System.out.println(line);
+				RemoteLogger.performLog(LogPriority.ERROR,
+						"Error creating playlist: " + line, "Mediaserver");
 			output.close();
 			input.close();
 			error.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+					.getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 	}
 
@@ -190,8 +194,8 @@ public class MPlayer extends AbstractPlayer {
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+						.getSimpleName() + ": " + e.getMessage(), "MPlayer");
 			}
 		}
 	}
@@ -234,8 +238,8 @@ public class MPlayer extends AbstractPlayer {
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+						.getSimpleName() + ": " + e.getMessage(), "MPlayer");
 			}
 		}
 	}
@@ -271,12 +275,9 @@ public class MPlayer extends AbstractPlayer {
 			for (int i = 0; i < line; i++)
 				firstLine = reader.readLine();
 			reader.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+					.getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 		return firstLine;
 	}
@@ -334,7 +335,9 @@ public class MPlayer extends AbstractPlayer {
 				bean.setState(PlayingBean.STATE.DOWN);
 				informPlayingBean(bean);
 			} catch (IOException e) {
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+						.getSimpleName() + ": " + e.getMessage(),
+						"MPlayerListener");
 			}
 		}
 

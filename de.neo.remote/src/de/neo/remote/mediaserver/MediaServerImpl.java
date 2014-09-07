@@ -12,7 +12,7 @@ import de.neo.rmi.protokol.RemoteException;
 public class MediaServerImpl implements IMediaServer {
 
 	public static final String ROOT = "MediaServer";
-	
+
 	private TotemPlayer totem;
 	private MPlayerDVD mplayer;
 	private ControlImpl control;
@@ -21,8 +21,9 @@ public class MediaServerImpl implements IMediaServer {
 	private OMXPlayer omxplayer;
 	private ImageViewerImpl imageViewer;
 
-	public MediaServerImpl(String browseLocation, String playlistLocation) {
-		ThumbnailHandler.init(playlistLocation);
+	public MediaServerImpl(String browseLocation, String playlistLocation,
+			boolean thumbnailWorker) {
+		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
 		totem = new TotemPlayer();
 		mplayer = new MPlayerDVD(playlistLocation);
 		browserLocation = browseLocation;

@@ -8,12 +8,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Feature;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 /**
@@ -84,8 +86,6 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			try {
 				Thread.sleep(100 * 10);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
@@ -104,8 +104,8 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		}
 		controlUnits.removeAll(exceptionList);
 		if (exceptionList.size() > 0)
-			System.out.println("Lost unit. " + controlUnits.size()
-					+ " unit(s) left.");
+			RemoteLogger.performLog(LogPriority.WARNING, "Lost unit. "
+					+ controlUnits.size() + " unit(s) left.", "Controlcenter");
 	}
 
 	@Override
@@ -118,8 +118,10 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		if (controlUnits.contains(controlUnit))
 			controlUnits.remove(controlUnit);
 		controlUnits.add(controlUnit);
-		System.out.println("Add " + controlUnits.size() + ". control unit: "
-				+ controlUnit.getName());
+		RemoteLogger.performLog(
+				LogPriority.INFORMATION,
+				"Add " + controlUnits.size() + ". control unit: "
+						+ controlUnit.getName(), "Controlcenter");
 	}
 
 	@Override

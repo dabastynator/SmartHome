@@ -19,6 +19,7 @@ import org.farng.mp3.id3.AbstractID3v2;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.PlayerException;
@@ -27,6 +28,7 @@ import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mediaserver.ThumbnailHandler.Thumbnail;
 import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailJob;
 import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailListener;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 /**
@@ -94,7 +96,9 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
 			}
 		} catch (TagException e) {
-			System.out.println(e);
+			RemoteLogger.performLog(LogPriority.ERROR,
+					"Cant read file-information: " + e.getMessage(),
+					"Mediaserver");
 		}
 		return bean;
 	}
@@ -217,8 +221,9 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 				PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
 				ThumbnailHandler.instance().queueThumbnailJob(job);
 			} catch (Exception e) {
-				System.out.println("No thumbnail for " + bean.getArtist()
-						+ " (" + e.getClass().getSimpleName() + ")");
+				RemoteLogger.performLog(LogPriority.ERROR, "No thumbnail for "
+						+ bean.getArtist() + " ("
+						+ e.getClass().getSimpleName() + ")", "Mediaserver");
 			}
 		}
 	}
@@ -279,7 +284,6 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
 				if (playingBean != null && playingBean.getState() == STATE.PLAY) {
 					playingBean.incrementCurrentTime(1);
@@ -325,8 +329,12 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					ThumbnailHandler.instance().writeThumbnail(thumbnailFile,
 							thumbnail);
 				} catch (IOException | JSONException e) {
-					System.out.println("Could not build thumbnail for '"
-							+ bean.getArtist() + "': " + e.getMessage());
+					RemoteLogger
+							.performLog(
+									LogPriority.ERROR,
+									"Could not build thumbnail for '"
+											+ bean.getArtist() + "': "
+											+ e.getMessage(), "Mediaserver");
 				}
 			}
 		}

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.api.IThumbnailListener;
 import de.neo.remote.mediaserver.ThumbnailHandler.ImageThumbnailJob;
@@ -13,6 +14,7 @@ import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailJob;
 import de.neo.remote.mediaserver.ThumbnailHandler.ThumbnailListener;
 import de.neo.rmi.api.Oneway;
 import de.neo.rmi.api.Server;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectorySender;
@@ -168,8 +170,11 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 
 		@Override
 		public void exceptionOccurred(Exception e) {
-			System.out.println("Error occured sending file: "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			RemoteLogger.performLog(
+					LogPriority.ERROR,
+					"Error occured sending file: "
+							+ e.getClass().getSimpleName() + ": "
+							+ e.getMessage(), "Mediaserver");
 		}
 
 		@Override

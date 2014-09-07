@@ -7,9 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 public class OMXPlayer extends AbstractPlayer {
@@ -207,8 +209,8 @@ public class OMXPlayer extends AbstractPlayer {
 
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+						.getSimpleName() + ": " + e.getMessage(), "OMXListener");
 			}
 		}
 

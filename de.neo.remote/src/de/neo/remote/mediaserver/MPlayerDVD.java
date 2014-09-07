@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IDVDPlayer;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
 
 public class MPlayerDVD extends MPlayer implements IDVDPlayer {
@@ -118,7 +120,9 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 				bean.setState(PlayingBean.STATE.DOWN);
 				informPlayingBean(bean);
 			} catch (IOException e) {
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
+						.getSimpleName() + ": " + e.getMessage(),
+						"MPlayerListener");
 			}
 		}
 	}

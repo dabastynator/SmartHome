@@ -2,6 +2,7 @@ package de.neo.remote;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.neo.remote.RemoteLogger.RemoteLogListener;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IMediaServer;
@@ -44,13 +46,7 @@ public class RemoteMain {
 			printUsage();
 			System.exit(1);
 		}
-		RMILogger.addLogListener(new RMILogListener() {
-			@Override
-			public void rmiLog(LogPriority priority, String message, String id,
-					long date) {
-				System.out.println(priority + ": " + message + " (" + id + ")");
-			}
-		});
+		setupLoging(System.out);
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
@@ -86,6 +82,25 @@ public class RemoteMain {
 		}
 	}
 
+	private static void setupLoging(final PrintStream stream) {
+		RMILogger.addLogListener(new RMILogListener() {
+			@Override
+			public void rmiLog(LogPriority priority, String message, String id,
+					long date) {
+				stream.println("RMI " + priority + ": " + message + " (" + id
+						+ ")");
+			}
+		});
+		RemoteLogger.listeners.add(new RemoteLogListener() {
+			@Override
+			public void remoteLog(LogPriority priority, String message,
+					String object, long date) {
+				stream.println("REMOTE " + priority + " by " + object + ": "
+						+ message);
+			}
+		});
+	}
+
 	private static List<IControlUnit> loadControlUnits(Document doc)
 			throws SAXException {
 		List<IControlUnit> units = new ArrayList<IControlUnit>();
@@ -112,11 +127,17 @@ public class RemoteMain {
 				String plsLocation = element.getAttribute("playlistLocation");
 				String name = element.getAttribute("name");
 				String type = element.getAttribute("type");
+				boolean thumbnailWorker = true;
+				if (element.hasAttribute("thumbnailWorker")) {
+					String worker = element.getAttribute("thumbnailWorker");
+					thumbnailWorker = worker.equals("true")
+							|| worker.equals("1");
+				}
 				float[] position = {
 						Float.parseFloat(element.getAttribute("x")),
 						Float.parseFloat(element.getAttribute("y")),
 						Float.parseFloat(element.getAttribute("z")) };
-				IMediaServer media = new MediaServerImpl(location, plsLocation);
+				IMediaServer media = new MediaServerImpl(location, plsLocation, thumbnailWorker);
 				MediaControlUnit unit = new MediaControlUnit(name, media,
 						position, type);
 				units.add(unit);
@@ -226,6 +247,8 @@ public class RemoteMain {
 		System.out
 				.println("      <xs:attribute name=\"location\" type=\"xs:string\"/>");
 		System.out
+				.println("      <xs:attribute name=\"thumbnailWorker\" type=\"xs:string\"/>");
+		System.out
 				.println("      <xs:attribute name=\"playlistLocation\" type=\"xs:string\"/>");
 		System.out
 				.println("      <xs:attribute name=\"name\" type=\"xs:string\"/>");
@@ -280,8 +303,8 @@ public class RemoteMain {
 					for (IControlUnit unit : m_units)
 						controlcenter.addControlUnit(unit);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
+						"RemoteMain");
 			}
 		}
 
