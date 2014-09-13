@@ -238,11 +238,14 @@ public class ThumbnailHandler {
 		private List<ThumbnailJob> jobs = Collections
 				.synchronizedList(new LinkedList<ThumbnailJob>());
 
+		private boolean mRunning = false;
+
 		@Override
 		synchronized public void run() {
-			RemoteLogger.performLog(LogPriority.ERROR,
+			RemoteLogger.performLog(LogPriority.INFORMATION,
 					"Start thumbnail worker for calculation", "Thumbnail");
-			while (true) {
+			mRunning = true;
+			while (mRunning) {
 				if (jobs.size() > 0) {
 					ThumbnailJob job = jobs.get(0);
 					jobs.remove(0);
@@ -266,8 +269,10 @@ public class ThumbnailHandler {
 		}
 
 		synchronized public void queueJob(ThumbnailJob job) {
-			jobs.add(job);
-			this.notify();
+			if (mRunning) {
+				jobs.add(job);
+				this.notify();
+			}
 		}
 
 	}
