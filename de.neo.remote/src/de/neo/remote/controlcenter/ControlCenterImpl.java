@@ -94,18 +94,20 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	 * remove control units with exception
 	 */
 	private void checkControlUnits() {
-		List<IControlUnit> exceptionList = new ArrayList<IControlUnit>();
-		for (IControlUnit unit : controlUnits) {
+		int removed = 0;
+		for (int i = controlUnits.size() - 1; i >= 0; i--) {
 			try {
+				IControlUnit unit = controlUnits.get(i);
 				unit.getName();
 			} catch (RemoteException e) {
-				exceptionList.add(unit);
+				controlUnits.remove(i);
+				removed++;
 			}
 		}
-		controlUnits.removeAll(exceptionList);
-		if (exceptionList.size() > 0)
-			RemoteLogger.performLog(LogPriority.WARNING, "Lost unit. "
-					+ controlUnits.size() + " unit(s) left.", "Controlcenter");
+		if (removed > 0)
+			RemoteLogger.performLog(LogPriority.WARNING, "Lost " + removed
+					+ " unit(s). " + controlUnits.size() + " unit(s) left.",
+					"Controlcenter");
 	}
 
 	@Override
