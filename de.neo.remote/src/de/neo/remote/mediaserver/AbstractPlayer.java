@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -228,8 +229,9 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		}
 	}
 
-	public static BufferedImage searchImageFromGoogle(String search)
-			throws IOException, JSONException {
+	public static BufferedImage searchImageFromGoogle(String search,
+			int minResolution, int maxResolution) throws IOException,
+			JSONException {
 		URL url = new URL(
 				"https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
 						+ URLEncoder.encode(search, "UTF-8"));
@@ -244,11 +246,18 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		}
 
 		JSONObject json = new JSONObject(builder.toString());
-		String imageUrl = json.getJSONObject("responseData")
-				.getJSONArray("results").getJSONObject(0).getString("url");
-
-		BufferedImage image = ImageIO.read(new URL(imageUrl));
-		return image;
+		JSONArray imageArray = json.getJSONObject("responseData").getJSONArray(
+				"results");
+		for (int i = 0; i < imageArray.length(); i++) {
+			int width = imageArray.getJSONObject(i).getInt("width");
+			int height = imageArray.getJSONObject(i).getInt("height");
+			if (width * height >= minResolution
+					&& width * height <= maxResolution) {
+				String imageUrl = imageArray.getJSONObject(i).getString("url");
+				return ImageIO.read(new URL(imageUrl));
+			}
+		}
+		throw new IOException("No matching resolution found");
 	}
 
 	@Override
@@ -309,8 +318,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					bean.getArtist());
 			if (thumbnail == null) {
 				try {
-					BufferedImage image = searchImageFromGoogle(bean
-							.getArtist());
+					BufferedImage image = searchImageFromGoogle(
+							bean.getArtist(), 0, 1000 * 1000);
 					thumbnail = new Thumbnail();
 					File thumbnailFile = ThumbnailHandler.instance()
 							.getStringThumbnailFile(bean.getArtist());
@@ -364,5 +373,16 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 			return super.equals(obj);
 		}
 
+	}
+
+	public static void main(String[] args) {
+		try {
+			BufferedImage image = searchImageFromGoogle("hin", 100, 1000 * 600);
+			System.out.println("w=" + image.getWidth() + ", h="
+					+ image.getHeight());
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
