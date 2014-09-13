@@ -102,14 +102,19 @@ public class ConnectionHandler {
 						configureReply(reply, reply.getResult());
 					// if (reply.getResult() instanceof Collection)
 					// configureReplyCollection(reply);
-					if (request.getType() == Type.NORMAL)
+					if (request.getType() == Type.NORMAL){
 						out.writeObject(reply);
+						out.flush();
+						out.reset();
+					}
 				} else {
 					Reply r = new Reply();
 					r.setError(new RemoteException(request.getObject(),
 							"no such object found: " + request.getObject()
 									+ " at " + server.getServerPort()));
 					out.writeObject(r);
+					out.flush();
+					out.reset();
 				}
 			}
 		} catch (IOException e) {

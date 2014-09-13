@@ -243,6 +243,8 @@ public class Server {
 		request.setId(id);
 		try {
 			registryOut.writeObject(request);
+			registryOut.flush();
+			registryOut.reset();
 			@SuppressWarnings("unused")
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
 			registeredIDList.add(id);
@@ -266,6 +268,8 @@ public class Server {
 		RegistryRequest request = new RegistryRequest(Type.UNREGISTER);
 		try {
 			registryOut.writeObject(request);
+			registryOut.flush();
+			registryOut.reset();
 			@SuppressWarnings("unused")
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
 			registeredIDList.remove(id);
@@ -295,6 +299,8 @@ public class Server {
 			RegistryRequest request = new RegistryRequest(Type.FIND);
 			request.setId(id);
 			registryOut.writeObject(request);
+			registryOut.flush();
+			registryOut.reset();
 			RegistryReply reply = (RegistryReply) registryIn.readObject();
 			if (reply.getObject() == null)
 				return null;
@@ -332,6 +338,8 @@ public class Server {
 			RegistryReply reply = null;
 			while (result == null) {
 				registryOut.writeObject(request);
+				registryOut.flush();
+				registryOut.reset();
 				reply = (RegistryReply) registryIn.readObject();
 				if (reply.getObject() == null) {
 					RMILogger.performLog(LogPriority.WARNING,

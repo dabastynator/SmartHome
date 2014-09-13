@@ -95,6 +95,8 @@ public class DynamicProxy implements InvocationHandler {
 			try {
 				try {
 					socket.getOutput().writeObject(request);
+					socket.getOutput().flush();
+					socket.getOutput().reset();
 					if (request.getType() == Type.ONEWAY)
 						return null;
 					reply = (Reply) socket.getInput().readObject();

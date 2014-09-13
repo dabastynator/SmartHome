@@ -69,6 +69,8 @@ public class RegistryHandler {
 					break;
 				}
 				out.writeObject(reply);
+				out.flush();
+				out.reset();
 			}
 
 		} catch (IOException e) {
