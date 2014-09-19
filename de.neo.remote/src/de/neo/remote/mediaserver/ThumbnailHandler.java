@@ -26,14 +26,14 @@ public class ThumbnailHandler {
 
 	public static final String THUMBNAILS = ".thumbnail";
 
-	private static ThumbnailHandler handler;
+	private static ThumbnailHandler mHandler;
 
 	public static ThumbnailHandler instance() {
-		return handler;
+		return mHandler;
 	}
 
 	public static void init(String temporaryFolder, boolean startWorker) {
-		handler = new ThumbnailHandler(temporaryFolder, startWorker);
+		mHandler = new ThumbnailHandler(temporaryFolder, startWorker);
 	}
 
 	private File thumbnails;

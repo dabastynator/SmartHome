@@ -13,7 +13,7 @@ import de.neo.rmi.api.RMILogger.LogPriority;
  */
 public class RemoteLogger {
 
-	public static List<RemoteLogListener> listeners = new ArrayList<RemoteLogger.RemoteLogListener>();
+	public static List<RemoteLogListener> mListeners = new ArrayList<RemoteLogger.RemoteLogListener>();
 
 	/**
 	 * Perform log. All log listeners will be informed about the log.
@@ -27,7 +27,7 @@ public class RemoteLogger {
 		long time = System.currentTimeMillis();
 		if (object == null)
 			object = "";
-		for (RemoteLogListener listener : listeners)
+		for (RemoteLogListener listener : mListeners)
 			listener.remoteLog(priority, message, object, time);
 	}
 

@@ -12,13 +12,13 @@ public class ImageViewerImpl implements IImageViewer {
 
 	public static final String IMAGE_VIEWER = "/usr/bin/fim";
 
-	private File[] currentImageFolder;
+	private File[] mCurrentImageFolder;
 
-	private int currentImageIndex;
+	private int mCurrentImageIndex;
 
-	private Process viewerProgress;
+	private Process mViewerProgress;
 	
-	private DataOutputStream viewerStream;
+	private DataOutputStream mViewerStream;
 
 	public static boolean isImage(String file) {
 		boolean isImage = false;
@@ -38,28 +38,28 @@ public class ImageViewerImpl implements IImageViewer {
 		if (!isImage(file))
 			throw new ImageException("Unknown image-extension: " + file);
 		try {
-			if (viewerProgress != null)
-				viewerProgress.destroy();
-			viewerProgress = Runtime.getRuntime().exec(
+			if (mViewerProgress != null)
+				mViewerProgress.destroy();
+			mViewerProgress = Runtime.getRuntime().exec(
 					new String[] { IMAGE_VIEWER, "-a", file });
 		} catch (IOException e) {
 			throw new ImageException(e.getMessage());
 		}
-		currentImageFolder = new File(currentImage.getParent()).listFiles();
-		for (int i = 0; i < currentImageFolder.length; i++) {
-			if (currentImageFolder[i].getAbsolutePath().equals(file))
-				currentImageIndex = i;
+		mCurrentImageFolder = new File(currentImage.getParent()).listFiles();
+		for (int i = 0; i < mCurrentImageFolder.length; i++) {
+			if (mCurrentImageFolder[i].getAbsolutePath().equals(file))
+				mCurrentImageIndex = i;
 		}
 	}
 
 	@Override
 	public void quit() throws RemoteException, ImageException {
-		if (viewerProgress == null)
+		if (mViewerProgress == null)
 			throw new ImageException("Image-viewer is down");
 		else {
-			viewerProgress.destroy();
-			viewerProgress = null;
-			currentImageFolder = null;
+			mViewerProgress.destroy();
+			mViewerProgress = null;
+			mCurrentImageFolder = null;
 		}
 	}
 
@@ -71,16 +71,16 @@ public class ImageViewerImpl implements IImageViewer {
 
 	@Override
 	public void next() throws RemoteException, ImageException {
-		for (int i = 1; i <= currentImageFolder.length; i++) {
-			String file = currentImageFolder[(currentImageIndex + i)
-					% currentImageFolder.length].getAbsolutePath();
+		for (int i = 1; i <= mCurrentImageFolder.length; i++) {
+			String file = mCurrentImageFolder[(mCurrentImageIndex + i)
+					% mCurrentImageFolder.length].getAbsolutePath();
 			if (isImage(file)) {
-				currentImageIndex = (currentImageIndex + i)
-						% currentImageFolder.length;
-				if (viewerProgress != null)
-					viewerProgress.destroy();
+				mCurrentImageIndex = (mCurrentImageIndex + i)
+						% mCurrentImageFolder.length;
+				if (mViewerProgress != null)
+					mViewerProgress.destroy();
 				try {
-					viewerProgress = Runtime.getRuntime().exec(
+					mViewerProgress = Runtime.getRuntime().exec(
 							new String[] { IMAGE_VIEWER, "-a", file });
 				} catch (IOException e) {
 					throw new ImageException(e.getMessage());
@@ -92,16 +92,16 @@ public class ImageViewerImpl implements IImageViewer {
 
 	@Override
 	public void previous() throws RemoteException, ImageException {
-		for (int i = -1; -i <= currentImageFolder.length; i--) {
-			String file = currentImageFolder[(currentImageIndex + i + currentImageFolder.length)
-					% currentImageFolder.length].getAbsolutePath();
+		for (int i = -1; -i <= mCurrentImageFolder.length; i--) {
+			String file = mCurrentImageFolder[(mCurrentImageIndex + i + mCurrentImageFolder.length)
+					% mCurrentImageFolder.length].getAbsolutePath();
 			if (isImage(file)) {
-				currentImageIndex = (currentImageIndex + i + currentImageFolder.length)
-						% currentImageFolder.length;
-				if (viewerProgress != null)
-					viewerProgress.destroy();
+				mCurrentImageIndex = (mCurrentImageIndex + i + mCurrentImageFolder.length)
+						% mCurrentImageFolder.length;
+				if (mViewerProgress != null)
+					mViewerProgress.destroy();
 				try {
-					viewerProgress = Runtime.getRuntime().exec(
+					mViewerProgress = Runtime.getRuntime().exec(
 							new String[] { IMAGE_VIEWER, "-f", file });
 				} catch (IOException e) {
 					throw new ImageException(e.getMessage());
@@ -132,10 +132,10 @@ public class ImageViewerImpl implements IImageViewer {
 
 	@Override
 	public void zoomIn() throws RemoteException, ImageException {
-		if (viewerStream == null)
+		if (mViewerStream == null)
 			throw new ImageException("Image-viewer is down");
 		try {
-			viewerStream.writeUTF("+");
+			mViewerStream.writeUTF("+");
 		} catch (IOException e) {
 			throw new ImageException("Cannot zoom: " + e.getMessage());
 		}
@@ -143,10 +143,10 @@ public class ImageViewerImpl implements IImageViewer {
 
 	@Override
 	public void zoomOut() throws RemoteException, ImageException {
-		if (viewerProgress == null)
+		if (mViewerProgress == null)
 			throw new ImageException("Image-viewer is down");
 		try {
-			viewerStream.writeUTF("-");
+			mViewerStream.writeUTF("-");
 		} catch (IOException e) {
 			throw new ImageException("Cannot zoom: " + e.getMessage());
 		}
@@ -155,21 +155,21 @@ public class ImageViewerImpl implements IImageViewer {
 	@Override
 	public void move(Direction direction) throws RemoteException,
 			ImageException {
-		if (viewerProgress == null)
+		if (mViewerProgress == null)
 			throw new ImageException("Image-viewer is down");
 		try {
 			switch(direction){
 			case DOWN:
-				viewerStream.writeUTF(OMXPlayer.ARROW_DOWN);
+				mViewerStream.writeUTF(OMXPlayer.ARROW_DOWN);
 				break;
 			case LEFT:
-				viewerStream.writeUTF(OMXPlayer.ARROW_LEFT);
+				mViewerStream.writeUTF(OMXPlayer.ARROW_LEFT);
 				break;
 			case RIGHT:
-				viewerStream.writeUTF(OMXPlayer.ARROW_RIGHT);
+				mViewerStream.writeUTF(OMXPlayer.ARROW_RIGHT);
 				break;
 			case UP:
-				viewerStream.writeUTF(OMXPlayer.ARROW_UP);
+				mViewerStream.writeUTF(OMXPlayer.ARROW_UP);
 				break;
 			default:
 				break;

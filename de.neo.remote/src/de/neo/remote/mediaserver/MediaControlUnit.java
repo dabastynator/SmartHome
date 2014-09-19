@@ -6,22 +6,22 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class MediaControlUnit implements IControlUnit {
 
-	private String name;
-	private IMediaServer mediaServer;
-	private float[] position;
-	private String type;
+	private String mName;
+	private IMediaServer mMediaServer;
+	private float[] mPosition;
+	private String mType;
 
 	public MediaControlUnit(String name, IMediaServer mediaServer,
 			float[] position, String type) {
-		this.name = name;
-		this.mediaServer = mediaServer;
-		this.position = position;
-		this.type = type;
+		mName = name;
+		mMediaServer = mediaServer;
+		mPosition = position;
+		mType = type;
 	}
 
 	@Override
 	public String getName() throws RemoteException {
-		return name;
+		return mName;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -32,17 +32,17 @@ public class MediaControlUnit implements IControlUnit {
 
 	@Override
 	public IMediaServer getRemoteableControlObject() {
-		return mediaServer;
+		return mMediaServer;
 	}
 
 	@Override
 	public String getDescription() throws RemoteException {
-		return type;
+		return mType;
 	}
 
 	@Override
 	public float[] getPosition() throws RemoteException {
-		return position;
+		return mPosition;
 	}
 
 }

@@ -19,7 +19,7 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 		LOADING, PLAYING, ERROR, DOWN
 	}
 
-	private PlayerObserver playerObserver;
+	private PlayerObserver mPlayerObserver;
 
 	public MPlayerDVD(String playListfolder) {
 		super(playListfolder);
@@ -33,28 +33,28 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 		}
 		try {
 			String[] args = new String[] { "/usr/bin/mplayer", "dvdnav://",
-					"/dev/dvd", "-slave", "-geometry", positionLeft + ":0" };
-			mplayerProcess = Runtime.getRuntime().exec(args);
+					"/dev/dvd", "-slave", "-geometry", mPositionLeft + ":0" };
+			mMplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
-			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
+			mMplayerIn = new PrintStream(mMplayerProcess.getOutputStream());
 			// start player observer
-			playerObserver = new PlayerObserver(mplayerProcess.getInputStream());
-			playerObserver.start();
+			mPlayerObserver = new PlayerObserver(mMplayerProcess.getInputStream());
+			mPlayerObserver.start();
 			// set default volume
-			mplayerIn.print("volume " + volume + " 1\n");
-			mplayerIn.flush();
+			mMplayerIn.print("volume " + mVolume + " 1\n");
+			mMplayerIn.flush();
 			fullScreen(true);
 		} catch (IOException e) {
 		}
-		while (playerObserver.state == ObserverState.LOADING) {
+		while (mPlayerObserver.state == ObserverState.LOADING) {
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
 			}
 		}
-		if (playerObserver.state == ObserverState.ERROR)
-			throw new PlayerException(playerObserver.message);
-		if (playerObserver.state == ObserverState.DOWN)
+		if (mPlayerObserver.state == ObserverState.ERROR)
+			throw new PlayerException(mPlayerObserver.message);
+		if (mPlayerObserver.state == ObserverState.DOWN)
 			throw new PlayerException("Player is down");
 		showMenu();
 	}
@@ -181,7 +181,7 @@ public class MPlayerDVD extends MPlayer implements IDVDPlayer {
 		}
 		try {
 			String[] args = new String[] { "/usr/bin/eject", "/dev/dvd" };
-			mplayerProcess = Runtime.getRuntime().exec(args);
+			mMplayerProcess = Runtime.getRuntime().exec(args);
 		} catch (IOException e) {
 		}
 

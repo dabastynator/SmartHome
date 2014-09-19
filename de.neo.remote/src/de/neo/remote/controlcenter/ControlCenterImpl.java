@@ -30,16 +30,16 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	/**
 	 * List of all control units
 	 */
-	private List<IControlUnit> controlUnits = Collections
+	private List<IControlUnit> mControlUnits = Collections
 			.synchronizedList(new ArrayList<IControlUnit>());
 
 	/**
 	 * The ground plot of the control center area
 	 */
-	private GroundPlot ground;
+	private GroundPlot mGround;
 
 	public ControlCenterImpl(Node root) {
-		ground = readGround((Element) root);
+		mGround = readGround((Element) root);
 		start();
 	}
 
@@ -95,51 +95,51 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	 */
 	private void checkControlUnits() {
 		int removed = 0;
-		for (int i = controlUnits.size() - 1; i >= 0; i--) {
+		for (int i = mControlUnits.size() - 1; i >= 0; i--) {
 			try {
-				IControlUnit unit = controlUnits.get(i);
+				IControlUnit unit = mControlUnits.get(i);
 				unit.getName();
 			} catch (RemoteException e) {
-				controlUnits.remove(i);
+				mControlUnits.remove(i);
 				removed++;
 			}
 		}
 		if (removed > 0)
 			RemoteLogger.performLog(LogPriority.WARNING, "Lost " + removed
-					+ " unit(s). " + controlUnits.size() + " unit(s) left.",
+					+ " unit(s). " + mControlUnits.size() + " unit(s) left.",
 					"Controlcenter");
 	}
 
 	@Override
 	public int getControlUnitNumber() throws RemoteException {
-		return controlUnits.size();
+		return mControlUnits.size();
 	}
 
 	@Override
 	public void addControlUnit(IControlUnit controlUnit) throws RemoteException {
-		if (controlUnits.contains(controlUnit))
-			controlUnits.remove(controlUnit);
-		controlUnits.add(controlUnit);
+		if (mControlUnits.contains(controlUnit))
+			mControlUnits.remove(controlUnit);
+		mControlUnits.add(controlUnit);
 		RemoteLogger.performLog(
 				LogPriority.INFORMATION,
-				"Add " + controlUnits.size() + ". control unit: "
+				"Add " + mControlUnits.size() + ". control unit: "
 						+ controlUnit.getName(), "Controlcenter");
 	}
 
 	@Override
 	public void removeControlUnit(IControlUnit controlUnit)
 			throws RemoteException {
-		controlUnits.remove(controlUnit);
+		mControlUnits.remove(controlUnit);
 	}
 
 	@Override
 	public IControlUnit getControlUnit(int number) throws RemoteException {
-		return controlUnits.get(number);
+		return mControlUnits.get(number);
 	}
 
 	@Override
 	public GroundPlot getGroundPlot() throws RemoteException {
-		return ground;
+		return mGround;
 	}
 
 }

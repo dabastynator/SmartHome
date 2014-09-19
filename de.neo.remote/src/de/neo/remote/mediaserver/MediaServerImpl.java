@@ -13,59 +13,59 @@ public class MediaServerImpl implements IMediaServer {
 
 	public static final String ROOT = "MediaServer";
 
-	private TotemPlayer totem;
-	private MPlayerDVD mplayer;
-	private ControlImpl control;
-	private PlayListImpl playlist;
-	private String browserLocation;
-	private OMXPlayer omxplayer;
-	private ImageViewerImpl imageViewer;
+	private TotemPlayer mTotem;
+	private MPlayerDVD mMplayer;
+	private ControlImpl mControl;
+	private PlayListImpl mPlaylist;
+	private String mBrowserLocation;
+	private OMXPlayer mOmxplayer;
+	private ImageViewerImpl mImageViewer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation,
 			boolean thumbnailWorker) {
 		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
-		totem = new TotemPlayer();
-		mplayer = new MPlayerDVD(playlistLocation);
-		browserLocation = browseLocation;
-		control = new ControlImpl();
-		playlist = new PlayListImpl(playlistLocation);
-		omxplayer = new OMXPlayer();
-		imageViewer = new ImageViewerImpl();
+		mTotem = new TotemPlayer();
+		mMplayer = new MPlayerDVD(playlistLocation);
+		mBrowserLocation = browseLocation;
+		mControl = new ControlImpl();
+		mPlaylist = new PlayListImpl(playlistLocation);
+		mOmxplayer = new OMXPlayer();
+		mImageViewer = new ImageViewerImpl();
 	}
 
 	@Override
 	public IBrowser createBrowser() throws RemoteException {
-		return new BrowserImpl(browserLocation);
+		return new BrowserImpl(mBrowserLocation);
 	}
 
 	@Override
 	public IPlayer getTotemPlayer() throws RemoteException {
-		return totem;
+		return mTotem;
 	}
 
 	@Override
 	public IDVDPlayer getMPlayer() throws RemoteException {
-		return mplayer;
+		return mMplayer;
 	}
 
 	@Override
 	public IControl getControl() throws RemoteException {
-		return control;
+		return mControl;
 	}
 
 	@Override
 	public IPlayList getPlayList() throws RemoteException {
-		return playlist;
+		return mPlaylist;
 	}
 
 	@Override
 	public IPlayer getOMXPlayer() throws RemoteException {
-		return omxplayer;
+		return mOmxplayer;
 	}
 
 	@Override
 	public IImageViewer getImageViewer() throws RemoteException {
-		return imageViewer;
+		return mImageViewer;
 	}
 
 }

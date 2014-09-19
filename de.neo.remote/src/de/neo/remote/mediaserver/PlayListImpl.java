@@ -18,19 +18,19 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class PlayListImpl implements IPlayList {
 
-	private String playlistLocation;
+	private String mPlaylistLocation;
 
 	public PlayListImpl(String playlistLocation) {
-		this.playlistLocation = playlistLocation;
+		this.mPlaylistLocation = playlistLocation;
 		if (playlistLocation != null
 				&& !playlistLocation.endsWith(File.separator))
-			this.playlistLocation += File.separator;
+			this.mPlaylistLocation += File.separator;
 	}
 
 	@Override
 	public String[] getPlayLists() throws RemoteException {
 		List<String> plsList = new ArrayList<String>();
-		File playlistFolder = new File(playlistLocation);
+		File playlistFolder = new File(mPlaylistLocation);
 		for (File pls : playlistFolder.listFiles()) {
 			String n = pls.getName();
 			if (!n.startsWith("."))
@@ -41,7 +41,7 @@ public class PlayListImpl implements IPlayList {
 
 	@Override
 	public void addPlayList(String name) throws RemoteException {
-		File pls = new File(playlistLocation + name + ".pls");
+		File pls = new File(mPlaylistLocation + name + ".pls");
 		try {
 			pls.createNewFile();
 		} catch (IOException e) {
@@ -54,7 +54,7 @@ public class PlayListImpl implements IPlayList {
 	public void extendPlayList(String pls, String file) throws RemoteException,
 			PlayerException {
 		try {
-			File plsF = new File(playlistLocation + pls + ".pls");
+			File plsF = new File(mPlaylistLocation + pls + ".pls");
 			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF,
 					true));
 			File fileF = new File(file);
@@ -79,7 +79,7 @@ public class PlayListImpl implements IPlayList {
 	@Override
 	public String[] listContent(String pls) throws RemoteException,
 			PlayerException {
-		File plsF = new File(playlistLocation + pls + ".pls");
+		File plsF = new File(mPlaylistLocation + pls + ".pls");
 		List<String> files = new ArrayList<String>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(plsF));
@@ -97,21 +97,21 @@ public class PlayListImpl implements IPlayList {
 
 	@Override
 	public void removePlayList(String pls) throws RemoteException {
-		new File(playlistLocation + pls + ".pls").delete();
+		new File(mPlaylistLocation + pls + ".pls").delete();
 	}
 
 	@Override
 	public void renamePlayList(String oldPls, String newPls)
 			throws RemoteException {
-		new File(playlistLocation + oldPls + ".pls").renameTo(new File(
-				playlistLocation + newPls + ".pls"));
+		new File(mPlaylistLocation + oldPls + ".pls").renameTo(new File(
+				mPlaylistLocation + newPls + ".pls"));
 	}
 
 	@Override
 	public void removeItem(String pls, String item) throws RemoteException,
 			PlayerException {
 		try {
-			File plsF = new File(playlistLocation + pls + ".pls");
+			File plsF = new File(mPlaylistLocation + pls + ".pls");
 			List<String> files = new ArrayList<String>();
 			BufferedReader reader;
 			reader = new BufferedReader(new FileReader(plsF));
@@ -136,7 +136,7 @@ public class PlayListImpl implements IPlayList {
 
 	@Override
 	public String getPlaylistFullpath(String pls) throws RemoteException {
-		return playlistLocation + pls + ".pls";
+		return mPlaylistLocation + pls + ".pls";
 	}
 
 }

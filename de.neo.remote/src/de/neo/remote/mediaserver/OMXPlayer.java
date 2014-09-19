@@ -22,11 +22,11 @@ public class OMXPlayer extends AbstractPlayer {
 	public static final String ARROW_LEFT = ESCAPE + "[D";
 	public static final String ARROW_RIGHT = ESCAPE + "[C";
 
-	protected Process omxProcess;
-	protected PrintStream omxIn;
-	protected OMXObserver omxObserver;
-	private long lastSeekBack;
-	private long lastSeekForeward;
+	protected Process mOmxProcess;
+	protected PrintStream mOmxIn;
+	protected OMXObserver mOmxObserver;
+	private long mLastSeekBack;
+	private long mLastSeekForeward;
 	private int mCurrentVolume;
 
 	public OMXPlayer() {
@@ -34,10 +34,10 @@ public class OMXPlayer extends AbstractPlayer {
 	}
 
 	protected void writeCommand(String cmd) throws PlayerException {
-		if (omxIn == null)
+		if (mOmxIn == null)
 			throw new PlayerException("omxplayer is down");
-		omxIn.print(cmd);
-		omxIn.flush();
+		mOmxIn.print(cmd);
+		mOmxIn.flush();
 	}
 
 	@Override
@@ -49,14 +49,13 @@ public class OMXPlayer extends AbstractPlayer {
 		try {
 			String[] args = new String[] { "/usr/bin/omxplayer", "-o", "local",
 					file };
-			omxProcess = Runtime.getRuntime().exec(args);
+			mOmxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
-			omxIn = new PrintStream(omxProcess.getOutputStream());
+			mOmxIn = new PrintStream(mOmxProcess.getOutputStream());
 			// start player observer
-			new OMXObserver(omxProcess.getInputStream()).start();
-			writeCurrentVolume();
+			new OMXObserver(mOmxProcess.getInputStream()).start();
 			informFile(new File(file));
-		} catch (IOException | RemoteException | PlayerException e) {
+		} catch (IOException e) {
 		}
 		super.play(file);
 	}
@@ -76,20 +75,20 @@ public class OMXPlayer extends AbstractPlayer {
 
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
-		if (System.currentTimeMillis() - lastSeekForeward > 300)
+		if (System.currentTimeMillis() - mLastSeekForeward > 300)
 			writeCommand(ARROW_RIGHT);
 		else
 			writeCommand(ARROW_UP);
-		lastSeekForeward = System.currentTimeMillis();
+		mLastSeekForeward = System.currentTimeMillis();
 	}
 
 	@Override
 	public void seekBackwards() throws RemoteException, PlayerException {
-		if (System.currentTimeMillis() - lastSeekBack > 300)
+		if (System.currentTimeMillis() - mLastSeekBack > 300)
 			writeCommand(ARROW_LEFT);
 		else
 			writeCommand(ARROW_DOWN);
-		lastSeekBack = System.currentTimeMillis();
+		mLastSeekBack = System.currentTimeMillis();
 	}
 
 	@Override
@@ -175,18 +174,17 @@ public class OMXPlayer extends AbstractPlayer {
 			String tempUrl = getStreamUrl(script, url);
 			String[] args = new String[] { "/usr/bin/omxplayer", "-o", "local",
 					tempUrl };
-			omxProcess = Runtime.getRuntime().exec(args);
+			mOmxProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
-			omxIn = new PrintStream(omxProcess.getOutputStream());
+			mOmxIn = new PrintStream(mOmxProcess.getOutputStream());
 			// start player observer
-			omxObserver = new OMXObserver(omxProcess.getInputStream());
-			omxObserver.start();
-			playingBean = new PlayingBean();
-			playingBean.setPath(url);
-			playingBean.setTitle(title);
-			playingBean.setState(STATE.PLAY);
-			writeCurrentVolume();
-			informPlayingBean(playingBean);
+			mOmxObserver = new OMXObserver(mOmxProcess.getInputStream());
+			mOmxObserver.start();
+			mPlayingBean = new PlayingBean();
+			mPlayingBean.setPath(url);
+			mPlayingBean.setTitle(title);
+			mPlayingBean.setState(STATE.PLAY);
+			informPlayingBean(mPlayingBean);
 		} catch (IOException e) {
 			throw new PlayerException("Could not stream url: " + e.getMessage());
 		}
@@ -219,6 +217,14 @@ public class OMXPlayer extends AbstractPlayer {
 					}
 					if (line.startsWith("Audio codec")) {
 						bean.setState(PlayingBean.STATE.PLAY);
+						try {
+							writeCurrentVolume();
+						} catch (RemoteException | PlayerException e) {
+							RemoteLogger.performLog(
+									LogPriority.ERROR,
+									"error writing current value: "
+											+ e.getMessage(), "omxplayer");
+						}
 						informPlayingBean(bean);
 					}
 

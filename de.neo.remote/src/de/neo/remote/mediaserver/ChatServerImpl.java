@@ -11,7 +11,7 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class ChatServerImpl implements IChatServer {
 
-	private List<IChatListener> listeners;
+	private List<IChatListener> mListeners;
 
 	/**
 	 * format for date
@@ -19,22 +19,22 @@ public class ChatServerImpl implements IChatServer {
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
 	public ChatServerImpl() {
-		listeners = new ArrayList<IChatListener>();
+		mListeners = new ArrayList<IChatListener>();
 	}
 
 	@Override
 	public void postMessage(String author, String msg) throws RemoteException {
 		String time = formatter.format(new Date());
-		for (IChatListener listener : listeners)
+		for (IChatListener listener : mListeners)
 			listener.informMessage(author, msg, time);
 	}
 
 	@Override
 	public boolean addChatListener(IChatListener listener)
 			throws RemoteException {
-		if (listeners.contains(listener))
+		if (mListeners.contains(listener))
 			return false;
-		boolean add = listeners.add(listener);
+		boolean add = mListeners.add(listener);
 		List<IChatListener> removeListener = new ArrayList<IChatListener>();
 		String client = "";
 		try {
@@ -42,21 +42,21 @@ public class ChatServerImpl implements IChatServer {
 		} catch (RemoteException e) {
 			removeListener.add(listener);
 		}
-		for (IChatListener l : listeners) {
+		for (IChatListener l : mListeners) {
 			try {
 				l.informNewClient(client);
 			} catch (RemoteException e) {
 				removeListener.add(l);
 			}
 		}
-		listeners.removeAll(removeListener);
+		mListeners.removeAll(removeListener);
 		return add;
 	}
 
 	@Override
 	public boolean removeChatListener(IChatListener listener)
 			throws RemoteException {
-		boolean remove = listeners.remove(listener);
+		boolean remove = mListeners.remove(listener);
 		List<IChatListener> removeListener = new ArrayList<IChatListener>();
 		String client = "";
 		try {
@@ -64,14 +64,14 @@ public class ChatServerImpl implements IChatServer {
 		} catch (RemoteException e) {
 			removeListener.add(listener);
 		}
-		for (IChatListener l : listeners) {
+		for (IChatListener l : mListeners) {
 			try {
 				l.informLeftClient(client);
 			} catch (RemoteException e) {
 				removeListener.add(l);
 			}
 		}
-		listeners.removeAll(removeListener);
+		mListeners.removeAll(removeListener);
 		return remove;
 	}
 
@@ -79,13 +79,13 @@ public class ChatServerImpl implements IChatServer {
 	public String[] getAllClients() throws RemoteException {
 		List<String> names = new ArrayList<String>();
 		List<IChatListener> removeListener = new ArrayList<IChatListener>();
-		for (IChatListener l : listeners)
+		for (IChatListener l : mListeners)
 			try {
 				names.add(l.getName());
 			} catch (RemoteException e) {
 				removeListener.add(l);
 			}
-		listeners.removeAll(removeListener);
+		mListeners.removeAll(removeListener);
 		return names.toArray(new String[names.size()]);
 	}
 

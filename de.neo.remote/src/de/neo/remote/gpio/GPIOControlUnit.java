@@ -6,21 +6,21 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class GPIOControlUnit implements IControlUnit{
 
-	private String switchName;
-	private String description;
-	private IInternetSwitch power;
-	private float[] position;
+	private String mSwitchName;
+	private String mDescription;
+	private IInternetSwitch mPower;
+	private float[] mPosition;
 
 	public GPIOControlUnit(String switchName, String description, IInternetSwitch power, float[] position) {
-		this.switchName = switchName;
-		this.description = description;
-		this.power = power;
-		this.position = position;
+		mSwitchName = switchName;
+		mDescription = description;
+		mPower = power;
+		mPosition = position;
 	}
 	
 	@Override
 	public String getName() throws RemoteException {
-		return switchName;
+		return mSwitchName;
 	}
 
 	@Override
@@ -30,17 +30,17 @@ public class GPIOControlUnit implements IControlUnit{
 
 	@Override
 	public IInternetSwitch getRemoteableControlObject() throws RemoteException {
-		return power;
+		return mPower;
 	}
 
 	@Override
 	public String getDescription() throws RemoteException {
-		return description;
+		return mDescription;
 	}
 
 	@Override
 	public float[] getPosition() throws RemoteException {
-		return position;
+		return mPosition;
 	}
 
 }

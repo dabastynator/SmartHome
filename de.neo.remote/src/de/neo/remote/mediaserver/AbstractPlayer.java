@@ -49,12 +49,12 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	/**
 	 * list of all listeners
 	 */
-	private List<IPlayerListener> listeners = new ArrayList<IPlayerListener>();
+	private List<IPlayerListener> mListeners = new ArrayList<IPlayerListener>();
 
 	/**
 	 * current playing file
 	 */
-	protected PlayingBean playingBean;
+	protected PlayingBean mPlayingBean;
 
 	public AbstractPlayer() {
 		new PlayingTimeCounter().start();
@@ -64,14 +64,14 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	@Override
 	public void addPlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		if (!listeners.contains(listener))
-			listeners.add(listener);
+		if (!mListeners.contains(listener))
+			mListeners.add(listener);
 	}
 
 	@Override
 	public void removePlayerMessageListener(IPlayerListener listener)
 			throws RemoteException {
-		listeners.remove(listener);
+		mListeners.remove(listener);
 	}
 
 	/**
@@ -124,29 +124,29 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	 * @param bean
 	 */
 	protected void informPlayingBean(PlayingBean bean) {
-		this.playingBean = new PlayingBean(bean);
+		this.mPlayingBean = new PlayingBean(bean);
 		List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
-		for (IPlayerListener listener : listeners)
+		for (IPlayerListener listener : mListeners)
 			try {
-				listener.playerMessage(playingBean);
+				listener.playerMessage(mPlayingBean);
 			} catch (RemoteException e) {
 				exceptionList.add(listener);
 			}
-		listeners.removeAll(exceptionList);
+		mListeners.removeAll(exceptionList);
 	}
 
 	@Override
 	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
-		return playingBean;
+		return mPlayingBean;
 	}
 
 	@Override
 	public void playPause() throws PlayerException {
-		if (playingBean != null) {
-			playingBean
-					.setState((playingBean.getState() == STATE.PLAY) ? STATE.PAUSE
+		if (mPlayingBean != null) {
+			mPlayingBean
+					.setState((mPlayingBean.getState() == STATE.PLAY) ? STATE.PAUSE
 							: STATE.PLAY);
-			informPlayingBean(playingBean);
+			informPlayingBean(mPlayingBean);
 		}
 	}
 
@@ -176,41 +176,41 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 	@Override
 	public void play(String file) {
-		if (playingBean != null) {
-			playingBean.setState(STATE.PLAY);
-			playingBean.setFile(file);
-			playingBean.setStartTime(System.currentTimeMillis());
-			informPlayingBean(playingBean);
+		if (mPlayingBean != null) {
+			mPlayingBean.setState(STATE.PLAY);
+			mPlayingBean.setFile(file);
+			mPlayingBean.setStartTime(System.currentTimeMillis());
+			informPlayingBean(mPlayingBean);
 		}
 	}
 
 	@Override
 	public void quit() throws PlayerException {
-		if (playingBean == null)
-			playingBean = new PlayingBean();
-		playingBean.setState(STATE.DOWN);
-		playingBean.setArtist(null);
-		playingBean.setTitle(null);
-		playingBean.setAlbum(null);
-		playingBean.setFile(null);
-		playingBean.setPath(null);
-		playingBean.setRadio(null);
-		informPlayingBean(playingBean);
+		if (mPlayingBean == null)
+			mPlayingBean = new PlayingBean();
+		mPlayingBean.setState(STATE.DOWN);
+		mPlayingBean.setArtist(null);
+		mPlayingBean.setTitle(null);
+		mPlayingBean.setAlbum(null);
+		mPlayingBean.setFile(null);
+		mPlayingBean.setPath(null);
+		mPlayingBean.setRadio(null);
+		informPlayingBean(mPlayingBean);
 	}
 
 	@Override
 	public void next() throws PlayerException {
-		if (playingBean != null) {
-			playingBean.setState(STATE.PLAY);
-			informPlayingBean(playingBean);
+		if (mPlayingBean != null) {
+			mPlayingBean.setState(STATE.PLAY);
+			informPlayingBean(mPlayingBean);
 		}
 	}
 
 	@Override
 	public void previous() throws PlayerException {
-		if (playingBean != null) {
-			playingBean.setState(STATE.PLAY);
-			informPlayingBean(playingBean);
+		if (mPlayingBean != null) {
+			mPlayingBean.setState(STATE.PLAY);
+			informPlayingBean(mPlayingBean);
 		}
 	}
 
@@ -294,8 +294,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 				}
-				if (playingBean != null && playingBean.getState() == STATE.PLAY) {
-					playingBean.incrementCurrentTime(1);
+				if (mPlayingBean != null && mPlayingBean.getState() == STATE.PLAY) {
+					mPlayingBean.incrementCurrentTime(1);
 				}
 			}
 		}

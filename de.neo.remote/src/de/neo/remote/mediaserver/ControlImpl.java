@@ -23,9 +23,9 @@ public class ControlImpl implements IControl {
 	public static final String EXIT_SCREENSAVER = "gnome-screensaver-command --exit";
 	public static final String SHUTDOWN = "shutdown -h now";
 
-	private Robot robot;
-	private int x = 0;
-	private int y = 0;
+	private Robot mRobot;
+	private int mX = 0;
+	private int mY = 0;
 
 	@Override
 	public void shutdown() {
@@ -53,19 +53,19 @@ public class ControlImpl implements IControl {
 	}
 
 	private Robot getRobot() throws RemoteException {
-		if (robot == null)
+		if (mRobot == null)
 			try {
-				robot = new Robot();
+				mRobot = new Robot();
 			} catch (AWTException e) {
 				throw new RemoteException("", "robot not available: "
 						+ e.getMessage());
 			}
-		return robot;
+		return mRobot;
 	}
 
 	@Override
 	public void mouseMove(int x, int y) throws RemoteException {
-		getRobot().mouseMove(this.x += x, this.y += y);
+		getRobot().mouseMove(this.mX += x, this.mY += y);
 	}
 
 	@Override

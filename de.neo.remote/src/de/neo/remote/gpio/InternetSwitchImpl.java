@@ -20,45 +20,45 @@ public class InternetSwitchImpl implements IInternetSwitch {
 	/**
 	 * Listener for power switch change.
 	 */
-	private List<IInternetSwitchListener> listeners = Collections
+	private List<IInternetSwitchListener> mListeners = Collections
 			.synchronizedList(new ArrayList<IInternetSwitchListener>());
-	private String name;
-	private SwitchPower power;
-	private String type;
-	private String familyCode;
-	private int switchNumber;
-	private State state;
-	private float[] position;
+	private String mName;
+	private SwitchPower mPower;
+	private String mType;
+	private String mFamilyCode;
+	private int mSwitchNumber;
+	private State mState;
+	private float[] mPosition;
 
 	public InternetSwitchImpl(String name, SwitchPower power,
 			String familyCode, int switchNumber, String type, float[] position) {
 		if (!familyCode.matches(FAMILY_REGEX))
 			throw new IllegalArgumentException("Invalid Familycode: "
 					+ familyCode + ". must match " + FAMILY_REGEX);
-		this.name = name;
-		this.power = power;
-		this.familyCode = familyCode;
-		this.switchNumber = switchNumber;
-		this.type = type;
-		this.position = position;
-		state = State.OFF;
+		mName = name;
+		mPower = power;
+		mFamilyCode = familyCode;
+		mSwitchNumber = switchNumber;
+		mType = type;
+		mPosition = position;
+		mState = State.OFF;
 	}
 
 	public InternetSwitchImpl(Element item, SwitchPower power)
 			throws SAXException {
 		try {
-			familyCode = item.getAttribute("familyCode");
-			switchNumber = Integer.parseInt(item.getAttribute("switchNumber"));
-			name = item.getAttribute("name");
-			position = new float[] { Float.parseFloat(item.getAttribute("x")),
+			mFamilyCode = item.getAttribute("familyCode");
+			mSwitchNumber = Integer.parseInt(item.getAttribute("switchNumber"));
+			mName = item.getAttribute("name");
+			mPosition = new float[] { Float.parseFloat(item.getAttribute("x")),
 					Float.parseFloat(item.getAttribute("y")),
 					Float.parseFloat(item.getAttribute("z")) };
-			type = item.getAttribute("type");
-			if (!familyCode.matches(FAMILY_REGEX))
+			mType = item.getAttribute("type");
+			if (!mFamilyCode.matches(FAMILY_REGEX))
 				throw new IllegalArgumentException("Invalid Familycode: "
-						+ familyCode + ". must match " + FAMILY_REGEX);
-			this.power = power;
-			state = State.OFF;
+						+ mFamilyCode + ". must match " + FAMILY_REGEX);
+			this.mPower = power;
+			mState = State.OFF;
 		} catch (Exception e) {
 			throw new SAXException("Error reading switch " + e.getMessage());
 		}
@@ -66,8 +66,8 @@ public class InternetSwitchImpl implements IInternetSwitch {
 
 	@Override
 	public void setState(final State state) throws RemoteException {
-		power.setSwitchState(familyCode, switchNumber, state);
-		this.state = state;
+		mPower.setSwitchState(mFamilyCode, mSwitchNumber, state);
+		this.mState = state;
 		new Thread() {
 			public void run() {
 				informListener(state);
@@ -77,45 +77,45 @@ public class InternetSwitchImpl implements IInternetSwitch {
 
 	@Override
 	public State getState() throws RemoteException {
-		return state;
+		return mState;
 	}
 
 	@Override
 	public void registerPowerSwitchListener(IInternetSwitchListener listener)
 			throws RemoteException {
-		if (!listeners.contains(listener))
-			listeners.add(listener);
+		if (!mListeners.contains(listener))
+			mListeners.add(listener);
 	}
 
 	@Override
 	public void unregisterPowerSwitchListener(IInternetSwitchListener listener)
 			throws RemoteException {
-		listeners.remove(listener);
+		mListeners.remove(listener);
 	}
 
 	private void informListener(State state) {
 		List<IInternetSwitchListener> exceptionList = new ArrayList<IInternetSwitchListener>();
-		for (IInternetSwitchListener listener : listeners) {
+		for (IInternetSwitchListener listener : mListeners) {
 			try {
-				listener.onPowerSwitchChange(name, state);
+				listener.onPowerSwitchChange(mName, state);
 			} catch (RemoteException e) {
 				exceptionList.add(listener);
 			}
 		}
-		listeners.removeAll(exceptionList);
+		mListeners.removeAll(exceptionList);
 	}
 
 	@Override
 	public String getType() {
-		return type;
+		return mType;
 	}
 
 	public String getName() {
-		return name;
+		return mName;
 	}
 
 	public float[] getPosition() {
-		return position;
+		return mPosition;
 	}
 
 }

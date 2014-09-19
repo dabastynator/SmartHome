@@ -2,7 +2,6 @@ package de.neo.remote.mediaserver;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,37 +18,37 @@ import de.neo.rmi.protokol.RemoteException;
 
 public class MPlayer extends AbstractPlayer {
 
-	protected Process mplayerProcess;
-	protected PrintStream mplayerIn;
-	protected int positionLeft = 0;
-	protected int volume = 50;
-	private int seekValue;
-	private Object playListfolder;
+	protected Process mMplayerProcess;
+	protected PrintStream mMplayerIn;
+	protected int mPositionLeft = 0;
+	protected int mVolume = 50;
+	private int mSeekValue;
+	private Object mPlayListfolder;
 
 	public MPlayer(String playListfolder) {
-		this.playListfolder = playListfolder;
+		this.mPlayListfolder = playListfolder;
 	}
 
 	protected void writeCommand(String cmd) throws PlayerException {
-		if (mplayerIn == null)
+		if (mMplayerIn == null)
 			throw new PlayerException("mplayer is down");
-		mplayerIn.print(cmd);
-		mplayerIn.print("\n");
-		mplayerIn.flush();
+		mMplayerIn.print(cmd);
+		mMplayerIn.print("\n");
+		mMplayerIn.flush();
 	}
 
 	@Override
 	public void play(String file) {
-		if (mplayerProcess == null)
+		if (mMplayerProcess == null)
 			startPlayer();
 
 		if (new File(file).isDirectory()) {
 			createPlayList(file);
-			mplayerIn.print("loadlist " + playListfolder + "/playlist.pls\n");
-			mplayerIn.flush();
+			mMplayerIn.print("loadlist " + mPlayListfolder + "/playlist.pls\n");
+			mMplayerIn.flush();
 		} else {
-			mplayerIn.print("loadfile \"" + file + "\" 0\n");
-			mplayerIn.flush();
+			mMplayerIn.print("loadfile \"" + file + "\" 0\n");
+			mMplayerIn.flush();
 		}
 		try {
 			writeVolume();
@@ -63,7 +62,7 @@ public class MPlayer extends AbstractPlayer {
 			Process exec = Runtime.getRuntime().exec(
 					new String[] { "/usr/bin/find", file + "/" });
 			PrintStream output = new PrintStream(new FileOutputStream(
-					playListfolder + "/playlist.pls"));
+					mPlayListfolder + "/playlist.pls"));
 			BufferedReader input = new BufferedReader(new InputStreamReader(
 					exec.getInputStream()));
 			BufferedReader error = new BufferedReader(new InputStreamReader(
@@ -86,15 +85,15 @@ public class MPlayer extends AbstractPlayer {
 	protected void startPlayer() {
 		try {
 			String[] args = new String[] { "/usr/bin/mplayer", "-slave",
-					"-quiet", "-idle", "-geometry", positionLeft + ":0" };
-			mplayerProcess = Runtime.getRuntime().exec(args);
+					"-quiet", "-idle", "-geometry", mPositionLeft + ":0" };
+			mMplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
-			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
+			mMplayerIn = new PrintStream(mMplayerProcess.getOutputStream());
 			// start player observer
-			new PlayerObserver(mplayerProcess.getInputStream()).start();
+			new PlayerObserver(mMplayerProcess.getInputStream()).start();
 			// set default volume
-			mplayerIn.print("volume " + volume + " 1\n");
-			mplayerIn.flush();
+			mMplayerIn.print("volume " + mVolume + " 1\n");
+			mMplayerIn.flush();
 		} catch (IOException e) {
 			// throw new PlayerException(e.getMessage());
 		}
@@ -109,8 +108,8 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void quit() throws PlayerException {
 		writeCommand("quit");
-		mplayerIn = null;
-		mplayerProcess = null;
+		mMplayerIn = null;
+		mMplayerProcess = null;
 		super.quit();
 	}
 
@@ -128,42 +127,42 @@ public class MPlayer extends AbstractPlayer {
 
 	@Override
 	public void seekForwards() throws RemoteException, PlayerException {
-		if (seekValue <= 0)
-			seekValue = 5;
-		else if (seekValue < -600)
-			seekValue *= 5;
-		writeCommand("seek " + seekValue + " 0");
-		playingBean.incrementCurrentTime(seekValue);
+		if (mSeekValue <= 0)
+			mSeekValue = 5;
+		else if (mSeekValue < -600)
+			mSeekValue *= 5;
+		writeCommand("seek " + mSeekValue + " 0");
+		mPlayingBean.incrementCurrentTime(mSeekValue);
 	}
 
 	@Override
 	public void seekBackwards() throws RemoteException, PlayerException {
-		if (seekValue >= 0)
-			seekValue = -5;
-		else if (seekValue > -600)
-			seekValue *= 5;
-		writeCommand("seek " + seekValue + " 0");
-		playingBean.incrementCurrentTime(seekValue);
+		if (mSeekValue >= 0)
+			mSeekValue = -5;
+		else if (mSeekValue > -600)
+			mSeekValue *= 5;
+		writeCommand("seek " + mSeekValue + " 0");
+		mPlayingBean.incrementCurrentTime(mSeekValue);
 	}
 
 	@Override
 	public void volUp() throws PlayerException {
-		volume += 3;
-		if (volume > 100)
-			volume = 100;
+		mVolume += 3;
+		if (mVolume > 100)
+			mVolume = 100;
 		writeVolume();
 	}
 
 	@Override
 	public void volDown() throws PlayerException {
-		volume -= 3;
-		if (volume < 0)
-			volume = 0;
+		mVolume -= 3;
+		if (mVolume < 0)
+			mVolume = 0;
 		writeVolume();
 	}
 
 	private void writeVolume() throws PlayerException {
-		writeCommand("volume " + volume + " 1");
+		writeCommand("volume " + mVolume + " 1");
 	}
 
 	@Override
@@ -182,15 +181,15 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void moveLeft() throws PlayerException {
 		long time = 0;
-		if (playingBean != null)
+		if (mPlayingBean != null)
 			time = Math
 					.max(System.currentTimeMillis()
-							- playingBean.getStartTime() - 3, 0);
+							- mPlayingBean.getStartTime() - 3, 0);
 		quit();
-		positionLeft -= 1680;
+		mPositionLeft -= 1680;
 		startPlayer();
-		if (playingBean != null && playingBean.getPath() != null) {
-			play(playingBean.getPath());
+		if (mPlayingBean != null && mPlayingBean.getPath() != null) {
+			play(mPlayingBean.getPath());
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
@@ -203,7 +202,7 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void playFromYoutube(String url) throws RemoteException,
 			PlayerException {
-		if (mplayerIn == null)
+		if (mMplayerIn == null)
 			startPlayer();
 		String[] split = url.split(" ");
 		String title = "";
@@ -217,7 +216,7 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void playFromArdMediathek(String url) throws RemoteException,
 			PlayerException {
-		if (mplayerIn == null)
+		if (mMplayerIn == null)
 			startPlayer();
 		String tatortStreamUrl = getStreamUrl(TATORT_DL_FILE, url);
 		writeCommand("loadfile " + tatortStreamUrl);
@@ -226,15 +225,15 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void moveRight() throws PlayerException {
 		long time = 0;
-		if (playingBean != null)
+		if (mPlayingBean != null)
 			time = Math
 					.max(System.currentTimeMillis()
-							- playingBean.getStartTime() - 3, 0);
+							- mPlayingBean.getStartTime() - 3, 0);
 		quit();
-		positionLeft += 1680;
+		mPositionLeft += 1680;
 		startPlayer();
-		if (playingBean != null && playingBean.getPath() != null) {
-			play(playingBean.getPath());
+		if (mPlayingBean != null && mPlayingBean.getPath() != null) {
+			play(mPlayingBean.getPath());
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
@@ -247,7 +246,7 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void playPlayList(String pls) throws RemoteException,
 			PlayerException {
-		if (mplayerIn == null) {
+		if (mMplayerIn == null) {
 			startPlayer();
 		}
 		if (!new File(pls).exists())
@@ -256,9 +255,9 @@ public class MPlayer extends AbstractPlayer {
 		if (firstLineOf(pls).equals("[playlist]")) {
 			String url = lineOfFile(pls, 3);
 			url = url.substring(6);
-			mplayerIn.print("loadfile " + url + "\n");
+			mMplayerIn.print("loadfile " + url + "\n");
 		} else
-			mplayerIn.print("loadlist " + pls + "\n");
+			mMplayerIn.print("loadlist " + pls + "\n");
 
 		writeVolume();
 	}
@@ -307,10 +306,10 @@ public class MPlayer extends AbstractPlayer {
 								.lastIndexOf(File.separator) + 1);
 						file = file.substring(0, file.length() - 1);
 						bean.setFile(file.trim());
-						if (playingBean != null
-								&& playingBean.getPath() != null
-								&& playingBean.getPath().equals(bean.getPath()))
-							bean.setStartTime(playingBean.getStartTime());
+						if (mPlayingBean != null
+								&& mPlayingBean.getPath() != null
+								&& mPlayingBean.getPath().equals(bean.getPath()))
+							bean.setStartTime(mPlayingBean.getStartTime());
 					}
 					if (line.startsWith(" Title: "))
 						bean.setTitle(line.substring(8).trim());

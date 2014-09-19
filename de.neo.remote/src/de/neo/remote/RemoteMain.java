@@ -91,7 +91,7 @@ public class RemoteMain {
 						+ ")");
 			}
 		});
-		RemoteLogger.listeners.add(new RemoteLogListener() {
+		RemoteLogger.mListeners.add(new RemoteLogListener() {
 			@Override
 			public void remoteLog(LogPriority priority, String message,
 					String object, long date) {
