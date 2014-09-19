@@ -27,6 +27,11 @@ public class OMXPlayer extends AbstractPlayer {
 	protected OMXObserver omxObserver;
 	private long lastSeekBack;
 	private long lastSeekForeward;
+	private int mCurrentVolume;
+
+	public OMXPlayer() {
+		mCurrentVolume = 0;
+	}
 
 	protected void writeCommand(String cmd) throws PlayerException {
 		if (omxIn == null)
@@ -49,11 +54,18 @@ public class OMXPlayer extends AbstractPlayer {
 			omxIn = new PrintStream(omxProcess.getOutputStream());
 			// start player observer
 			new OMXObserver(omxProcess.getInputStream()).start();
-
+			writeCurrentVolume();
 			informFile(new File(file));
-		} catch (IOException e) {
+		} catch (IOException | RemoteException | PlayerException e) {
 		}
 		super.play(file);
+	}
+
+	private void writeCurrentVolume() throws RemoteException, PlayerException {
+		for (int i = 1; i <= mCurrentVolume; i++)
+			writeCommand("+");
+		for (int i = -1; i >= mCurrentVolume; i--)
+			writeCommand("-");
 	}
 
 	@Override
@@ -83,11 +95,13 @@ public class OMXPlayer extends AbstractPlayer {
 	@Override
 	public void volUp() throws RemoteException, PlayerException {
 		writeCommand("+");
+		mCurrentVolume++;
 	}
 
 	@Override
 	public void volDown() throws RemoteException, PlayerException {
 		writeCommand("-");
+		mCurrentVolume++;
 	}
 
 	@Override
@@ -171,6 +185,7 @@ public class OMXPlayer extends AbstractPlayer {
 			playingBean.setPath(url);
 			playingBean.setTitle(title);
 			playingBean.setState(STATE.PLAY);
+			writeCurrentVolume();
 			informPlayingBean(playingBean);
 		} catch (IOException e) {
 			throw new PlayerException("Could not stream url: " + e.getMessage());
@@ -209,8 +224,10 @@ public class OMXPlayer extends AbstractPlayer {
 
 				}
 			} catch (IOException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-						.getSimpleName() + ": " + e.getMessage(), "OMXListener");
+				RemoteLogger
+						.performLog(LogPriority.ERROR, e.getClass()
+								.getSimpleName() + ": " + e.getMessage(),
+								"OMXListener");
 			}
 		}
 
