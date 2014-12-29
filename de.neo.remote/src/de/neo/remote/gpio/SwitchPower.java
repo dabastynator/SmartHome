@@ -4,7 +4,9 @@ import java.util.BitSet;
 
 import com.pi4j.io.gpio.RaspiPin;
 
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.rmi.api.RMILogger.LogPriority;
 
 /**
  * Implements the gpio power by executing switch commands
@@ -17,7 +19,7 @@ public class SwitchPower {
 	private RCSwitch mRcSwitch;
 
 	public SwitchPower() {
-		mRcSwitch = new RCSwitch(RaspiPin.GPIO_17);
+		mRcSwitch = new RCSwitch(RaspiPin.GPIO_00);
 	}
 
 	public synchronized void setSwitchState(String familyCode,
@@ -27,6 +29,9 @@ public class SwitchPower {
 			mRcSwitch.switchOn(bitSet, switchNumber);
 		else
 			mRcSwitch.switchOff(bitSet, switchNumber);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Set switch "
+				+ familyCode + " " + switchNumber + " to " + state,
+				"Internetswitch");
 	}
 
 }
