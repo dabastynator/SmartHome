@@ -32,7 +32,7 @@ public abstract class AbstractSender {
 	 * list of progress listener
 	 */
 	protected List<SenderProgress> progressListener = new ArrayList<SenderProgress>();
-	
+
 	/**
 	 * byte block to inform progress listener
 	 */
@@ -48,14 +48,12 @@ public abstract class AbstractSender {
 	 */
 	private long sendingProgress;
 
-	
 	public AbstractSender(int port, int times, long progressStep) {
 		this.port = port;
 		this.times = times;
 		this.progressStep = progressStep;
 	}
-	
-	
+
 	/**
 	 * allocate new sender on given port, the data will be send given times
 	 * 
@@ -105,9 +103,10 @@ public abstract class AbstractSender {
 				writeData(socket.getOutputStream());
 			} catch (IOException e) {
 				informException(e);
+			} finally {
+				serverPort.close();
 			}
 		}
-		serverPort.close();
 	}
 
 	/**
