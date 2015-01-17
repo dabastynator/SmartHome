@@ -214,15 +214,6 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void playFromArdMediathek(String url) throws RemoteException,
-			PlayerException {
-		if (mMplayerIn == null)
-			startPlayer();
-		String tatortStreamUrl = getStreamUrl(TATORT_DL_FILE, url);
-		writeCommand("loadfile " + tatortStreamUrl);
-	}
-
-	@Override
 	public void moveRight() throws PlayerException {
 		long time = 0;
 		if (mPlayingBean != null)

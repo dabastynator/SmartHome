@@ -26,6 +26,8 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 
 	public static final int DOWNLOAD_PORT = 5033;
 
+	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
+
 	private String mLocation;
 	private String mRoot;
 	private List<String> mCurrentFiles;
@@ -48,7 +50,8 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 	public boolean goBack() {
 		if (mRoot.equals(mLocation))
 			return false;
-		mLocation = mLocation.substring(0, mLocation.lastIndexOf(File.separator));
+		mLocation = mLocation.substring(0,
+				mLocation.lastIndexOf(File.separator));
 		mLocation = mLocation.substring(0,
 				mLocation.lastIndexOf(File.separator) + 1);
 		return true;
@@ -105,7 +108,7 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 	public ServerPort publishFile(String file) throws RemoteException,
 			IOException {
 		FileSender sender = new FileSender(new File(mLocation + file),
-				DOWNLOAD_PORT, 1);
+				DOWNLOAD_PORT, 1, 1024 * 512);
 		sender.getProgressListener().add(new BrowserSendListener());
 		sender.sendAsync();
 		ServerPort serverport = new ServerPort(Server.getServer()
@@ -238,6 +241,16 @@ public class BrowserImpl implements IBrowser, ThumbnailListener {
 			this.fileName = fileName;
 		}
 
+	}
+
+	@Override
+	public void downloadFromARDMediathek(int documentId)
+			throws RemoteException, IOException {
+		if (!mLocation.endsWith(File.separator))
+			mLocation += File.separator;
+		String destinty = mLocation + documentId + ".mp4";
+		Runtime.getRuntime().exec(
+				new String[] { TATORT_DL_FILE, documentId + "", destinty });
 	}
 
 }

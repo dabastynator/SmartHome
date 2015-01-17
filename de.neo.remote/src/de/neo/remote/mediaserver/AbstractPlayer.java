@@ -40,8 +40,6 @@ import de.neo.rmi.protokol.RemoteException;
  */
 public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
-	public static final String TATORT_DL_FILE = "/usr/bin/tatort-dl.sh";
-
 	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
 
 	public static final int THUMBNAIL_SIZE = 128;
@@ -266,12 +264,6 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	@Override
-	public void playFromArdMediathek(String url) throws RemoteException,
-			PlayerException {
-
-	}
-
-	@Override
 	public void onThumbnailCalculation(ThumbnailJob job) {
 		if (job instanceof PlayerThumbnailJob) {
 			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
@@ -294,7 +286,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 				}
-				if (mPlayingBean != null && mPlayingBean.getState() == STATE.PLAY) {
+				if (mPlayingBean != null
+						&& mPlayingBean.getState() == STATE.PLAY) {
 					mPlayingBean.incrementCurrentTime(1);
 				}
 			}

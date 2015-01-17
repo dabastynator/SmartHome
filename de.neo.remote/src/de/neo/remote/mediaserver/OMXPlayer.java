@@ -149,12 +149,6 @@ public class OMXPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void playFromArdMediathek(String url) throws RemoteException,
-			PlayerException {
-		streamFromUrl(TATORT_DL_FILE, url, url);
-	}
-
-	@Override
 	public void playFromYoutube(String url) throws RemoteException,
 			PlayerException {
 		String[] split = url.split(" ");

@@ -126,8 +126,19 @@ public interface IBrowser extends RemoteAble {
 	 * @param file
 	 * @return server ip and port for download connection
 	 * @throws RemoteException
+	 * @throws IOException
+	 */
+	public ServerPort publishAbsoluteFile(String file) throws RemoteException,
+			IOException;
+
+	/**
+	 * start download from ard mediathek. Download specified document by id. The
+	 * download destiny is the current browser location.
+	 * 
+	 * @param documentId
+	 * @throws RemoteException
 	 * @throws IOException 
 	 */
-	public ServerPort publishAbsoluteFile(String file) throws RemoteException, IOException;
+	public void downloadFromARDMediathek(int documentId) throws RemoteException, IOException;
 
 }
