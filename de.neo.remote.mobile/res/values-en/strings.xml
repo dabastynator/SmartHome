@@ -42,4 +42,6 @@
     <string name="str_dvd_no_sub">Subtitle off</string>
     <string name="str_dvd_next_sub">Next subtitle</string>
     <string name="str_search">Search</string>
+    <string name="str_input_stream">Save ARD-sream</string>
+    <string name="str_input_stream_url">Enter the "DocumentId"</string>
 </resources>

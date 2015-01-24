@@ -41,4 +41,6 @@
     <string name="str_dvd_no_sub">Untertitel aus</string>
     <string name="str_dvd_next_sub">Nächster Untertitel</string>
     <string name="str_search">Suchen</string>
+    <string name="str_input_stream">ARD Sream speichern</string>
+    <string name="str_input_stream_url">Gib die "DocumentId" ein</string>
 </resources>

@@ -148,4 +148,10 @@ public class BufferBrowser implements IBrowser {
 		return location;
 	}
 
+	@Override
+	public void downloadFromARDMediathek(int documentId)
+			throws RemoteException, IOException {
+		browser.downloadFromARDMediathek(documentId);
+	}
+
 }

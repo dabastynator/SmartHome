@@ -295,10 +295,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		alert.setPositiveButton(getResources().getString(android.R.string.ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						String url = input.getText().toString();
-						PlayTatortTask task = new PlayTatortTask(
-								MediaServerActivity.this, url, binder);
-						task.execute(new String[] {});
+						String document = input.getText().toString();
+						try{
+							int documentID = Integer.parseInt(document);
+							PlayTatortTask task = new PlayTatortTask(
+									MediaServerActivity.this, documentID, binder);
+							task.execute(new String[] {});
+						}catch(Exception e){
+							
+						}
 					}
 				});
 
