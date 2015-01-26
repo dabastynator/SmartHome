@@ -74,7 +74,8 @@ public class RemoteMain {
 					controlcenter, units);
 			server.manageConnector(connector, registryIp);
 
-		} catch (ParserConfigurationException | SAXException | IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException
+				| IllegalArgumentException e) {
 			System.err
 					.println("Error parsing configuration: " + e.getMessage());
 			printXMLSchema();
@@ -102,7 +103,7 @@ public class RemoteMain {
 	}
 
 	private static List<IControlUnit> loadControlUnits(Document doc)
-			throws SAXException {
+			throws SAXException, IOException {
 		List<IControlUnit> units = new ArrayList<IControlUnit>();
 		NodeList switches = doc.getElementsByTagName(InternetSwitchImpl.ROOT);
 		SwitchPower power = new SwitchPower();
@@ -123,6 +124,11 @@ public class RemoteMain {
 			Node item = mediaServer.item(i);
 			if (item instanceof Element) {
 				Element element = (Element) item;
+				for (String attribute : new String[] { "location", "name",
+						"type", "playlistLocation", "x", "y", "z" })
+					if (!element.hasAttribute(attribute))
+						throw new SAXException(attribute
+								+ " missing for mediaserver");
 				String location = element.getAttribute("location");
 				String plsLocation = element.getAttribute("playlistLocation");
 				String name = element.getAttribute("name");
@@ -137,7 +143,8 @@ public class RemoteMain {
 						Float.parseFloat(element.getAttribute("x")),
 						Float.parseFloat(element.getAttribute("y")),
 						Float.parseFloat(element.getAttribute("z")) };
-				IMediaServer media = new MediaServerImpl(location, plsLocation, thumbnailWorker);
+				IMediaServer media = new MediaServerImpl(location, plsLocation,
+						thumbnailWorker);
 				MediaControlUnit unit = new MediaControlUnit(name, media,
 						position, type);
 				units.add(unit);

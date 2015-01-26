@@ -47,6 +47,11 @@ public class InternetSwitchImpl implements IInternetSwitch {
 	public InternetSwitchImpl(Element item, SwitchPower power)
 			throws SAXException {
 		try {
+			for (String attribute : new String[] { "familyCode", "name",
+					"type", "switchNumber", "x", "y", "z" })
+				if (!item.hasAttribute(attribute))
+					throw new SAXException(attribute
+							+ " missing for internet switch");
 			mFamilyCode = item.getAttribute("familyCode");
 			mSwitchNumber = Integer.parseInt(item.getAttribute("switchNumber"));
 			mName = item.getAttribute("name");
@@ -60,7 +65,7 @@ public class InternetSwitchImpl implements IInternetSwitch {
 			this.mPower = power;
 			mState = State.OFF;
 		} catch (Exception e) {
-			throw new SAXException("Error reading switch " + e.getMessage());
+			throw new SAXException("Error reading switch: " + e.getMessage());
 		}
 	}
 

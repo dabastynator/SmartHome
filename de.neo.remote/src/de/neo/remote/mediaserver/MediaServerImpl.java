@@ -1,5 +1,8 @@
 package de.neo.remote.mediaserver;
 
+import java.io.File;
+import java.io.IOException;
+
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IDVDPlayer;
@@ -22,7 +25,11 @@ public class MediaServerImpl implements IMediaServer {
 	private ImageViewerImpl mImageViewer;
 
 	public MediaServerImpl(String browseLocation, String playlistLocation,
-			boolean thumbnailWorker) {
+			boolean thumbnailWorker) throws IOException {
+		if (!new File(browseLocation).exists())
+			throw new IOException("Browser location does not exist: " + browseLocation);
+		if (!new File(playlistLocation).exists())
+			throw new IOException("Playlist location does not exist: " + playlistLocation);
 		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
 		mTotem = new TotemPlayer();
 		mMplayer = new MPlayerDVD(playlistLocation);
