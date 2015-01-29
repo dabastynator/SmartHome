@@ -97,7 +97,7 @@ public class ConnectionHandler {
 				DynamicAdapter adapter = server.getAdapterMap().get(
 						request.getObject());
 				if (adapter != null) {
-					Reply reply = adapter.performeRequest(request);
+					Reply reply = adapter.performRequest(request);
 					if (reply.getResult() instanceof RemoteAble)
 						configureReply(reply, reply.getResult());
 					// if (reply.getResult() instanceof Collection)

@@ -73,7 +73,7 @@ public class DynamicAdapter {
 	 * @param request
 	 * @return reply
 	 */
-	public Reply performeRequest(Request request) {
+	public Reply performRequest(Request request) {
 		Reply reply = new Reply();
 		try {
 			Method method = findMethod(request);
