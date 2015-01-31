@@ -63,9 +63,6 @@ public class BrowserAdapter extends ArrayAdapter<String> implements
 				public void run() {
 					try {
 						path = BrowserAdapter.this.browser.getFullLocation();
-						BrowserAdapter.this.browser
-								.fireThumbnails(BrowserAdapter.this,
-										PREVIEW_SIZE, PREVIEW_SIZE);
 					} catch (Exception e) {
 					}
 				}

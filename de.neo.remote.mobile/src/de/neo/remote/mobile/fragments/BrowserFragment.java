@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IThumbnailListener;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
@@ -40,7 +41,8 @@ import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.remote.mobile.R;
 
-public class BrowserFragment extends Fragment implements IRemoteActionListener {
+public class BrowserFragment extends Fragment implements IRemoteActionListener,
+		IThumbnailListener {
 
 	public static final String LISTVIEW_POSITION = "listviewPosition";
 	public static final String SPINNER_POSITION = "spinnerPosition";
@@ -121,7 +123,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 			Intent intent = new Intent(activity, ControlSceneActivity.class);
 			activity.startActivity(intent);
 		}
-		StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		final StationStuff mediaServer = activity.binder.getLatestMediaServer();
 		if (mediaServer == null) {
 			activity.setTitle(getActivity().getResources().getString(
 					R.string.str_no_mediaserver)
@@ -134,6 +136,18 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 				mediaServer.browser, itemArray, viewerState,
 				activity.playingBean));
 		browserContentView.setSelection(selectedPosition);
+		if (mediaServer.browser != null)
+			new Thread() {
+				public void run() {
+					try {
+						mediaServer.browser.fireThumbnails(
+								BrowserFragment.this,
+								BrowserAdapter.PREVIEW_SIZE,
+								BrowserAdapter.PREVIEW_SIZE);
+					} catch (Exception e) {
+					}
+				}
+			}.start();
 		switch (viewerState) {
 		case DIRECTORIES:
 			activity.setTitle(mediaServer.browser.getLocationInt() + "@"
@@ -471,6 +485,14 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener {
 	@Override
 	public void downloadCanceled() {
 		downloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void setThumbnail(String file, int width, int height, int[] thumbnail)
+			throws RemoteException {
+		BrowserAdapter adapter = (BrowserAdapter) browserContentView
+				.getAdapter();
+		adapter.setThumbnail(file, width, height, thumbnail);
 	}
 
 }
