@@ -522,6 +522,8 @@ public class Server {
 		if (connection != null) {
 			connection.disconnect();
 			serverConnections.remove(serverPort);
+			RMILogger.performLog(LogPriority.INFORMATION, "Close connection",
+					serverPort.getIp());
 		}
 	}
 

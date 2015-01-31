@@ -135,7 +135,7 @@ public class ServerConnection {
 		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),
 				new Class[] { template }, (InvocationHandler) p);
 		proxyMap.put(id, object);
-		RMILogger.performLog(LogPriority.INFORMATION, "Create new proy: "
+		RMILogger.performLog(LogPriority.INFORMATION, "Create new proxy: "
 				+ template.getSimpleName(), id);
 		return object;
 	}
