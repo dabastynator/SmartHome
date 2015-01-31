@@ -154,6 +154,7 @@ public class ServerConnection {
 		for (ConnectionSocket cs : serverConnections) {
 			try {
 				cs.output.writeObject(closeRequest);
+				cs.output.flush();
 			} catch (IOException e) {
 			}
 			cs.disconnect();
