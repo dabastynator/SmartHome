@@ -294,7 +294,7 @@ public class Server {
 	 * @throws RemoteException
 	 */
 	@SuppressWarnings("rawtypes")
-	public Object find(String id, Class template) throws RemoteException {
+	public <T> T find(String id, Class template) throws RemoteException {
 		try {
 			RegistryRequest request = new RegistryRequest(Type.FIND);
 			request.setId(id);
@@ -308,7 +308,7 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject()
 					.getServerPort());
 			// create proxy
-			return sc.createProxy(id, template);
+			return (T) sc.createProxy(id, template);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {
@@ -329,7 +329,7 @@ public class Server {
 	 * @throws RemoteException
 	 */
 	@SuppressWarnings("rawtypes")
-	public Object forceFind(String id, Class template) throws RemoteException {
+	public <T> T forceFind(String id, Class template) throws RemoteException {
 		try {
 			RegistryRequest request = new RegistryRequest(Type.FIND);
 			request.setId(id);
@@ -354,7 +354,7 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject()
 					.getServerPort());
 			// create proxy
-			return sc.createProxy(id, template);
+			return (T) sc.createProxy(id, template);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {
