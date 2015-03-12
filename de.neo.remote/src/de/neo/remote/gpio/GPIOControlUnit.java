@@ -10,12 +10,14 @@ public class GPIOControlUnit implements IControlUnit{
 	private String mDescription;
 	private IInternetSwitch mPower;
 	private float[] mPosition;
+	private String mID;
 
-	public GPIOControlUnit(String switchName, String description, IInternetSwitch power, float[] position) {
+	public GPIOControlUnit(String id, String switchName, String description, IInternetSwitch power, float[] position) {
 		mSwitchName = switchName;
 		mDescription = description;
 		mPower = power;
 		mPosition = position;
+		mID = id;
 	}
 	
 	@Override
@@ -41,6 +43,11 @@ public class GPIOControlUnit implements IControlUnit{
 	@Override
 	public float[] getPosition() throws RemoteException {
 		return mPosition;
+	}
+
+	@Override
+	public String getID() throws RemoteException {
+		return mID;
 	}
 
 }

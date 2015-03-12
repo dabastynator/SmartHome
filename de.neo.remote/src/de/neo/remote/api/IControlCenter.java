@@ -20,15 +20,15 @@ public interface IControlCenter extends RemoteAble {
 	/**
 	 * Port of the server
 	 */
-	public static final int PORT = 5021;
+	public static final int PORT = 5022;
 
 	/**
-	 * Get number of registered control units
+	 * Get array of all unit-ids.
 	 * 
-	 * @return number of control units
+	 * @return ids
 	 * @throws RemoteException
 	 */
-	public int getControlUnitNumber() throws RemoteException;
+	public String[] getControlUnitIDs() throws RemoteException;
 
 	/**
 	 * Add new remote control unit.
@@ -56,11 +56,11 @@ public interface IControlCenter extends RemoteAble {
 			throws RemoteException;
 
 	/**
-	 * Get control unit by specified number.
+	 * Get control unit by specified unit-id.
 	 * 
-	 * @param number
+	 * @param id
 	 * @return control unit by number
 	 * @throws RemoteException
 	 */
-	public IControlUnit getControlUnit(int number) throws RemoteException;
+	public IControlUnit getControlUnit(String id) throws RemoteException;
 }

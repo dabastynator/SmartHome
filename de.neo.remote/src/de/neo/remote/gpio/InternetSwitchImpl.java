@@ -9,9 +9,10 @@ import org.xml.sax.SAXException;
 
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IInternetSwitchListener;
+import de.neo.remote.gpio.SerialReader.ISerialListener;
 import de.neo.rmi.protokol.RemoteException;
 
-public class InternetSwitchImpl implements IInternetSwitch {
+public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 
 	public static final String ROOT = "InternetSwitch";
 
@@ -29,9 +30,11 @@ public class InternetSwitchImpl implements IInternetSwitch {
 	private int mSwitchNumber;
 	private State mState;
 	private float[] mPosition;
+	private boolean mReadOnly;
 
 	public InternetSwitchImpl(String name, SwitchPower power,
-			String familyCode, int switchNumber, String type, float[] position) {
+			String familyCode, int switchNumber, String type, float[] position,
+			boolean readOnly) {
 		if (!familyCode.matches(FAMILY_REGEX))
 			throw new IllegalArgumentException("Invalid Familycode: "
 					+ familyCode + ". must match " + FAMILY_REGEX);
@@ -42,13 +45,15 @@ public class InternetSwitchImpl implements IInternetSwitch {
 		mType = type;
 		mPosition = position;
 		mState = State.OFF;
+		mReadOnly = readOnly;
+		SerialReader.getInstance().getListener().add(this);
 	}
 
 	public InternetSwitchImpl(Element item, SwitchPower power)
 			throws SAXException {
 		try {
-			for (String attribute : new String[] { "familyCode", "name",
-					"type", "switchNumber", "x", "y", "z" })
+			for (String attribute : new String[] { "readonly", "familyCode",
+					"name", "type", "switchNumber", "x", "y", "z" })
 				if (!item.hasAttribute(attribute))
 					throw new SAXException(attribute
 							+ " missing for internet switch");
@@ -59,6 +64,8 @@ public class InternetSwitchImpl implements IInternetSwitch {
 					Float.parseFloat(item.getAttribute("y")),
 					Float.parseFloat(item.getAttribute("z")) };
 			mType = item.getAttribute("type");
+			String readonly = item.getAttribute("readonly");
+			mReadOnly = readonly.equals("1") || readonly.equals("true");
 			if (!mFamilyCode.matches(FAMILY_REGEX))
 				throw new IllegalArgumentException("Invalid Familycode: "
 						+ mFamilyCode + ". must match " + FAMILY_REGEX);
@@ -67,6 +74,7 @@ public class InternetSwitchImpl implements IInternetSwitch {
 		} catch (Exception e) {
 			throw new SAXException("Error reading switch: " + e.getMessage());
 		}
+		SerialReader.getInstance().getListener().add(this);
 	}
 
 	@Override
@@ -121,6 +129,19 @@ public class InternetSwitchImpl implements IInternetSwitch {
 
 	public float[] getPosition() {
 		return mPosition;
+	}
+
+	@Override
+	public boolean isReadOnly() throws RemoteException {
+		return mReadOnly;
+	}
+
+	@Override
+	public void OnSwitchEvent(String family, int switchNumber, State state) {
+		if (mFamilyCode.equals(family) && mSwitchNumber == switchNumber) {
+			mState = state;
+			informListener(state);
+		}
 	}
 
 }

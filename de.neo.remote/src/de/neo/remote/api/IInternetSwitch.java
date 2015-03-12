@@ -61,4 +61,13 @@ public interface IInternetSwitch extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public String getType() throws RemoteException;
+
+	/**
+	 * Get behavior of the switch. If the switch can just be read, but not set,
+	 * the method returns true.
+	 * 
+	 * @return true if read only switch, false otherwise
+	 * @throws RemoteException
+	 */
+	public boolean isReadOnly() throws RemoteException;
 }

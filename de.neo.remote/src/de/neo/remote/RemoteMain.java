@@ -110,9 +110,13 @@ public class RemoteMain {
 		for (int i = 0; i < switches.getLength(); i++) {
 			Node item = switches.item(i);
 			if (item instanceof Element) {
+				Element element = (Element) item;
+				if (!element.hasAttribute("id"))
+					throw new SAXException("id missing for internet switch");
+				String id = element.getAttribute("id");
 				InternetSwitchImpl internetSwitch = new InternetSwitchImpl(
-						(Element) item, power);
-				GPIOControlUnit unit = new GPIOControlUnit(
+						element, power);
+				GPIOControlUnit unit = new GPIOControlUnit(id,
 						internetSwitch.getName(), "Internet switch",
 						internetSwitch, internetSwitch.getPosition());
 				units.add(unit);
@@ -124,8 +128,8 @@ public class RemoteMain {
 			Node item = mediaServer.item(i);
 			if (item instanceof Element) {
 				Element element = (Element) item;
-				for (String attribute : new String[] { "location", "name",
-						"type", "playlistLocation", "x", "y", "z" })
+				for (String attribute : new String[] { "id", "location",
+						"name", "type", "playlistLocation", "x", "y", "z" })
 					if (!element.hasAttribute(attribute))
 						throw new SAXException(attribute
 								+ " missing for mediaserver");
@@ -133,6 +137,7 @@ public class RemoteMain {
 				String plsLocation = element.getAttribute("playlistLocation");
 				String name = element.getAttribute("name");
 				String type = element.getAttribute("type");
+				String id = element.getAttribute("id");
 				boolean thumbnailWorker = true;
 				if (element.hasAttribute("thumbnailWorker")) {
 					String worker = element.getAttribute("thumbnailWorker");
@@ -145,7 +150,7 @@ public class RemoteMain {
 						Float.parseFloat(element.getAttribute("z")) };
 				IMediaServer media = new MediaServerImpl(location, plsLocation,
 						thumbnailWorker);
-				MediaControlUnit unit = new MediaControlUnit(name, media,
+				MediaControlUnit unit = new MediaControlUnit(id, name, media,
 						position, type);
 				units.add(unit);
 			}
@@ -301,8 +306,8 @@ public class RemoteMain {
 			try {
 				IControlCenter controlcenter = m_controlcenter;
 				if (controlcenter == null) {
-					controlcenter = (IControlCenter) server.forceFind(
-							IControlCenter.ID, IControlCenter.class);
+					controlcenter = server.forceFind(IControlCenter.ID,
+							IControlCenter.class);
 				} else {
 					server.register(IControlCenter.ID, m_controlcenter);
 				}

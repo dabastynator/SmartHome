@@ -10,13 +10,15 @@ public class MediaControlUnit implements IControlUnit {
 	private IMediaServer mMediaServer;
 	private float[] mPosition;
 	private String mType;
+	private String mID;
 
-	public MediaControlUnit(String name, IMediaServer mediaServer,
+	public MediaControlUnit(String id, String name, IMediaServer mediaServer,
 			float[] position, String type) {
 		mName = name;
 		mMediaServer = mediaServer;
 		mPosition = position;
 		mType = type;
+		mID = id;
 	}
 
 	@Override
@@ -43,6 +45,11 @@ public class MediaControlUnit implements IControlUnit {
 	@Override
 	public float[] getPosition() throws RemoteException {
 		return mPosition;
+	}
+
+	@Override
+	public String getID() throws RemoteException {
+		return mID;
 	}
 
 }

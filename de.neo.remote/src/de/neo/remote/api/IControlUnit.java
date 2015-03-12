@@ -34,6 +34,14 @@ public interface IControlUnit extends RemoteAble {
 	public float[] getPosition() throws RemoteException;
 
 	/**
+	 * Get ID of this unit.
+	 * 
+	 * @return id
+	 * @throws RemoteException
+	 */
+	public String getID() throws RemoteException;
+
+	/**
 	 * Get the interface of the remote able control unit.
 	 * 
 	 * @return interface of the remote able object

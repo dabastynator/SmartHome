@@ -1,8 +1,8 @@
 package de.neo.remote.controlcenter;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,8 +30,8 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	/**
 	 * List of all control units
 	 */
-	private List<IControlUnit> mControlUnits = Collections
-			.synchronizedList(new ArrayList<IControlUnit>());
+	private Map<String, IControlUnit> mControlUnits = Collections
+			.synchronizedMap(new HashMap<String, IControlUnit>());
 
 	/**
 	 * The ground plot of the control center area
@@ -95,12 +95,12 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	 */
 	private void checkControlUnits() {
 		int removed = 0;
-		for (int i = mControlUnits.size() - 1; i >= 0; i--) {
+		for (String id : mControlUnits.keySet()) {
 			try {
-				IControlUnit unit = mControlUnits.get(i);
-				unit.getName();
+				IControlUnit unit = mControlUnits.get(id);
+				unit.getID();
 			} catch (RemoteException e) {
-				mControlUnits.remove(i);
+				mControlUnits.remove(id);
 				removed++;
 			}
 		}
@@ -111,19 +111,17 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public int getControlUnitNumber() throws RemoteException {
-		return mControlUnits.size();
-	}
-
-	@Override
 	public void addControlUnit(IControlUnit controlUnit) throws RemoteException {
-		if (mControlUnits.contains(controlUnit))
-			mControlUnits.remove(controlUnit);
-		mControlUnits.add(controlUnit);
-		RemoteLogger.performLog(
-				LogPriority.INFORMATION,
-				"Add " + mControlUnits.size() + ". control unit: "
-						+ controlUnit.getName(), "Controlcenter");
+		try {
+			String id = controlUnit.getID();
+			mControlUnits.put(id, controlUnit);
+			RemoteLogger.performLog(LogPriority.INFORMATION,
+					"Add " + mControlUnits.size() + ". control unit: "
+							+ controlUnit.getName() + " (" + id + ")",
+					"Controlcenter");
+		} catch (RemoteException e) {
+
+		}
 	}
 
 	@Override
@@ -133,13 +131,18 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public IControlUnit getControlUnit(int number) throws RemoteException {
-		return mControlUnits.get(number);
+	public GroundPlot getGroundPlot() throws RemoteException {
+		return mGround;
 	}
 
 	@Override
-	public GroundPlot getGroundPlot() throws RemoteException {
-		return mGround;
+	public String[] getControlUnitIDs() throws RemoteException {
+		return mControlUnits.keySet().toArray(new String[mControlUnits.size()]);
+	}
+
+	@Override
+	public IControlUnit getControlUnit(String id) throws RemoteException {
+		return mControlUnits.get(id);
 	}
 
 }
