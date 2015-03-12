@@ -48,7 +48,7 @@ public class ControlCenterBuffer implements IControlCenter {
 
 	@Override
 	public String[] getControlUnitIDs() throws RemoteException {
-		if (ids != null)
+		if (ids == null)
 			ids = center.getControlUnitIDs();
 		return ids;
 	}
