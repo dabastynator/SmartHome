@@ -6,6 +6,5 @@
 	<classpathentry kind="lib" path="lib/jdom-2.0.5.zip"/>
 	<classpathentry kind="lib" path="lib/java-json.jar"/>
 	<classpathentry kind="lib" path="lib/jid3lib-0.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/rxtx-2.2pre1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
