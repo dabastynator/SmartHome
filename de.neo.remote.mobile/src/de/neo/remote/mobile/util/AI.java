@@ -96,7 +96,8 @@ public class AI implements IVoiceRecognition {
 			State state = State.OFF;
 			if (split[2].equalsIgnoreCase("an"))
 				state = State.ON;
-			IInternetSwitch power = binder.getPower().get(split[1]);
+			IInternetSwitch power = (IInternetSwitch) binder.getSwitches().get(
+					split[1]).mObject;
 			if (power == null)
 				throw new AIException("Unknown switch: " + split[1]);
 			power.setState(state);

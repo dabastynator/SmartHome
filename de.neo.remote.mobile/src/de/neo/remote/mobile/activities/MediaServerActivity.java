@@ -47,7 +47,7 @@ import de.remote.mobile.R;
  */
 public class MediaServerActivity extends AbstractConnectionActivity {
 
-	public static final String EXTRA_MEDIA_NAME = "mediaServerName";
+	public static final String EXTRA_MEDIA_ID = "media_server_id";
 	public static final int FILE_REQUEST = 3;
 
 	/**
@@ -75,7 +75,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	public ImageView totemButton;
 	public ImageView filesystemButton;
 	public ImageView playlistButton;
-	protected String mediaServerName;
+	protected String mediaServerID;
 	protected LinearLayout dvdLayout;
 	protected ImageView dvdButton;
 	public ImageView omxButton;
@@ -98,9 +98,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		findComponents();
 
 		if (getIntent().getExtras() != null
-				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_NAME)) {
-			mediaServerName = getIntent().getExtras().getString(
-					EXTRA_MEDIA_NAME);
+				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
+			mediaServerID = getIntent().getExtras().getString(
+					EXTRA_MEDIA_ID);
 		}
 
 		ai = new AI(this);
@@ -255,7 +255,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				}
 				break;
 			case R.id.opt_refresh:
-				binder.getMediaServerByName(mediaServerName);
+				binder.getMediaServerByID(mediaServerID);
 				new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_record:
@@ -446,7 +446,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	@Override
 	void onBinderConnected() {
 		if (binder.getLatestMediaServer() != null
-				&& !binder.getLatestMediaServer().name.equals(mediaServerName)) {
+				&& !binder.getLatestMediaServer().name.equals(mediaServerID)) {
 			new BrowserLoadTask(this, null, false).execute();
 		}
 		Bundle extras = getIntent().getExtras();
@@ -507,7 +507,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			@Override
 			protected String[] doInBackground(String... params) {
 				try {
-					binder.getMediaServerByName(mediaServerName);
+					binder.getMediaServerByID(mediaServerID);
 					return new String[] {};
 				} catch (Exception e) {
 					exeption = e;

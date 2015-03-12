@@ -1,5 +1,8 @@
 package de.neo.remote.mobile.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
@@ -8,27 +11,19 @@ import de.neo.rmi.protokol.RemoteException;
 public class ControlCenterBuffer implements IControlCenter {
 
 	private IControlCenter center;
-	private int number;
 	private GroundPlot ground;
-	private IControlUnit[] units;
+	private Map<String, IControlUnit> units;
+	private String[] ids;
 
 	public ControlCenterBuffer(IControlCenter center) {
 		this.center = center;
+		units = new HashMap<String, IControlUnit>();
 		clear();
 	}
 
 	public void clear() {
-		number = -1;
 		ground = null;
-	}
-
-	@Override
-	public int getControlUnitNumber() throws RemoteException {
-		if (number < 0) {
-			number = center.getControlUnitNumber();
-			units = new IControlUnit[number];
-		}
-		return number;
+		units.clear();
 	}
 
 	@Override
@@ -52,9 +47,20 @@ public class ControlCenterBuffer implements IControlCenter {
 	}
 
 	@Override
-	public IControlUnit getControlUnit(int number) throws RemoteException {
-		if (units[number] == null)
-			units[number] = center.getControlUnit(number);
-		return units[number];
+	public String[] getControlUnitIDs() throws RemoteException {
+		if (ids != null)
+			ids = center.getControlUnitIDs();
+		return ids;
+	}
+
+	@Override
+	public IControlUnit getControlUnit(String id) throws RemoteException {
+		IControlUnit unit = units.get(id);
+		if (unit == null){
+			unit = center.getControlUnit(id);
+			if (unit != null)
+				units.put(id, unit);
+		}
+		return unit;
 	}
 }

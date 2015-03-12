@@ -40,6 +40,7 @@ import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
 import de.neo.remote.mobile.services.PlayerBinder;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -92,34 +93,32 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		glObjects = new GLGroup();
 		GroundPlot ground = control.getGroundPlot();
 		addGroundToScene(ground);
-		for (String name : binder.getUnits().keySet()) {
+		for (String id : binder.getUnits().keySet()) {
 			try {
-				Object object = binder.getUnits().get(name);
-				float[] position = binder.getUnitPosition(name);
-				if (object instanceof IMediaServer) {
-					GLFigure glServer = createGLMediaServer(
-							binder.getUnitDescription(name), name);
-					glServer.position[0] = position[0];
-					glServer.position[1] = position[2];
-					glServer.position[2] = -position[1];
-					MediaServerListener listener = new MediaServerListener(name);
+				BufferdUnit unit = binder.getUnits().get(id);
+				if (unit.mObject instanceof IMediaServer) {
+					GLFigure glServer = createGLMediaServer(unit.mDescription);
+					glServer.position[0] = unit.mPosition[0];
+					glServer.position[1] = unit.mPosition[2];
+					glServer.position[2] = -unit.mPosition[1];
+					MediaServerListener listener = new MediaServerListener(unit.mID);
 					glServer.setOnClickListener(listener);
 					glObjects.addFigure(glServer);
-					glMediaServers.put(name, glServer);
+					glMediaServers.put(unit.mID, glServer);
 				}
-				if (object instanceof IInternetSwitch) {
-					IInternetSwitch internet = (IInternetSwitch) object;
+				if (unit.mObject instanceof IInternetSwitch) {
+					IInternetSwitch internet = (IInternetSwitch) unit.mObject;
 					String type = internet.getType();
 					GLSwitch light = loadGLSwitchByType(type);
 					light.setSwitch(internet.getState() == State.ON);
-					light.position[0] = position[0];
-					light.position[1] = position[2];
-					light.position[2] = -position[1];
+					light.position[0] = unit.mPosition[0];
+					light.position[1] = unit.mPosition[2];
+					light.position[2] = -unit.mPosition[1];
 					InternetSwitchListener listener = new InternetSwitchListener(
 							light, internet);
 					light.setOnClickListener(listener);
 					glObjects.addFigure(light);
-					glSwitches.put(name, light);
+					glSwitches.put(unit.mID, light);
 				}
 			} catch (RemoteException e) {
 
@@ -128,7 +127,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		room.addFigure(glObjects);
 	}
 
-	private GLFigure createGLMediaServer(String description, String name) {
+	private GLFigure createGLMediaServer(String description) {
 		if ("multimedia".equals(description)) {
 			GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE,
 					true);
@@ -264,15 +263,15 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	class MediaServerListener implements GLClickListener {
 
-		private String mediaServerName;
+		private String mID;
 
-		public MediaServerListener(String mediaServerName) {
-			this.mediaServerName = mediaServerName;
+		public MediaServerListener(String id) {
+			mID = id;
 		}
 
 		@Override
 		public void onGLClick() {
-			selecter.selectMediaServer(mediaServerName);
+			selecter.selectMediaServer(mID);
 		}
 
 	}

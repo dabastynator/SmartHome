@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.RemoteViews;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.remote.mobile.R;
@@ -46,25 +47,25 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		if (binder.isConnected()) {
-			Map<String, IInternetSwitch> power = binder.getPower();
-			String[] switches = power.keySet()
-					.toArray(new String[power.size()]);
-			switchList.setAdapter(new SwitchAdapter(this, switches, power,
+			Map<String, BufferdUnit> switches = binder.getSwitches();
+			String[] ids = switches.keySet().toArray(
+					new String[switches.size()]);
+			switchList.setAdapter(new SwitchAdapter(this, ids, switches,
 					listener));
 		} else {
-			switchList
-					.setAdapter(new SwitchAdapter(this, new String[] {}, null));
+			switchList.setAdapter(new SwitchAdapter(this, new String[] {},
+					null, null));
 		}
 	}
 
 	public class SelectSwitchListener {
 
-		public boolean onSelectSwitch(String switchName) {
+		public boolean onSelectSwitch(String switchID, String switchName) {
 			// Speichere Auswahl
 			SharedPreferences prefs = SelectSwitchActivity.this
 					.getSharedPreferences(WIDGET_PREFS, 0);
 			SharedPreferences.Editor edit = prefs.edit();
-			edit.putString("" + appWidgetId, switchName);
+			edit.putString("" + appWidgetId, switchID);
 			edit.commit();
 
 			AppWidgetManager manager = AppWidgetManager

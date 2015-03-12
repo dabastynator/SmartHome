@@ -82,7 +82,7 @@ public class ServerDao {
 	/**
 	 * insert new server
 	 * 
-	 * @param name
+	 * @param mName
 	 * @param ip
 	 */
 	public long insertServer(String serverName, String ip) {

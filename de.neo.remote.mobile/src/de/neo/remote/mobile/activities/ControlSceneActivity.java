@@ -152,14 +152,14 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	}
 
 	public class SelectMediaServer {
-		public void selectMediaServer(final String name) {
+		public void selectMediaServer(final String id) {
 			handler.post(new Runnable() {
 
 				@Override
 				public void run() {
 					Intent intent = new Intent(ControlSceneActivity.this,
 							MediaServerActivity.class);
-					intent.putExtra(MediaServerActivity.EXTRA_MEDIA_NAME, name);
+					intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, id);
 					ControlSceneActivity.this.startActivity(intent);
 				}
 			});

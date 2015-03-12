@@ -10,11 +10,11 @@ import android.os.Binder;
 import android.os.Environment;
 import android.widget.Toast;
 import de.neo.remote.api.IBrowser;
-import de.neo.remote.api.IChatServer;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.PlayerListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
@@ -71,15 +71,6 @@ public class PlayerBinder extends Binder {
 	 */
 	public void connectToServer(final int id) {
 		service.connectToServer(id);
-	}
-
-	/**
-	 * get the remote chat server object
-	 * 
-	 * @return chat server
-	 */
-	public IChatServer getChatServer() {
-		return service.chatServer;
 	}
 
 	/**
@@ -169,7 +160,8 @@ public class PlayerBinder extends Binder {
 	 */
 	public void uploadFile(final IBrowser browser, final File file) {
 		try {
-			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1, DownloadTask.PROGRESS_STEP);
+			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1,
+					DownloadTask.PROGRESS_STEP);
 			fileSender.getProgressListener().add(service.uploadListener);
 			fileSender.setBufferSize(DownloadTask.BUFFER_SIZE);
 			fileSender.sendAsync();
@@ -204,7 +196,7 @@ public class PlayerBinder extends Binder {
 		service.handler.post(runnable);
 	}
 
-	public Map<String, Object> getUnits() {
+	public Map<String, BufferdUnit> getUnits() {
 		return service.unitMap;
 	}
 
@@ -216,30 +208,26 @@ public class PlayerBinder extends Binder {
 		service.refreshControlCenter();
 	}
 
-	public StationStuff getMediaServerByName(String mediaServerName)
+	public StationStuff getMediaServerByID(String id)
 			throws RemoteException {
-		Object object = service.unitMap.get(mediaServerName);
-		if (object instanceof IMediaServer) {
-			IMediaServer mediaServer = (IMediaServer) object;
-			StationStuff mediaObjects = null;
-			if (service.stationStuff.containsKey(mediaServerName)) {
-				mediaObjects = service.stationStuff.get(mediaServerName);
-			} else {
-				mediaObjects = new StationStuff();
-				mediaObjects.browser = new BufferBrowser(
+		BufferdUnit unit = service.unitMap.get(id);
+		if (unit.mObject instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) unit.mObject;
+			if (unit.mStation == null) {
+				unit.mStation = new StationStuff();
+				unit.mStation.browser = new BufferBrowser(
 						mediaServer.createBrowser());
-				mediaObjects.control = mediaServer.getControl();
-				mediaObjects.mplayer = mediaServer.getMPlayer();
-				mediaObjects.omxplayer = mediaServer.getOMXPlayer();
-				mediaObjects.player = mediaObjects.mplayer;
-				mediaObjects.pls = mediaServer.getPlayList();
-				mediaObjects.totem = mediaServer.getTotemPlayer();
-				mediaObjects.imageViewer = mediaServer.getImageViewer();
-				mediaObjects.name = mediaServerName;
-				service.stationStuff.put(mediaServerName, mediaObjects);
+				unit.mStation.control = mediaServer.getControl();
+				unit.mStation.mplayer = mediaServer.getMPlayer();
+				unit.mStation.omxplayer = mediaServer.getOMXPlayer();
+				unit.mStation.player = unit.mStation.mplayer;
+				unit.mStation.pls = mediaServer.getPlayList();
+				unit.mStation.totem = mediaServer.getTotemPlayer();
+				unit.mStation.imageViewer = mediaServer.getImageViewer();
+				unit.mStation.name = unit.mName;
 			}
-			service.setCurrentMediaServer(mediaObjects);
-			return mediaObjects;
+			service.setCurrentMediaServer(unit.mStation);
+			return unit.mStation;
 		}
 		return null;
 	}
@@ -248,25 +236,17 @@ public class PlayerBinder extends Binder {
 		return service.currentMediaServer;
 	}
 
-	public float[] getUnitPosition(String name) {
-		return service.unitMapPostion.get(name);
-	}
-
-	public Map<String, IInternetSwitch> getPower() {
-		Map<String, IInternetSwitch> power = new HashMap<String, IInternetSwitch>();
+	public Map<String, BufferdUnit> getSwitches() {
+		Map<String, BufferdUnit> power = new HashMap<String, BufferdUnit>();
 		if (getUnits() == null)
 			return power;
-		for (String name : getUnits().keySet()) {
-			Object object = getUnits().get(name);
-			if (object instanceof IInternetSwitch) {
-				power.put(name, (IInternetSwitch) object);
+		for (String id : getUnits().keySet()) {
+			BufferdUnit unit = getUnits().get(id);
+			if (unit.mObject instanceof IInternetSwitch) {
+				power.put(id, unit);
 			}
 		}
 		return power;
-	}
-
-	public String getUnitDescription(String name) {
-		return service.unitMapDescription.get(name);
 	}
 
 	public void downloadPlaylist(final IBrowser browser,

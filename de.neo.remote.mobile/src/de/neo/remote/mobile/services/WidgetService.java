@@ -1,7 +1,6 @@
 package de.neo.remote.mobile.services;
 
 import java.nio.IntBuffer;
-import java.util.Map;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -22,6 +21,7 @@ import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.SelectSwitchActivity;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
@@ -353,23 +353,24 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder == null)
 			throw new Exception(getResources().getString(
 					R.string.str_no_conneciton));
-		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
-		String switchName = prefs.getString(widgetID + "", null);
-		if (switchName == null)
+		String switchID = prefs.getString(widgetID + "", null);
+		if (switchID == null)
 			return;
-		updateSwitchWidget(widgetID, R.drawable.light_off, switchName);
-		if (powers == null || !powers.containsKey(switchName))
-			throw new Exception(binder.getServerName()
+		BufferdUnit unit = binder.getSwitches().get(switchID);
+		if (unit == null) {
+			updateSwitchWidget(widgetID, R.drawable.light_off, switchID);
+			throw new Exception(binder.getServerName() + " "
 					+ getResources().getString(R.string.str_has_no_switch)
-					+ switchName);
-		IInternetSwitch power = powers.get(switchName);
+					+ " " + switchID);
+		}
+		IInternetSwitch power = (IInternetSwitch) unit.mObject;
 		State state = power.getState();
 		if (state == State.ON)
-			updateSwitchWidget(widgetID, R.drawable.light_on, switchName);
+			updateSwitchWidget(widgetID, R.drawable.light_on, unit.mName);
 		else
-			updateSwitchWidget(widgetID, R.drawable.light_off, switchName);
+			updateSwitchWidget(widgetID, R.drawable.light_off, unit.mName);
 	}
 
 	private void updateSwitchWidget(int widgetID, int image, String text) {
@@ -389,26 +390,26 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (binder == null)
 			throw new Exception(getResources().getString(
 					R.string.str_no_conneciton));
-		Map<String, IInternetSwitch> powers = binder.getPower();
 		SharedPreferences prefs = getSharedPreferences(
 				SelectSwitchActivity.WIDGET_PREFS, 0);
-		final String name = prefs.getString(widgetID + "", null);
-		if (name == null)
+		final String switchID = prefs.getString(widgetID + "", null);
+		if (switchID == null)
 			return;
-		IInternetSwitch power = powers.get(name);
-		if (power == null)
-			throw new Exception(binder.getServerName()
+		BufferdUnit unit = binder.getSwitches().get(switchID);
+		if (unit == null)
+			throw new Exception(binder.getServerName() + " "
 					+ getResources().getString(R.string.str_has_no_switch)
-					+ name);
+					+ " " + switchID);
 		if (DEBUGGING)
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					Toast.makeText(getApplicationContext(),
-							"Switch " + name + " id=" + widgetID,
+							"Switch " + switchID + " id=" + widgetID,
 							Toast.LENGTH_SHORT).show();
 				}
 			});
+		IInternetSwitch power = (IInternetSwitch) unit.mObject;
 		State state = power.getState();
 		if (state == State.ON)
 			state = State.OFF;
@@ -424,7 +425,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			else
 				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
 						R.drawable.light_off);
-			remoteSwitchViews.setTextViewText(R.id.text_power_widget, name);
+			remoteSwitchViews.setTextViewText(R.id.text_power_widget, unit.mName);
 			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 		}
 	}

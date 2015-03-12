@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
-import de.neo.remote.api.IChatServer;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
@@ -68,11 +67,7 @@ public class RemoteService extends Service {
 	 */
 	protected ControlCenterBuffer controlCenter;
 
-	protected Map<String, StationStuff> stationStuff;
-
-	protected Map<String, Object> unitMap;
-	protected Map<String, float[]> unitMapPostion;
-	protected Map<String, String> unitMapDescription;
+	protected Map<String, BufferdUnit> unitMap;
 
 	/**
 	 * listener for player
@@ -111,11 +106,6 @@ public class RemoteService extends Service {
 	private RMILogListener rmiLogListener;
 
 	/**
-	 * remote chat server object
-	 */
-	public IChatServer chatServer;
-
-	/**
 	 * current media server
 	 */
 	public StationStuff currentMediaServer;
@@ -138,8 +128,8 @@ public class RemoteService extends Service {
 			}
 			localServer.startServer();
 
-			IControlCenter center = (IControlCenter) localServer.find(
-					IControlCenter.ID, IControlCenter.class);
+			IControlCenter center = localServer.find(IControlCenter.ID,
+					IControlCenter.class);
 			if (center == null)
 				throw new RemoteException(IControlCenter.ID,
 						"control center not found in registry");
@@ -147,8 +137,6 @@ public class RemoteService extends Service {
 
 			refreshControlCenter();
 
-			chatServer = (IChatServer) localServer.find(IChatServer.ID,
-					IChatServer.class);
 			// power.registerPowerSwitchListener(powerListener);
 			handler.post(new Runnable() {
 				@Override
@@ -183,10 +171,7 @@ public class RemoteService extends Service {
 		};
 		RMILogger.addLogListener(rmiLogListener);
 		binder = new PlayerBinder(this);
-		stationStuff = new HashMap<String, StationStuff>();
-		unitMap = new HashMap<String, Object>();
-		unitMapPostion = new HashMap<String, float[]>();
-		unitMapDescription = new HashMap<String, String>();
+		unitMap = new HashMap<String, BufferdUnit>();
 		actionListener = new ArrayList<IRemoteActionListener>();
 		notificationHandler = new NotificationHandler(this);
 		playerListener = new PlayerListener();
@@ -217,9 +202,7 @@ public class RemoteService extends Service {
 			localServer.close();
 		unitMap.clear();
 		controlCenter = null;
-		stationStuff.clear();
 		serverID = -1;
-		chatServer = null;
 		serverName = null;
 		notificationHandler.removeNotification();
 	}
@@ -270,6 +253,26 @@ public class RemoteService extends Service {
 		}
 	}
 
+	public static class BufferdUnit {
+
+		public BufferdUnit(IControlUnit controlUnit) throws RemoteException {
+			mUnit = controlUnit;
+			mID = mUnit.getID();
+			mName = mUnit.getName();
+			mDescription = mUnit.getDescription();
+			mObject = mUnit.getRemoteableControlObject();
+			mPosition = mUnit.getPosition();
+		}
+
+		public String mID;
+		public String mName;
+		public String mDescription;
+		public StationStuff mStation;
+		public float[] mPosition;
+		public Object mObject;
+		public IControlUnit mUnit;
+	}
+
 	public static class StationStuff {
 		public BufferBrowser browser;
 		public IPlayer player;
@@ -314,31 +317,23 @@ public class RemoteService extends Service {
 	}
 
 	public void refreshControlCenter() {
-		int stationSize = 0;
+		String[] ids = null;
 		controlCenter.clear();
 		try {
-			stationSize = controlCenter.getControlUnitNumber();
+			ids = controlCenter.getControlUnitIDs();
 			controlCenter.getGroundPlot();
 		} catch (RemoteException e1) {
 		}
 		currentMediaServer = null;
-		stationStuff.clear();
 		unitMap.clear();
-		unitMapPostion.clear();
-		unitMapDescription.clear();
-		for (int i = 0; i < stationSize; i++) {
+		for (String id: ids) {
 			try {
-				IControlUnit unit = controlCenter.getControlUnit(i);
-				Object object = unit.getRemoteableControlObject();
-				String name = unit.getName();
-				Log.e("control unit", name);
-				String description = unit.getDescription();
-				float[] position = unit.getPosition();
-				unitMap.put(name, object);
-				unitMapPostion.put(name, position);
-				unitMapDescription.put(name, description);
-				if (object instanceof IInternetSwitch)
-					((IInternetSwitch) object)
+				BufferdUnit bufferdUnit = new BufferdUnit(
+						controlCenter.getControlUnit(id));
+				Log.e("control unit", bufferdUnit.mName);
+				unitMap.put(bufferdUnit.mID, bufferdUnit);
+				if (bufferdUnit.mObject instanceof IInternetSwitch)
+					((IInternetSwitch) bufferdUnit.mObject)
 							.registerPowerSwitchListener(internetSwitchListener);
 			} catch (Exception e) {
 				Log.e("error",

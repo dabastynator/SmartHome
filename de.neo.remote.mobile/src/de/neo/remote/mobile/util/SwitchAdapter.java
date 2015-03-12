@@ -16,39 +16,39 @@ import android.widget.ToggleButton;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.mobile.activities.SelectSwitchActivity.SelectSwitchListener;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
 public class SwitchAdapter extends ArrayAdapter<String> {
 
-	private Map<String, IInternetSwitch> power;
-	private SelectSwitchListener listener = null;
+	private Map<String, BufferdUnit> mSwitches;
+	private SelectSwitchListener mListener = null;
+	private String[] mIDs;
 
-	public SwitchAdapter(Context context, String[] all,
-			Map<String, IInternetSwitch> power) {
-		super(context, R.layout.switch_row, R.id.lbl_switch_name, all);
-		this.power = power;
-	}
-
-	public SwitchAdapter(Context context, String[] all,
-			Map<String, IInternetSwitch> power, SelectSwitchListener listener) {
-		this(context, all, power);
-		this.listener = listener;
+	public SwitchAdapter(Context context, String[] ids,
+			Map<String, BufferdUnit> switches, SelectSwitchListener listener) {
+		super(context, R.layout.switch_row, R.id.lbl_switch_name, ids);
+		mSwitches = switches;
+		mIDs = ids;
+		mListener = listener;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = super.getView(position, convertView, parent);
+		String id = mIDs[position];
+		BufferdUnit internetSwitch = mSwitches.get(id);
 		ToggleButton button = (ToggleButton) view
 				.findViewById(R.id.btn_switch_state);
 		TextView lable = (TextView) view.findViewById(R.id.lbl_switch_name);
-		String switchName = lable.getText().toString();
-		OnClickSwitchListener switchListner = new OnClickSwitchListener(
-				switchName);
+		lable.setText(internetSwitch.mName);
+		OnClickSwitchListener switchListner = new OnClickSwitchListener(id,
+				internetSwitch.mName);
 		lable.setOnClickListener(switchListner);
 		view.setOnClickListener(switchListner);
-		button.setOnCheckedChangeListener(new SwitchChangeListener(power
-				.get(switchName), button));
+		button.setOnCheckedChangeListener(new SwitchChangeListener(
+				(IInternetSwitch) internetSwitch.mObject, button));
 		return view;
 	}
 
@@ -107,16 +107,18 @@ public class SwitchAdapter extends ArrayAdapter<String> {
 
 	public class OnClickSwitchListener implements OnClickListener {
 
-		private String name;
+		private String mID;
+		private String mName;
 
-		public OnClickSwitchListener(String switchName) {
-			this.name = switchName;
+		public OnClickSwitchListener(String id, String name) {
+			mID = id;
+			mName = name;
 		}
 
 		@Override
 		public void onClick(View arg0) {
-			if (listener != null)
-				listener.onSelectSwitch(name);
+			if (mListener != null)
+				mListener.onSelectSwitch(mID, mName);
 		}
 
 	}
