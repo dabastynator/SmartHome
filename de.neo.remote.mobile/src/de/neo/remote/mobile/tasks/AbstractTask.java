@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
+import android.widget.Toast;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -12,7 +13,7 @@ public abstract class AbstractTask extends
 		AsyncTask<String, Integer, Exception> {
 
 	public enum TaskMode {
-		DialogTask, ActionBarTask
+		DialogTask, ActionBarTask, ToastTask
 	};
 
 	protected AbstractConnectionActivity activity;
@@ -47,6 +48,10 @@ public abstract class AbstractTask extends
 		if (mode == TaskMode.ActionBarTask) {
 			activity.setProgressBarVisibility(true);
 			activity.setTitle(getDialogTitle());
+		}
+		if (mode == TaskMode.ToastTask) {
+			Toast.makeText(activity, getDialogTitle(), Toast.LENGTH_SHORT)
+					.show();
 		}
 	}
 

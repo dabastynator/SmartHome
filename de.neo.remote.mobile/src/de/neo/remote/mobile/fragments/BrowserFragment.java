@@ -221,10 +221,11 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 						plsFileMap.values().toArray(
 								new String[plsFileMap.size()]), selectedItem);
 			} else if (selectedPosition < mediaServer.directoryCount)
-				activity.binder.downloadDirectory(mediaServer.browser,
-						selectedItem);
+				activity.binder.downloadDirectory(activity,
+						mediaServer.browser, selectedItem);
 			else
-				activity.binder.downloadFile(mediaServer.browser, selectedItem);
+				activity.binder.downloadFile(activity, mediaServer.browser,
+						selectedItem);
 			break;
 		case R.id.opt_pls_delete:
 			new Thread() {

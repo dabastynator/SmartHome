@@ -14,6 +14,7 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
+import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.PlayerListener;
@@ -123,8 +124,10 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void downloadFile(IBrowser browser, String file) {
-		new DownloadTask(browser, file, null, getServerName(), this).execute();
+	public void downloadFile(AbstractConnectionActivity activity,
+			IBrowser browser, String file) {
+		new DownloadTask(activity, browser, file, null, getServerName(), this)
+				.execute();
 		service.notificationHandler.setFile(file);
 	}
 
@@ -133,9 +136,10 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param directory
 	 */
-	public void downloadDirectory(IBrowser browser, String directory) {
-		new DownloadTask(browser, null, directory, getServerName(), this)
-				.execute();
+	public void downloadDirectory(AbstractConnectionActivity activity,
+			IBrowser browser, String directory) {
+		new DownloadTask(activity, browser, null, directory, getServerName(),
+				this).execute();
 		service.notificationHandler.setFile(directory);
 	}
 
@@ -208,8 +212,7 @@ public class PlayerBinder extends Binder {
 		service.refreshControlCenter();
 	}
 
-	public StationStuff getMediaServerByID(String id)
-			throws RemoteException {
+	public StationStuff getMediaServerByID(String id) throws RemoteException {
 		BufferdUnit unit = service.unitMap.get(id);
 		if (unit.mObject instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) unit.mObject;

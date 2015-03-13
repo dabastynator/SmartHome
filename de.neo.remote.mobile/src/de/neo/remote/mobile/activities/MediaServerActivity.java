@@ -350,13 +350,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			browserFragment.onRestoreInstanceState(bundle);
 	}
 
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		if (browserFragment != null)
-			browserFragment.onContextItemSelected(item);
-		return super.onContextItemSelected(item);
-	}
-
 	private void createNewPlaylist() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
