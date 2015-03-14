@@ -4,6 +4,7 @@
     android:initialLayout="@layout/switch_widget"
     android:minHeight="70dp"
     android:minWidth="65dp"
-    android:updatePeriodMillis="60000" >
+    android:updatePeriodMillis="60000"
+    android:resizeMode="horizontal|vertical" >
 
 </appwidget-provider>
