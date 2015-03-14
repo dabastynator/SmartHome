@@ -72,8 +72,6 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}
 	};
 
-	private RemoteViews remoteSwitchViews;
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -82,8 +80,6 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		startService(intent);
 		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
 		initializeMusicWidgets();
-		remoteSwitchViews = new RemoteViews(getApplicationContext()
-				.getPackageName(), R.layout.switch_widget);
 		updateSwitchWidget();
 	};
 
@@ -137,8 +133,6 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			executeCommand(intent.getAction(), intent);
 		else {
 			initializeMusicWidgets();
-			remoteSwitchViews = new RemoteViews(getApplicationContext()
-					.getPackageName(), R.layout.switch_widget);
 			updateSwitchWidget();
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -156,7 +150,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				try {
 					if (binder == null)
 						throw new RemoteException("not binded", "not binded");
-					if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
+					if (action
+							.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
 						int widgetID = intent.getIntExtra(
 								SelectSwitchActivity.SWITCH_NUMBER, 0);
 						switchPower(widgetID);
@@ -256,6 +251,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
 		initializeMusicWidgets();
+		updateSwitchWidget();
 	}
 
 	@Override
@@ -295,11 +291,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				getResources()
 						.getString(R.string.str_no_conneciton_with_server), "",
 				false, null);
+		updateSwitchWidget();
 		stopSelf();
 	}
 
 	@Override
-	public void onPowerSwitchChange(String switchName, State state) {
+	public void onPowerSwitchChange(String switchId, State state) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
 
@@ -312,14 +309,15 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		// update each of the app widgets with the remote adapter
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
-			String name = prefs.getString(appWidgetIds[i] + "", null);
-			if (switchName.equals(name)) {
+			String id = prefs.getString(appWidgetIds[i] + "", null);
+			BufferdUnit bufferdUnit = binder.getSwitches().get(id);
+			if (switchId.equals(id) && bufferdUnit != null) {
 				if (state == State.ON)
 					updateSwitchWidget(appWidgetIds[i], R.drawable.light_on,
-							name);
+							bufferdUnit.mName);
 				else
 					updateSwitchWidget(appWidgetIds[i], R.drawable.light_off,
-							name);
+							bufferdUnit.mName);
 			}
 		}
 	}
@@ -376,14 +374,15 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	private void updateSwitchWidget(int widgetID, int image, String text) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
-		if (remoteSwitchViews != null) {
-			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-					image);
-			remoteSwitchViews.setTextViewText(R.id.text_power_widget, text);
-			RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
-					widgetID);
-			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
-		}
+		RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext()
+				.getPackageName(), R.layout.switch_widget);
+		remoteSwitchViews.setImageViewResource(R.id.image_power_widget, image);
+		remoteSwitchViews.setTextViewText(R.id.text_power_widget, text);
+		
+		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
+				widgetID);
+		
+		appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 	}
 
 	private void switchPower(final int widgetID) throws Exception {
@@ -418,16 +417,18 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		power.setState(state);
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this
 				.getApplicationContext());
-		if (remoteSwitchViews != null) {
-			if (state == State.ON)
-				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-						R.drawable.light_on);
-			else
-				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-						R.drawable.light_off);
-			remoteSwitchViews.setTextViewText(R.id.text_power_widget, unit.mName);
-			appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
-		}
+		RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext()
+				.getPackageName(), R.layout.switch_widget);
+		if (state == State.ON)
+			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+					R.drawable.light_on);
+		else
+			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+					R.drawable.light_off);
+		remoteSwitchViews.setTextViewText(R.id.text_power_widget, unit.mName);
+		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
+				widgetID);
+		appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 	}
 
 	@Override

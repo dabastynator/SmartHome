@@ -6,10 +6,10 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.RemoteViews;
-import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.WidgetService;
@@ -77,9 +77,13 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 					WidgetService.class);
 			switchIntent.setAction(RemotePowerWidgetProvider.ACTION_SWITCH);
 			switchIntent.putExtra(SWITCH_NUMBER, appWidgetId);
+			switchIntent
+					.setData(Uri.withAppendedPath(
+							Uri.parse("ABCD://widget/id/"),
+							String.valueOf(appWidgetId)));
 			PendingIntent switchPending = PendingIntent.getService(
-					SelectSwitchActivity.this, switchIntent.hashCode(),
-					switchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+					SelectSwitchActivity.this, appWidgetId, switchIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
 			views.setOnClickPendingIntent(R.id.widget_power_layout,
 					switchPending);
 			views.setImageViewResource(R.id.image_power_widget,
