@@ -31,10 +31,11 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	private State mState;
 	private float[] mPosition;
 	private boolean mReadOnly;
+	private String mId;
 
 	public InternetSwitchImpl(String name, SwitchPower power,
 			String familyCode, int switchNumber, String type, float[] position,
-			boolean readOnly) {
+			boolean readOnly, String id) {
 		if (!familyCode.matches(FAMILY_REGEX))
 			throw new IllegalArgumentException("Invalid Familycode: "
 					+ familyCode + ". must match " + FAMILY_REGEX);
@@ -46,6 +47,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 		mPosition = position;
 		mState = State.OFF;
 		mReadOnly = readOnly;
+		mId = id;
 		SerialReader.getInstance().getListener().add(this);
 	}
 
@@ -53,10 +55,11 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 			throws SAXException {
 		try {
 			for (String attribute : new String[] { "readonly", "familyCode",
-					"name", "type", "switchNumber", "x", "y", "z" })
+					"name", "type", "switchNumber", "x", "y", "z", "id" })
 				if (!item.hasAttribute(attribute))
 					throw new SAXException(attribute
 							+ " missing for internet switch");
+			mId = item.getAttribute("id");
 			mFamilyCode = item.getAttribute("familyCode");
 			mSwitchNumber = Integer.parseInt(item.getAttribute("switchNumber"));
 			mName = item.getAttribute("name");
@@ -110,7 +113,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 		List<IInternetSwitchListener> exceptionList = new ArrayList<IInternetSwitchListener>();
 		for (IInternetSwitchListener listener : mListeners) {
 			try {
-				listener.onPowerSwitchChange(mName, state);
+				listener.onPowerSwitchChange(mId, state);
 			} catch (RemoteException e) {
 				exceptionList.add(listener);
 			}

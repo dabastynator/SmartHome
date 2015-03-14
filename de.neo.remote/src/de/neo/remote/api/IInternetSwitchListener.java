@@ -18,6 +18,6 @@ public interface IInternetSwitchListener extends RemoteAble {
 	 * @param state
 	 * @throws RemoteException
 	 */
-	public void onPowerSwitchChange(String switchName, State state) throws RemoteException;
+	public void onPowerSwitchChange(String switchId, State state) throws RemoteException;
 
 }
