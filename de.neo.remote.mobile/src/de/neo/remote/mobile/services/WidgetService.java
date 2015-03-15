@@ -356,7 +356,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			return;
 		BufferdUnit unit = binder.getSwitches().get(switchID);
 		if (unit == null) {
-			updateSwitchWidget(widgetID, R.drawable.light_off, switchID);
+			updateSwitchWidget(widgetID, R.drawable.switch_unknown, switchID);
 			throw new Exception(binder.getServerName() + " "
 					+ getResources().getString(R.string.str_has_no_switch)
 					+ " " + switchID);
@@ -416,12 +416,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				.getApplicationContext());
 		RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext()
 				.getPackageName(), R.layout.switch_widget);
-		if (state == State.ON)
-			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-					R.drawable.light_on);
-		else
-			remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-					R.drawable.light_off);
+		remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+				getImageForSwitchType(unit.mSwitchType, state == State.ON));
 		remoteSwitchViews.setTextViewText(R.id.text_power_widget, unit.mName);
 		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
 				widgetID);
@@ -466,14 +462,18 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				return R.drawable.tv_off;
 		}
 		if (ControlSceneRenderer.LAMP_FLOOR.equals(type)
-				|| ControlSceneRenderer.LAMP_LAVA.equals(type)
-				|| ControlSceneRenderer.LAMP_READ.equals(type)) {
+				|| ControlSceneRenderer.LAMP_LAVA.equals(type)) {
 			if (on)
 				return R.drawable.light_on;
 			else
 				return R.drawable.light_off;
 		}
+		if (ControlSceneRenderer.LAMP_READ.equals(type)) {
+			if (on)
+				return R.drawable.reading_on;
+			else
+				return R.drawable.reading_off;
+		}
 		return R.drawable.switch_unknown;
 	}
-
 }
