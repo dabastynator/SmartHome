@@ -23,6 +23,7 @@ import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
+import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -150,8 +151,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				try {
 					if (binder == null)
 						throw new RemoteException("not binded", "not binded");
-					if (action
-							.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
+					if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
 						int widgetID = intent.getIntExtra(
 								SelectSwitchActivity.SWITCH_NUMBER, 0);
 						switchPower(widgetID);
@@ -312,12 +312,10 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			String id = prefs.getString(appWidgetIds[i] + "", null);
 			BufferdUnit bufferdUnit = binder.getSwitches().get(id);
 			if (switchId.equals(id) && bufferdUnit != null) {
-				if (state == State.ON)
-					updateSwitchWidget(appWidgetIds[i], R.drawable.light_on,
-							bufferdUnit.mName);
-				else
-					updateSwitchWidget(appWidgetIds[i], R.drawable.light_off,
-							bufferdUnit.mName);
+				updateSwitchWidget(
+						appWidgetIds[i],
+						getImageForSwitchType(bufferdUnit.mSwitchType,
+								state == State.ON), bufferdUnit.mName);
 			}
 		}
 	}
@@ -365,10 +363,9 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}
 		IInternetSwitch power = (IInternetSwitch) unit.mObject;
 		State state = power.getState();
-		if (state == State.ON)
-			updateSwitchWidget(widgetID, R.drawable.light_on, unit.mName);
-		else
-			updateSwitchWidget(widgetID, R.drawable.light_off, unit.mName);
+		updateSwitchWidget(widgetID,
+				getImageForSwitchType(unit.mSwitchType, state == State.ON),
+				unit.mName);
 	}
 
 	private void updateSwitchWidget(int widgetID, int image, String text) {
@@ -378,10 +375,10 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				.getPackageName(), R.layout.switch_widget);
 		remoteSwitchViews.setImageViewResource(R.id.image_power_widget, image);
 		remoteSwitchViews.setTextViewText(R.id.text_power_widget, text);
-		
+
 		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this,
 				widgetID);
-		
+
 		appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 	}
 
@@ -453,6 +450,30 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	public void sendingCanceled() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public int getImageForSwitchType(String type, boolean on) {
+		if (ControlSceneRenderer.AUDO.equals(type)) {
+			if (on)
+				return R.drawable.music_on;
+			else
+				return R.drawable.music_off;
+		}
+		if (ControlSceneRenderer.VIDEO.equals(type)) {
+			if (on)
+				return R.drawable.tv_on;
+			else
+				return R.drawable.tv_off;
+		}
+		if (ControlSceneRenderer.LAMP_FLOOR.equals(type)
+				|| ControlSceneRenderer.LAMP_LAVA.equals(type)
+				|| ControlSceneRenderer.LAMP_READ.equals(type)) {
+			if (on)
+				return R.drawable.light_on;
+			else
+				return R.drawable.light_off;
+		}
+		return R.drawable.switch_unknown;
 	}
 
 }

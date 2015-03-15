@@ -271,6 +271,7 @@ public class RemoteService extends Service {
 		public float[] mPosition;
 		public Object mObject;
 		public IControlUnit mUnit;
+		public String mSwitchType;
 	}
 
 	public static class StationStuff {
@@ -326,15 +327,17 @@ public class RemoteService extends Service {
 		}
 		currentMediaServer = null;
 		unitMap.clear();
-		for (String id: ids) {
+		for (String id : ids) {
 			try {
 				BufferdUnit bufferdUnit = new BufferdUnit(
 						controlCenter.getControlUnit(id));
 				Log.e("control unit", bufferdUnit.mName);
 				unitMap.put(bufferdUnit.mID, bufferdUnit);
-				if (bufferdUnit.mObject instanceof IInternetSwitch)
-					((IInternetSwitch) bufferdUnit.mObject)
-							.registerPowerSwitchListener(internetSwitchListener);
+				if (bufferdUnit.mObject instanceof IInternetSwitch) {
+					IInternetSwitch iswitch = (IInternetSwitch) bufferdUnit.mObject;
+					iswitch.registerPowerSwitchListener(internetSwitchListener);
+					bufferdUnit.mSwitchType = iswitch.getType();
+				}
 			} catch (Exception e) {
 				Log.e("error",
 						e.getClass().getSimpleName() + ": " + e.getMessage());

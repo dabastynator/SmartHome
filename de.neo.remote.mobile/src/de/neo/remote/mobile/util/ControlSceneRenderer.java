@@ -108,7 +108,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				}
 				if (unit.mObject instanceof IInternetSwitch) {
 					IInternetSwitch internet = (IInternetSwitch) unit.mObject;
-					String type = internet.getType();
+					String type = unit.mSwitchType;
 					GLSwitch light = loadGLSwitchByType(type);
 					light.setSwitch(internet.getState() == State.ON);
 					light.position[0] = unit.mPosition[0];

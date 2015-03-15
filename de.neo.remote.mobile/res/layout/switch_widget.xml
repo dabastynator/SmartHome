@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:alpha="0.7"
-        android:src="@drawable/light_off" />
+        android:src="@drawable/switch_unknown" />
 
     <TextView
         android:id="@+id/text_power_widget"
@@ -24,6 +24,6 @@
         android:textColor="@android:color/white"
         android:textSize="13dp"
         android:gravity="bottom|center_horizontal"
-        android:text="Switch" />
+        android:text="" />
 
 </RelativeLayout>
