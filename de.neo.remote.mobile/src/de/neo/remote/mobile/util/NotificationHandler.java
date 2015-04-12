@@ -183,14 +183,14 @@ public class NotificationHandler implements IRemoteActionListener {
 		builder.setWhen(when);
 		if (playing)
 			builder.addAction(R.drawable.player_small_pause,
-					context.getString(R.string.str_pause), playPending);
+					context.getString(R.string.player_pause), playPending);
 		else
 			builder.addAction(R.drawable.player_small_play,
 					context.getString(R.string.str_play), playPending);
 		builder.addAction(R.drawable.player_small_vol_down,
-				context.getString(R.string.str_vol_down), prevPending);
+				context.getString(R.string.player_vol_down), prevPending);
 		builder.addAction(R.drawable.player_small_vol_up,
-				context.getString(R.string.str_vol_up), nextPending);
+				context.getString(R.string.player_vol_up), nextPending);
 		if (thumbnail != null)
 			builder.setLargeIcon(thumbnail);
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());

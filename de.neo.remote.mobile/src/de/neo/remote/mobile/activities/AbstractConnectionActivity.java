@@ -28,41 +28,20 @@ import de.remote.mobile.R;
 public abstract class AbstractConnectionActivity extends Activity implements
 		IRemoteActionListener {
 
-	/**
-	 * name for extra data for server name
-	 */
 	public static final String EXTRA_SERVER_ID = "serverId";
 
-	/**
-	 * binder object
-	 */
-	public PlayerBinder binder;
-
-	protected ProgressDialog progress;
-
-	/**
-	 * id of connected server
-	 */
+	public PlayerBinder mBinder;
+	protected ProgressDialog mProgress;
 	protected int serverID = -1;
-
-	/**
-	 * database object
-	 */
 	protected RemoteDatabase serverDB;
-
-	/**
-	 * handler to post runnables on the gui thread
-	 */
 	protected Handler handler = new Handler();
+	protected boolean mIsActive;
 
-	/**
-	 * connection to the service
-	 */
-	protected ServiceConnection playerConnection = new ServiceConnection() {
+	protected ServiceConnection mPlayerConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			binder.removeRemoteActionListener(AbstractConnectionActivity.this);
+			mBinder.removeRemoteActionListener(AbstractConnectionActivity.this);
 			Log.e("disconnect service", "lass: "
 					+ AbstractConnectionActivity.this.getClass()
 							.getSimpleName());
@@ -70,11 +49,11 @@ public abstract class AbstractConnectionActivity extends Activity implements
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			binder = (PlayerBinder) service;
-			boolean newConnection = !binder.isConnected();
+			mBinder = (PlayerBinder) service;
+			boolean newConnection = !mBinder.isConnected();
 			onStartConnecting();
 			onBinderConnected();
-			binder.addRemoteActionListener(AbstractConnectionActivity.this);
+			mBinder.addRemoteActionListener(AbstractConnectionActivity.this);
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
 					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
@@ -88,7 +67,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 					Toast.makeText(
 							AbstractConnectionActivity.this,
 							getResources().getString(
-									R.string.str_no_favorite_server),
+									R.string.server_no_favorite),
 							Toast.LENGTH_SHORT).show();
 					Intent intent = new Intent(AbstractConnectionActivity.this,
 							SelectServerActivity.class);
@@ -98,7 +77,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 			}
 			// if there is a server id to connect -> connect
 			if (serverID >= 0 && newConnection)
-				binder.connectToServer(serverID);
+				mBinder.connectToServer(serverID);
 			else if (!newConnection)
 				AbstractConnectionActivity.this.onServerConnectionChanged(null,
 						-1);
@@ -112,7 +91,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		// bind remote service
 		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
-		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
+		bindService(intent, mPlayerConnection, Context.BIND_AUTO_CREATE);
 
 		// start widget service
 		intent = new Intent(this, RemoteService.class);
@@ -122,6 +101,16 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	};
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		mIsActive = true;
+	}
+
+	public boolean isActive() {
+		return mIsActive;
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == SelectServerActivity.RESULT_CODE) {
@@ -129,7 +118,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 				return;
 			serverID = data.getExtras().getInt(SelectServerActivity.SERVER_ID);
 			onStartConnecting();
-			binder.connectToServer(serverID);
+			mBinder.connectToServer(serverID);
 		}
 	}
 
@@ -143,9 +132,9 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		case R.id.opt_exit:
 			// intent = new Intent(this, RemoteService.class);
 			// stopService(intent);
-			binder.disconnect();
-			binder.removeRemoteActionListener(this);
-			unbindService(playerConnection);
+			mBinder.disconnect();
+			mBinder.removeRemoteActionListener(this);
+			unbindService(mPlayerConnection);
 			finish();
 			break;
 		}
@@ -155,19 +144,20 @@ public abstract class AbstractConnectionActivity extends Activity implements
 	@Override
 	protected void onPause() {
 		dismissProgress();
+		mIsActive = false;
 		super.onPause();
 	}
 
 	public ProgressDialog createProgress() {
 		dismissProgress();
-		progress = new ProgressDialog(this);
-		return progress;
+		mProgress = new ProgressDialog(this);
+		return mProgress;
 	}
 
 	public void dismissProgress() {
-		if (progress != null)
-			progress.dismiss();
-		progress = null;
+		if (mProgress != null)
+			mProgress.dismiss();
+		mProgress = null;
 	}
 
 	/**

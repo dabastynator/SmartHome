@@ -62,10 +62,10 @@ public class PlayerButtonFragment extends Fragment {
 
 	public void playerAction(final View v) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		if (activity.binder == null
-				|| activity.binder.getLatestMediaServer() == null)
+		if (activity.mBinder == null
+				|| activity.mBinder.getLatestMediaServer() == null)
 			return;
-		final IPlayer player = activity.binder.getLatestMediaServer().player;
+		final IPlayer player = activity.mBinder.getLatestMediaServer().player;
 		AsyncTask<String, Integer, String> task = new AsyncTask<String, Integer, String>() {
 
 			@Override

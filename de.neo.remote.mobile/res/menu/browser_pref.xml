@@ -5,7 +5,7 @@
         android:id="@+id/item2"
         android:icon="@drawable/player"
         android:showAsAction="never"
-        android:title="@string/str_player">
+        android:title="@string/player">
         <menu>
             <item
                 android:id="@+id/opt_mplayer"
@@ -17,16 +17,16 @@
     </item>
     <item
         android:id="@+id/item5"
-        android:showAsAction="ifRoom"
         android:icon="@drawable/pls_smal"
+        android:showAsAction="ifRoom"
         android:title="Playlists">
         <menu>
             <item
                 android:id="@+id/opt_playlist"
-                android:title="@string/str_show_playlist"/>
+                android:title="@string/playlist_show"/>
             <item
                 android:id="@+id/opt_create_playlist"
-                android:title="@string/str_create_playlist"/>
+                android:title="@string/playlist_add"/>
         </menu>
     </item>
     <item
@@ -37,35 +37,29 @@
         <menu>
             <item
                 android:id="@+id/opt_dvd_eject"
-                android:title="@string/str_eject"/>
+                android:title="@string/dvd_eject"/>
             <item
                 android:id="@+id/opt_dvd_menu"
-                android:title="@string/str_dvd_menu"/>
+                android:title="@string/dvd_menu"/>
             <item
                 android:id="@+id/opt_dvd_no_subtitle"
-                android:title="@string/str_dvd_no_sub"/>
+                android:title="@string/dvd_no_sub"/>
             <item
                 android:id="@+id/opt_dvd_next_subtitle"
-                android:title="@string/str_dvd_next_sub"/>
+                android:title="@string/dvd_next_sub"/>
         </menu>
     </item>
     <item
-        android:id="@+id/opt_record"
-        android:icon="@drawable/mic_32"
-        android:showAsAction="ifRoom"
-        android:title="@string/str_record">
-    </item>
-    <item
         android:id="@+id/opt_refresh"
-        android:showAsAction="ifRoom"
         android:icon="@drawable/refresh_32"
-        android:title="@string/str_refresh">
+        android:showAsAction="ifRoom"
+        android:title="@string/refresh">
     </item>
     <item
         android:id="@+id/opt_control"
-        android:showAsAction="ifRoom"
         android:icon="@drawable/control"
-        android:title="@string/str_control">
+        android:showAsAction="ifRoom"
+        android:title="@string/control">
         <menu>
             <item
                 android:id="@+id/opt_upload"
@@ -75,30 +69,27 @@
             <item
                 android:id="@+id/opt_light_on"
                 android:icon="@drawable/light_on"
-                android:title="@string/str_make_bright"/>
+                android:title="@string/make_bright"/>
             <item
                 android:id="@+id/opt_light_off"
                 android:icon="@drawable/light_off"
-                android:title="@string/str_make_dark"/>
+                android:title="@string/make_dark"/>
             <item
                 android:id="@+id/opt_audiotrack"
                 android:icon="@drawable/audio"
-                android:title="@string/str_audio_track"/>
+                android:title="@string/audio_track"/>
             <item
                 android:id="@+id/opt_right"
                 android:icon="@drawable/player_right"
-                android:title="@string/str_move_right"/>
+                android:title="@string/move_right"/>
             <item
                 android:id="@+id/opt_left"
                 android:icon="@drawable/player_left"
-                android:title="@string/str_move_left"/>
-            <item
-                android:id="@+id/opt_tatort"
-                android:title="@string/str_tatort"/>
+                android:title="@string/move_left"/>
             <item
                 android:id="@+id/opt_shutdown"
                 android:icon="@drawable/exit"
-                android:title="@string/str_shutdown"/>
+                android:title="@string/shutdown"/>
         </menu>
     </item>
 

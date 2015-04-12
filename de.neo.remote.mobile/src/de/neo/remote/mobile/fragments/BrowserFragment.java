@@ -31,11 +31,11 @@ import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.MediaState;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
-import de.neo.remote.mobile.activities.SelectPlaylistActivity;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.BrowserLoadTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
+import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.util.BrowserAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
@@ -123,11 +123,12 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 			Intent intent = new Intent(activity, ControlSceneActivity.class);
 			activity.startActivity(intent);
 		}
-		final StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		final StationStuff mediaServer = activity.mBinder
+				.getLatestMediaServer();
 		if (mediaServer == null) {
 			activity.setTitle(getActivity().getResources().getString(
-					R.string.str_no_mediaserver)
-					+ "@" + activity.binder.getLatestMediaServer().name);
+					R.string.mediaserver_no_server)
+					+ "@" + activity.mBinder.getLatestMediaServer().name);
 			browserContentView.setAdapter(new BrowserAdapter(activity, null,
 					new String[] {}, viewerState, activity.playingBean));
 			return;
@@ -188,60 +189,37 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 
 	public boolean onContextItemSelected(MenuItem item) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		final StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		final StationStuff mediaServer = activity.mBinder
+				.getLatestMediaServer();
 		switch (item.getItemId()) {
 		case R.id.opt_item_play:
-			new PlayItemTask(activity, selectedItem, activity.binder)
+			new PlayItemTask(activity, selectedItem, activity.mBinder)
 					.execute(new String[] {});
 			Toast.makeText(
 					activity,
 					getActivity().getResources().getString(
-							R.string.str_play_directory), Toast.LENGTH_SHORT)
+							R.string.player_play_directory), Toast.LENGTH_SHORT)
 					.show();
 			break;
 		case R.id.opt_item_addplaylist:
-			new Thread() {
-				public void run() {
-					try {
-						Intent i = new Intent(getActivity(),
-								SelectPlaylistActivity.class);
-						i.putExtra(SelectPlaylistActivity.PLS_LIST,
-								mediaServer.pls.getPlayLists());
-						startActivityForResult(i,
-								SelectPlaylistActivity.SELECT_PLS_CODE);
-					} catch (RemoteException e) {
-					}
-				};
-			}.start();
+			new PlayListTask(activity, mediaServer).addItem(selectedItem);
 			break;
 		case R.id.opt_item_download:
 			if (viewerState == ViewerState.PLAYLISTS) {
-				activity.binder.downloadPlaylist(
+				activity.mBinder.downloadPlaylist(
 						mediaServer.browser,
 						plsFileMap.values().toArray(
 								new String[plsFileMap.size()]), selectedItem);
 			} else if (selectedPosition < mediaServer.directoryCount)
-				activity.binder.downloadDirectory(activity,
+				activity.mBinder.downloadDirectory(activity,
 						mediaServer.browser, selectedItem);
 			else
-				activity.binder.downloadFile(activity, mediaServer.browser,
+				activity.mBinder.downloadFile(activity, mediaServer.browser,
 						selectedItem);
 			break;
 		case R.id.opt_pls_delete:
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.pls.removePlayList(selectedItem);
-					} catch (RemoteException e) {
-					}
-				};
-			}.start();
-			new BrowserLoadTask(activity, null, false).execute();
-			Toast.makeText(
-					activity,
-					activity.getResources().getString(
-							R.string.str_playlist_deleted)
-							+ ": " + selectedItem, Toast.LENGTH_SHORT).show();
+			new PlayListTask(activity, mediaServer)
+					.deletePlaylist(selectedItem);
 			break;
 		case R.id.opt_pls_show:
 			viewerState = ViewerState.PLS_ITEMS;
@@ -249,21 +227,8 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 			new BrowserLoadTask(activity, null, false).execute();
 			break;
 		case R.id.opt_pls_item_delete:
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.pls.removeItem(currentPlayList,
-								selectedItem);
-					} catch (Exception e) {
-					}
-				};
-			}.start();
-			new BrowserLoadTask(activity, null, false).execute();
-			Toast.makeText(
-					getActivity(),
-					getActivity().getResources().getString(
-							R.string.str_entry_deleted)
-							+ ": " + selectedItem, Toast.LENGTH_SHORT).show();
+			new PlayListTask(activity, mediaServer).deleteItemFromPlaylist(
+					currentPlayList, selectedItem);
 			break;
 		}
 		return super.onContextItemSelected(item);
@@ -273,33 +238,13 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		final StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		final StationStuff mediaServer = activity.mBinder
+				.getLatestMediaServer();
 		if (data == null)
 			return;
-		if (requestCode == SelectPlaylistActivity.SELECT_PLS_CODE) {
-			if (data.getExtras() == null)
-				return;
-			final String pls = data.getExtras().getString(
-					SelectPlaylistActivity.RESULT);
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.pls.extendPlayList(pls,
-								mediaServer.browser.getFullLocation()
-										+ selectedItem);
-					} catch (Exception e) {
-					}
-				};
-			}.start();
-			Toast.makeText(
-					activity,
-					getActivity().getResources().getString(
-							R.string.str_entry_add)
-							+ " :" + selectedItem, Toast.LENGTH_SHORT).show();
-		}
 		if (requestCode == MediaServerActivity.FILE_REQUEST) {
 			Uri uri = data.getData();
-			activity.binder.uploadFile(mediaServer.browser,
+			activity.mBinder.uploadFile(mediaServer.browser,
 					new File(activity.getFilePathByUri(uri)));
 		}
 	}
@@ -319,7 +264,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		if (activity.binder == null)
+		if (activity.mBinder == null)
 			return false;
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			selectedPosition = 0;
@@ -371,7 +316,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 		public void onItemClick(AdapterView<?> arg0, View view, int position,
 				long arg3) {
 			MediaServerActivity activity = (MediaServerActivity) getActivity();
-			StationStuff mediaServer = activity.binder.getLatestMediaServer();
+			StationStuff mediaServer = activity.mBinder.getLatestMediaServer();
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
 			if (viewerState == ViewerState.DIRECTORIES) {
@@ -384,7 +329,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 			if (viewerState == ViewerState.PLS_ITEMS)
 				item = plsFileMap.get(item);
 			PlayItemTask task = new PlayItemTask(
-					(MediaServerActivity) getActivity(), item, activity.binder);
+					(MediaServerActivity) getActivity(), item, activity.mBinder);
 			task.execute(new String[] {});
 		}
 	}
@@ -415,7 +360,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		downloadLayout.setVisibility(View.VISIBLE);
 		if (maxDonwloadSize == 0)
-			maxDonwloadSize = activity.binder.getReceiver().getFullSize();
+			maxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
 		downloadProgress.setProgress((int) ((100d * size) / maxDonwloadSize));
 		if (file != null)
 			downloadText.setText(file);
@@ -426,7 +371,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		downloadLayout.setVisibility(View.VISIBLE);
 		if (maxDonwloadSize == 0)
-			maxDonwloadSize = activity.binder.getReceiver().getFullSize();
+			maxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
 		downloadProgress.setProgress((int) ((100d * size) / maxDonwloadSize));
 	}
 
@@ -442,7 +387,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 
 	public void cancelDownload(View v) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		AbstractReceiver receiver = activity.binder.getReceiver();
+		AbstractReceiver receiver = activity.mBinder.getReceiver();
 		if (receiver != null) {
 			receiver.cancel();
 		} else {

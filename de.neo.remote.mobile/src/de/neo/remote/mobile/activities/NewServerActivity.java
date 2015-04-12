@@ -77,7 +77,7 @@ public class NewServerActivity extends Activity {
 				ip.getText().toString());
 		Toast.makeText(
 				this,
-				getResources().getString(R.string.str_server_added) + ": "
+				getResources().getString(R.string.server_added) + ": "
 						+ serverName, Toast.LENGTH_SHORT).show();
 		// Intent i = new Intent(this, SelectServerActivity.class);
 		// startActivity(i);

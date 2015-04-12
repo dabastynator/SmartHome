@@ -46,8 +46,8 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onServerConnectionChanged(String serverName, int serverID) {
-		if (binder.isConnected()) {
-			Map<String, BufferdUnit> switches = binder.getSwitches();
+		if (mBinder.isConnected()) {
+			Map<String, BufferdUnit> switches = mBinder.getSwitches();
 			String[] ids = switches.keySet().toArray(
 					new String[switches.size()]);
 			switchList.setAdapter(new SwitchAdapter(this, ids, switches,

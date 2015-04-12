@@ -32,7 +32,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		view = new AbstractSceneSurfaceView(this, savedInstanceState, renderer);
 		setContentView(view);
 
-		setTitle(getResources().getString(R.string.str_connecting));
+		setTitle(getResources().getString(R.string.connecting));
 		setProgressBarVisibility(true);
 	}
 
@@ -54,11 +54,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	}
 
 	private void updateGLView() {
-		if (binder.getControlCenter() == null) {
-			setTitle(getResources().getString(R.string.str_no_controlcenter));
+		if (mBinder.getControlCenter() == null) {
+			setTitle(getResources().getString(R.string.no_controlcenter));
 			setProgressBarVisibility(false);
 		} else {
-			setTitle(getResources().getString(R.string.str_load_controlcenter));
+			setTitle(getResources().getString(R.string.load_controlcenter));
 			setProgressBarVisibility(true);
 			new Thread(new UpdateGLViewRunner()).start();
 		}
@@ -72,7 +72,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 			setProgressBarVisibility(true);
 			new Thread() {
 				public void run() {
-					binder.refreshControlCenter();
+					mBinder.refreshControlCenter();
 					new UpdateGLViewRunner().run();
 				};
 			}.start();
@@ -108,7 +108,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	void onStartConnecting() {
-		setTitle(getResources().getString(R.string.str_connecting));
+		setTitle(getResources().getString(R.string.connecting));
 		setProgressBarVisibility(true);
 	}
 
@@ -117,17 +117,17 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		@Override
 		public void run() {
 			try {
-				renderer.reloadControlCenter(binder);
+				renderer.reloadControlCenter(mBinder);
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						if (binder.getControlCenter() != null)
+						if (mBinder.getControlCenter() != null)
 							Toast.makeText(
 									ControlSceneActivity.this,
 									getResources().getString(
-											R.string.str_loaded_controlcenter),
+											R.string.loaded_controlcenter),
 									Toast.LENGTH_SHORT).show();
-						setTitle("Controlcenter@" + binder.getServerName());
+						setTitle("Controlcenter@" + mBinder.getServerName());
 						setProgressBarVisibility(false);
 					}
 				});
@@ -138,11 +138,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 						Toast.makeText(
 								ControlSceneActivity.this,
 								getResources().getString(
-										R.string.str_error_load_server)
+										R.string.error_load_server)
 										+ ": " + e.getMessage(),
 								Toast.LENGTH_LONG).show();
 						setTitle(getResources().getString(
-								R.string.str_no_conneciton));
+								R.string.no_conneciton));
 						setProgressBarVisibility(false);
 					}
 				});

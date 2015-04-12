@@ -32,10 +32,9 @@ import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.BrowserLoadTask;
+import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayTatortTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
-import de.neo.remote.mobile.util.AI;
-import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.mobile.R;
 
@@ -70,7 +69,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	protected IRemoteActionListener remoteListener;
 	protected ProgressBar downloadProgress;
-	protected AI ai;
 	public ImageView mplayerButton;
 	public ImageView totemButton;
 	public ImageView filesystemButton;
@@ -99,11 +97,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
-			mediaServerID = getIntent().getExtras().getString(
-					EXTRA_MEDIA_ID);
+			mediaServerID = getIntent().getExtras().getString(EXTRA_MEDIA_ID);
 		}
-
-		ai = new AI(this);
 
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(true);
@@ -111,8 +106,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		if (binder == null || binder.getLatestMediaServer() == null
-				|| !mediaserver.equals(binder.getLatestMediaServer().name))
+		if (mBinder == null || mBinder.getLatestMediaServer() == null
+				|| !mediaserver.equals(mBinder.getLatestMediaServer().name))
 			return;
 		if (buttonFragment != null)
 			buttonFragment.onPlayingBeanChanged(mediaserver, bean);
@@ -132,7 +127,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void disableScreen() {
-		setTitle(getResources().getString(R.string.str_no_conneciton));
+		setTitle(getResources().getString(R.string.no_conneciton));
 		setProgressBarVisibility(false);
 	}
 
@@ -144,8 +139,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		final StationStuff mediaServer = binder.getLatestMediaServer();
-		if (binder == null)
+		final StationStuff mediaServer = mBinder.getLatestMediaServer();
+		if (mBinder == null)
 			return super.onKeyDown(keyCode, event);
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			new Thread() {
@@ -177,7 +172,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void showDVDBar(View v) {
-		IPlayer player = binder.getLatestMediaServer().player;
+		IPlayer player = mBinder.getLatestMediaServer().player;
 		if (dvdLayout.getVisibility() == View.VISIBLE) {
 			dvdLayout.setVisibility(View.GONE);
 			dvdButton.setBackgroundResource(0);
@@ -199,13 +194,13 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onDestroy() {
-		unbindService(playerConnection);
+		unbindService(mPlayerConnection);
 		super.onDestroy();
 	}
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
-		StationStuff mediaServer = binder.getLatestMediaServer();
+		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
@@ -255,11 +250,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				}
 				break;
 			case R.id.opt_refresh:
-				binder.getMediaServerByID(mediaServerID);
+				mBinder.getMediaServerByID(mediaServerID);
 				new BrowserLoadTask(this, null, false).execute();
-				break;
-			case R.id.opt_record:
-				ai.record();
 				break;
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -268,12 +260,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 						Intent.createChooser(intent, "File Chooser"),
 						FILE_REQUEST);
 				break;
-			case R.id.opt_tatort:
-				askForStream();
-				break;
-
 			case R.id.opt_create_playlist:
-				createNewPlaylist();
+				new PlayListTask(this, mediaServer).createPlaylist();
 				break;
 			}
 		} catch (Exception e) {
@@ -286,7 +274,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle(getResources().getString(R.string.str_input_stream));
-		alert.setMessage(getResources().getString(R.string.str_input_stream_url));
+		alert.setMessage(getResources()
+				.getString(R.string.str_input_stream_url));
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
@@ -296,13 +285,14 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String document = input.getText().toString();
-						try{
+						try {
 							int documentID = Integer.parseInt(document);
 							PlayTatortTask task = new PlayTatortTask(
-									MediaServerActivity.this, documentID, binder);
+									MediaServerActivity.this, documentID,
+									mBinder);
 							task.execute(new String[] {});
-						}catch(Exception e){
-							
+						} catch (Exception e) {
+
 						}
 					}
 				});
@@ -350,55 +340,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			browserFragment.onRestoreInstanceState(bundle);
 	}
 
-	private void createNewPlaylist() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle(getResources().getString(R.string.str_playlist_add));
-		alert.setMessage(getResources().getString(R.string.str_playlist_name));
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(this);
-		alert.setView(input);
-
-		if (binder == null)
-			return;
-		final StationStuff mediaServer = binder.getLatestMediaServer();
-		if (mediaServer == null)
-			return;
-
-		alert.setPositiveButton(getResources().getString(android.R.string.ok),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						final String pls = input.getText().toString();
-						new Thread() {
-							public void run() {
-								try {
-									mediaServer.pls.addPlayList(pls);
-								} catch (RemoteException e) {
-								}
-							};
-						}.start();
-						new BrowserLoadTask(MediaServerActivity.this, null,
-								false).execute();
-						Toast.makeText(
-								MediaServerActivity.this,
-								getResources().getString(
-										R.string.str_playlist_added)
-										+ ": " + pls, Toast.LENGTH_SHORT)
-								.show();
-					}
-				});
-
-		alert.setNegativeButton(
-				getResources().getString(android.R.string.cancel),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-					}
-				});
-
-		alert.show();
-	}
-
 	/**
 	 * convert given uri to file path.
 	 * 
@@ -427,7 +368,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onStartConnecting() {
-		setTitle(getResources().getString(R.string.str_connecting));
+		setTitle(getResources().getString(R.string.connecting));
 		setProgressBarVisibility(true);
 		if (browserFragment != null)
 			browserFragment.browserContentView
@@ -438,15 +379,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	void onBinderConnected() {
-		if (binder.getLatestMediaServer() != null
-				&& !binder.getLatestMediaServer().name.equals(mediaServerID)) {
+		if (mBinder.getLatestMediaServer() != null
+				&& !mBinder.getLatestMediaServer().name.equals(mediaServerID)) {
 			new BrowserLoadTask(this, null, false).execute();
 		}
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 			if (youtubeURL != null) {
-				new PlayYoutubeTask(this, youtubeURL, binder)
+				new PlayYoutubeTask(this, youtubeURL, mBinder)
 						.execute(new String[] {});
 				getIntent().removeExtra(Intent.EXTRA_TEXT);
 			}
@@ -460,7 +401,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (extras != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 			if (youtubeURL != null) {
-				new PlayYoutubeTask(this, youtubeURL, binder)
+				new PlayYoutubeTask(this, youtubeURL, mBinder)
 						.execute(new String[] {});
 				getIntent().removeExtra(Intent.EXTRA_TEXT);
 			}
@@ -493,14 +434,13 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			protected void onPreExecute() {
 				super.onPreExecute();
 				setProgressBarVisibility(true);
-				setTitle(getResources().getString(
-						R.string.str_load_mediaobjects));
+				setTitle(getResources().getString(R.string.mediaserver_load));
 			}
 
 			@Override
 			protected String[] doInBackground(String... params) {
 				try {
-					binder.getMediaServerByID(mediaServerID);
+					mBinder.getMediaServerByID(mediaServerID);
 					return new String[] {};
 				} catch (Exception e) {
 					exeption = e;
@@ -513,13 +453,12 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				if (exeption != null)
 					Toast.makeText(MediaServerActivity.this,
 							exeption.getMessage(), Toast.LENGTH_SHORT).show();
-				if (binder.getLatestMediaServer() != null) {
+				if (mBinder.getLatestMediaServer() != null) {
 					new BrowserLoadTask(MediaServerActivity.this, null, false)
 							.execute();
 				} else {
 					disableScreen();
 				}
-				ai.setPlayerBinder(binder);
 			}
 
 		}.execute(new String[] {});
@@ -536,11 +475,11 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		public void run() {
 			new BrowserLoadTask(MediaServerActivity.this, null, false)
 					.execute();
-			if (binder.getReceiver() != null
-					&& binder.getReceiver().getState() == ReceiverState.LOADING) {
+			if (mBinder.getReceiver() != null
+					&& mBinder.getReceiver().getState() == ReceiverState.LOADING) {
 				downloadLayout.setVisibility(View.VISIBLE);
-				downloadProgress.setProgress((int) ((100d * binder
-						.getReceiver().getDownloadProgress()) / binder
+				downloadProgress.setProgress((int) ((100d * mBinder
+						.getReceiver().getDownloadProgress()) / mBinder
 						.getReceiver().getFullSize()));
 			}
 		}
@@ -561,7 +500,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setTotem(View view) {
-		StationStuff mediaServer = binder.getLatestMediaServer();
+		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mediaServer != null) {
 			mediaServer.player = mediaServer.totem;
 			totemButton.setBackgroundResource(R.drawable.image_border);
@@ -572,7 +511,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setMPlayer(View view) {
-		StationStuff mediaServer = binder.getLatestMediaServer();
+		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mediaServer != null) {
 			mediaServer.player = mediaServer.mplayer;
 			mplayerButton.setBackgroundResource(R.drawable.image_border);
@@ -583,7 +522,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setOMXPlayer(View view) {
-		StationStuff server = binder.getLatestMediaServer();
+		StationStuff server = mBinder.getLatestMediaServer();
 		if (server != null) {
 			server.player = server.omxplayer;
 			omxButton.setBackgroundResource(R.drawable.image_border);

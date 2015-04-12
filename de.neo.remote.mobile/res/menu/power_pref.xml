@@ -2,28 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/opt_record"
-        android:icon="@drawable/mic_32"
-        android:showAsAction="ifRoom"
-        android:title="@string/str_record">
-    </item>
-    <item
         android:id="@+id/opt_server_select"
         android:icon="@drawable/server"
         android:showAsAction="ifRoom"
-        android:title="@string/str_server_name">
+        android:title="@string/server_name">
     </item>
     <item
         android:id="@+id/opt_control_refresh"
         android:icon="@drawable/refresh_32"
         android:showAsAction="ifRoom"
-        android:title="@string/str_refresh">
-    </item>    
+        android:title="@string/refresh">
+    </item>
     <item
         android:id="@+id/opt_exit"
         android:icon="@drawable/exit"
         android:showAsAction="never"
-        android:title="@string/str_exit">
+        android:title="@string/exit">
     </item>
 
 </menu>

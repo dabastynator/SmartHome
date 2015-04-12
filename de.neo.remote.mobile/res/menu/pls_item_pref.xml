@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/opt_pls_item_delete"
-        android:title="@string/str_remove_from_playlist">
+        android:title="@string/playlist_remove_item">
     </item>
 
 </menu>

@@ -1,69 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="str_record">Record</string>
-    <string name="str_left">Left</string>
-    <string name="str_right">Right</string>
-    <string name="str_player">Player</string>
-    <string name="str_make_bright">Bright display</string>
-    <string name="str_make_dark">Dark display</string>
-    <string name="str_audio_track">Next audio track</string>
-    <string name="str_move_right">Move right</string>
-    <string name="str_move_left">Move left</string>
-    <string name="str_shutdown">Shutdown</string>
-    <string name="str_control">Control</string>
-    <string name="str_exit">Exit</string>
-    <string name="str_play">Play</string>
-    <string name="str_pause">Pause</string>
-    <string name="str_vol_down">Leiser</string>
-    <string name="str_vol_up">Lauter</string>
-    <string name="str_add_to_playlist">Add to playlist</string>
-    <string name="str_delete">Delete</string>
-    <string name="str_remove_from_playlist">Remove from playlist</string>
-    <string name="str_show_playlist">Show playlist</string>
-    <string name="str_delete_playlist">Delete playlist</string>
-    <string name="str_server_favorite">Set as favorite</string>
-    <string name="str_server_edit">Edit</string>
-    <string name="str_server_name">Server</string>
-    <string name="str_add_new_server">Add new server</string>
-    <string name="str_ip">IP</string>
-    <string name="str_post">Post</string>
+    <!-- Options -->
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="make_bright">Bright display</string>
+    <string name="make_dark">Dark display</string>
+    <string name="audio_track">Next audio track</string>
+    <string name="move_right">Move right</string>
+    <string name="move_left">Move left</string>
+    <string name="shutdown">Shutdown</string>
+    <string name="control">Control</string>
+    <string name="exit">Exit</string>
+
+    <!-- Play control strings -->
+    <string name="player">Player</string>
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_vol_down">Vol down</string>
+    <string name="player_vol_up">Vol up</string>
+    <string name="player_no_file_playing">No file playing</string>
+    <string name="player_play_directory">Play directory</string>
+
+    <!-- DVD Strings -->
+    <string name="dvd_eject">Eject</string>
+    <string name="dvd_menu">Menu</string>
+    <string name="dvd_no_sub">Subtitles off</string>
+    <string name="dvd_next_sub">Next subtitle</string>
+
+    <!-- Playlist strings -->
+    <string name="playlist_add_item">Add to playlist</string>
+    <string name="playlist_select">Select playlist</string>
+    <string name="playlist_remove_item">Remove from playlist</string>
+    <string name="playlist_show">Show playlist</string>
+    <string name="playlist_delete">Delete playlist</string>
+    <string name="playlist_deleted">Playlist deleted</string>
+    <string name="playlist_added">Playlist added</string>
+    <string name="playlist_add">Add playlist</string>
+    <string name="playlist_enter_name">Enter name for new playlist</string>
+
+    <!-- Server strings -->
+    <string name="server_favorite">Set as favorite</string>
+    <string name="server_edit">Edit</string>
+    <string name="server_name">Server</string>
+    <string name="server_add_new_server">Add new server</string>
+    <string name="server_ip">IP</string>
+    <string name="server_post">Post</string>
+    <string name="server_added">Server added</string>
+    <string name="server_no_favorite">No favorite server found</string>
+
+    <!-- Remote connection strings -->
+    <string name="connecting">Connecting...</string>
+    <string name="load_controlcenter">Load controlcenter</string>
+    <string name="loaded_controlcenter">Controlcenter loaded</string>
+    <string name="no_controlcenter">No controlcenter in registry</string>
+    <string name="loading">Loading...</string>
+    <string name="no_conneciton">No connection</string>
+    <string name="no_conneciton_with_server">No server connected</string>
+    <string name="error_load_server">Connection error</string>
+    <string name="refresh">Refresh</string>
+
+    <!-- Media server strings -->
+    <string name="mediaserver_load">Load mediaserver...</string>
+    <string name="mediaserver_no_server">No mediaserver</string>
+    <string name="mediaserver_no_server_selected_at">No mediaserver selected at </string>
+
+    <!-- Power switch -->
+    <string name="switch_power">Internet Power Switch</string>
+    <string name="switch_has_no_switch"> has no switch </string>
+
+    <!-- General -->
     <string name="str_create">Create</string>
     <string name="str_name">Name</string>
+    <string name="delete">Delete</string>
     <string name="app_name">RemoteControl</string>
-    <string name="str_create_playlist">Create new playlist</string>
-    <string name="str_clear_screen">Clear</string>
-    <string name="str_chat_name">Change name</string>
     <string name="str_download">Download</string>
     <string name="str_upload">Upload</string>
-    <string name="str_webcam">Webcam</string>
-    <string name="add_new_server">add new server</string>
-    <string name="str_power">Internet Power Switch</string>
-    <string name="str_tatort">Stream ARD Mediathek</string>
-    <string name="str_play_directory">Ordner abspielen</string>
     <string name="str_entry_deleted">Eintrag gelöscht</string>
     <string name="str_entry_add">Eintrag hinzugefügt</string>
-    <string name="str_playlist_deleted">Playlist gelöscht</string>
-    <string name="str_playlist_added">Playlist hinzugefügt</string>
-    <string name="str_playlist_add">Playlist hinzufügen</string>
-    <string name="str_playlist_name">Gib den Namen der neuen Playlist ein</string>
-    <string name="str_connecting">Verbinden...</string>
-    <string name="str_load_mediaobjects">Lade Mediaserver...</string>
-    <string name="str_load_controlcenter">Lade Controlcenter</string>
-    <string name="str_loaded_controlcenter">Controlcenter geladen</string>
-    <string name="str_loading">Lade</string>
-    <string name="str_no_conneciton">Keine Verbindung</string>
-    <string name="str_no_conneciton_with_server">Keine Verbindung mit einem Server</string>
-    <string name="str_no_mediaserver">Kein Mediaserver</string>
-    <string name="str_no_mediaserver_at">Kein Mediaserver festgelegt bei </string>
-    <string name="str_no_file_playing">Keine Datei abgespielt</string>
-    <string name="str_refresh">Neu Laden</string>
-    <string name="str_no_controlcenter">Kein Controlcenter</string>
-    <string name="str_no_favorite_server">Kein bevorzuger Server vorhanden</string>
-    <string name="str_error_load_server">Fehler beim Verbinungsaufbau</string>
-    <string name="str_input_stream">ARD Sream speichern</string>
-    <string name="str_input_stream_url">Gib die "DocumentId" ein</string>
-    <string name="str_server_added">Server hinzugefügt</string>
-    <string name="str_has_no_switch"> hat keinen Schalter </string>
 
 </resources>

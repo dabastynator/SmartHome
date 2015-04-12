@@ -214,39 +214,37 @@ public final class R {
         public static final int mediaserver_fragment_browser=0x7f080028;
         public static final int mediaserver_fragment_button=0x7f080029;
         public static final int mediaserver_fragment_button_right=0x7f08002a;
-        public static final int opt_audiotrack=0x7f080054;
-        public static final int opt_control=0x7f080050;
-        public static final int opt_control_refresh=0x7f080060;
+        public static final int opt_audiotrack=0x7f080053;
+        public static final int opt_control=0x7f08004f;
+        public static final int opt_control_refresh=0x7f08005e;
         public static final int opt_create_playlist=0x7f080048;
         public static final int opt_dvd=0x7f080049;
         public static final int opt_dvd_eject=0x7f08004a;
         public static final int opt_dvd_menu=0x7f08004b;
         public static final int opt_dvd_next_subtitle=0x7f08004d;
         public static final int opt_dvd_no_subtitle=0x7f08004c;
-        public static final int opt_exit=0x7f080061;
-        public static final int opt_item_addplaylist=0x7f08005a;
-        public static final int opt_item_download=0x7f08005b;
-        public static final int opt_item_play=0x7f080059;
-        public static final int opt_left=0x7f080056;
-        public static final int opt_light_off=0x7f080053;
-        public static final int opt_light_on=0x7f080052;
+        public static final int opt_exit=0x7f08005f;
+        public static final int opt_item_addplaylist=0x7f080058;
+        public static final int opt_item_download=0x7f080059;
+        public static final int opt_item_play=0x7f080057;
+        public static final int opt_left=0x7f080055;
+        public static final int opt_light_off=0x7f080052;
+        public static final int opt_light_on=0x7f080051;
         public static final int opt_mplayer=0x7f080044;
         public static final int opt_playlist=0x7f080047;
-        public static final int opt_pls_delete=0x7f08005e;
-        public static final int opt_pls_item_delete=0x7f08005c;
-        public static final int opt_pls_show=0x7f08005d;
-        public static final int opt_record=0x7f08004e;
-        public static final int opt_refresh=0x7f08004f;
-        public static final int opt_right=0x7f080055;
-        public static final int opt_select_server_add=0x7f080062;
-        public static final int opt_server_delete=0x7f080063;
-        public static final int opt_server_edit=0x7f080064;
-        public static final int opt_server_favorite=0x7f080065;
-        public static final int opt_server_select=0x7f08005f;
-        public static final int opt_shutdown=0x7f080058;
-        public static final int opt_tatort=0x7f080057;
+        public static final int opt_pls_delete=0x7f08005c;
+        public static final int opt_pls_item_delete=0x7f08005a;
+        public static final int opt_pls_show=0x7f08005b;
+        public static final int opt_refresh=0x7f08004e;
+        public static final int opt_right=0x7f080054;
+        public static final int opt_select_server_add=0x7f080060;
+        public static final int opt_server_delete=0x7f080061;
+        public static final int opt_server_edit=0x7f080062;
+        public static final int opt_server_favorite=0x7f080063;
+        public static final int opt_server_select=0x7f08005d;
+        public static final int opt_shutdown=0x7f080056;
         public static final int opt_totem=0x7f080045;
-        public static final int opt_upload=0x7f080051;
+        public static final int opt_upload=0x7f080050;
         public static final int prg_donwload=0x7f08000a;
         public static final int server_list=0x7f08003c;
         public static final int status_icon=0x7f080000;
@@ -290,75 +288,132 @@ public final class R {
         public static final int server_pref=0x7f070006;
     }
     public static final class string {
-        public static final int add_new_server=0x7f060024;
-        public static final int app_name=0x7f06001d;
-        public static final int str_add_new_server=0x7f060018;
-        public static final int str_add_to_playlist=0x7f060010;
-        public static final int str_audio_track=0x7f060006;
-        public static final int str_chat_name=0x7f060020;
-        public static final int str_clear_screen=0x7f06001f;
-        public static final int str_connecting=0x7f06002e;
-        public static final int str_control=0x7f06000a;
-        public static final int str_create=0x7f06001b;
-        public static final int str_create_playlist=0x7f06001e;
-        public static final int str_delete=0x7f060011;
-        public static final int str_delete_playlist=0x7f060014;
-        public static final int str_download=0x7f060021;
-        public static final int str_dvd_menu=0x7f060041;
-        public static final int str_dvd_next_sub=0x7f060043;
-        public static final int str_dvd_no_sub=0x7f060042;
-        public static final int str_eject=0x7f060040;
-        public static final int str_entry_add=0x7f060029;
-        public static final int str_entry_deleted=0x7f060028;
-        public static final int str_error_load_server=0x7f06003b;
-        public static final int str_exit=0x7f06000b;
-        public static final int str_has_no_switch=0x7f06003f;
-        public static final int str_input_stream=0x7f06003c;
-        public static final int str_input_stream_url=0x7f06003d;
-        public static final int str_ip=0x7f060019;
-        public static final int str_left=0x7f060001;
-        public static final int str_load_controlcenter=0x7f060030;
-        public static final int str_load_mediaobjects=0x7f06002f;
-        public static final int str_loaded_controlcenter=0x7f060031;
-        public static final int str_loading=0x7f060032;
-        public static final int str_make_bright=0x7f060004;
-        public static final int str_make_dark=0x7f060005;
-        public static final int str_move_left=0x7f060008;
-        public static final int str_move_right=0x7f060007;
-        public static final int str_name=0x7f06001c;
-        public static final int str_no_conneciton=0x7f060033;
-        public static final int str_no_conneciton_with_server=0x7f060034;
-        public static final int str_no_controlcenter=0x7f060039;
-        public static final int str_no_favorite_server=0x7f06003a;
-        public static final int str_no_file_playing=0x7f060037;
-        public static final int str_no_mediaserver=0x7f060035;
-        public static final int str_no_mediaserver_at=0x7f060036;
-        public static final int str_pause=0x7f06000d;
-        public static final int str_play=0x7f06000c;
-        public static final int str_play_directory=0x7f060027;
-        public static final int str_player=0x7f060003;
-        public static final int str_playlist_add=0x7f06002c;
-        public static final int str_playlist_added=0x7f06002b;
-        public static final int str_playlist_deleted=0x7f06002a;
-        public static final int str_playlist_name=0x7f06002d;
-        public static final int str_post=0x7f06001a;
-        public static final int str_power=0x7f060025;
-        public static final int str_record=0x7f060000;
-        public static final int str_refresh=0x7f060038;
-        public static final int str_remove_from_playlist=0x7f060012;
-        public static final int str_right=0x7f060002;
-        public static final int str_search=0x7f060044;
-        public static final int str_server_added=0x7f06003e;
-        public static final int str_server_edit=0x7f060016;
-        public static final int str_server_favorite=0x7f060015;
-        public static final int str_server_name=0x7f060017;
-        public static final int str_show_playlist=0x7f060013;
-        public static final int str_shutdown=0x7f060009;
-        public static final int str_tatort=0x7f060026;
-        public static final int str_upload=0x7f060022;
-        public static final int str_vol_down=0x7f06000e;
-        public static final int str_vol_up=0x7f06000f;
-        public static final int str_webcam=0x7f060023;
+        public static final int add_new_server=0x7f060058;
+        public static final int app_name=0x7f060037;
+        public static final int audio_track=0x7f060004;
+        /**  Remote connection strings 
+ Remote connection strings 
+         */
+        public static final int connecting=0x7f060026;
+        public static final int control=0x7f060008;
+        public static final int delete=0x7f060036;
+        /**  DVD Strings 
+ DVD Strings 
+         */
+        public static final int dvd_eject=0x7f060011;
+        public static final int dvd_menu=0x7f060012;
+        public static final int dvd_next_sub=0x7f060014;
+        public static final int dvd_no_sub=0x7f060013;
+        public static final int error_load_server=0x7f06002d;
+        public static final int exit=0x7f060009;
+        /**  Options 
+ Options 
+         */
+        public static final int left=0x7f060000;
+        public static final int load_controlcenter=0x7f060027;
+        public static final int loaded_controlcenter=0x7f060028;
+        public static final int loading=0x7f06002a;
+        public static final int make_bright=0x7f060002;
+        public static final int make_dark=0x7f060003;
+        /**  Media server strings 
+ Media server strings 
+         */
+        public static final int mediaserver_load=0x7f06002f;
+        public static final int mediaserver_no_server=0x7f060030;
+        public static final int mediaserver_no_server_selected_at=0x7f060031;
+        public static final int move_left=0x7f060006;
+        public static final int move_right=0x7f060005;
+        public static final int no_conneciton=0x7f06002b;
+        public static final int no_conneciton_with_server=0x7f06002c;
+        public static final int no_controlcenter=0x7f060029;
+        /**  Play control strings 
+         */
+        public static final int player=0x7f06000a;
+        public static final int player_no_file_playing=0x7f06000f;
+        public static final int player_pause=0x7f06000c;
+        /**  Play control strings 
+         */
+        public static final int player_play=0x7f06000b;
+        public static final int player_play_directory=0x7f060010;
+        public static final int player_vol_down=0x7f06000d;
+        public static final int player_vol_up=0x7f06000e;
+        public static final int playlist_add=0x7f06001c;
+        /**  Playlist strings 
+ Playlist strings 
+         */
+        public static final int playlist_add_item=0x7f060015;
+        public static final int playlist_added=0x7f06001b;
+        public static final int playlist_delete=0x7f060019;
+        public static final int playlist_deleted=0x7f06001a;
+        public static final int playlist_enter_name=0x7f06001d;
+        public static final int playlist_remove_item=0x7f060017;
+        public static final int playlist_select=0x7f060016;
+        public static final int playlist_show=0x7f060018;
+        public static final int refresh=0x7f06002e;
+        public static final int right=0x7f060001;
+        public static final int server_add_new_server=0x7f060021;
+        public static final int server_added=0x7f060024;
+        public static final int server_edit=0x7f06001f;
+        /**  Server strings 
+ Server strings 
+         */
+        public static final int server_favorite=0x7f06001e;
+        public static final int server_ip=0x7f060022;
+        public static final int server_name=0x7f060020;
+        public static final int server_no_favorite=0x7f060025;
+        public static final int server_post=0x7f060023;
+        public static final int shutdown=0x7f060007;
+        public static final int str_add_new_server=0x7f060051;
+        public static final int str_add_to_playlist=0x7f060049;
+        public static final int str_audio_track=0x7f060042;
+        public static final int str_chat_name=0x7f060056;
+        public static final int str_clear_screen=0x7f060055;
+        public static final int str_control=0x7f060046;
+        /**  General 
+ General 
+         */
+        public static final int str_create=0x7f060034;
+        public static final int str_create_playlist=0x7f060054;
+        public static final int str_delete=0x7f06004a;
+        public static final int str_delete_playlist=0x7f06004d;
+        public static final int str_download=0x7f060038;
+        public static final int str_dvd_menu=0x7f06005c;
+        public static final int str_dvd_next_sub=0x7f06005e;
+        public static final int str_dvd_no_sub=0x7f06005d;
+        public static final int str_eject=0x7f06005b;
+        public static final int str_entry_add=0x7f06003b;
+        public static final int str_entry_deleted=0x7f06003a;
+        public static final int str_exit=0x7f060047;
+        public static final int str_input_stream=0x7f060060;
+        public static final int str_input_stream_url=0x7f060061;
+        public static final int str_ip=0x7f060052;
+        public static final int str_left=0x7f06003d;
+        public static final int str_make_bright=0x7f060040;
+        public static final int str_make_dark=0x7f060041;
+        public static final int str_move_left=0x7f060044;
+        public static final int str_move_right=0x7f060043;
+        public static final int str_name=0x7f060035;
+        public static final int str_play=0x7f060048;
+        public static final int str_player=0x7f06003f;
+        public static final int str_post=0x7f060053;
+        public static final int str_power=0x7f060059;
+        public static final int str_record=0x7f06003c;
+        public static final int str_refresh=0x7f06005a;
+        public static final int str_remove_from_playlist=0x7f06004b;
+        public static final int str_right=0x7f06003e;
+        public static final int str_search=0x7f06005f;
+        public static final int str_server_edit=0x7f06004f;
+        public static final int str_server_favorite=0x7f06004e;
+        public static final int str_server_name=0x7f060050;
+        public static final int str_show_playlist=0x7f06004c;
+        public static final int str_shutdown=0x7f060045;
+        public static final int str_upload=0x7f060039;
+        public static final int str_webcam=0x7f060057;
+        public static final int switch_has_no_switch=0x7f060033;
+        /**  Power switch 
+ Power switch 
+         */
+        public static final int switch_power=0x7f060032;
     }
     public static final class xml {
         public static final int widget_info=0x7f040000;

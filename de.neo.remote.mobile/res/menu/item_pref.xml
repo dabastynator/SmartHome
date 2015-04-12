@@ -3,11 +3,11 @@
 
     <item
         android:id="@+id/opt_item_play"
-        android:title="@string/str_play">
+        android:title="@string/player_play">
     </item>
     <item
         android:id="@+id/opt_item_addplaylist"
-        android:title="@string/str_add_to_playlist">
+        android:title="@string/playlist_add_item">
     </item>
     <item
         android:id="@+id/opt_item_download"

@@ -30,7 +30,7 @@ public class BrowserLoadTask extends AbstractTask {
 
 	@Override
 	protected String getDialogTitle() {
-		return activity.getResources().getString(R.string.str_loading);
+		return activity.getResources().getString(R.string.loading);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class BrowserLoadTask extends AbstractTask {
 
 	private String[] loadItems(String gotoPath) throws RemoteException,
 			PlayerException {
-		StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		StationStuff mediaServer = activity.mBinder.getLatestMediaServer();
 		if (mediaServer == null) {
 			activity.disableScreen();
 			return new String[] {};
@@ -85,20 +85,20 @@ public class BrowserLoadTask extends AbstractTask {
 		super.onPostExecute(result);
 		if (exception == null)
 			browser_fragment.onLoadedItems(itemArray, goBack);
-		StationStuff mediaServer = activity.binder.getLatestMediaServer();
+		StationStuff mediaServer = activity.mBinder.getLatestMediaServer();
 		IPlayer player = mediaServer.player;
 		activity.totemButton.setBackgroundResource(0);
 		activity.mplayerButton.setBackgroundResource(0);
 		if (activity.omxButton != null)
-		activity.omxButton.setBackgroundResource(0);
-		if (player == activity.binder.getLatestMediaServer().mplayer)
-		activity.mplayerButton
-		.setBackgroundResource(R.drawable.image_border);
-		if (player == activity.binder.getLatestMediaServer().totem)
-		activity.totemButton.setBackgroundResource(R.drawable.image_border);
-		if (player == activity.binder.getLatestMediaServer().omxplayer
-		&& activity.omxButton != null)
-		activity.omxButton.setBackgroundResource(R.drawable.image_border);
+			activity.omxButton.setBackgroundResource(0);
+		if (player == activity.mBinder.getLatestMediaServer().mplayer)
+			activity.mplayerButton
+					.setBackgroundResource(R.drawable.image_border);
+		if (player == activity.mBinder.getLatestMediaServer().totem)
+			activity.totemButton.setBackgroundResource(R.drawable.image_border);
+		if (player == activity.mBinder.getLatestMediaServer().omxplayer
+				&& activity.omxButton != null)
+			activity.omxButton.setBackgroundResource(R.drawable.image_border);
 	}
 
 }
