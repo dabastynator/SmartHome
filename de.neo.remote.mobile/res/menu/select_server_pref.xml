@@ -4,6 +4,7 @@
     <item
         android:id="@+id/opt_select_server_add"
         android:icon="@drawable/addserver"
+        android:showAsAction="ifRoom"
         android:title="@string/server_add_new_server">
     </item>
 

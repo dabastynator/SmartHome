@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
+import de.neo.android.persistence.DaoBuilder;
+import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
@@ -23,7 +25,9 @@ import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.database.RemoteDatabase;
+import de.neo.remote.mobile.persistence.RemoteDaoFilling;
+import de.neo.remote.mobile.persistence.RemoteDataBase;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
@@ -37,80 +41,24 @@ import de.neo.rmi.transceiver.SenderProgress;
 
 public class RemoteService extends Service {
 
-	/**
-	 * name of current server
-	 */
-	protected int serverID;
+	protected RemoteServer mCurrentServer;
+	protected ControlCenterBuffer mCurrentControlCenter;
+	public StationStuff mCurrentMediaServer;
+	protected PlayingBean mCurrentPlayingFile;
 
-	/**
-	 * ip of current server
-	 */
-	protected String serverIP;
-
-	/**
-	 * name of current server
-	 */
-	protected String serverName;
-
-	/**
-	 * the binder to execute all functions
-	 */
-	protected PlayerBinder binder;
-
-	/**
-	 * local server, to provide
-	 */
-	protected Server localServer;
-
-	/**
-	 * remote station list object
-	 */
-	protected ControlCenterBuffer controlCenter;
-
-	protected Map<String, BufferdUnit> unitMap;
-
-	/**
-	 * listener for player
-	 */
-	protected PlayerListener playerListener;
-
-	/**
-	 * listener for download progress and playing files to update notifications
-	 */
-	protected NotificationHandler notificationHandler;
+	protected PlayerBinder mBinder;
+	protected Server mLocalServer;
+	protected Map<String, BufferdUnit> mUnitMap;
+	protected NotificationHandler mNotificationHandler;
 
 	public ProgressListener downloadListener;
+	SenderProgress uploadListener;
+	private PlayerListener mPlayerListener;
 
 	protected IInternetSwitchListener internetSwitchListener;
+	protected Handler mHandler;
 
-	/**
-	 * current playing file
-	 */
-	protected PlayingBean playingFile;
-
-	/**
-	 * handler to post actions in the ui thread
-	 */
-	protected Handler handler;
-
-	/**
-	 * database object to the local database
-	 */
-	protected RemoteDatabase serverDB;
-
-	/**
-	 * list of all listeners for any action on this service
-	 */
-	protected List<IRemoteActionListener> actionListener;
-
-	private RMILogListener rmiLogListener;
-
-	/**
-	 * current media server
-	 */
-	public StationStuff currentMediaServer;
-
-	protected SenderProgress uploadListener;
+	protected List<IRemoteActionListener> mActionListener;
 
 	/**
 	 * create connection, execute runnable if connection has started in the ui
@@ -119,40 +67,41 @@ public class RemoteService extends Service {
 	 * @param successRunnable
 	 */
 	protected void connect() {
-		localServer = Server.getServer();
+		mLocalServer = Server.getServer();
 		try {
 			try {
-				localServer.connectToRegistry(serverIP);
+				mLocalServer.connectToRegistry(mCurrentServer.getIP());
 			} catch (SocketException e) {
-				localServer.connectToRegistry(serverIP);
+				mLocalServer.connectToRegistry(mCurrentServer.getIP());
 			}
-			localServer.startServer();
+			mLocalServer.startServer();
 
-			IControlCenter center = localServer.find(IControlCenter.ID,
+			IControlCenter center = mLocalServer.find(IControlCenter.ID,
 					IControlCenter.class);
 			if (center == null)
 				throw new RemoteException(IControlCenter.ID,
 						"control center not found in registry");
-			controlCenter = new ControlCenterBuffer(center);
+			mCurrentControlCenter = new ControlCenterBuffer(center);
 
 			refreshControlCenter();
 
 			// power.registerPowerSwitchListener(powerListener);
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					for (IRemoteActionListener listener : actionListener)
-						listener.onServerConnectionChanged(serverName, serverID);
+					for (IRemoteActionListener listener : mActionListener)
+						listener.onServerConnectionChanged(mCurrentServer);
 				}
 			});
 		} catch (final Exception e) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
+					mCurrentServer = null;
 					Toast.makeText(RemoteService.this, e.getMessage(),
 							Toast.LENGTH_LONG).show();
-					for (IRemoteActionListener listener : actionListener)
-						listener.onServerConnectionChanged(null, -1);
+					for (IRemoteActionListener listener : mActionListener)
+						listener.onServerConnectionChanged(mCurrentServer);
 				}
 			});
 		}
@@ -161,8 +110,8 @@ public class RemoteService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		handler = new Handler();
-		rmiLogListener = new RMILogListener() {
+		mHandler = new Handler();
+		RMILogListener rmiLogListener = new RMILogListener() {
 			@Override
 			public void rmiLog(LogPriority priority, String message, String id,
 					long date) {
@@ -170,53 +119,42 @@ public class RemoteService extends Service {
 			}
 		};
 		RMILogger.addLogListener(rmiLogListener);
-		binder = new PlayerBinder(this);
-		unitMap = new HashMap<String, BufferdUnit>();
-		actionListener = new ArrayList<IRemoteActionListener>();
-		notificationHandler = new NotificationHandler(this);
-		playerListener = new PlayerListener();
+		mBinder = new PlayerBinder(this);
+		mUnitMap = new HashMap<String, BufferdUnit>();
+		mActionListener = new ArrayList<IRemoteActionListener>();
+		mNotificationHandler = new NotificationHandler(this);
+		mPlayerListener = new PlayerListener();
 		internetSwitchListener = new GPIOListener();
 		downloadListener = new ProgressListener();
 		uploadListener = new UploadProgressListenr();
-		actionListener.add(notificationHandler);
-		serverDB = new RemoteDatabase(this);
+		mActionListener.add(mNotificationHandler);
+		DaoBuilder builder = new DaoBuilder().setDatabase(
+				new RemoteDataBase(this)).setDaoMapFilling(
+				new RemoteDaoFilling());
+		DaoFactory.initiate(builder);
 	}
 
 	@Override
 	public void onDestroy() {
-		disconnect();
-		for (IRemoteActionListener listener : actionListener) {
-			listener.onServerConnectionChanged(null, -1);
+		disconnectFromServer();
+		for (IRemoteActionListener listener : mActionListener) {
+			listener.onServerConnectionChanged(null);
 			listener.onStopService();
 		}
-		serverDB.close();
-		RMILogger.removeLogListener(rmiLogListener);
+		DaoFactory.finilize();
 		super.onDestroy();
-	}
-
-	/**
-	 * disconnect from current connection
-	 */
-	private void disconnect() {
-		if (localServer != null)
-			localServer.close();
-		unitMap.clear();
-		controlCenter = null;
-		serverID = -1;
-		serverName = null;
-		notificationHandler.removeNotification();
 	}
 
 	@Override
 	public PlayerBinder onBind(Intent intent) {
-		return binder;
+		return mBinder;
 	}
 
 	/**
 	 * @return local server
 	 */
 	public Server getServer() {
-		return localServer;
+		return mLocalServer;
 	}
 
 	public void setCurrentMediaServer(final StationStuff mediaObjects)
@@ -225,26 +163,27 @@ public class RemoteService extends Service {
 			new Thread() {
 				@Override
 				public void run() {
-					StationStuff oldServer = currentMediaServer;
-					currentMediaServer = mediaObjects;
+					StationStuff oldServer = mCurrentMediaServer;
+					mCurrentMediaServer = mediaObjects;
 					try {
 						if (oldServer != null) {
 							oldServer.totem
-									.removePlayerMessageListener(playerListener);
+									.removePlayerMessageListener(mPlayerListener);
 							oldServer.mplayer
-									.removePlayerMessageListener(playerListener);
+									.removePlayerMessageListener(mPlayerListener);
 						}
 					} catch (RemoteException e) {
 					}
 					try {
-						currentMediaServer.mplayer
-								.addPlayerMessageListener(playerListener);
-						currentMediaServer.totem
-								.addPlayerMessageListener(playerListener);
-						currentMediaServer.omxplayer
-								.addPlayerMessageListener(playerListener);
-						playerListener.playerMessage(currentMediaServer.player
-								.getPlayingBean());
+						mCurrentMediaServer.mplayer
+								.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaServer.totem
+								.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaServer.omxplayer
+								.addPlayerMessageListener(mPlayerListener);
+						mPlayerListener
+								.playerMessage(mCurrentMediaServer.player
+										.getPlayingBean());
 					} catch (PlayerException e) {
 					} catch (RemoteException e) {
 					}
@@ -287,14 +226,12 @@ public class RemoteService extends Service {
 		public int directoryCount;
 	}
 
-	public void connectToServer(final int id) {
+	public void connectToServer(final RemoteServer server) {
+		disconnectFromServer();
 		new Thread() {
 			public void run() {
-				if (id != serverID) {
-					disconnect();
-					serverID = id;
-					serverIP = serverDB.getServerDao().getIpOfServer(id);
-					serverName = serverDB.getServerDao().getNameOfServer(id);
+				if (mCurrentServer != server) {
+					mCurrentServer = server;
 					connect();
 				}
 			}
@@ -304,13 +241,17 @@ public class RemoteService extends Service {
 	public void disconnectFromServer() {
 		new Thread() {
 			public void run() {
-				disconnect();
-				handler.post(new Runnable() {
+				if (mLocalServer != null)
+					mLocalServer.close();
+				mUnitMap.clear();
+				mCurrentControlCenter = null;
+				mCurrentServer = null;
+				mNotificationHandler.removeNotification();
+				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						for (IRemoteActionListener listener : actionListener)
-							listener.onServerConnectionChanged(serverName,
-									serverID);
+						for (IRemoteActionListener listener : mActionListener)
+							listener.onServerConnectionChanged(null);
 					}
 				});
 			}
@@ -319,20 +260,20 @@ public class RemoteService extends Service {
 
 	public void refreshControlCenter() {
 		String[] ids = null;
-		controlCenter.clear();
+		mCurrentControlCenter.clear();
 		try {
-			ids = controlCenter.getControlUnitIDs();
-			controlCenter.getGroundPlot();
+			ids = mCurrentControlCenter.getControlUnitIDs();
+			mCurrentControlCenter.getGroundPlot();
 		} catch (RemoteException e1) {
 		}
-		currentMediaServer = null;
-		unitMap.clear();
+		mCurrentMediaServer = null;
+		mUnitMap.clear();
 		for (String id : ids) {
 			try {
 				BufferdUnit bufferdUnit = new BufferdUnit(
-						controlCenter.getControlUnit(id));
+						mCurrentControlCenter.getControlUnit(id));
 				Log.e("control unit", bufferdUnit.mName);
-				unitMap.put(bufferdUnit.mID, bufferdUnit);
+				mUnitMap.put(bufferdUnit.mID, bufferdUnit);
 				if (bufferdUnit.mObject instanceof IInternetSwitch) {
 					IInternetSwitch iswitch = (IInternetSwitch) bufferdUnit.mObject;
 					iswitch.registerPowerSwitchListener(internetSwitchListener);
@@ -354,14 +295,14 @@ public class RemoteService extends Service {
 
 		@Override
 		public void playerMessage(final PlayingBean playing) {
-			playingFile = playing;
-			handler.post(new Runnable() {
+			mCurrentPlayingFile = playing;
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					String media = "unknown";
-					if (currentMediaServer != null)
-						media = currentMediaServer.name;
-					for (IRemoteActionListener listener : actionListener)
+					if (mCurrentMediaServer != null)
+						media = mCurrentMediaServer.name;
+					for (IRemoteActionListener listener : mActionListener)
 						listener.onPlayingBeanChanged(media, playing);
 				}
 			});
@@ -380,10 +321,10 @@ public class RemoteService extends Service {
 		public void onPowerSwitchChange(final String switchName,
 				final State state) throws RemoteException {
 			Log.e("gpio power", "Switch: " + switchName + " " + state);
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					for (IRemoteActionListener listener : actionListener)
+					for (IRemoteActionListener listener : mActionListener)
 						listener.onPowerSwitchChange(switchName, state);
 				}
 			});
@@ -401,9 +342,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void startReceive(final long size, final String file) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.startReceive(size, file);
 				}
 			});
@@ -411,9 +352,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void progressReceive(final long size, final String file) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.progressReceive(size, file);
 				}
 			});
@@ -421,12 +362,12 @@ public class RemoteService extends Service {
 
 		@Override
 		public void endReceive(final long size) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					Toast.makeText(RemoteService.this, "download finished",
 							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.endReceive(size);
 				}
 			});
@@ -434,13 +375,13 @@ public class RemoteService extends Service {
 
 		@Override
 		public void exceptionOccurred(final Exception e) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					Toast.makeText(RemoteService.this,
 							"error occurred while loading: " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.exceptionOccurred(e);
 				}
 			});
@@ -448,12 +389,12 @@ public class RemoteService extends Service {
 
 		@Override
 		public void downloadCanceled() {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					Toast.makeText(RemoteService.this, "download cancled",
 							Toast.LENGTH_SHORT).show();
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.downloadCanceled();
 				}
 			});
@@ -465,9 +406,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void startSending(final long size) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.startSending(size);
 				}
 			});
@@ -475,9 +416,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void progressSending(final long size) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.progressSending(size);
 				}
 			});
@@ -485,9 +426,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void endSending(final long size) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.endSending(size);
 				}
 			});
@@ -495,9 +436,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void exceptionOccurred(final Exception e) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.exceptionOccurred(e);
 				}
 			});
@@ -505,9 +446,9 @@ public class RemoteService extends Service {
 
 		@Override
 		public void sendingCanceled() {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 				public void run() {
-					for (IRemoteActionListener l : actionListener)
+					for (IRemoteActionListener l : mActionListener)
 						l.sendingCanceled();
 				}
 			});
@@ -536,7 +477,7 @@ public class RemoteService extends Service {
 		 * 
 		 * @param serverName
 		 */
-		void onServerConnectionChanged(String serverName, int serverID);
+		void onServerConnectionChanged(RemoteServer server);
 
 		/**
 		 * call on stopping remote service.

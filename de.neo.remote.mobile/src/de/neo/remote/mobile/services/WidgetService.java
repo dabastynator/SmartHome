@@ -19,6 +19,7 @@ import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.SelectSwitchActivity;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
@@ -89,8 +90,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			setMusicWidgetText(
 					getResources().getString(R.string.mediaserver_no_server),
 					getResources().getString(R.string.mediaserver_no_server)
-							+ " (" + binder.getServerName() + ")", "", false,
-					null);
+							+ " (" + binder.getServer().getName() + ")", "",
+					false, null);
 			return;
 		}
 		if (binder.getLatestMediaServer().player != null && playing == null)
@@ -249,7 +250,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
+	public void onServerConnectionChanged(RemoteServer server) {
 		initializeMusicWidgets();
 		updateSwitchWidget();
 	}
@@ -355,7 +356,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		BufferdUnit unit = binder.getSwitches().get(switchID);
 		if (unit == null) {
 			updateSwitchWidget(widgetID, R.drawable.switch_unknown, switchID);
-			throw new Exception(binder.getServerName() + " "
+			throw new Exception(binder.getServer().getName() + " "
 					+ getResources().getString(R.string.switch_has_no_switch)
 					+ " " + switchID);
 		}
@@ -391,7 +392,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			return;
 		BufferdUnit unit = binder.getSwitches().get(switchID);
 		if (unit == null)
-			throw new Exception(binder.getServerName() + " "
+			throw new Exception(binder.getServer().getName() + " "
 					+ getResources().getString(R.string.switch_has_no_switch)
 					+ " " + switchID);
 		if (DEBUGGING)

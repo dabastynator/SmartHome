@@ -48,6 +48,7 @@
     <string name="server_post">Post</string>
     <string name="server_added">Server added</string>
     <string name="server_no_favorite">No favorite server found</string>
+    <string name="server_no_server">No server found</string>
 
     <!-- Remote connection strings -->
     <string name="connecting">Connecting...</string>

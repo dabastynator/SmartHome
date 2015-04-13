@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.RemoteViews;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.WidgetService;
@@ -45,7 +46,7 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
+	public void onServerConnectionChanged(RemoteServer server) {
 		if (mBinder.isConnected()) {
 			Map<String, BufferdUnit> switches = mBinder.getSwitches();
 			String[] ids = switches.keySet().toArray(

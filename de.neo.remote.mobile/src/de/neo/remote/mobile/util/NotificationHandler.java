@@ -13,6 +13,7 @@ import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
@@ -26,35 +27,16 @@ import de.remote.mobile.R;
  */
 public class NotificationHandler implements IRemoteActionListener {
 
-	/**
-	 * id of the playing notification
-	 */
 	protected static final int PLAYING_NOTIFICATION_ID = 1;
-
-	/**
-	 * id of the download notification
-	 */
 	public static final int DOWNLOAD_NOTIFICATION_ID = 2;
 
-	/**
-	 * current downloading file
-	 */
-	private String file;
-
-	/**
-	 * size of the whole file
-	 */
-	private long fullSize;
-
-	/**
-	 * the context to make notifications
-	 */
-	private Context context;
-
-	private int serverID;
+	private String mDownloadFile;
+	private long mFullDownloadSize;
+	private Context mContext;
+	private RemoteServer mCurrentServer;
 
 	public NotificationHandler(Context context) {
-		this.context = context;
+		mContext = context;
 	}
 
 	/**
@@ -63,14 +45,14 @@ public class NotificationHandler implements IRemoteActionListener {
 	 * @param file
 	 */
 	public void setFile(String file) {
-		this.file = file;
+		mDownloadFile = file;
 	}
 
 	@Override
 	public void startReceive(final long size, String file) {
-		fullSize = size;
+		mFullDownloadSize = size;
 		makeLoadNotification(
-				context.getResources().getString(R.string.str_download), file,
+				mContext.getResources().getString(R.string.str_download), file,
 				0, R.drawable.download);
 
 	}
@@ -78,14 +60,15 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void progressReceive(final long size, String file) {
 		makeLoadNotification(
-				context.getResources().getString(R.string.str_download), file,
-				((float) size) / ((float) fullSize), R.drawable.download);
+				mContext.getResources().getString(R.string.str_download), file,
+				((float) size) / ((float) mFullDownloadSize),
+				R.drawable.download);
 
 	}
 
 	@Override
 	public void endReceive(final long size) {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 
@@ -93,7 +76,7 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void exceptionOccurred(final Exception e) {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 
@@ -101,7 +84,7 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void downloadCanceled() {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 
@@ -110,7 +93,7 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
 		if (playing == null || playing.getState() == STATE.DOWN) {
-			NotificationManager nm = (NotificationManager) context
+			NotificationManager nm = (NotificationManager) mContext
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
 			return;
@@ -138,7 +121,7 @@ public class NotificationHandler implements IRemoteActionListener {
 			thumbnail.copyPixelsFromBuffer(buf);
 		}
 		if (playing.getState() == STATE.DOWN) {
-			NotificationManager nm = (NotificationManager) context
+			NotificationManager nm = (NotificationManager) mContext
 					.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
 		} else
@@ -155,27 +138,28 @@ public class NotificationHandler implements IRemoteActionListener {
 	 */
 	protected void makePlayingNotification(String title, String body,
 			Bitmap thumbnail, long when, boolean playing) {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent nIntent = new Intent(context, MediaServerActivity.class);
+		Intent nIntent = new Intent(mContext, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
-		PendingIntent pInent = PendingIntent
-				.getActivity(context, 0, nIntent, 0);
-		Intent playIntent = new Intent(context, WidgetService.class);
+		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID,
+				mCurrentServer.getId());
+		PendingIntent pInent = PendingIntent.getActivity(mContext, 0, nIntent,
+				0);
+		Intent playIntent = new Intent(mContext, WidgetService.class);
 		playIntent.setAction(RemoteWidgetProvider.ACTION_PLAY);
-		PendingIntent playPending = PendingIntent.getService(context, 0,
+		PendingIntent playPending = PendingIntent.getService(mContext, 0,
 				playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		Intent nextIntent = new Intent(context, WidgetService.class);
+		Intent nextIntent = new Intent(mContext, WidgetService.class);
 		nextIntent.setAction(RemoteWidgetProvider.ACTION_VOLUP);
-		PendingIntent nextPending = PendingIntent.getService(context, 0,
+		PendingIntent nextPending = PendingIntent.getService(mContext, 0,
 				nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		Intent prevIntent = new Intent(context, WidgetService.class);
+		Intent prevIntent = new Intent(mContext, WidgetService.class);
 		prevIntent.setAction(RemoteWidgetProvider.ACTION_VOLDOWN);
-		PendingIntent prevPending = PendingIntent.getService(context, 0,
+		PendingIntent prevPending = PendingIntent.getService(mContext, 0,
 				prevIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		Builder builder = new NotificationCompat.Builder(context);
+		Builder builder = new NotificationCompat.Builder(mContext);
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentTitle(title);
 		builder.setContentText(body);
@@ -183,29 +167,29 @@ public class NotificationHandler implements IRemoteActionListener {
 		builder.setWhen(when);
 		if (playing)
 			builder.addAction(R.drawable.player_small_pause,
-					context.getString(R.string.player_pause), playPending);
+					mContext.getString(R.string.player_pause), playPending);
 		else
 			builder.addAction(R.drawable.player_small_play,
-					context.getString(R.string.str_play), playPending);
+					mContext.getString(R.string.str_play), playPending);
 		builder.addAction(R.drawable.player_small_vol_down,
-				context.getString(R.string.player_vol_down), prevPending);
+				mContext.getString(R.string.player_vol_down), prevPending);
 		builder.addAction(R.drawable.player_small_vol_up,
-				context.getString(R.string.player_vol_up), nextPending);
+				mContext.getString(R.string.player_vol_up), nextPending);
 		if (thumbnail != null)
 			builder.setLargeIcon(thumbnail);
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
 	}
 
 	public void removeNotification() {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(PLAYING_NOTIFICATION_ID);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
-		this.serverID = serverID;
+	public void onServerConnectionChanged(RemoteServer server) {
+		mCurrentServer = server;
 	}
 
 	@Override
@@ -221,15 +205,16 @@ public class NotificationHandler implements IRemoteActionListener {
 	 */
 	protected void makeLoadNotification(String title, String text,
 			float progress, int imgResource) {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent nIntent = new Intent(context, MediaServerActivity.class);
+		Intent nIntent = new Intent(mContext, MediaServerActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, serverID);
-		PendingIntent pIntent = PendingIntent.getActivity(context, 0, nIntent,
+		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID,
+				mCurrentServer.getId());
+		PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, nIntent,
 				0);
 
-		Builder builder = new NotificationCompat.Builder(context);
+		Builder builder = new NotificationCompat.Builder(mContext);
 		builder.setContentTitle(title);
 		builder.setContentText(text);
 		builder.setProgress(100, (int) (progress * 100), false);
@@ -246,29 +231,30 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void startSending(long size) {
-		fullSize = size;
+		mFullDownloadSize = size;
 		makeLoadNotification(
-				context.getResources().getString(R.string.str_upload), file, 0,
-				R.drawable.upload);
+				mContext.getResources().getString(R.string.str_upload),
+				mDownloadFile, 0, R.drawable.upload);
 	}
 
 	@Override
 	public void progressSending(long size) {
 		makeLoadNotification(
-				context.getResources().getString(R.string.str_upload), file,
-				((float) size) / ((float) fullSize), R.drawable.upload);
+				mContext.getResources().getString(R.string.str_upload),
+				mDownloadFile, ((float) size) / ((float) mFullDownloadSize),
+				R.drawable.upload);
 	}
 
 	@Override
 	public void endSending(long size) {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}
 
 	@Override
 	public void sendingCanceled() {
-		NotificationManager nm = (NotificationManager) context
+		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}

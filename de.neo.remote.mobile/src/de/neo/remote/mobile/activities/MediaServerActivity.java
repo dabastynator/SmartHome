@@ -29,6 +29,7 @@ import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.BrowserLoadTask;
@@ -424,7 +425,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
+	public void onServerConnectionChanged(RemoteServer server) {
 
 		new AsyncTask<String, Integer, String[]>() {
 

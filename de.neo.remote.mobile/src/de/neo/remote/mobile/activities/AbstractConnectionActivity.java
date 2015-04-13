@@ -1,19 +1,26 @@
 package de.neo.remote.mobile.activities;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
+import de.neo.android.persistence.Dao;
+import de.neo.android.persistence.DaoBuilder;
+import de.neo.android.persistence.DaoException;
+import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.database.RemoteDatabase;
+import de.neo.remote.mobile.persistence.RemoteDaoFilling;
+import de.neo.remote.mobile.persistence.RemoteDataBase;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.PlayerBinder;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -28,13 +35,11 @@ import de.remote.mobile.R;
 public abstract class AbstractConnectionActivity extends Activity implements
 		IRemoteActionListener {
 
-	public static final String EXTRA_SERVER_ID = "serverId";
+	public static final String EXTRA_SERVER_ID = "server_id";
 
 	public PlayerBinder mBinder;
 	protected ProgressDialog mProgress;
-	protected int serverID = -1;
-	protected RemoteDatabase serverDB;
-	protected Handler handler = new Handler();
+	protected RemoteServer mCurrentServer;
 	protected boolean mIsActive;
 
 	protected ServiceConnection mPlayerConnection = new ServiceConnection() {
@@ -42,7 +47,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			mBinder.removeRemoteActionListener(AbstractConnectionActivity.this);
-			Log.e("disconnect service", "lass: "
+			Log.e("disconnect service", "class: "
 					+ AbstractConnectionActivity.this.getClass()
 							.getSimpleName());
 		}
@@ -54,16 +59,24 @@ public abstract class AbstractConnectionActivity extends Activity implements
 			onStartConnecting();
 			onBinderConnected();
 			mBinder.addRemoteActionListener(AbstractConnectionActivity.this);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
 			// if there is a server in extra -> connect with this server
 			if (getIntent().getExtras() != null
 					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
-				serverID = getIntent().getExtras().getInt(EXTRA_SERVER_ID);
-				newConnection = true;
+				try {
+					mCurrentServer = dao.loadById(getIntent().getExtras()
+							.getInt(EXTRA_SERVER_ID));
+					newConnection = true;
+				} catch (DaoException e) {
+					e.printStackTrace();
+				}
+
 			}
 			// else just connect if there is no connection
 			else if (newConnection) {
-				serverID = serverDB.getServerDao().getFavoriteServer();
-				if (serverID == -1) {
+				mCurrentServer = getFavoriteServer();
+				if (mCurrentServer == null) {
 					Toast.makeText(
 							AbstractConnectionActivity.this,
 							getResources().getString(
@@ -76,11 +89,10 @@ public abstract class AbstractConnectionActivity extends Activity implements
 				}
 			}
 			// if there is a server id to connect -> connect
-			if (serverID >= 0 && newConnection)
-				mBinder.connectToServer(serverID);
+			if (mCurrentServer != null && newConnection)
+				mBinder.connectToServer(mCurrentServer);
 			else if (!newConnection)
-				AbstractConnectionActivity.this.onServerConnectionChanged(null,
-						-1);
+				AbstractConnectionActivity.this.onServerConnectionChanged(null);
 		}
 
 	};
@@ -97,8 +109,26 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		intent = new Intent(this, RemoteService.class);
 		startService(intent);
 
-		serverDB = new RemoteDatabase(this);
-	};
+		DaoBuilder builder = new DaoBuilder().setDatabase(
+				new RemoteDataBase(this)).setDaoMapFilling(
+				new RemoteDaoFilling());
+		DaoFactory.initiate(builder);
+	}
+
+	protected RemoteServer getFavoriteServer() {
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
+			List<RemoteServer> serverList = dao.loadAll();
+			for (RemoteServer server : serverList) {
+				if (server.isFavorite())
+					return server;
+			}
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	@Override
 	protected void onResume() {
@@ -116,9 +146,17 @@ public abstract class AbstractConnectionActivity extends Activity implements
 		if (requestCode == SelectServerActivity.RESULT_CODE) {
 			if (data == null || data.getExtras() == null)
 				return;
-			serverID = data.getExtras().getInt(SelectServerActivity.SERVER_ID);
-			onStartConnecting();
-			mBinder.connectToServer(serverID);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
+			try {
+				mCurrentServer = dao.loadById(data.getExtras().getInt(
+						SelectServerActivity.SERVER_ID));
+				onStartConnecting();
+				mBinder.connectToServer(mCurrentServer);
+			} catch (DaoException e) {
+				e.printStackTrace();
+				mCurrentServer = null;
+			}
 		}
 	}
 
@@ -172,8 +210,7 @@ public abstract class AbstractConnectionActivity extends Activity implements
 
 	@Override
 	protected void onDestroy() {
-		serverDB.close();
-
+		DaoFactory.finilize();
 		super.onDestroy();
 	}
 

@@ -2,14 +2,16 @@ package de.neo.remote.mobile.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
-import de.neo.opengl.common.AbstractSceneSurfaceView;
+import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -17,10 +19,13 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	private AbstractSceneSurfaceView view;
 	private ControlSceneRenderer renderer;
+	private Handler mHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		mHandler = new Handler();
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		requestWindowFeature(Window.FEATURE_PROGRESS);
@@ -49,7 +54,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
+	public void onServerConnectionChanged(RemoteServer server) {
 		updateGLView();
 	}
 
@@ -118,7 +123,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		public void run() {
 			try {
 				renderer.reloadControlCenter(mBinder);
-				handler.post(new Runnable() {
+				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
 						if (mBinder.getControlCenter() != null)
@@ -127,12 +132,13 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 									getResources().getString(
 											R.string.loaded_controlcenter),
 									Toast.LENGTH_SHORT).show();
-						setTitle("Controlcenter@" + mBinder.getServerName());
+						setTitle("Controlcenter@"
+								+ mBinder.getServer().getName());
 						setProgressBarVisibility(false);
 					}
 				});
 			} catch (final Exception e) {
-				handler.post(new Runnable() {
+				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
 						Toast.makeText(
@@ -153,7 +159,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	public class SelectMediaServer {
 		public void selectMediaServer(final String id) {
-			handler.post(new Runnable() {
+			mHandler.post(new Runnable() {
 
 				@Override
 				public void run() {

@@ -31,6 +31,7 @@ import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.MediaState;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.BrowserLoadTask;
@@ -412,7 +413,7 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 	}
 
 	@Override
-	public void onServerConnectionChanged(String serverName, int serverID) {
+	public void onServerConnectionChanged(RemoteServer server) {
 	}
 
 	@Override

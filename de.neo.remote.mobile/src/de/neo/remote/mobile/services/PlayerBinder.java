@@ -15,9 +15,9 @@ import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
-import de.neo.remote.mobile.services.RemoteService.PlayerListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.DownloadTask;
 import de.neo.remote.mobile.util.BufferBrowser;
@@ -61,7 +61,7 @@ public class PlayerBinder extends Binder {
 	}
 
 	public IControlCenter getControlCenter() {
-		return service.controlCenter;
+		return service.mCurrentControlCenter;
 	}
 
 	/**
@@ -70,26 +70,15 @@ public class PlayerBinder extends Binder {
 	 * @param id
 	 * @param r
 	 */
-	public void connectToServer(final int id) {
-		service.connectToServer(id);
+	public void connectToServer(RemoteServer server) {
+		service.connectToServer(server);
 	}
 
 	/**
 	 * @return true if there is a connection wich a server
 	 */
 	public boolean isConnected() {
-		return service.controlCenter != null;
-	}
-
-	/**
-	 * @return name of connected server
-	 */
-	public String getServerName() {
-		return service.serverName;
-	}
-
-	public PlayerListener getPlayerListener() {
-		return service.playerListener;
+		return service.mCurrentControlCenter != null;
 	}
 
 	/**
@@ -99,8 +88,8 @@ public class PlayerBinder extends Binder {
 	 * @param listener
 	 */
 	public void addRemoteActionListener(IRemoteActionListener listener) {
-		if (!service.actionListener.contains(listener))
-			service.actionListener.add(listener);
+		if (!service.mActionListener.contains(listener))
+			service.mActionListener.add(listener);
 	}
 
 	/**
@@ -109,14 +98,14 @@ public class PlayerBinder extends Binder {
 	 * @param listener
 	 */
 	public void removeRemoteActionListener(IRemoteActionListener listener) {
-		service.actionListener.remove(listener);
+		service.mActionListener.remove(listener);
 	}
 
 	/**
 	 * @return current playing file
 	 */
 	public PlayingBean getPlayingFile() {
-		return service.playingFile;
+		return service.mCurrentPlayingFile;
 	}
 
 	/**
@@ -126,9 +115,9 @@ public class PlayerBinder extends Binder {
 	 */
 	public void downloadFile(AbstractConnectionActivity activity,
 			IBrowser browser, String file) {
-		new DownloadTask(activity, browser, file, null, getServerName(), this)
-				.execute();
-		service.notificationHandler.setFile(file);
+		new DownloadTask(activity, browser, file, null,
+				service.mCurrentServer.getName(), this).execute();
+		service.mNotificationHandler.setFile(file);
 	}
 
 	/**
@@ -138,9 +127,9 @@ public class PlayerBinder extends Binder {
 	 */
 	public void downloadDirectory(AbstractConnectionActivity activity,
 			IBrowser browser, String directory) {
-		new DownloadTask(activity, browser, null, directory, getServerName(),
-				this).execute();
-		service.notificationHandler.setFile(directory);
+		new DownloadTask(activity, browser, null, directory,
+				service.mCurrentServer.getName(), this).execute();
+		service.mNotificationHandler.setFile(directory);
 	}
 
 	/**
@@ -148,13 +137,6 @@ public class PlayerBinder extends Binder {
 	 */
 	public AbstractReceiver getReceiver() {
 		return receiver;
-	}
-
-	/**
-	 * @return local server
-	 */
-	public Server getServer() {
-		return service.getServer();
 	}
 
 	/**
@@ -197,11 +179,11 @@ public class PlayerBinder extends Binder {
 				Toast.makeText(service, message, length).show();
 			}
 		};
-		service.handler.post(runnable);
+		service.mHandler.post(runnable);
 	}
 
 	public Map<String, BufferdUnit> getUnits() {
-		return service.unitMap;
+		return service.mUnitMap;
 	}
 
 	public void disconnect() {
@@ -213,7 +195,7 @@ public class PlayerBinder extends Binder {
 	}
 
 	public StationStuff getMediaServerByID(String id) throws RemoteException {
-		BufferdUnit unit = service.unitMap.get(id);
+		BufferdUnit unit = service.mUnitMap.get(id);
 		if (unit.mObject instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) unit.mObject;
 			if (unit.mStation == null) {
@@ -236,7 +218,7 @@ public class PlayerBinder extends Binder {
 	}
 
 	public StationStuff getLatestMediaServer() {
-		return service.currentMediaServer;
+		return service.mCurrentMediaServer;
 	}
 
 	public Map<String, BufferdUnit> getSwitches() {
@@ -269,7 +251,7 @@ public class PlayerBinder extends Binder {
 					String folder = Environment.getExternalStorageDirectory()
 							.toString()
 							+ File.separator
-							+ getServerName().trim();
+							+ service.mCurrentServer.getName();
 					File base = new File(folder);
 					if (!base.exists())
 						base.mkdir();
@@ -290,7 +272,7 @@ public class PlayerBinder extends Binder {
 						receiver.setBufferSize(1000000);
 						receiver.getProgressListener().add(
 								service.downloadListener);
-						service.notificationHandler.setFile(itemName);
+						service.mNotificationHandler.setFile(itemName);
 						receiver.receiveSync();
 					}
 				} catch (Exception e) {
@@ -300,5 +282,9 @@ public class PlayerBinder extends Binder {
 			}
 		};
 		downloader.execute(playlist);
+	}
+
+	public RemoteServer getServer() {
+		return service.mCurrentServer;
 	}
 }

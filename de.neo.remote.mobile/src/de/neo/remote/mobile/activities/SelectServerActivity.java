@@ -1,13 +1,15 @@
 package de.neo.remote.mobile.activities;
 
+import java.util.List;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteCursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,9 +18,15 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import de.neo.remote.mobile.database.RemoteDatabase;
-import de.neo.remote.mobile.database.ServerTable;
-import de.neo.remote.mobile.util.ServerCursorAdapter;
+import android.widget.TextView;
+import de.neo.android.persistence.Dao;
+import de.neo.android.persistence.DaoBuilder;
+import de.neo.android.persistence.DaoException;
+import de.neo.android.persistence.DaoFactory;
+import de.neo.remote.mobile.persistence.RemoteDaoFilling;
+import de.neo.remote.mobile.persistence.RemoteDataBase;
+import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.util.ServerAdapter;
 import de.remote.mobile.R;
 
 /**
@@ -29,76 +37,65 @@ import de.remote.mobile.R;
  */
 public class SelectServerActivity extends Activity {
 
-	/**
-	 * request code for this activity
-	 */
 	public static final int RESULT_CODE = 2;
-
-	/**
-	 * name of the server name attribute
-	 */
 	public static final String SERVER_ID = "serverID";
-
-	/**
-	 * store the current selected server
-	 */
-	protected int selectedItem;
-
-	/**
-	 * database object to execute changes
-	 */
-	private RemoteDatabase serverDB;
-
-	private ListView serverList;
+	protected RemoteServer mCurrentServer;
+	private ListView mServerList;
+	private View mNoServerFound;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.server);
-		
+		DaoBuilder builder = new DaoBuilder().setDatabase(
+				new RemoteDataBase(this)).setDaoMapFilling(
+				new RemoteDaoFilling());
+		DaoFactory.initiate(builder);
+		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+				RemoteServer.class);
 		findComponents();
 
-		serverList.setOnItemClickListener(new OnItemClickListener() {
+		mServerList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View view, int position,
-					long arg3) {
+			public void onItemClick(AdapterView<?> adapter, View view,
+					int position, long arg3) {
+				mCurrentServer = (RemoteServer) adapter
+						.getItemAtPosition(position);
 				Intent i = new Intent();
-				SQLiteCursor c = (SQLiteCursor) serverList.getAdapter().getItem(
-						position);
-				selectedItem = c.getInt(ServerTable.INDEX_ID);
-				i.putExtra(SERVER_ID, selectedItem);
+				i.putExtra(SERVER_ID, (int) mCurrentServer.getId());
 				setResult(RESULT_CODE, i);
 				finish();
 			}
 
 		});
-		serverList.setOnItemLongClickListener(new OnItemLongClickListener() {
+		mServerList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View view,
+			public boolean onItemLongClick(AdapterView<?> adapter, View view,
 					int position, long arg3) {
-				SQLiteCursor c = (SQLiteCursor) serverList.getAdapter().getItem(
-						position);
-				selectedItem = c.getInt(ServerTable.INDEX_ID);
+				mCurrentServer = (RemoteServer) adapter
+						.getItemAtPosition(position);
 				return false;
 			}
 		});
-		registerForContextMenu(serverList);
+		registerForContextMenu(mServerList);
+		try {
+			if (dao.loadAll().size() == 0)
+				editServer(null);
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		serverDB = new RemoteDatabase(this);
-		SQLiteDatabase db = serverDB.getReadableDatabase();
-		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
-				null, null, null, null, null);
-		serverList.setAdapter(new ServerCursorAdapter(this, c));
-		db.close();
+		updateList();
 	}
 
 	private void findComponents() {
-		serverList = (ListView)findViewById(R.id.server_list);
+		mServerList = (ListView) findViewById(R.id.server_list);
+		mNoServerFound = findViewById(R.id.server_no_server_found);
 	}
 
 	@Override
@@ -111,22 +108,27 @@ public class SelectServerActivity extends Activity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.opt_server_delete:
-			serverDB.getServerDao().deleteServer(selectedItem);
-			updateList();
-			break;
-		case R.id.opt_server_edit:
-			Intent intent = new Intent(SelectServerActivity.this,
-					NewServerActivity.class);
-			intent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, selectedItem);
-			startActivity(intent);
-			finish();
-			break;
-		case R.id.opt_server_favorite:
-			serverDB.getServerDao().setFavorite(selectedItem);
-			updateList();
-			break;
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
+			switch (item.getItemId()) {
+			case R.id.opt_server_delete:
+				dao.delete(mCurrentServer.getId());
+				updateList();
+				break;
+			case R.id.opt_server_edit:
+				editServer(mCurrentServer);
+				break;
+			case R.id.opt_server_favorite:
+				for (RemoteServer server : dao.loadAll()) {
+					server.setFavorite(mCurrentServer.getId() == server.getId());
+					dao.update(server);
+				}
+				updateList();
+				break;
+			}
+		} catch (DaoException e) {
+			e.printStackTrace();
 		}
 		return super.onContextItemSelected(item);
 	}
@@ -135,12 +137,19 @@ public class SelectServerActivity extends Activity {
 	 * update the list view
 	 */
 	private void updateList() {
-		ServerCursorAdapter adapter = (ServerCursorAdapter) serverList.getAdapter();
-		SQLiteDatabase db = serverDB.getReadableDatabase();
-		Cursor c = db.query(ServerTable.TABLE_NAME, ServerTable.ALL_COLUMNS,
-				null, null, null, null, null);
-		adapter.changeCursor(c);
-		db.close();
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
+			List<RemoteServer> serverList = dao.loadAll();
+			ServerAdapter adapter = new ServerAdapter(this, serverList);
+			mServerList.setAdapter(adapter);
+			if (serverList.size() == 0)
+				mNoServerFound.setVisibility(View.VISIBLE);
+			else
+				mNoServerFound.setVisibility(View.GONE);
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -162,13 +171,57 @@ public class SelectServerActivity extends Activity {
 	}
 
 	public void addNewServer(View view) {
-		Intent intent = new Intent(this, NewServerActivity.class);
-		startActivity(intent);		
+		editServer(null);
+	}
+
+	private void editServer(final RemoteServer server) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View dialogView = inflater.inflate(R.layout.server_edit, null);
+		builder.setView(dialogView);
+		final TextView name = (TextView) dialogView
+				.findViewById(R.id.server_edit_name);
+		final TextView ip = (TextView) dialogView
+				.findViewById(R.id.server_edit_ip);
+		if (server != null) {
+			builder.setTitle(getString(R.string.server_edit));
+			name.setText(server.getName());
+			ip.setText(server.getIP());
+		} else
+			builder.setTitle(getString(R.string.server_add_new_server));
+		builder.setPositiveButton(getString(R.string.server_post),
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						RemoteServer newServer = server;
+						if (newServer == null)
+							newServer = new RemoteServer();
+						newServer.setName(name.getText().toString());
+						newServer.setIP(ip.getText().toString());
+						saveServer(newServer, server == null);
+					}
+				});
+		builder.create().show();
+	}
+
+	protected void saveServer(RemoteServer newServer, boolean createNew) {
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
+					RemoteServer.class);
+			if (createNew)
+				dao.save(newServer);
+			else
+				dao.update(newServer);
+			updateList();
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
-		serverDB.close();
+		DaoFactory.finilize();
 		super.onDestroy();
 	}
 
