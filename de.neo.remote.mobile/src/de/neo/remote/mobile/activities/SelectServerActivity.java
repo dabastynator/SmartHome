@@ -20,11 +20,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import de.neo.android.persistence.Dao;
-import de.neo.android.persistence.DaoBuilder;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.mobile.persistence.RemoteDaoFilling;
-import de.neo.remote.mobile.persistence.RemoteDataBase;
+import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.util.ServerAdapter;
 import de.remote.mobile.R;
@@ -48,10 +46,7 @@ public class SelectServerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.server);
-		DaoBuilder builder = new DaoBuilder().setDatabase(
-				new RemoteDataBase(this)).setDaoMapFilling(
-				new RemoteDaoFilling());
-		DaoFactory.initiate(builder);
+		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
 				RemoteServer.class);
 		findComponents();

@@ -1,6 +1,5 @@
 package de.neo.remote.mobile.tasks;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.widget.Toast;
@@ -66,9 +65,7 @@ public class SimpleTask extends AsyncTask<String, Integer, Exception> {
 	protected void onPostExecute(Exception result) {
 		mActivity.dismissProgress();
 		if (result != null && mActivity.isActive()) {
-			new AlertDialog.Builder(mActivity)
-					.setTitle(result.getClass().getSimpleName())
-					.setMessage(result.getMessage()).show();
+			new AbstractTask.ErrorDialog(mActivity, result).show();
 		} else if (result == null && mActivity.isActive()) {
 			Toast.makeText(mActivity, mSuccess, Toast.LENGTH_SHORT).show();
 		}

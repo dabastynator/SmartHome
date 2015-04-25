@@ -8,10 +8,10 @@ import java.util.Map;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
-import de.neo.android.persistence.DaoBuilder;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
@@ -25,9 +25,9 @@ import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.persistence.RemoteDaoFilling;
-import de.neo.remote.mobile.persistence.RemoteDataBase;
+import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
@@ -46,66 +46,19 @@ public class RemoteService extends Service {
 	public StationStuff mCurrentMediaServer;
 	protected PlayingBean mCurrentPlayingFile;
 
-	protected PlayerBinder mBinder;
+	protected RemoteBinder mBinder;
 	protected Server mLocalServer;
 	protected Map<String, BufferdUnit> mUnitMap;
 	protected NotificationHandler mNotificationHandler;
 
 	public ProgressListener downloadListener;
-	SenderProgress uploadListener;
+	public SenderProgress uploadListener;
 	private PlayerListener mPlayerListener;
 
 	protected IInternetSwitchListener internetSwitchListener;
 	protected Handler mHandler;
 
 	protected List<IRemoteActionListener> mActionListener;
-
-	/**
-	 * create connection, execute runnable if connection has started in the ui
-	 * thread.
-	 * 
-	 * @param successRunnable
-	 */
-	protected void connect() {
-		mLocalServer = Server.getServer();
-		try {
-			try {
-				mLocalServer.connectToRegistry(mCurrentServer.getIP());
-			} catch (SocketException e) {
-				mLocalServer.connectToRegistry(mCurrentServer.getIP());
-			}
-			mLocalServer.startServer();
-
-			IControlCenter center = mLocalServer.find(IControlCenter.ID,
-					IControlCenter.class);
-			if (center == null)
-				throw new RemoteException(IControlCenter.ID,
-						"control center not found in registry");
-			mCurrentControlCenter = new ControlCenterBuffer(center);
-
-			refreshControlCenter();
-
-			// power.registerPowerSwitchListener(powerListener);
-			mHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					for (IRemoteActionListener listener : mActionListener)
-						listener.onServerConnectionChanged(mCurrentServer);
-				}
-			});
-		} catch (final Exception e) {
-			mHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mCurrentServer = null;
-					Toast.makeText(RemoteService.this, e.getMessage(),
-							Toast.LENGTH_LONG).show();
-					for (IRemoteActionListener listener : mActionListener)
-						listener.onServerConnectionChanged(mCurrentServer);
-				}
-			});
-		}
-	}
 
 	@Override
 	public void onCreate() {
@@ -119,7 +72,7 @@ public class RemoteService extends Service {
 			}
 		};
 		RMILogger.addLogListener(rmiLogListener);
-		mBinder = new PlayerBinder(this);
+		mBinder = new RemoteBinder(this);
 		mUnitMap = new HashMap<String, BufferdUnit>();
 		mActionListener = new ArrayList<IRemoteActionListener>();
 		mNotificationHandler = new NotificationHandler(this);
@@ -128,10 +81,7 @@ public class RemoteService extends Service {
 		downloadListener = new ProgressListener();
 		uploadListener = new UploadProgressListenr();
 		mActionListener.add(mNotificationHandler);
-		DaoBuilder builder = new DaoBuilder().setDatabase(
-				new RemoteDataBase(this)).setDaoMapFilling(
-				new RemoteDaoFilling());
-		DaoFactory.initiate(builder);
+		DaoFactory.initiate(new RemoteDaoBuilder(this));
 	}
 
 	@Override
@@ -146,7 +96,7 @@ public class RemoteService extends Service {
 	}
 
 	@Override
-	public PlayerBinder onBind(Intent intent) {
+	public RemoteBinder onBind(Intent intent) {
 		return mBinder;
 	}
 
@@ -184,8 +134,7 @@ public class RemoteService extends Service {
 						mPlayerListener
 								.playerMessage(mCurrentMediaServer.player
 										.getPlayingBean());
-					} catch (PlayerException e) {
-					} catch (RemoteException e) {
+					} catch (PlayerException | RemoteException e) {
 					}
 				}
 			}.start();
@@ -227,35 +176,79 @@ public class RemoteService extends Service {
 	}
 
 	public void connectToServer(final RemoteServer server) {
-		disconnectFromServer();
-		new Thread() {
-			public void run() {
-				if (mCurrentServer != server) {
-					mCurrentServer = server;
-					connect();
+		if (mCurrentServer == server)
+			return;
+		new AsyncTask<RemoteServer, Integer, Exception>() {
+
+			@Override
+			protected Exception doInBackground(RemoteServer... server) {
+				mLocalServer = Server.getServer();
+				try {
+					try {
+						if (mLocalServer != null)
+							mLocalServer.close();
+						mUnitMap.clear();
+						mCurrentControlCenter = null;
+						mCurrentServer = null;
+						mNotificationHandler.removeNotification();
+					} catch (Exception ignore) {
+						mCurrentControlCenter = null;
+						mCurrentServer = null;
+					}
+					try {
+						mLocalServer.connectToRegistry(server[0].getIP());
+					} catch (SocketException e) {
+						mLocalServer.connectToRegistry(server[0].getIP());
+					}
+					mLocalServer.startServer();
+
+					IControlCenter center = mLocalServer.find(
+							IControlCenter.ID, IControlCenter.class);
+					if (center == null)
+						throw new RemoteException(IControlCenter.ID,
+								"control center not found in registry");
+					mCurrentControlCenter = new ControlCenterBuffer(center);
+					mCurrentServer = server[0];
+					refreshControlCenter();
+				} catch (final Exception e) {
+					return e;
 				}
+				return null;
 			}
-		}.start();
+
+			@Override
+			protected void onPostExecute(Exception error) {
+				if (error != null) {
+					mCurrentServer = null;
+					new AbstractTask.ErrorDialog(RemoteService.this, error)
+							.show();
+				}
+				for (IRemoteActionListener listener : mActionListener)
+					listener.onServerConnectionChanged(mCurrentServer);
+			}
+		}.execute(server);
 	}
 
 	public void disconnectFromServer() {
-		new Thread() {
-			public void run() {
+		new AsyncTask<Void, Integer, Exception>() {
+
+			@Override
+			protected Exception doInBackground(Void... params) {
 				if (mLocalServer != null)
 					mLocalServer.close();
 				mUnitMap.clear();
 				mCurrentControlCenter = null;
 				mCurrentServer = null;
 				mNotificationHandler.removeNotification();
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						for (IRemoteActionListener listener : mActionListener)
-							listener.onServerConnectionChanged(null);
-					}
-				});
+				return null;
 			}
-		}.start();
+
+			protected void onPostExecute(Exception result) {
+				for (IRemoteActionListener listener : mActionListener)
+					listener.onServerConnectionChanged(null);
+			};
+
+		}.execute();
 	}
 
 	public void refreshControlCenter() {

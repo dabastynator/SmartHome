@@ -40,7 +40,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	/**
 	 * binder for connection with the remote service
 	 */
-	private PlayerBinder binder;
+	private RemoteBinder binder;
 
 	/**
 	 * the handler executes runnables in the ui thread
@@ -59,7 +59,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			binder = (PlayerBinder) service;
+			binder = (RemoteBinder) service;
 			binder.addRemoteActionListener(WidgetService.this);
 			if (binder.isConnected())
 				updateMusicWidget(null);

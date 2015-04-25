@@ -13,6 +13,7 @@ import android.widget.RemoteViews;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
+import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.remote.mobile.R;
@@ -43,6 +44,12 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 
 	private void findComponents() {
 		switchList = (ListView) findViewById(R.id.list_switches);
+	}
+	
+	@Override
+	void onRemoteBinder(RemoteBinder mBinder) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -99,12 +106,6 @@ public class SelectSwitchActivity extends AbstractConnectionActivity {
 			finish();
 			return false;
 		}
-
-	}
-
-	@Override
-	void onBinderConnected() {
-		// TODO Auto-generated method stub
 
 	}
 

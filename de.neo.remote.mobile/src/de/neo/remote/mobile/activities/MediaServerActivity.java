@@ -1,9 +1,5 @@
 package de.neo.remote.mobile.activities;
 
-import java.util.Locale;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,27 +12,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.api.IDVDPlayer;
-import de.neo.remote.api.IImageViewer;
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
-import de.neo.remote.mobile.tasks.BrowserLoadTask;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
-import de.neo.remote.mobile.tasks.PlayTatortTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
-import de.neo.rmi.transceiver.AbstractReceiver.ReceiverState;
 import de.remote.mobile.R;
 
 /**
@@ -59,38 +51,28 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
 	}
 
-	/**
-	 * remote media state, either playing music / video or showing images.
-	 * 
-	 * @author sebastian
-	 */
-	public enum MediaState {
-		MUSIC_VIDEO, IMAGES
-	}
-
-	protected IRemoteActionListener remoteListener;
-	protected ProgressBar downloadProgress;
-	public ImageView mplayerButton;
-	public ImageView totemButton;
-	public ImageView filesystemButton;
-	public ImageView playlistButton;
-	protected String mediaServerID;
-	protected LinearLayout dvdLayout;
-	protected ImageView dvdButton;
-	public ImageView omxButton;
-	protected TextView downloadText;
-	protected LinearLayout downloadLayout;
-	public PlayingBean playingBean;
-	private BrowserFragment browserFragment;
-	private PlayerButtonFragment buttonFragment;
-	private PlayerButtonFragment buttonFragmentRight;
+	protected IRemoteActionListener mRemoteListener;
+	protected ProgressBar mDownloadProgress;
+	public ImageView mMplayerButton;
+	public ImageView mTotemButton;
+	public ImageView mFilesystemButton;
+	public ImageView mPlaylistButton;
+	protected String mMediaServerID;
+	protected LinearLayout mDvdLayout;
+	protected ImageView mDvdButton;
+	public ImageView mOmxButton;
+	protected TextView mDownloadText;
+	protected LinearLayout mDownloadLayout;
+	public PlayingBean mPlayingBean;
+	private BrowserFragment mBrowserFragment;
+	private PlayerButtonFragment mButtonFragment;
+	private PlayerButtonFragment mButtonFragmentRight;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		requestWindowFeature(Window.FEATURE_PROGRESS);
+		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.mediaserver_main);
 
@@ -98,11 +80,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 		if (getIntent().getExtras() != null
 				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
-			mediaServerID = getIntent().getExtras().getString(EXTRA_MEDIA_ID);
+			mMediaServerID = getIntent().getExtras().getString(EXTRA_MEDIA_ID);
 		}
-
-		setProgressBarIndeterminateVisibility(true);
-		setProgressBarVisibility(true);
 	}
 
 	@Override
@@ -110,13 +89,13 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (mBinder == null || mBinder.getLatestMediaServer() == null
 				|| !mediaserver.equals(mBinder.getLatestMediaServer().name))
 			return;
-		if (buttonFragment != null)
-			buttonFragment.onPlayingBeanChanged(mediaserver, bean);
-		if (buttonFragmentRight != null)
-			buttonFragmentRight.onPlayingBeanChanged(mediaserver, bean);
-		if (browserFragment != null)
-			browserFragment.onPlayingBeanChanged(mediaserver, bean);
-		playingBean = bean;
+		if (mButtonFragment != null)
+			mButtonFragment.onPlayingBeanChanged(mediaserver, bean);
+		if (mButtonFragmentRight != null)
+			mButtonFragmentRight.onPlayingBeanChanged(mediaserver, bean);
+		if (mBrowserFragment != null)
+			mBrowserFragment.onPlayingBeanChanged(mediaserver, bean);
+		mPlayingBean = bean;
 	}
 
 	@Override
@@ -165,8 +144,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			}.start();
 			return true;
 		}
-		if (browserFragment != null) {
-			if (browserFragment.onKeyDown(keyCode, event))
+		if (mBrowserFragment != null) {
+			if (mBrowserFragment.onKeyDown(keyCode, event))
 				return true;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -174,15 +153,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	public void showDVDBar(View v) {
 		IPlayer player = mBinder.getLatestMediaServer().player;
-		if (dvdLayout.getVisibility() == View.VISIBLE) {
-			dvdLayout.setVisibility(View.GONE);
-			dvdButton.setBackgroundResource(0);
+		if (mDvdLayout.getVisibility() == View.VISIBLE) {
+			mDvdLayout.setVisibility(View.GONE);
+			mDvdButton.setBackgroundResource(0);
 		} else {
 			if (player instanceof IDVDPlayer) {
 				try {
 					((IDVDPlayer) player).playDVD();
-					dvdLayout.setVisibility(View.VISIBLE);
-					dvdButton.setBackgroundResource(R.drawable.image_border);
+					mDvdLayout.setVisibility(View.VISIBLE);
+					mDvdButton.setBackgroundResource(R.drawable.image_border);
 				} catch (Exception e) {
 					Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT)
 							.show();
@@ -200,7 +179,14 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onContextItemSelected(MenuItem item) {
+		if (mBrowserFragment.onContextItemSelected(item))
+			return true;
+		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
@@ -244,15 +230,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				if (mediaServer.player instanceof IDVDPlayer)
 					((IDVDPlayer) mediaServer.player).showMenu();
 				break;
-			case R.id.opt_playlist:
-				if (browserFragment != null) {
-					browserFragment.viewerState = ViewerState.PLAYLISTS;
-					new BrowserLoadTask(this, null, false).execute();
-				}
-				break;
 			case R.id.opt_refresh:
-				mBinder.getMediaServerByID(mediaServerID);
-				new BrowserLoadTask(this, null, false).execute();
+				// mBinder.getMediaServerByID(mediaServerID);
+				// new BrowserLoadTask(this, null, false).execute();
 				break;
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -268,77 +248,33 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
-		return super.onMenuItemSelected(featureId, item);
-	}
-
-	private void askForStream() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle(getResources().getString(R.string.str_input_stream));
-		alert.setMessage(getResources()
-				.getString(R.string.str_input_stream_url));
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(this);
-		alert.setView(input);
-
-		alert.setPositiveButton(getResources().getString(android.R.string.ok),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String document = input.getText().toString();
-						try {
-							int documentID = Integer.parseInt(document);
-							PlayTatortTask task = new PlayTatortTask(
-									MediaServerActivity.this, documentID,
-									mBinder);
-							task.execute(new String[] {});
-						} catch (Exception e) {
-
-						}
-					}
-				});
-
-		alert.setNegativeButton(
-				getResources().getString(android.R.string.cancel),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-					}
-				});
-
-		alert.show();
+		return super.onOptionsItemSelected(item);
 	}
 
 	/**
 	 * find components by their id
 	 */
 	private void findComponents() {
-		dvdButton = (ImageView) findViewById(R.id.button_dvd);
-		mplayerButton = (ImageView) findViewById(R.id.button_mplayer);
-		totemButton = (ImageView) findViewById(R.id.button_totem);
-		omxButton = (ImageView) findViewById(R.id.button_omxplayer);
-		filesystemButton = (ImageView) findViewById(R.id.button_filesystem);
-		playlistButton = (ImageView) findViewById(R.id.button_playlist);
-		browserFragment = (BrowserFragment) getFragmentManager()
+		mDvdButton = (ImageView) findViewById(R.id.button_dvd);
+		mMplayerButton = (ImageView) findViewById(R.id.button_mplayer);
+		mTotemButton = (ImageView) findViewById(R.id.button_totem);
+		mOmxButton = (ImageView) findViewById(R.id.button_omxplayer);
+		mFilesystemButton = (ImageView) findViewById(R.id.button_filesystem);
+		mPlaylistButton = (ImageView) findViewById(R.id.button_playlist);
+		mBrowserFragment = (BrowserFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_browser);
-		buttonFragment = (PlayerButtonFragment) getFragmentManager()
+		mButtonFragment = (PlayerButtonFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button);
-		buttonFragmentRight = (PlayerButtonFragment) getFragmentManager()
+		mButtonFragmentRight = (PlayerButtonFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button_right);
-		dvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
+		mDvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (browserFragment != null)
-			browserFragment.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle bundle) {
-		super.onRestoreInstanceState(bundle);
-		if (browserFragment != null)
-			browserFragment.onRestoreInstanceState(bundle);
+		if (mBrowserFragment != null)
+			mBrowserFragment.onSaveInstanceState(outState);
 	}
 
 	/**
@@ -371,29 +307,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	protected void onStartConnecting() {
 		setTitle(getResources().getString(R.string.connecting));
 		setProgressBarVisibility(true);
-		if (browserFragment != null)
-			browserFragment.browserContentView
-					.setAdapter(new ArrayAdapter<String>(this,
-							android.R.layout.simple_list_item_1,
-							new String[] {}));
 	};
-
-	@Override
-	void onBinderConnected() {
-		if (mBinder.getLatestMediaServer() != null
-				&& !mBinder.getLatestMediaServer().name.equals(mediaServerID)) {
-			new BrowserLoadTask(this, null, false).execute();
-		}
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
-			if (youtubeURL != null) {
-				new PlayYoutubeTask(this, youtubeURL, mBinder)
-						.execute(new String[] {});
-				getIntent().removeExtra(Intent.EXTRA_TEXT);
-			}
-		}
-	}
 
 	@Override
 	protected void onResume() {
@@ -416,20 +330,11 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		// now getIntent() should always return the last received intent
 	}
 
-	public static boolean isImage(String item) {
-		item = item.toLowerCase(Locale.US);
-		for (String extension : IImageViewer.IMAGE_EXTENSIONS)
-			if (item.endsWith(extension))
-				return true;
-		return false;
-	}
-
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
 
-		new AsyncTask<String, Integer, String[]>() {
-
-			Exception exeption = null;
+		new AsyncTask<String, Integer, StationStuff>() {
+			private Exception error;
 
 			@Override
 			protected void onPreExecute() {
@@ -439,75 +344,43 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			}
 
 			@Override
-			protected String[] doInBackground(String... params) {
+			protected StationStuff doInBackground(String... params) {
 				try {
-					mBinder.getMediaServerByID(mediaServerID);
-					return new String[] {};
+					return mBinder.getMediaServerByID(mMediaServerID);
 				} catch (Exception e) {
-					exeption = e;
-					return new String[] {};
+					error = e;
 				}
+				return null;
 			}
 
 			@Override
-			protected void onPostExecute(String[] result) {
-				if (exeption != null)
-					Toast.makeText(MediaServerActivity.this,
-							exeption.getMessage(), Toast.LENGTH_SHORT).show();
-				if (mBinder.getLatestMediaServer() != null) {
-					new BrowserLoadTask(MediaServerActivity.this, null, false)
-							.execute();
-				} else {
-					disableScreen();
-				}
+			protected void onPostExecute(StationStuff station) {
+				if (error != null)
+					new AbstractTask.ErrorDialog(MediaServerActivity.this,
+							error);
+				else
+					mBrowserFragment.setStation(station);
 			}
 
-		}.execute(new String[] {});
-	}
-
-	/**
-	 * callback for connecting to the remote server. update the list view and
-	 * show the directory.
-	 * 
-	 * @author sebastian
-	 */
-	public class ShowFolderRunnable implements Runnable {
-		@Override
-		public void run() {
-			new BrowserLoadTask(MediaServerActivity.this, null, false)
-					.execute();
-			if (mBinder.getReceiver() != null
-					&& mBinder.getReceiver().getState() == ReceiverState.LOADING) {
-				downloadLayout.setVisibility(View.VISIBLE);
-				downloadProgress.setProgress((int) ((100d * mBinder
-						.getReceiver().getDownloadProgress()) / mBinder
-						.getReceiver().getFullSize()));
-			}
-		}
+		}.execute();
 	}
 
 	public void showFileSystem(View view) {
-		if (browserFragment != null) {
-			browserFragment.viewerState = ViewerState.DIRECTORIES;
-			new BrowserLoadTask(this, null, false).execute();
-		}
+		mBrowserFragment.showView(ViewerState.DIRECTORIES);
 	}
 
 	public void showPlaylist(View view) {
-		if (browserFragment != null) {
-			browserFragment.viewerState = ViewerState.PLAYLISTS;
-			new BrowserLoadTask(this, null, false).execute();
-		}
+		mBrowserFragment.showView(ViewerState.PLAYLISTS);
 	}
 
 	public void setTotem(View view) {
 		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mediaServer != null) {
 			mediaServer.player = mediaServer.totem;
-			totemButton.setBackgroundResource(R.drawable.image_border);
-			mplayerButton.setBackgroundResource(0);
-			if (omxButton != null)
-				omxButton.setBackgroundResource(0);
+			mTotemButton.setBackgroundResource(R.drawable.image_border);
+			mMplayerButton.setBackgroundResource(0);
+			if (mOmxButton != null)
+				mOmxButton.setBackgroundResource(0);
 		}
 	}
 
@@ -515,10 +388,10 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mediaServer != null) {
 			mediaServer.player = mediaServer.mplayer;
-			mplayerButton.setBackgroundResource(R.drawable.image_border);
-			totemButton.setBackgroundResource(0);
-			if (omxButton != null)
-				omxButton.setBackgroundResource(0);
+			mMplayerButton.setBackgroundResource(R.drawable.image_border);
+			mTotemButton.setBackgroundResource(0);
+			if (mOmxButton != null)
+				mOmxButton.setBackgroundResource(0);
 		}
 	}
 
@@ -526,72 +399,78 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		StationStuff server = mBinder.getLatestMediaServer();
 		if (server != null) {
 			server.player = server.omxplayer;
-			omxButton.setBackgroundResource(R.drawable.image_border);
-			totemButton.setBackgroundResource(0);
-			mplayerButton.setBackgroundResource(0);
+			mOmxButton.setBackgroundResource(R.drawable.image_border);
+			mTotemButton.setBackgroundResource(0);
+			mMplayerButton.setBackgroundResource(0);
 		}
 	}
 
 	@Override
 	public void startSending(long size) {
 		super.startSending(size);
-		if (browserFragment != null)
-			browserFragment.startSending(size);
+		if (mBrowserFragment != null)
+			mBrowserFragment.startSending(size);
 	}
 
 	@Override
 	public void progressSending(long size) {
 		super.progressSending(size);
-		if (browserFragment != null)
-			browserFragment.progressSending(size);
+		if (mBrowserFragment != null)
+			mBrowserFragment.progressSending(size);
 	}
 
 	@Override
 	public void endSending(long size) {
 		super.endSending(size);
-		if (browserFragment != null)
-			browserFragment.endSending(size);
+		if (mBrowserFragment != null)
+			mBrowserFragment.endSending(size);
 	}
 
 	@Override
 	public void sendingCanceled() {
 		super.sendingCanceled();
-		if (browserFragment != null)
-			browserFragment.sendingCanceled();
+		if (mBrowserFragment != null)
+			mBrowserFragment.sendingCanceled();
 	}
 
 	@Override
 	public void progressReceive(long size, String file) {
 		super.progressReceive(size, file);
-		if (browserFragment != null)
-			browserFragment.progressReceive(size, file);
+		if (mBrowserFragment != null)
+			mBrowserFragment.progressReceive(size, file);
 	}
 
 	@Override
 	public void endReceive(long size) {
 		super.endReceive(size);
-		if (browserFragment != null)
-			browserFragment.endReceive(size);
+		if (mBrowserFragment != null)
+			mBrowserFragment.endReceive(size);
 	}
 
 	@Override
 	public void exceptionOccurred(Exception e) {
 		super.exceptionOccurred(e);
-		if (browserFragment != null)
-			browserFragment.exceptionOccurred(e);
+		if (mBrowserFragment != null)
+			mBrowserFragment.exceptionOccurred(e);
 	}
 
 	@Override
 	public void downloadCanceled() {
 		super.downloadCanceled();
-		if (browserFragment != null)
-			browserFragment.downloadCanceled();
+		if (mBrowserFragment != null)
+			mBrowserFragment.downloadCanceled();
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (browserFragment != null)
-			browserFragment.onActivityResult(requestCode, resultCode, data);
+		if (mBrowserFragment != null)
+			mBrowserFragment.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	void onRemoteBinder(RemoteBinder mBinder) {
+		// mBrowserFragment.onRemoteBinder(mBinder);
+		// if (mBinder != null && )
 	}
 }

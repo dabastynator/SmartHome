@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.remote.mobile"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="3"
+    android:versionName="3.0" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,11 +15,13 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Holo" >
+        android:theme="@style/AppTheme" >
+        
         <activity
             android:name="de.neo.remote.mobile.activities.MediaServerActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:parentActivityName="de.neo.remote.mobile.activities.ControlSceneActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -31,33 +33,28 @@
                     android:mimeType="text/*" />
             </intent-filter>
         </activity>
+        
         <activity
             android:name="de.neo.remote.mobile.activities.ControlSceneActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="de.neo.remote.mobile.activities.SelectPlaylistActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
+        
         <activity
             android:name="de.neo.remote.mobile.activities.SelectServerActivity"
             android:label="@string/app_name" >
         </activity>
-        <activity
-            android:name="de.neo.remote.mobile.activities.NewServerActivity"
-            android:label="@string/app_name" >
-        </activity>
+        
         <activity
             android:name="de.neo.remote.mobile.activities.SelectSwitchActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Dialog" >
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

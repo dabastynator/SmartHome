@@ -5,7 +5,7 @@ import java.io.File;
 import android.os.Environment;
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
-import de.neo.remote.mobile.services.PlayerBinder;
+import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
@@ -14,7 +14,7 @@ public class DownloadTask extends AbstractTask {
 
 	public DownloadTask(AbstractConnectionActivity activity, IBrowser browser,
 			String file, String directory, String serverName,
-			PlayerBinder binder) {
+			RemoteBinder binder) {
 		super(activity, TaskMode.ToastTask);
 		this.browser = browser;
 		this.file = file;
@@ -30,7 +30,7 @@ public class DownloadTask extends AbstractTask {
 	private String file;
 	private String directory;
 	private String serverName;
-	private PlayerBinder binder;
+	private RemoteBinder binder;
 
 	@Override
 	protected void onExecute() throws Exception {

@@ -1,16 +1,16 @@
 package de.neo.remote.mobile.tasks;
 
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
-import de.neo.remote.mobile.services.PlayerBinder;
+import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.util.BufferBrowser;
 
 public class PlayTatortTask extends AbstractTask {
 
-	private PlayerBinder binder;
+	private RemoteBinder binder;
 	private int mDocumentId;
 
 	public PlayTatortTask(AbstractConnectionActivity activity,
-			int documentID, PlayerBinder binder) {
+			int documentID, RemoteBinder binder) {
 		super(activity, TaskMode.DialogTask);
 		this.mDocumentId = documentID;
 		this.binder = binder;

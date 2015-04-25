@@ -50,13 +50,11 @@
                 android:src="@drawable/cancel" />
         </LinearLayout>
 
-        <ListView
-            android:id="@+id/fileList"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:fadingEdge="vertical"
-            android:fastScrollEnabled="true"
-            android:scrollbars="vertical" />
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/media_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <TableLayout
@@ -78,59 +76,53 @@
                 android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/player_up" />
+                android:background="@drawable/player_up" />
         </TableRow>
 
         <TableRow
             android:id="@+id/tableRow2"
-            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1" >
 
             <Button
                 android:id="@+id/button_left"
-                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/player_button_size"
                 android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/player_left" />
+                android:background="@drawable/player_left" />
 
             <Button
                 android:id="@+id/button_enter"
-                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/player_button_size"
                 android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/player_enter" />
+                android:background="@drawable/player_enter" />
 
             <Button
                 android:id="@+id/button_right"
-                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/player_button_size"
                 android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/player_right" />
+                android:background="@drawable/player_right" />
         </TableRow>
 
         <TableRow
             android:id="@+id/tableRow3"
-            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1" >
 
             <Button
                 android:id="@+id/button_down"
-                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/player_button_size"
                 android:layout_height="@dimen/player_button_size"
                 android:layout_weight="1"
                 android:onClick="playerAction"
-                android:src="@drawable/player_down" />
+                android:background="@drawable/player_down" />
         </TableRow>
     </TableLayout>
 

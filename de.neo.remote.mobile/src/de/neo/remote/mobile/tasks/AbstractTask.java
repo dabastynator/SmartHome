@@ -1,7 +1,12 @@
 package de.neo.remote.mobile.tasks;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
@@ -145,6 +150,30 @@ public abstract class AbstractTask extends
 
 	protected Object getResult() {
 		return null;
+	}
+
+	public static class ErrorDialog {
+		private Exception mError;
+		private Context mContext;
+
+		public ErrorDialog(Context context, Exception e) {
+			mError = e;
+			mContext = context;
+		}
+
+		public void show() {
+			Builder builder = new AlertDialog.Builder(mContext);
+			builder.setTitle(mError.getClass().getSimpleName());
+			if (mError.getMessage() == null
+					|| mError.getMessage().length() == 0) {
+				StringWriter errors = new StringWriter();
+				mError.printStackTrace(new PrintWriter(errors));
+				builder.setMessage(errors.toString());
+			} else {
+				builder.setMessage(mError.getMessage());
+			}
+			builder.create();
+		}
 	}
 
 }

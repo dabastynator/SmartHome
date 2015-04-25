@@ -39,7 +39,7 @@ import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
-import de.neo.remote.mobile.services.PlayerBinder;
+import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
@@ -82,7 +82,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return room;
 	}
 
-	public void reloadControlCenter(PlayerBinder binder) throws RemoteException {
+	public void reloadControlCenter(RemoteBinder binder) throws RemoteException {
 		IControlCenter control = binder.getControlCenter();
 		if (glObjects != null)
 			room.removeFigure(glObjects);

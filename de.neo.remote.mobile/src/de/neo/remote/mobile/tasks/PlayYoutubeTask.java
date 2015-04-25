@@ -2,15 +2,15 @@ package de.neo.remote.mobile.tasks;
 
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
-import de.neo.remote.mobile.services.PlayerBinder;
+import de.neo.remote.mobile.services.RemoteBinder;
 
 public class PlayYoutubeTask extends AbstractTask {
 
 	private String youtubeURL;
-	private PlayerBinder binder;
+	private RemoteBinder binder;
 
 	public PlayYoutubeTask(AbstractConnectionActivity activity,
-			String youtubeURL, PlayerBinder binder) {
+			String youtubeURL, RemoteBinder binder) {
 		super(activity, TaskMode.DialogTask);
 		this.youtubeURL = youtubeURL;
 		this.binder = binder;

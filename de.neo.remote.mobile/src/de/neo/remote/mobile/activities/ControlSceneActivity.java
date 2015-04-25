@@ -12,6 +12,8 @@ import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.services.RemoteBinder;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -23,12 +25,12 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		mHandler = new Handler();
 
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		requestWindowFeature(Window.FEATURE_PROGRESS);
 		setProgressBarIndeterminateVisibility(true);
 		setProgressBarVisibility(false);
 
@@ -55,10 +57,6 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
-		updateGLView();
-	}
-
-	private void updateGLView() {
 		if (mBinder.getControlCenter() == null) {
 			setTitle(getResources().getString(R.string.no_controlcenter));
 			setProgressBarVisibility(false);
@@ -70,7 +68,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_control_refresh:
 			setTitle(getResources().getString(R.string.str_refresh));
@@ -83,7 +81,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 			}.start();
 			break;
 		}
-		return super.onMenuItemSelected(featureId, item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -104,11 +102,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		renderer.powerSwitchChanged(_switch, state);
 
 	}
-
+	
 	@Override
-	void onBinderConnected() {
+	void onRemoteBinder(RemoteBinder mBinder) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
@@ -141,12 +139,8 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						Toast.makeText(
-								ControlSceneActivity.this,
-								getResources().getString(
-										R.string.error_load_server)
-										+ ": " + e.getMessage(),
-								Toast.LENGTH_LONG).show();
+						new AbstractTask.ErrorDialog(ControlSceneActivity.this,
+								e).show();
 						setTitle(getResources().getString(
 								R.string.no_conneciton));
 						setProgressBarVisibility(false);

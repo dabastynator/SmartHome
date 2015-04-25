@@ -34,7 +34,7 @@ import de.neo.rmi.transceiver.FileSender;
  * 
  * @author sebastian
  */
-public class PlayerBinder extends Binder {
+public class RemoteBinder extends Binder {
 
 	/**
 	 * port for uploading files
@@ -56,7 +56,7 @@ public class PlayerBinder extends Binder {
 	 * 
 	 * @param service
 	 */
-	public PlayerBinder(RemoteService service) {
+	public RemoteBinder(RemoteService service) {
 		this.service = service;
 	}
 
