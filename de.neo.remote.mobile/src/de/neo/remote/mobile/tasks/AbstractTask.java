@@ -172,7 +172,7 @@ public abstract class AbstractTask extends
 			} else {
 				builder.setMessage(mError.getMessage());
 			}
-			builder.create();
+			builder.create().show();;
 		}
 	}
 

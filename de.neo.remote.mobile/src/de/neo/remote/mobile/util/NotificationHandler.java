@@ -170,7 +170,7 @@ public class NotificationHandler implements IRemoteActionListener {
 					mContext.getString(R.string.player_pause), playPending);
 		else
 			builder.addAction(R.drawable.player_small_play,
-					mContext.getString(R.string.str_play), playPending);
+					mContext.getString(R.string.player_play), playPending);
 		builder.addAction(R.drawable.player_small_vol_down,
 				mContext.getString(R.string.player_vol_down), prevPending);
 		builder.addAction(R.drawable.player_small_vol_up,

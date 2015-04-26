@@ -2,11 +2,11 @@ package de.neo.remote.mobile.activities;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -33,7 +33,7 @@ import de.remote.mobile.R;
  * 
  * @author sebastian
  */
-public class SelectServerActivity extends Activity {
+public class SelectServerActivity extends ActionBarActivity {
 
 	public static final int RESULT_CODE = 2;
 	public static final String SERVER_ID = "serverID";
@@ -44,6 +44,9 @@ public class SelectServerActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		getSupportActionBar().setDisplayShowHomeEnabled(true);
+		getSupportActionBar().setLogo(R.drawable.ic_launcher);
 
 		setContentView(R.layout.server);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
@@ -156,13 +159,13 @@ public class SelectServerActivity extends Activity {
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_select_server_add:
 			addNewServer(null);
 			break;
 		}
-		return super.onMenuItemSelected(featureId, item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	public void addNewServer(View view) {

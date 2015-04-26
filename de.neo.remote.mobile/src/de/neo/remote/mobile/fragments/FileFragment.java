@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
@@ -56,19 +55,19 @@ public class FileFragment extends ListFragment {
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
-		refreshContent((AbstractConnectionActivity) getActivity(), null, false);
+		refreshContent(getActivity(), null, false);
 	}
 
-	private void refreshContent(final AbstractConnectionActivity activity,
-			final String goTo, final boolean goBack) {
+	private void refreshContent(final Context context, final String goTo,
+			final boolean goBack) {
 		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
 
 			private String[] mFileList;
+			private boolean mGoBack = false;
 
 			@Override
 			protected void onPreExecute() {
-				super.onPreExecute();
-				activity.setProgressBarVisibility(true);
+				setListShown(false);
 			}
 
 			@Override
@@ -80,7 +79,7 @@ public class FileFragment extends ListFragment {
 						if (goTo != null)
 							mStationStuff.browser.goTo(goTo);
 						if (goBack)
-							mStationStuff.browser.goBack();
+							mGoBack = mStationStuff.browser.goBack();
 						mStationStuff.browser.getLocation();
 						mPath = mStationStuff.browser.getFullLocation();
 						String[] directories = mStationStuff.browser
@@ -103,11 +102,15 @@ public class FileFragment extends ListFragment {
 			@Override
 			protected void onPostExecute(Exception result) {
 				if (result != null) {
-					new AbstractTask.ErrorDialog(activity, result).show();
+					new AbstractTask.ErrorDialog(context, result).show();
+					setEmptyText(result.getClass().getSimpleName());
 				} else {
-					setListAdapter(new FileAdapter(activity, mFileList));
+					if (getListAdapter() != null)
+						setListShown(true);
+					setListAdapter(new FileAdapter(context, mFileList));
 				}
-				activity.setProgressBarVisibility(false);
+				if (mGoBack)
+					getActivity().onBackPressed();
 			}
 		};
 		task.execute();
@@ -123,7 +126,7 @@ public class FileFragment extends ListFragment {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onContextItemSelected(MenuItem item) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		switch (item.getItemId()) {
 		case R.id.opt_item_play:
@@ -170,7 +173,9 @@ public class FileFragment extends ListFragment {
 					&& mPlayingBean.getPath() != null
 					&& mPlayingBean.getPath().equals(mPath + file)) {
 				image.setImageResource(R.drawable.playing);
-			} else if (file.toUpperCase(Locale.US).endsWith("MP3")
+			} else if (position < mStationStuff.directoryCount)
+				image.setImageResource(R.drawable.folder);
+			else if (file.toUpperCase(Locale.US).endsWith("MP3")
 					|| file.toUpperCase(Locale.US).endsWith("OGG")
 					|| file.toUpperCase(Locale.US).endsWith("WAV"))
 				image.setImageResource(R.drawable.music);
@@ -236,14 +241,16 @@ public class FileFragment extends ListFragment {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				((ArrayAdapter<?>) getListAdapter()).notifyDataSetChanged();
+				if (getListAdapter() != null)
+					((ArrayAdapter<?>) getListAdapter()).notifyDataSetChanged();
 			}
 		});
 	}
 
 	public void setPlayingFile(PlayingBean bean) {
 		mPlayingBean = bean;
-		((ArrayAdapter<?>) getListAdapter()).notifyDataSetChanged();
+		if (getListAdapter() != null)
+			((ArrayAdapter<?>) getListAdapter()).notifyDataSetChanged();
 	}
 
 }

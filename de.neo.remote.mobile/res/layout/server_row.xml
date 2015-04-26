@@ -27,7 +27,7 @@
             android:id="@+id/server_row_ip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/str_ip" />
+            android:text="@string/server_ip" />
     </LinearLayout>
 
 </LinearLayout>

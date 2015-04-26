@@ -3,10 +3,13 @@ package de.neo.remote.mobile.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.ViewPager.LayoutParams;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.IInternetSwitch.State;
@@ -19,50 +22,60 @@ import de.remote.mobile.R;
 
 public class ControlSceneActivity extends AbstractConnectionActivity {
 
-	private AbstractSceneSurfaceView view;
-	private ControlSceneRenderer renderer;
+	private AbstractSceneSurfaceView mGLView;
+	private ControlSceneRenderer mRenderer;
 	private Handler mHandler;
+	private FrameLayout mLayout;
+	private ProgressBar mProgress;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		requestWindowFeature(Window.FEATURE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		mHandler = new Handler();
 
-		setProgressBarIndeterminateVisibility(true);
-		setProgressBarVisibility(false);
-
 		SelectMediaServer selecter = new SelectMediaServer();
-		renderer = new ControlSceneRenderer(this, selecter);
-		view = new AbstractSceneSurfaceView(this, savedInstanceState, renderer);
-		setContentView(view);
+
+		setContentView(R.layout.controlscene);
+		findComponents();
+
+		mRenderer = new ControlSceneRenderer(this, selecter);
+		mGLView = new AbstractSceneSurfaceView(this, savedInstanceState,
+				mRenderer);
+
+		LayoutParams params = new LayoutParams();
+		params.height = LayoutParams.MATCH_PARENT;
+		params.width = LayoutParams.MATCH_PARENT;
+		mLayout.addView(mGLView, 0, params);
 
 		setTitle(getResources().getString(R.string.connecting));
-		setProgressBarVisibility(true);
+	}
+
+	private void findComponents() {
+		mLayout = (FrameLayout) findViewById(R.id.controlscene_layout);
+		mProgress = (ProgressBar) findViewById(R.id.controlscene_progress);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		view.onPause();
+		mGLView.onPause();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		view.onResume();
+		mGLView.onResume();
 	}
 
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
 		if (mBinder.getControlCenter() == null) {
 			setTitle(getResources().getString(R.string.no_controlcenter));
-			setProgressBarVisibility(false);
+			mProgress.setVisibility(View.GONE);
 		} else {
 			setTitle(getResources().getString(R.string.load_controlcenter));
-			setProgressBarVisibility(true);
+			mProgress.setVisibility(View.VISIBLE);
 			new Thread(new UpdateGLViewRunner()).start();
 		}
 	}
@@ -71,8 +84,8 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_control_refresh:
-			setTitle(getResources().getString(R.string.str_refresh));
-			setProgressBarVisibility(true);
+			setTitle(getResources().getString(R.string.refresh));
+			mProgress.setVisibility(View.VISIBLE);
 			new Thread() {
 				public void run() {
 					mBinder.refreshControlCenter();
@@ -86,7 +99,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		renderer.setPlayingBean(mediaserver, bean);
+		mRenderer.setPlayingBean(mediaserver, bean);
 	}
 
 	@Override
@@ -99,20 +112,20 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onPowerSwitchChange(String _switch, State state) {
-		renderer.powerSwitchChanged(_switch, state);
+		mRenderer.powerSwitchChanged(_switch, state);
 
 	}
-	
+
 	@Override
 	void onRemoteBinder(RemoteBinder mBinder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	void onStartConnecting() {
 		setTitle(getResources().getString(R.string.connecting));
-		setProgressBarVisibility(true);
+		mProgress.setVisibility(View.VISIBLE);
 	}
 
 	public class UpdateGLViewRunner implements Runnable {
@@ -120,7 +133,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		@Override
 		public void run() {
 			try {
-				renderer.reloadControlCenter(mBinder);
+				mRenderer.reloadControlCenter(mBinder);
 				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
@@ -132,7 +145,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 									Toast.LENGTH_SHORT).show();
 						setTitle("Controlcenter@"
 								+ mBinder.getServer().getName());
-						setProgressBarVisibility(false);
+						mProgress.setVisibility(View.GONE);
 					}
 				});
 			} catch (final Exception e) {
@@ -143,7 +156,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 								e).show();
 						setTitle(getResources().getString(
 								R.string.no_conneciton));
-						setProgressBarVisibility(false);
+						mProgress.setVisibility(View.GONE);
 					}
 				});
 			}

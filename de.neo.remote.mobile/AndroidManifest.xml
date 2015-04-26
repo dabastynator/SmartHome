@@ -16,13 +16,12 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
         <activity
             android:name="de.neo.remote.mobile.activities.MediaServerActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:parentActivityName="de.neo.remote.mobile.activities.ControlSceneActivity" >
+            android:parentActivityName="de.neo.remote.mobile.activities.ControlSceneActivity"
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -33,28 +32,25 @@
                     android:mimeType="text/*" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name="de.neo.remote.mobile.activities.ControlSceneActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name="de.neo.remote.mobile.activities.SelectServerActivity"
             android:label="@string/app_name" >
         </activity>
-        
         <activity
             android:name="de.neo.remote.mobile.activities.SelectSwitchActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

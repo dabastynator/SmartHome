@@ -74,8 +74,8 @@ public class PlayListTask {
 					}
 				})
 				.setSuccess(
-						mActivity.getString(R.string.str_delete_playlist)
-								+ ": " + playlist).execute();
+						mActivity.getString(R.string.playlist_delete) + ": "
+								+ playlist).execute();
 	}
 
 	public void deleteItemFromPlaylist(final String playlist, final String item) {
@@ -88,7 +88,7 @@ public class PlayListTask {
 					}
 				})
 				.setSuccess(
-						mActivity.getString(R.string.str_remove_from_playlist)
+						mActivity.getString(R.string.playlist_remove_item)
 								+ ": " + item).execute();
 	}
 

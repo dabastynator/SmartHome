@@ -8,12 +8,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -21,7 +21,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
@@ -48,10 +47,10 @@ public class PlaylistFragment extends ListFragment {
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
-		refreshContent((AbstractConnectionActivity) getActivity());
+		refreshContent(getActivity());
 	}
 
-	private void refreshContent(final AbstractConnectionActivity activity) {
+	private void refreshContent(final Context context) {
 		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
 
 			private String[] mItems;
@@ -59,7 +58,7 @@ public class PlaylistFragment extends ListFragment {
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
-				activity.setProgressBarVisibility(true);
+				setListShown(false);
 			}
 
 			@Override
@@ -83,11 +82,15 @@ public class PlaylistFragment extends ListFragment {
 			@Override
 			protected void onPostExecute(Exception result) {
 				if (result != null) {
-					new AbstractTask.ErrorDialog(activity, result).show();
+					new AbstractTask.ErrorDialog(context, result).show();
+					setListAdapter(new PlaylistAdapter(context, new String[] {}));
+					setListShown(true);
+					setEmptyText(result.getClass().getSimpleName());
 				} else {
-					setListAdapter(new PlaylistAdapter(activity, mItems));
+					if (getListAdapter() != null)
+						setListShown(true);
+					setListAdapter(new PlaylistAdapter(context, mItems));
 				}
-				activity.setProgressBarVisibility(false);
 			}
 		};
 		task.execute();
@@ -106,7 +109,7 @@ public class PlaylistFragment extends ListFragment {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onContextItemSelected(MenuItem item) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		final StationStuff mediaServer = activity.mBinder
 				.getLatestMediaServer();
@@ -135,7 +138,7 @@ public class PlaylistFragment extends ListFragment {
 		case R.id.opt_pls_show:
 			mViewerState = ViewerState.PLS_ITEMS;
 			mCurrentPlayList = mSelectedItem;
-			refreshContent((AbstractConnectionActivity) getActivity());
+			refreshContent(getActivity());
 			return true;
 		case R.id.opt_pls_item_delete:
 			new PlayListTask(activity, mediaServer).deleteItemFromPlaylist(
@@ -156,7 +159,10 @@ public class PlaylistFragment extends ListFragment {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = super.getView(position, convertView, parent);
 			ImageView image = (ImageView) view.findViewById(R.id.img_item);
-			image.setImageResource(R.drawable.pls);
+			if (mViewerState == ViewerState.PLAYLISTS)
+				image.setImageResource(R.drawable.pls);
+			if (mViewerState == ViewerState.PLS_ITEMS)
+				image.setImageResource(R.drawable.music);
 			return view;
 		}
 
@@ -169,7 +175,8 @@ public class PlaylistFragment extends ListFragment {
 				int position, long arg3) {
 			mSelectedItem = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
-			mSelectedItem = mPlsFileMap.get(mSelectedItem);
+			if (mViewerState == ViewerState.PLS_ITEMS)
+				mSelectedItem = mPlsFileMap.get(mSelectedItem);
 			return false;
 		}
 	}

@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -70,8 +69,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		requestWindowFeature(Window.FEATURE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.mediaserver_main);
@@ -145,8 +142,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			return true;
 		}
 		if (mBrowserFragment != null) {
-			if (mBrowserFragment.onKeyDown(keyCode, event))
-				return true;
+			mBrowserFragment.onKeyDown(keyCode, event);
+			return true;
 		}
 		return super.onKeyDown(keyCode, event);
 	}
