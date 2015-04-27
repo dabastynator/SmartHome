@@ -79,7 +79,7 @@ public class FileFragment extends ListFragment {
 						if (goTo != null)
 							mStationStuff.browser.goTo(goTo);
 						if (goBack)
-							mGoBack = mStationStuff.browser.goBack();
+							mGoBack = !mStationStuff.browser.goBack();
 						mStationStuff.browser.getLocation();
 						mPath = mStationStuff.browser.getFullLocation();
 						String[] directories = mStationStuff.browser

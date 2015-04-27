@@ -72,6 +72,13 @@ public class PlaylistFragment extends ListFragment {
 					} else {
 						mItems = mStationStuff.pls
 								.listContent(mCurrentPlayList);
+						mPlsFileMap.clear();
+						for (String item : mItems)
+							if (item.indexOf("/") >= 0)
+								mPlsFileMap.put(item.substring(item
+										.lastIndexOf("/") + 1), item);
+							else
+								mPlsFileMap.put(item, item);
 					}
 				} catch (Exception e) {
 					return e;
@@ -188,7 +195,8 @@ public class PlaylistFragment extends ListFragment {
 			MediaServerActivity activity = (MediaServerActivity) getActivity();
 			String item = ((TextView) view.findViewById(R.id.lbl_item_name))
 					.getText().toString();
-			item = mPlsFileMap.get(item);
+			if (mViewerState == ViewerState.PLS_ITEMS)
+				item = mPlsFileMap.get(item);
 			PlayItemTask task = new PlayItemTask(activity, item,
 					activity.mBinder, mViewerState);
 			task.execute(new String[] {});

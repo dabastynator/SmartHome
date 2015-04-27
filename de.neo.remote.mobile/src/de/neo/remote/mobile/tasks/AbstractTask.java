@@ -8,66 +8,61 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
-import de.neo.rmi.protokol.RemoteException;
 
 public abstract class AbstractTask extends
 		AsyncTask<String, Integer, Exception> {
 
 	public enum TaskMode {
-		DialogTask, ActionBarTask, ToastTask
+		DialogTask, ToastTask
 	};
 
-	protected AbstractConnectionActivity activity;
-	protected boolean canceld = false;
-	protected TaskMode mode;
-	protected Exception exception;
+	protected AbstractConnectionActivity mActivity;
+	protected boolean mCanceld = false;
+	protected TaskMode mMode;
+	protected Exception mException;
 
 	public AbstractTask(AbstractConnectionActivity activity, TaskMode mode) {
-		this.activity = activity;
-		this.mode = mode;
-		canceld = false;
+		mActivity = activity;
+		mMode = mode;
+		mCanceld = false;
 	}
 
 	@Override
 	protected void onPreExecute() {
-		if (mode == TaskMode.DialogTask) {
-			ProgressDialog progress = activity.createProgress();
+		if (mMode == TaskMode.DialogTask) {
+			ProgressDialog progress = mActivity.createProgress();
 			progress.setTitle(getDialogTitle());
 			progress.setMessage(getDialogMsg());
 			progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+			progress.setButton(DialogInterface.BUTTON_NEGATIVE,
+					mActivity.getString(android.R.string.cancel),
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();
-							canceld = true;
+							mCanceld = true;
 						}
 					});
 			progress.setCancelable(false);
 			progress.show();
 		}
-		if (mode == TaskMode.ActionBarTask) {
-			activity.setProgressBarVisibility(true);
-			activity.setTitle(getDialogTitle());
-		}
-		if (mode == TaskMode.ToastTask) {
-			Toast.makeText(activity, getDialogTitle(), Toast.LENGTH_SHORT)
+		if (mMode == TaskMode.ToastTask) {
+			Toast.makeText(mActivity, getDialogTitle(), Toast.LENGTH_SHORT)
 					.show();
 		}
 	}
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		if (mode == TaskMode.DialogTask) {
+		if (mMode == TaskMode.DialogTask) {
 			int progress = values[0];
 			ProgressDialog dialog = null;
 			if (progress == 0) {
-				activity.dismissProgress();
-				dialog = activity.createProgress();
+				mActivity.dismissProgress();
+				dialog = mActivity.createProgress();
 				dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 				dialog.setTitle(getDialogTitle());
 				dialog.setMessage(getDialogMsg());
@@ -77,7 +72,7 @@ public abstract class AbstractTask extends
 							public void onClick(DialogInterface dialog,
 									int which) {
 								dialog.dismiss();
-								canceld = true;
+								mCanceld = true;
 							}
 						});
 				dialog.setMax(getProgressMaximum());
@@ -85,7 +80,7 @@ public abstract class AbstractTask extends
 				dialog.show();
 			}
 			if (dialog == null)
-				dialog = activity.createProgress();
+				dialog = mActivity.createProgress();
 			dialog.setProgress(progress);
 		}
 	}
@@ -95,7 +90,7 @@ public abstract class AbstractTask extends
 		try {
 			onExecute();
 		} catch (Exception e) {
-			exception = e;
+			mException = e;
 			e.printStackTrace();
 			return e;
 		}
@@ -104,31 +99,14 @@ public abstract class AbstractTask extends
 
 	@Override
 	protected void onPostExecute(Exception result) {
-		if (mode == TaskMode.DialogTask) {
-			activity.dismissProgress();
+		if (mMode == TaskMode.DialogTask) {
+			mActivity.dismissProgress();
 		}
-		if (mode == TaskMode.ActionBarTask) {
-			activity.setProgressBarVisibility(false);
-		}
-		if (result == null && !canceld)
-			activity.progressFinished(getResult());
+		if (result == null && !mCanceld)
+			mActivity.progressFinished(getResult());
 		if (result != null) {
-			result.printStackTrace();
-			AlertDialog.Builder errorDialog = new AlertDialog.Builder(activity);
-			if (result instanceof RemoteException)
-				errorDialog.setTitle("Remote error");
-			else
-				errorDialog.setTitle(getDialogTitle());
-			errorDialog.setMessage(result.getClass().getSimpleName() + ": "
-					+ result.getMessage());
-			errorDialog.setPositiveButton(
-					activity.getResources().getString(android.R.string.ok),
-					new OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-						}
-					});
-			if (!activity.isFinishing())
-				errorDialog.show();
+			if (!mActivity.isFinishing())
+				new ErrorDialog(mActivity, result).show();
 		}
 	}
 
@@ -172,7 +150,7 @@ public abstract class AbstractTask extends
 			} else {
 				builder.setMessage(mError.getMessage());
 			}
-			builder.create().show();;
+			builder.create().show();
 		}
 	}
 

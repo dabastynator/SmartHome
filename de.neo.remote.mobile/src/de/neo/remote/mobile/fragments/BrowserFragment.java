@@ -68,13 +68,16 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 	private void findComponents() {
 		mListPager = (ViewPager) getActivity().findViewById(R.id.media_pager);
 		AbstractConnectionActivity activity = (AbstractConnectionActivity) getActivity();
-		if (activity.mBinder == null)
-			mBrowserPageAdapter = new BrowserPageAdapter(getFragmentManager(),
-					activity, null);
-		else
-			mBrowserPageAdapter = new BrowserPageAdapter(getFragmentManager(),
-					activity, activity.mBinder.getLatestMediaServer());
-		mListPager.setAdapter(mBrowserPageAdapter);
+		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
+			if (activity.mBinder == null)
+				mBrowserPageAdapter = new BrowserPageAdapter(
+						getChildFragmentManager(), activity, null);
+			else
+				mBrowserPageAdapter = new BrowserPageAdapter(
+						getChildFragmentManager(), activity,
+						activity.mBinder.getLatestMediaServer());
+			mListPager.setAdapter(mBrowserPageAdapter);
+		}
 		mDownloadLayout = (LinearLayout) getActivity().findViewById(
 				R.id.layout_download);
 		mDownloadProgress = (ProgressBar) getActivity().findViewById(
@@ -121,43 +124,53 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 
 	@Override
 	public void startReceive(long size, String file) {
-		mMaxDonwloadSize = size;
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		mDownloadProgress.setProgress(0);
-		if (file != null)
-			mDownloadText.setText(file);
-		else
-			mDownloadText.setText(getActivity().getResources().getString(
-					R.string.str_download));
+		if (getActivity() != null) {
+			mMaxDonwloadSize = size;
+			mDownloadLayout.setVisibility(View.VISIBLE);
+			mDownloadProgress.setProgress(0);
+			if (file != null)
+				mDownloadText.setText(file);
+			else
+				mDownloadText.setText(getActivity().getResources().getString(
+						R.string.str_download));
+		}
 	}
 
 	@Override
 	public void startSending(long size) {
-		mMaxDonwloadSize = size;
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		mDownloadProgress.setProgress(0);
-		mDownloadText.setText(getActivity().getResources().getString(
-				R.string.str_upload));
+		if (getActivity() != null) {
+			mMaxDonwloadSize = size;
+			mDownloadLayout.setVisibility(View.VISIBLE);
+			mDownloadProgress.setProgress(0);
+			mDownloadText.setText(getActivity().getResources().getString(
+					R.string.str_upload));
+		}
 	}
 
 	@Override
 	public void progressReceive(long size, String file) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		if (mMaxDonwloadSize == 0)
-			mMaxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
-		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
-		if (file != null)
-			mDownloadText.setText(file);
+		if (activity != null) {
+			mDownloadLayout.setVisibility(View.VISIBLE);
+			if (mMaxDonwloadSize == 0)
+				mMaxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
+			mDownloadProgress
+					.setProgress((int) ((100d * size) / mMaxDonwloadSize));
+			if (file != null)
+				mDownloadText.setText(file);
+		}
 	}
 
 	@Override
 	public void progressSending(long size) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		if (mMaxDonwloadSize == 0)
-			mMaxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
-		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
+		if (activity != null) {
+			mDownloadLayout.setVisibility(View.VISIBLE);
+			if (mMaxDonwloadSize == 0)
+				mMaxDonwloadSize = activity.mBinder.getReceiver().getFullSize();
+			mDownloadProgress
+					.setProgress((int) ((100d * size) / mMaxDonwloadSize));
+		}
 	}
 
 	@Override
@@ -172,13 +185,15 @@ public class BrowserFragment extends Fragment implements IRemoteActionListener,
 
 	public void cancelDownload(View v) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		AbstractReceiver receiver = activity.mBinder.getReceiver();
-		if (receiver != null) {
-			receiver.cancel();
-		} else {
-			Toast.makeText(activity, "no receiver available",
-					Toast.LENGTH_SHORT).show();
-			mDownloadLayout.setVisibility(View.GONE);
+		if (activity != null) {
+			AbstractReceiver receiver = activity.mBinder.getReceiver();
+			if (receiver != null) {
+				receiver.cancel();
+			} else {
+				Toast.makeText(activity, "no receiver available",
+						Toast.LENGTH_SHORT).show();
+				mDownloadLayout.setVisibility(View.GONE);
+			}
 		}
 	}
 
