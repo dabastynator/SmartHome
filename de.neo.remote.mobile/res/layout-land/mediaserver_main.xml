@@ -62,12 +62,12 @@
             android:text="|>" />
 
         <ImageView
-            android:id="@+id/button_dvd"
+            android:id="@+id/button_omxplayer"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="showDVDBar"
-            android:src="@drawable/dvd" />
+            android:onClick="setOMXPlayer"
+            android:src="@drawable/pi" />
     </LinearLayout>
 
     <fragment

@@ -79,6 +79,8 @@ public class PlaylistFragment extends ListFragment {
 										.lastIndexOf("/") + 1), item);
 							else
 								mPlsFileMap.put(item, item);
+						mItems = mPlsFileMap.keySet().toArray(
+								new String[mPlsFileMap.size()]);
 					}
 				} catch (Exception e) {
 					return e;

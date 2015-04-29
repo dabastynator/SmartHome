@@ -1,14 +1,13 @@
 package de.neo.remote.mobile.fragments;
 
-import android.support.v4.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-import de.neo.remote.api.IDVDPlayer;
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
@@ -38,9 +37,8 @@ public class PlayerButtonFragment extends Fragment {
 	private void findComponents() {
 		int[] playerButtons = new int[] { R.id.button_play, R.id.button_next,
 				R.id.button_pref, R.id.button_seek_bwd, R.id.button_seek_fwd,
-				R.id.button_left, R.id.button_right, R.id.button_up,
-				R.id.button_down, R.id.button_enter, R.id.button_vol_down,
-				R.id.button_vol_up, R.id.button_full, R.id.button_quit };
+				R.id.button_vol_down, R.id.button_vol_up, R.id.button_full,
+				R.id.button_quit };
 		playButton = (Button) getActivity().findViewById(R.id.button_play);
 		View.OnClickListener listener = new View.OnClickListener() {
 			public void onClick(View v) {
@@ -98,27 +96,6 @@ public class PlayerButtonFragment extends Fragment {
 						break;
 					case R.id.button_quit:
 						player.quit();
-						break;
-					case R.id.button_left:
-						if (player instanceof IDVDPlayer)
-							((IDVDPlayer) player).menuLeft();
-						break;
-					case R.id.button_right:
-						if (player instanceof IDVDPlayer)
-							((IDVDPlayer) player).menuRight();
-						break;
-					case R.id.button_up:
-						if (player instanceof IDVDPlayer)
-							((IDVDPlayer) player).menuUp();
-						break;
-					case R.id.button_down:
-						if (player instanceof IDVDPlayer)
-							((IDVDPlayer) player).menuDown();
-						;
-						break;
-					case R.id.button_enter:
-						if (player instanceof IDVDPlayer)
-							((IDVDPlayer) player).menuEnter();
 						break;
 					}
 				} catch (Exception e) {

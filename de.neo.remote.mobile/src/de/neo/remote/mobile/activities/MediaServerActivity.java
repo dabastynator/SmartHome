@@ -17,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.api.IDVDPlayer;
-import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
@@ -57,8 +56,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	public ImageView mFilesystemButton;
 	public ImageView mPlaylistButton;
 	protected String mMediaServerID;
-	protected LinearLayout mDvdLayout;
-	protected ImageView mDvdButton;
 	public ImageView mOmxButton;
 	protected TextView mDownloadText;
 	protected LinearLayout mDownloadLayout;
@@ -148,27 +145,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public void showDVDBar(View v) {
-		IPlayer player = mBinder.getLatestMediaServer().player;
-		if (mDvdLayout.getVisibility() == View.VISIBLE) {
-			mDvdLayout.setVisibility(View.GONE);
-			mDvdButton.setBackgroundResource(0);
-		} else {
-			if (player instanceof IDVDPlayer) {
-				try {
-					((IDVDPlayer) player).playDVD();
-					mDvdLayout.setVisibility(View.VISIBLE);
-					mDvdButton.setBackgroundResource(R.drawable.image_border);
-				} catch (Exception e) {
-					Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT)
-							.show();
-				}
-			} else
-				Toast.makeText(this, "player does not support dvds",
-						Toast.LENGTH_SHORT).show();
-		}
-	}
-
 	@Override
 	protected void onDestroy() {
 		unbindService(mPlayerConnection);
@@ -211,22 +187,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			case R.id.opt_right:
 				mediaServer.player.moveRight();
 				break;
-			case R.id.opt_dvd_eject:
-				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer) mediaServer.player).ejectDVD();
-				break;
-			case R.id.opt_dvd_no_subtitle:
-				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer) mediaServer.player).subtitleRemove();
-				break;
-			case R.id.opt_dvd_next_subtitle:
-				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer) mediaServer.player).subtitleNext();
-				break;
-			case R.id.opt_dvd_menu:
-				if (mediaServer.player instanceof IDVDPlayer)
-					((IDVDPlayer) mediaServer.player).showMenu();
-				break;
 			case R.id.opt_refresh:
 				// mBinder.getMediaServerByID(mediaServerID);
 				// new BrowserLoadTask(this, null, false).execute();
@@ -252,7 +212,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	 * find components by their id
 	 */
 	private void findComponents() {
-		mDvdButton = (ImageView) findViewById(R.id.button_dvd);
 		mMplayerButton = (ImageView) findViewById(R.id.button_mplayer);
 		mTotemButton = (ImageView) findViewById(R.id.button_totem);
 		mOmxButton = (ImageView) findViewById(R.id.button_omxplayer);
@@ -264,7 +223,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				.findFragmentById(R.id.mediaserver_fragment_button);
 		mButtonFragmentRight = (PlayerButtonFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button_right);
-		mDvdLayout = (LinearLayout) findViewById(R.id.layout_dvd_bar);
 	}
 
 	@Override

@@ -50,14 +50,6 @@
             android:layout_weight="1"
             android:onClick="setOMXPlayer"
             android:src="@drawable/pi" />
-
-        <ImageView
-            android:id="@+id/button_dvd"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:onClick="showDVDBar"
-            android:src="@drawable/dvd" />
     </LinearLayout>
 
     <fragment

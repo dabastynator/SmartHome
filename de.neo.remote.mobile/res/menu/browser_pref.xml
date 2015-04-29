@@ -30,26 +30,6 @@
         </menu>
     </item>
     <item
-        android:id="@+id/opt_dvd"
-        android:icon="@drawable/dvd"
-        android:showAsAction="never"
-        android:title="DVD">
-        <menu>
-            <item
-                android:id="@+id/opt_dvd_eject"
-                android:title="@string/dvd_eject"/>
-            <item
-                android:id="@+id/opt_dvd_menu"
-                android:title="@string/dvd_menu"/>
-            <item
-                android:id="@+id/opt_dvd_no_subtitle"
-                android:title="@string/dvd_no_sub"/>
-            <item
-                android:id="@+id/opt_dvd_next_subtitle"
-                android:title="@string/dvd_next_sub"/>
-        </menu>
-    </item>
-    <item
         android:id="@+id/opt_refresh"
         android:icon="@drawable/refresh_32"
         android:showAsAction="ifRoom"
