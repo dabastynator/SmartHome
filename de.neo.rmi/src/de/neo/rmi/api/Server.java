@@ -308,7 +308,7 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject()
 					.getServerPort());
 			// create proxy
-			return (T) sc.createProxy(id, template);
+			return (T) sc.createProxy(id, template, true);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {
@@ -354,7 +354,7 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject()
 					.getServerPort());
 			// create proxy
-			return (T) sc.createProxy(id, template);
+			return (T) sc.createProxy(id, template, true);
 		} catch (UnknownHostException e) {
 			throw new RemoteException(id, e.getMessage());
 		} catch (IOException e) {

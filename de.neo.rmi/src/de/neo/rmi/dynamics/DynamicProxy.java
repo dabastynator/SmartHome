@@ -106,12 +106,13 @@ public class DynamicProxy implements InvocationHandler {
 					else if (reply.getError() != null)
 						resultException = reply.getError();
 					else if (reply.getReturnType() != null
-							&& reply.getNewId() != null){
-						ServerConnection sp = server.connectToServer(reply.getServerPort());
+							&& reply.getNewId() != null) {
+						ServerConnection sp = server.connectToServer(reply
+								.getServerPort());
 						return sp.createProxy(reply.getNewId(),
-								reply.getReturnType());
-					}
-					else
+								reply.getReturnType(),
+								!reply.isCreateNewAdapter());
+					} else
 						return reply.getResult();
 					i = server.getConnectionSocketCount();
 				} catch (IOException e) {
@@ -146,6 +147,8 @@ public class DynamicProxy implements InvocationHandler {
 				} else if (paramters[i] instanceof RemoteAble) {
 					String objId = server.getAdapterObjectIdMap().get(
 							paramters[i]);
+					Reply r = new Reply();
+					r.setCreateNewAdapter(objId == null);
 					if (objId == null) {
 						objId = getNextId();
 						DynamicAdapter adapter = new DynamicAdapter(objId,
@@ -153,7 +156,6 @@ public class DynamicProxy implements InvocationHandler {
 						server.getAdapterMap().put(objId, adapter);
 						server.getAdapterObjectIdMap().put(paramters[i], objId);
 					}
-					Reply r = new Reply();
 					r.addNewId(objId);
 					r.setServerPort(new ServerPort(server.getServerPort()));
 					r.setReturnType(method.getParameterTypes()[i]);

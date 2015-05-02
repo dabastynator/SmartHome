@@ -39,6 +39,11 @@ public class Reply implements Serializable {
 	 */
 	private ServerPort serverPort;
 
+	/**
+	 * force server to create new adapter for this parameter reply
+	 */
+	private boolean createNewAdapter;
+
 	public Object getResult() {
 		return result;
 	}
@@ -82,4 +87,14 @@ public class Reply implements Serializable {
 		this.serverPort = serverPort;
 	}
 
+	public boolean isCreateNewAdapter() {
+		return createNewAdapter;
+	}
+
+	public void setCreateNewAdapter(boolean createNewAdapter) {
+		this.createNewAdapter = createNewAdapter;
+	}
+
+	
+	
 }

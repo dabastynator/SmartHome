@@ -127,9 +127,9 @@ public class ServerConnection {
 	 * @param template
 	 * @return proxy
 	 */
-	public Object createProxy(String id, Class template) {
+	public Object createProxy(String id, Class template, boolean useCache) {
 		Object p = proxyMap.get(id);
-		if (p != null)
+		if (p != null && useCache)
 			return p;
 		p = new DynamicProxy(id, this, server);
 		Object object = Proxy.newProxyInstance(p.getClass().getClassLoader(),

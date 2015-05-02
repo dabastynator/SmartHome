@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.neo.rmi.api.RMILogger;
-import de.neo.rmi.api.Server;
 import de.neo.rmi.api.RMILogger.LogPriority;
+import de.neo.rmi.api.Server;
 import de.neo.rmi.handler.ServerConnection;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.Reply;
@@ -75,6 +75,7 @@ public class DynamicAdapter {
 	 */
 	public Reply performRequest(Request request) {
 		Reply reply = new Reply();
+		reply.setCreateNewAdapter(false);
 		try {
 			Method method = findMethod(request);
 			if (method == null) {
@@ -136,7 +137,7 @@ public class DynamicAdapter {
 				types[i] = r.getReturnType();
 				ServerConnection sc = server.connectToServer(r.getServerPort());
 				request.getParams()[i] = sc.createProxy(r.getNewId(),
-						r.getReturnType());
+						r.getReturnType(), !r.isCreateNewAdapter());
 			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();
 			else
