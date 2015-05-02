@@ -52,13 +52,57 @@
             android:src="@drawable/pi" />
     </LinearLayout>
 
-    <fragment
-        android:id="@+id/mediaserver_fragment_browser"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2"
-        class="de.neo.remote.mobile.fragments.BrowserFragment"
-        tools:layout="@layout/mediaserver_browser" />
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/layout_download"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/lbl_download"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_margin="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/str_download" />
+
+                <ProgressBar
+                    android:id="@+id/prg_donwload"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:max="100" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/button_cancel_download"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="6"
+                android:onClick="cancelDownload"
+                android:src="@drawable/cancel" />
+        </LinearLayout>
+
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/media_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
     <fragment
         android:id="@+id/mediaserver_fragment_button"

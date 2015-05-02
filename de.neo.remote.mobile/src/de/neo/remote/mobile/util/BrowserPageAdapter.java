@@ -1,5 +1,6 @@
 package de.neo.remote.mobile.util;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -22,8 +23,10 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 			AbstractConnectionActivity activity, StationStuff stationStuff) {
 		super(fm);
 		mBinder = activity.mBinder;
-		mPlayListFragment = new PlaylistFragment(stationStuff);
-		mFileFragment = new FileFragment(stationStuff);
+		mPlayListFragment = new PlaylistFragment();
+		mFileFragment = new FileFragment();
+		mPlayListFragment.setStation(stationStuff);
+		mFileFragment.setStation(stationStuff);
 	}
 
 	@Override
@@ -45,19 +48,18 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 		return fragment.onContextItemSelected(item);
 	}
 
-	public void onKeyDown(int keyCode, KeyEvent event, int position) {
-		if (position == 0)
-			mFileFragment.onKeyDown(keyCode, event);
-		if (position == 1)
-			mPlayListFragment.onKeyDown(keyCode, event);
-	}
-
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
 		mFileFragment.setPlayingFile(bean);
 	}
 
 	public void setThumbnail(String file, int width, int height, int[] thumbnail) {
 		mFileFragment.setThumbnail(file, width, height, thumbnail);
+	}
+
+	public interface BrowserFragment {
+		public void refreshContent(Context context);
+
+		public boolean onKeyDown(int keyCode, KeyEvent event);
 	}
 
 }

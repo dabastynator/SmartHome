@@ -1,11 +1,17 @@
 package de.neo.remote.mobile.activities;
 
+import java.io.File;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,9 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.neo.remote.api.IDVDPlayer;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.fragments.BrowserFragment;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
@@ -27,6 +31,9 @@ import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
+import de.neo.remote.mobile.util.BrowserPageAdapter;
+import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.rmi.transceiver.AbstractReceiver;
 import de.remote.mobile.R;
 
 /**
@@ -40,6 +47,12 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	public static final String EXTRA_MEDIA_ID = "media_server_id";
 	public static final int FILE_REQUEST = 3;
 
+	public static final String LISTVIEW_POSITION = "listviewPosition";
+	public static final String SPINNER_POSITION = "spinnerPosition";
+	public static final String VIEWER_STATE = "viewerstate";
+	public static final String MEDIA_STATE = "mediastate";
+	public static final String PLAYLIST = "playlist";
+
 	/**
 	 * viewer states of the browser
 	 * 
@@ -50,7 +63,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	protected IRemoteActionListener mRemoteListener;
-	protected ProgressBar mDownloadProgress;
 	public ImageView mMplayerButton;
 	public ImageView mTotemButton;
 	public ImageView mFilesystemButton;
@@ -58,11 +70,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	protected String mMediaServerID;
 	public ImageView mOmxButton;
 	protected TextView mDownloadText;
-	protected LinearLayout mDownloadLayout;
 	public PlayingBean mPlayingBean;
-	private BrowserFragment mBrowserFragment;
 	private PlayerButtonFragment mButtonFragment;
 	private PlayerButtonFragment mButtonFragmentRight;
+	private ViewPager mListPager;
+	private BrowserPageAdapter mBrowserPageAdapter;
+
+	protected LinearLayout mDownloadLayout;
+	protected ProgressBar mDownloadProgress;
+	private long mMaxDonwloadSize = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +103,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			mButtonFragment.onPlayingBeanChanged(mediaserver, bean);
 		if (mButtonFragmentRight != null)
 			mButtonFragmentRight.onPlayingBeanChanged(mediaserver, bean);
-		if (mBrowserFragment != null)
-			mBrowserFragment.onPlayingBeanChanged(mediaserver, bean);
+		mBrowserPageAdapter.onPlayingBeanChanged(mediaserver, bean);
 		mPlayingBean = bean;
 	}
 
@@ -100,9 +115,14 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		return true;
 	}
 
-	public void disableScreen() {
-		setTitle(getResources().getString(R.string.no_conneciton));
-		setProgressBarVisibility(false);
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		// super.onCreateContextMenu(menu, v, menuInfo);
+		Fragment fragment = mBrowserPageAdapter.getItem(mListPager
+				.getCurrentItem());
+		if (fragment != null)
+			fragment.onCreateContextMenu(menu, v, menuInfo);
 	}
 
 	/**
@@ -138,10 +158,10 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			}.start();
 			return true;
 		}
-		if (mBrowserFragment != null) {
-			mBrowserFragment.onKeyDown(keyCode, event);
+		BrowserFragment fragment = (BrowserFragment) mBrowserPageAdapter
+				.getItem(mListPager.getCurrentItem());
+		if (fragment != null && fragment.onKeyDown(keyCode, event))
 			return true;
-		}
 		return super.onKeyDown(keyCode, event);
 	}
 
@@ -153,7 +173,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		if (mBrowserFragment.onContextItemSelected(item))
+		if (mBrowserPageAdapter.onContextItemSelected(item,
+				mListPager.getCurrentItem()))
 			return true;
 		return super.onContextItemSelected(item);
 	}
@@ -188,8 +209,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				mediaServer.player.moveRight();
 				break;
 			case R.id.opt_refresh:
-				// mBinder.getMediaServerByID(mediaServerID);
-				// new BrowserLoadTask(this, null, false).execute();
+				setStation(mediaServer);
 				break;
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -208,6 +228,24 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	public void setStation(StationStuff station) {
+		mBrowserPageAdapter = new BrowserPageAdapter(
+				getSupportFragmentManager(), this,
+				mBinder.getLatestMediaServer());
+		mListPager.setAdapter(mBrowserPageAdapter);
+		if (station != null)
+			setTitle(station.name);
+		else
+			setTitle(getString(R.string.no_conneciton));
+	}
+
+	public void showView(ViewerState state) {
+		if (state == ViewerState.DIRECTORIES)
+			mListPager.setCurrentItem(0);
+		if (state == ViewerState.PLAYLISTS)
+			mListPager.setCurrentItem(1);
+	}
+
 	/**
 	 * find components by their id
 	 */
@@ -217,19 +255,25 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		mOmxButton = (ImageView) findViewById(R.id.button_omxplayer);
 		mFilesystemButton = (ImageView) findViewById(R.id.button_filesystem);
 		mPlaylistButton = (ImageView) findViewById(R.id.button_playlist);
-		mBrowserFragment = (BrowserFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.mediaserver_fragment_browser);
 		mButtonFragment = (PlayerButtonFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button);
 		mButtonFragmentRight = (PlayerButtonFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.mediaserver_fragment_button_right);
-	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		if (mBrowserFragment != null)
-			mBrowserFragment.onSaveInstanceState(outState);
+		mListPager = (ViewPager) findViewById(R.id.media_pager);
+		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
+			if (mBinder == null)
+				mBrowserPageAdapter = new BrowserPageAdapter(
+						getSupportFragmentManager(), this, null);
+			else
+				mBrowserPageAdapter = new BrowserPageAdapter(
+						getSupportFragmentManager(), this,
+						mBinder.getLatestMediaServer());
+			mListPager.setAdapter(mBrowserPageAdapter);
+		}
+		mDownloadLayout = (LinearLayout) findViewById(R.id.layout_download);
+		mDownloadProgress = (ProgressBar) findViewById(R.id.prg_donwload);
+		mDownloadText = (TextView) findViewById(R.id.lbl_download);
 	}
 
 	/**
@@ -260,7 +304,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	protected void onStartConnecting() {
-		setTitle(getResources().getString(R.string.connecting));
+		setTitle(getString(R.string.connecting));
 		setProgressBarVisibility(true);
 	};
 
@@ -295,7 +339,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			protected void onPreExecute() {
 				super.onPreExecute();
 				setProgressBarVisibility(true);
-				setTitle(getResources().getString(R.string.mediaserver_load));
+				setTitle(getString(R.string.mediaserver_load));
 			}
 
 			@Override
@@ -314,18 +358,18 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 					new AbstractTask.ErrorDialog(MediaServerActivity.this,
 							error);
 				else
-					mBrowserFragment.setStation(station);
+					setStation(station);
 			}
 
 		}.execute();
 	}
 
 	public void showFileSystem(View view) {
-		mBrowserFragment.showView(ViewerState.DIRECTORIES);
+		showView(ViewerState.DIRECTORIES);
 	}
 
 	public void showPlaylist(View view) {
-		mBrowserFragment.showView(ViewerState.PLAYLISTS);
+		showView(ViewerState.PLAYLISTS);
 	}
 
 	public void setTotem(View view) {
@@ -363,69 +407,110 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	@Override
 	public void startSending(long size) {
 		super.startSending(size);
-		if (mBrowserFragment != null)
-			mBrowserFragment.startSending(size);
+		mMaxDonwloadSize = size;
+		mDownloadLayout.setVisibility(View.VISIBLE);
+		mDownloadProgress.setProgress(0);
+		mDownloadText.setText(getString(R.string.str_upload));
 	}
 
 	@Override
 	public void progressSending(long size) {
 		super.progressSending(size);
-		if (mBrowserFragment != null)
-			mBrowserFragment.progressSending(size);
+		mDownloadLayout.setVisibility(View.VISIBLE);
+		if (mMaxDonwloadSize == 0)
+			mMaxDonwloadSize = mBinder.getReceiver().getFullSize();
+		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
 	}
 
 	@Override
 	public void endSending(long size) {
 		super.endSending(size);
-		if (mBrowserFragment != null)
-			mBrowserFragment.endSending(size);
+		mDownloadLayout.setVisibility(View.GONE);
 	}
 
 	@Override
 	public void sendingCanceled() {
 		super.sendingCanceled();
-		if (mBrowserFragment != null)
-			mBrowserFragment.sendingCanceled();
+		mDownloadLayout.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void startReceive(long size, String file) {
+		super.startReceive(size, file);
+		mMaxDonwloadSize = size;
+		mDownloadLayout.setVisibility(View.VISIBLE);
+		mDownloadProgress.setProgress(0);
+		if (file != null)
+			mDownloadText.setText(file);
+		else
+			mDownloadText.setText(getString(R.string.str_download));
 	}
 
 	@Override
 	public void progressReceive(long size, String file) {
 		super.progressReceive(size, file);
-		if (mBrowserFragment != null)
-			mBrowserFragment.progressReceive(size, file);
+		mDownloadLayout.setVisibility(View.VISIBLE);
+		if (mMaxDonwloadSize == 0)
+			mMaxDonwloadSize = mBinder.getReceiver().getFullSize();
+		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
+		if (file != null)
+			mDownloadText.setText(file);
 	}
 
 	@Override
 	public void endReceive(long size) {
 		super.endReceive(size);
-		if (mBrowserFragment != null)
-			mBrowserFragment.endReceive(size);
+		mDownloadLayout.setVisibility(View.GONE);
 	}
 
 	@Override
 	public void exceptionOccurred(Exception e) {
 		super.exceptionOccurred(e);
-		if (mBrowserFragment != null)
-			mBrowserFragment.exceptionOccurred(e);
+		mDownloadLayout.setVisibility(View.GONE);
+		new AbstractTask.ErrorDialog(this, e).show();
 	}
 
 	@Override
 	public void downloadCanceled() {
 		super.downloadCanceled();
-		if (mBrowserFragment != null)
-			mBrowserFragment.downloadCanceled();
+		mDownloadLayout.setVisibility(View.GONE);
+	}
+
+	public void cancelDownload(View v) {
+		AbstractReceiver receiver = mBinder.getReceiver();
+		if (receiver != null) {
+			receiver.cancel();
+		} else {
+			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT)
+					.show();
+			mDownloadLayout.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (mBrowserFragment != null)
-			mBrowserFragment.onActivityResult(requestCode, resultCode, data);
+		final StationStuff mediaServer = mBinder.getLatestMediaServer();
+		if (data == null)
+			return;
+		if (requestCode == MediaServerActivity.FILE_REQUEST) {
+			Uri uri = data.getData();
+			mBinder.uploadFile(mediaServer.browser, new File(
+					getFilePathByUri(uri)));
+		}
 	}
 
 	@Override
 	void onRemoteBinder(RemoteBinder mBinder) {
 		// mBrowserFragment.onRemoteBinder(mBinder);
 		// if (mBinder != null && )
+	}
+
+	public void refreshContent() {
+		BrowserFragment fragment = (BrowserFragment) mBrowserPageAdapter
+				.getItem(mListPager.getCurrentItem());
+
+		if (fragment != null)
+			fragment.refreshContent(this);
 	}
 }

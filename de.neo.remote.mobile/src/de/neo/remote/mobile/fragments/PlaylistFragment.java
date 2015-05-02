@@ -27,9 +27,10 @@ import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
+import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.remote.mobile.R;
 
-public class PlaylistFragment extends ListFragment {
+public class PlaylistFragment extends ListFragment implements BrowserFragment {
 
 	private StationStuff mStationStuff;
 	private String mSelectedItem;
@@ -37,9 +38,13 @@ public class PlaylistFragment extends ListFragment {
 	private Map<String, String> mPlsFileMap = new HashMap<String, String>();
 	private ViewerState mViewerState;
 
-	public PlaylistFragment(StationStuff stationstuff) {
-		mStationStuff = stationstuff;
+	public PlaylistFragment() {
 		mViewerState = ViewerState.PLAYLISTS;
+		setRetainInstance(false);
+	}
+
+	public void setStation(StationStuff station) {
+		mStationStuff = station;
 	}
 
 	@Override
@@ -47,10 +52,11 @@ public class PlaylistFragment extends ListFragment {
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
+		getActivity().registerForContextMenu(getListView());
 		refreshContent(getActivity());
 	}
 
-	private void refreshContent(final Context context) {
+	public void refreshContent(final Context context) {
 		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
 
 			private String[] mItems;
@@ -109,7 +115,6 @@ public class PlaylistFragment extends ListFragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater mi = new MenuInflater(getActivity().getApplication());
 		if (mViewerState == ViewerState.PLAYLISTS)
 			mi.inflate(R.menu.pls_pref, menu);
@@ -205,13 +210,14 @@ public class PlaylistFragment extends ListFragment {
 		}
 	}
 
-	public void onKeyDown(int keyCode, KeyEvent event) {
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		if (activity.mBinder != null && keyCode == KeyEvent.KEYCODE_BACK
 				&& mViewerState == ViewerState.PLS_ITEMS) {
 			mViewerState = ViewerState.PLAYLISTS;
 			refreshContent(activity);
+			return true;
 		}
+		return false;
 	}
-
 }

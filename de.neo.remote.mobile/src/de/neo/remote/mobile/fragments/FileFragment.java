@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.neo.remote.api.IThumbnailListener;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
@@ -32,9 +33,13 @@ import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
+import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.remote.mobile.R;
 
-public class FileFragment extends ListFragment {
+public class FileFragment extends ListFragment implements BrowserFragment,
+		IThumbnailListener {
+
+	public static final int PREVIEW_SIZE = 128;
 
 	private StationStuff mStationStuff;
 	private String mSelectedItem;
@@ -44,10 +49,18 @@ public class FileFragment extends ListFragment {
 	private Map<String, Bitmap> mThumbnails;
 	private Handler mHandler;
 
-	public FileFragment(StationStuff stationstuff) {
+	public FileFragment() {
 		mThumbnails = new HashMap<String, Bitmap>();
 		mHandler = new Handler();
-		mStationStuff = stationstuff;
+		setRetainInstance(false);
+	}
+
+	public void setStation(StationStuff station) {
+		mStationStuff = station;
+	}
+
+	public void refreshContent(Context context) {
+		refreshContent(context, null, false);
 	}
 
 	@Override
@@ -55,6 +68,7 @@ public class FileFragment extends ListFragment {
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
+		getActivity().registerForContextMenu(getListView());
 		refreshContent(getActivity(), null, false);
 	}
 
@@ -92,6 +106,8 @@ public class FileFragment extends ListFragment {
 								directories.length);
 						System.arraycopy(files, 0, mFileList,
 								directories.length, files.length);
+						mStationStuff.browser.fireThumbnails(FileFragment.this,
+								PREVIEW_SIZE, PREVIEW_SIZE);
 					}
 				} catch (Exception e) {
 					return e;
@@ -120,7 +136,6 @@ public class FileFragment extends ListFragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater mi = new MenuInflater(getActivity().getApplication());
 		mi.inflate(R.menu.item_pref, menu);
 	}
@@ -225,12 +240,14 @@ public class FileFragment extends ListFragment {
 		}
 	}
 
-	public void onKeyDown(int keyCode, KeyEvent event) {
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		if (activity.mBinder != null && keyCode == KeyEvent.KEYCODE_BACK) {
 			mSelectedPosition = 0;
 			refreshContent(activity, null, true);
+			return true;
 		}
+		return false;
 	}
 
 	public void setThumbnail(String file, int width, int height, int[] thumbnail) {

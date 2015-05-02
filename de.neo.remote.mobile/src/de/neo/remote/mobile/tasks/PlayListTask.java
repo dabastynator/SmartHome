@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.widget.EditText;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.remote.mobile.R;
@@ -65,45 +66,67 @@ public class PlayListTask {
 	}
 
 	public void deletePlaylist(final String playlist) {
-		new SimpleTask(mActivity)
-				.setAction(new BackgroundAction() {
+		SimpleTask task = new SimpleTask(mActivity) {
+			@Override
+			protected void onPostExecute(Exception result) {
+				super.onPostExecute(result);
+				if (mActivity instanceof MediaServerActivity)
+					((MediaServerActivity) mActivity).refreshContent();
+			}
+		};
+		task.setAction(new BackgroundAction() {
 
-					@Override
-					public void run() throws Exception {
-						mMedia.pls.removePlayList(playlist);
-					}
-				})
-				.setSuccess(
-						mActivity.getString(R.string.playlist_delete) + ": "
-								+ playlist).execute();
+			@Override
+			public void run() throws Exception {
+				mMedia.pls.removePlayList(playlist);
+			}
+		});
+		task.setSuccess(mActivity.getString(R.string.playlist_delete) + ": "
+				+ playlist);
+		task.execute();
+
 	}
 
 	public void deleteItemFromPlaylist(final String playlist, final String item) {
-		new SimpleTask(mActivity)
-				.setAction(new BackgroundAction() {
+		SimpleTask task = new SimpleTask(mActivity) {
+			@Override
+			protected void onPostExecute(Exception result) {
+				super.onPostExecute(result);
+				if (mActivity instanceof MediaServerActivity)
+					((MediaServerActivity) mActivity).refreshContent();
+			}
+		};
+		task.setAction(new BackgroundAction() {
 
-					@Override
-					public void run() throws Exception {
-						mMedia.pls.removeItem(playlist, item);
-					}
-				})
-				.setSuccess(
-						mActivity.getString(R.string.playlist_remove_item)
-								+ ": " + item).execute();
+			@Override
+			public void run() throws Exception {
+				mMedia.pls.removeItem(playlist, item);
+			}
+		});
+		task.setSuccess(mActivity.getString(R.string.playlist_remove_item)
+				+ ": " + item);
+		task.execute();
 	}
 
 	public void createPlaylist(final String playlist) {
-		new SimpleTask(mActivity)
-				.setAction(new BackgroundAction() {
+		SimpleTask task = new SimpleTask(mActivity) {
+			@Override
+			protected void onPostExecute(Exception result) {
+				super.onPostExecute(result);
+				if (mActivity instanceof MediaServerActivity)
+					((MediaServerActivity) mActivity).refreshContent();
+			}
+		};
+		task.setAction(new BackgroundAction() {
 
-					@Override
-					public void run() throws Exception {
-						mMedia.pls.addPlayList(playlist);
-					}
-				})
-				.setSuccess(
-						mActivity.getString(R.string.playlist_added) + ": "
-								+ playlist).execute();
+			@Override
+			public void run() throws Exception {
+				mMedia.pls.addPlayList(playlist);
+			}
+		});
+		task.setSuccess(mActivity.getString(R.string.playlist_added) + ": "
+				+ playlist);
+		task.execute();
 	}
 
 	class SelectPlayListTask extends SimpleTask {
