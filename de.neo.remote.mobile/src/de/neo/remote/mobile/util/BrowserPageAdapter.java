@@ -6,35 +6,29 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.fragments.FileFragment;
 import de.neo.remote.mobile.fragments.PlaylistFragment;
-import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.StationStuff;
 
 public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
-	private PlaylistFragment mPlayListFragment;
 	private FileFragment mFileFragment;
-	public RemoteBinder mBinder;
+	private PlaylistFragment mPlaylistFragment;
 
-	public BrowserPageAdapter(FragmentManager fm,
-			AbstractConnectionActivity activity, StationStuff stationStuff) {
+	public BrowserPageAdapter(FragmentManager fm) {
 		super(fm);
-		mBinder = activity.mBinder;
-		mPlayListFragment = new PlaylistFragment();
-		mFileFragment = new FileFragment();
-		mPlayListFragment.setStation(stationStuff);
-		mFileFragment.setStation(stationStuff);
 	}
 
 	@Override
 	public Fragment getItem(int position) {
-		if (position == 0)
-			return mFileFragment;
-		if (position == 1)
-			return mPlayListFragment;
+		if (position == 0) {
+			return new FileFragment();
+		}
+		if (position == 1) {
+			return new PlaylistFragment();
+		}
 		return null;
 	}
 
@@ -43,23 +37,45 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 		return 2;
 	}
 
+	@Override
+	public Object instantiateItem(ViewGroup container, int position) {
+		Fragment fragment = (Fragment) super.instantiateItem(container,
+				position);
+		if (fragment instanceof FileFragment)
+			mFileFragment = (FileFragment) fragment;
+		if (fragment instanceof PlaylistFragment)
+			mPlaylistFragment = (PlaylistFragment) fragment;
+		return fragment;
+	}
+
+	public void setStation(StationStuff station) {
+		if (mFileFragment != null)
+			mFileFragment.setStation(station);
+		if (mPlaylistFragment != null)
+			mPlaylistFragment.setStation(station);
+	}
+
 	public boolean onContextItemSelected(MenuItem item, int position) {
 		Fragment fragment = getItem(position);
 		return fragment.onContextItemSelected(item);
 	}
 
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		mFileFragment.setPlayingFile(bean);
+		if (mFileFragment != null)
+			mFileFragment.setPlayingFile(bean);
 	}
 
 	public void setThumbnail(String file, int width, int height, int[] thumbnail) {
-		mFileFragment.setThumbnail(file, width, height, thumbnail);
+		if (mFileFragment != null)
+			mFileFragment.setThumbnail(file, width, height, thumbnail);
 	}
 
 	public interface BrowserFragment {
 		public void refreshContent(Context context);
 
 		public boolean onKeyDown(int keyCode, KeyEvent event);
+
+		public void setStation(StationStuff station);
 	}
 
 }

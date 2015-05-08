@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -229,14 +230,29 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setStation(StationStuff station) {
-		mBrowserPageAdapter = new BrowserPageAdapter(
-				getSupportFragmentManager(), this,
-				mBinder.getLatestMediaServer());
-		mListPager.setAdapter(mBrowserPageAdapter);
+		mBrowserPageAdapter.setStation(station);
+		updateFilePlsButtons();
+		updatePlayerButtons();
 		if (station != null)
 			setTitle(station.name);
 		else
 			setTitle(getString(R.string.no_conneciton));
+	}
+
+	private void updatePlayerButtons() {
+		StationStuff server = mBinder.getLatestMediaServer();
+		if (server != null && server.player == server.mplayer)
+			mMplayerButton.setBackgroundResource(R.drawable.image_border);
+		else
+			mMplayerButton.setBackgroundResource(0);
+		if (server != null && server.player == server.omxplayer)
+			mOmxButton.setBackgroundResource(R.drawable.image_border);
+		else
+			mOmxButton.setBackgroundResource(0);
+		if (server != null && server.player == server.totem)
+			mTotemButton.setBackgroundResource(R.drawable.image_border);
+		else
+			mTotemButton.setBackgroundResource(0);
 	}
 
 	public void showView(ViewerState state) {
@@ -244,6 +260,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			mListPager.setCurrentItem(0);
 		if (state == ViewerState.PLAYLISTS)
 			mListPager.setCurrentItem(1);
+		updateFilePlsButtons();
 	}
 
 	/**
@@ -261,14 +278,25 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				.findFragmentById(R.id.mediaserver_fragment_button_right);
 
 		mListPager = (ViewPager) findViewById(R.id.media_pager);
+		mListPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int arg0) {
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+				updateFilePlsButtons();
+			}
+		});
 		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
-			if (mBinder == null)
-				mBrowserPageAdapter = new BrowserPageAdapter(
-						getSupportFragmentManager(), this, null);
-			else
-				mBrowserPageAdapter = new BrowserPageAdapter(
-						getSupportFragmentManager(), this,
-						mBinder.getLatestMediaServer());
+			mBrowserPageAdapter = new BrowserPageAdapter(
+					getSupportFragmentManager());
+			if (mBinder != null)
+				mBrowserPageAdapter.setStation(mBinder.getLatestMediaServer());
 			mListPager.setAdapter(mBrowserPageAdapter);
 		}
 		mDownloadLayout = (LinearLayout) findViewById(R.id.layout_download);
@@ -383,6 +411,18 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		}
 	}
 
+	private void updateFilePlsButtons() {
+		StationStuff mediaServer = mBinder.getLatestMediaServer();
+		if (mediaServer != null && mListPager.getCurrentItem() == 0)
+			mFilesystemButton.setBackgroundResource(R.drawable.image_border);
+		else
+			mFilesystemButton.setBackgroundResource(0);
+		if (mediaServer != null && mListPager.getCurrentItem() == 1)
+			mPlaylistButton.setBackgroundResource(R.drawable.image_border);
+		else
+			mPlaylistButton.setBackgroundResource(0);
+	}
+
 	public void setMPlayer(View view) {
 		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mediaServer != null) {
@@ -478,6 +518,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	public void cancelDownload(View v) {
 		AbstractReceiver receiver = mBinder.getReceiver();
+		mDownloadLayout.setVisibility(View.GONE);
 		if (receiver != null) {
 			receiver.cancel();
 		} else {

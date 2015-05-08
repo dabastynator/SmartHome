@@ -40,11 +40,11 @@ public class PlaylistFragment extends ListFragment implements BrowserFragment {
 
 	public PlaylistFragment() {
 		mViewerState = ViewerState.PLAYLISTS;
-		setRetainInstance(false);
 	}
 
 	public void setStation(StationStuff station) {
 		mStationStuff = station;
+		refreshContent(getActivity());
 	}
 
 	@Override

@@ -52,11 +52,11 @@ public class FileFragment extends ListFragment implements BrowserFragment,
 	public FileFragment() {
 		mThumbnails = new HashMap<String, Bitmap>();
 		mHandler = new Handler();
-		setRetainInstance(false);
 	}
 
 	public void setStation(StationStuff station) {
 		mStationStuff = station;
+		refreshContent(getActivity());
 	}
 
 	public void refreshContent(Context context) {
@@ -119,6 +119,8 @@ public class FileFragment extends ListFragment implements BrowserFragment,
 			protected void onPostExecute(Exception result) {
 				if (result != null) {
 					new AbstractTask.ErrorDialog(context, result).show();
+					setListAdapter(new FileAdapter(context, new String[] {}));
+					setListShown(true);
 					setEmptyText(result.getClass().getSimpleName());
 				} else {
 					if (getListAdapter() != null)
