@@ -196,7 +196,7 @@ public class RemoteBinder extends Binder {
 
 	public StationStuff getMediaServerByID(String id) throws RemoteException {
 		BufferdUnit unit = service.mUnitMap.get(id);
-		if (unit.mObject instanceof IMediaServer) {
+		if (unit != null && unit.mObject instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) unit.mObject;
 			if (unit.mStation == null) {
 				unit.mStation = new StationStuff();

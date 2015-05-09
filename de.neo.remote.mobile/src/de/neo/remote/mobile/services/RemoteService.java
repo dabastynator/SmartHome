@@ -335,6 +335,9 @@ public class RemoteService extends Service {
 		@Override
 		public void onPowerSwitchChange(final String switchName,
 				final State state) throws RemoteException {
+			BufferdUnit unit = mUnitMap.get(switchName);
+			if (unit != null)
+				unit.mSwitchState = state;
 			Log.e("gpio power", "Switch: " + switchName + " " + state);
 			mHandler.post(new Runnable() {
 				@Override

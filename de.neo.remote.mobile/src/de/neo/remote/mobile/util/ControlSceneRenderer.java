@@ -142,7 +142,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if ("remote".equals(description)) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
 			cube.setTexture(loadBitmap(R.drawable.ic_launcher));
-			cube.size[0] = cube.size[1] = cube.size[2] = 0.3f;
+			cube.size[0] = cube.size[1] = cube.size[2] = 0.5f;
 			cube.setColor(1, 1, 1);
 			return cube;
 		}

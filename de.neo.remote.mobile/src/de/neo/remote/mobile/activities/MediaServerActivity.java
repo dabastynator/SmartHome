@@ -236,7 +236,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (station != null)
 			setTitle(station.name);
 		else
-			setTitle(getString(R.string.no_conneciton));
+			setTitle(getString(R.string.mediaserver_no_server));
 	}
 
 	private void updatePlayerButtons() {
@@ -373,7 +373,10 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			@Override
 			protected StationStuff doInBackground(String... params) {
 				try {
-					return mBinder.getMediaServerByID(mMediaServerID);
+					if (mMediaServerID == null)
+						return mBinder.getLatestMediaServer();
+					else
+						return mBinder.getMediaServerByID(mMediaServerID);
 				} catch (Exception e) {
 					error = e;
 				}
@@ -384,7 +387,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			protected void onPostExecute(StationStuff station) {
 				if (error != null)
 					new AbstractTask.ErrorDialog(MediaServerActivity.this,
-							error);
+							error).show();
 				else
 					setStation(station);
 			}
