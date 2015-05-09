@@ -86,6 +86,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_control_refresh:
+			mRenderer.clearControlCenter();
 			setTitle(getResources().getString(R.string.refresh));
 			mProgress.setVisibility(View.VISIBLE);
 			mBinder.connectToServer(mBinder.getServer());

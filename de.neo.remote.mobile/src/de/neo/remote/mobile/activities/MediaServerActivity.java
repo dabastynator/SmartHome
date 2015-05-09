@@ -359,8 +359,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
-
-		new AsyncTask<String, Integer, StationStuff>() {
+		AsyncTask<String, Integer, StationStuff> task = new AsyncTask<String, Integer, StationStuff>() {
 			private Exception error;
 
 			@Override
@@ -392,7 +391,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 					setStation(station);
 			}
 
-		}.execute();
+		};
+		if (mIsActive)
+			task.execute();
 	}
 
 	public void showFileSystem(View view) {

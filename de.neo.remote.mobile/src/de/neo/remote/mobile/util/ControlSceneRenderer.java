@@ -88,9 +88,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	public void reloadControlCenter(RemoteBinder binder) throws RemoteException {
 		IControlCenter control = binder.getControlCenter();
-		clearScene();
-		mGLMediaServers.clear();
-		mGLSwitches.clear();
+		clearControlCenter();
 		if (control == null)
 			return;
 		GroundPlot ground = control.getGroundPlot();
@@ -279,7 +277,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mRoom.addFigure(figure);
 	}
 
-	private synchronized void clearScene() {
+	public synchronized void clearControlCenter() {
+		mGLBufferdUnits.clear();
+		mGLMediaServers.clear();
+		mGLSwitches.clear();
 		mRoom.clear();
 	}
 
