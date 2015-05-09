@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 import de.neo.android.persistence.DaoFactory;
+import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
@@ -160,6 +161,7 @@ public class RemoteService extends Service {
 		public Object mObject;
 		public IControlUnit mUnit;
 		public String mSwitchType;
+		public State mSwitchState;
 	}
 
 	public static class StationStuff {
@@ -176,8 +178,6 @@ public class RemoteService extends Service {
 	}
 
 	public void connectToServer(final RemoteServer server) {
-		if (mCurrentServer == server)
-			return;
 		new AsyncTask<RemoteServer, Integer, Exception>() {
 
 			@Override
@@ -256,7 +256,7 @@ public class RemoteService extends Service {
 		mCurrentControlCenter.clear();
 		try {
 			ids = mCurrentControlCenter.getControlUnitIDs();
-			mCurrentControlCenter.getGroundPlot();
+			fireGroundPlot(mCurrentControlCenter.getGroundPlot());
 		} catch (RemoteException e1) {
 		}
 		mCurrentMediaServer = null;
@@ -271,12 +271,34 @@ public class RemoteService extends Service {
 					IInternetSwitch iswitch = (IInternetSwitch) bufferdUnit.mObject;
 					iswitch.registerPowerSwitchListener(internetSwitchListener);
 					bufferdUnit.mSwitchType = iswitch.getType();
+					bufferdUnit.mSwitchState = iswitch.getState();
 				}
+				fireControlUnit(bufferdUnit);
 			} catch (Exception e) {
 				Log.e("error",
 						e.getClass().getSimpleName() + ": " + e.getMessage());
 			}
 		}
+	}
+
+	private void fireControlUnit(final BufferdUnit bufferdUnit) {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				for (IRemoteActionListener listener : mActionListener)
+					listener.onControlUnitCreated(bufferdUnit);
+			}
+		});
+	}
+
+	private void fireGroundPlot(final GroundPlot plot) {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				for (IRemoteActionListener listener : mActionListener)
+					listener.onGroundPlotCreated(plot);
+			}
+		});
 	}
 
 	/**
@@ -471,6 +493,20 @@ public class RemoteService extends Service {
 		 * @param serverName
 		 */
 		void onServerConnectionChanged(RemoteServer server);
+
+		/**
+		 * create new control unit.
+		 * 
+		 * @param controlUnit
+		 */
+		void onControlUnitCreated(BufferdUnit controlUnit);
+
+		/**
+		 * create new ground plot.
+		 * 
+		 * @param plot
+		 */
+		void onGroundPlotCreated(GroundPlot plot);
 
 		/**
 		 * call on stopping remote service.

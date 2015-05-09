@@ -6,7 +6,6 @@ import java.util.Map;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -30,7 +29,7 @@ import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.remote.mobile.R;
 
-public class PlaylistFragment extends ListFragment implements BrowserFragment {
+public class PlaylistFragment extends BrowserFragment {
 
 	private StationStuff mStationStuff;
 	private String mSelectedItem;

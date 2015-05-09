@@ -1,5 +1,8 @@
 package de.neo.remote.mobile.activities;
 
+import java.util.Collection;
+import java.util.Set;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,13 +13,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
-import de.neo.remote.mobile.tasks.AbstractTask;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
+import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -74,9 +78,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 			setTitle(getResources().getString(R.string.no_controlcenter));
 			mProgress.setVisibility(View.GONE);
 		} else {
-			setTitle(getResources().getString(R.string.load_controlcenter));
-			mProgress.setVisibility(View.VISIBLE);
-			new Thread(new UpdateGLViewRunner()).start();
+			new UpdateGLViewTask(this).execute();
 		}
 	}
 
@@ -86,12 +88,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		case R.id.opt_control_refresh:
 			setTitle(getResources().getString(R.string.refresh));
 			mProgress.setVisibility(View.VISIBLE);
-			new Thread() {
-				public void run() {
-					mBinder.refreshControlCenter();
-					new UpdateGLViewRunner().run();
-				};
-			}.start();
+			mBinder.connectToServer(mBinder.getServer());
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -128,38 +125,55 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		mProgress.setVisibility(View.VISIBLE);
 	}
 
-	public class UpdateGLViewRunner implements Runnable {
+	@Override
+	public void onControlUnitCreated(BufferdUnit controlUnit) {
+		mRenderer.addControlUnitToScene(controlUnit);
+	}
+
+	@Override
+	public void onGroundPlotCreated(GroundPlot plot) {
+		mRenderer.addGroundToScene(plot);
+	}
+
+	public class UpdateGLViewTask extends SimpleTask {
+
+		public UpdateGLViewTask(AbstractConnectionActivity activity) {
+			super(activity);
+			// setSuccess(getString(R.string.loaded_controlcenter));
+		}
 
 		@Override
-		public void run() {
+		protected void onPreExecute() {
+			super.onPreExecute();
+			setTitle(getResources().getString(R.string.load_controlcenter));
+			mProgress.setVisibility(View.VISIBLE);
+		}
+
+		@Override
+		protected Exception doInBackground(String... params) {
 			try {
-				mRenderer.reloadControlCenter(mBinder);
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						if (mBinder.getControlCenter() != null)
-							Toast.makeText(
-									ControlSceneActivity.this,
-									getResources().getString(
-											R.string.loaded_controlcenter),
-									Toast.LENGTH_SHORT).show();
-						setTitle("Controlcenter@"
-								+ mBinder.getServer().getName());
-						mProgress.setVisibility(View.GONE);
-					}
-				});
-			} catch (final Exception e) {
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						new AbstractTask.ErrorDialog(ControlSceneActivity.this,
-								e).show();
-						setTitle(getResources().getString(
-								R.string.no_conneciton));
-						mProgress.setVisibility(View.GONE);
-					}
-				});
+				Set<BufferdUnit> renderUnits = mRenderer.getUnits();
+				Collection<BufferdUnit> remoteUnits = mBinder.getUnits()
+						.values();
+				boolean isDirty = renderUnits.size() != remoteUnits.size();
+				for (BufferdUnit unit : remoteUnits)
+					isDirty |= !renderUnits.contains(unit);
+				if (isDirty)
+					mRenderer.reloadControlCenter(mBinder);
+			} catch (Exception e) {
+				return e;
 			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Exception result) {
+			super.onPostExecute(result);
+			if (result == null)
+				setTitle("Controlcenter@" + mBinder.getServer().getName());
+			else
+				setTitle(getResources().getString(R.string.no_conneciton));
+			mProgress.setVisibility(View.GONE);
 		}
 
 	}

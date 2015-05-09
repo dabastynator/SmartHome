@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -36,8 +35,7 @@ import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.remote.mobile.R;
 
-public class FileFragment extends ListFragment implements BrowserFragment,
-		IThumbnailListener {
+public class FileFragment extends BrowserFragment implements IThumbnailListener {
 
 	public static final int PREVIEW_SIZE = 128;
 

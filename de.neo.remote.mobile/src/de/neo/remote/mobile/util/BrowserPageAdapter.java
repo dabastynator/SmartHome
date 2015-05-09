@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -22,12 +23,16 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 	}
 
 	@Override
-	public Fragment getItem(int position) {
+	public BrowserFragment getItem(int position) {
 		if (position == 0) {
-			return new FileFragment();
+			if (mFileFragment == null)
+				mFileFragment = new FileFragment();
+			return mFileFragment;
 		}
 		if (position == 1) {
-			return new PlaylistFragment();
+			if (mPlaylistFragment == null)
+				mPlaylistFragment = new PlaylistFragment();
+			return mPlaylistFragment;
 		}
 		return null;
 	}
@@ -70,12 +75,12 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 			mFileFragment.setThumbnail(file, width, height, thumbnail);
 	}
 
-	public interface BrowserFragment {
-		public void refreshContent(Context context);
+	public static abstract class BrowserFragment extends ListFragment {
+		public abstract void refreshContent(Context context);
 
-		public boolean onKeyDown(int keyCode, KeyEvent event);
+		public abstract boolean onKeyDown(int keyCode, KeyEvent event);
 
-		public void setStation(StationStuff station);
+		public abstract void setStation(StationStuff station);
 	}
 
 }

@@ -159,8 +159,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			}.start();
 			return true;
 		}
-		BrowserFragment fragment = (BrowserFragment) mBrowserPageAdapter
-				.getItem(mListPager.getCurrentItem());
+		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager
+				.getCurrentItem());
 		if (fragment != null && fragment.onKeyDown(keyCode, event))
 			return true;
 		return super.onKeyDown(keyCode, event);
@@ -548,8 +548,8 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void refreshContent() {
-		BrowserFragment fragment = (BrowserFragment) mBrowserPageAdapter
-				.getItem(mListPager.getCurrentItem());
+		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager
+				.getCurrentItem());
 
 		if (fragment != null)
 			fragment.refreshContent(this);

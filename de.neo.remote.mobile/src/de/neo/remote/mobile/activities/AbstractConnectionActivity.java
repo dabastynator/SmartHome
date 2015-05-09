@@ -17,11 +17,13 @@ import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
 import de.remote.mobile.R;
@@ -211,6 +213,14 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
+	}
+
+	@Override
+	public void onControlUnitCreated(BufferdUnit controlUnit) {
+	}
+
+	@Override
+	public void onGroundPlotCreated(GroundPlot plot) {
 	}
 
 	@Override

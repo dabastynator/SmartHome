@@ -10,11 +10,13 @@ import android.graphics.Bitmap;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
+import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
 import de.remote.mobile.R;
@@ -257,6 +259,14 @@ public class NotificationHandler implements IRemoteActionListener {
 		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
+	}
+
+	@Override
+	public void onControlUnitCreated(BufferdUnit controlUnit) {
+	}
+
+	@Override
+	public void onGroundPlotCreated(GroundPlot plot) {
 	}
 
 }

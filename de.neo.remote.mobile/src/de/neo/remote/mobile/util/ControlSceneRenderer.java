@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -53,78 +56,78 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public static final String LAMP_FLOOR = "floorlamp";
 	public static final String TABLE = "table";
 
-	private GLGroup room;
-	private GLGroup glObjects;
-	private SelectMediaServer selecter;
+	private GLGroup mRoom;
+	private SelectMediaServer mMediaServerListener;
 
-	private Map<String, GLFigure> glMediaServers;
-	private Map<String, GLSwitch> glSwitches;
-	private TranslateSceneHandler handler;
+	private Map<String, GLFigure> mGLMediaServers;
+	private Map<String, GLSwitch> mGLSwitches;
+	private Map<BufferdUnit, GLFigure> mGLBufferdUnits;
+	private TranslateSceneHandler mHandler;
 
 	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
 		super(context);
-		this.selecter = selecter;
+		this.mMediaServerListener = selecter;
 		setGradient(new float[] { 0.3f, 0.3f, 1, 1 },
 				new float[] { 1, 1, 1, 1 });
-		handler = new TranslateSceneHandler();
-		handler.sceneRotation.rotateByAngleAxis(Math.PI / 4, 1, 0, 0);
-		handler.zoomBounds[0] = -4;
-		handler.zoomBounds[1] = -15;
-		setTouchSceneHandler(handler);
+		mHandler = new TranslateSceneHandler();
+		mHandler.sceneRotation.rotateByAngleAxis(Math.PI / 4, 1, 0, 0);
+		mHandler.zoomBounds[0] = -4;
+		mHandler.zoomBounds[1] = -15;
+		setTouchSceneHandler(mHandler);
 		setLighting(true);
-		glMediaServers = new HashMap<String, GLFigure>();
-		glSwitches = new HashMap<String, GLSwitch>();
+		mGLMediaServers = new HashMap<String, GLFigure>();
+		mGLSwitches = new HashMap<String, GLSwitch>();
+		mGLBufferdUnits = new HashMap<BufferdUnit, GLFigure>();
 	}
 
 	@Override
 	protected GLFigure createScene() {
-		room = new GLGroup();
-		return room;
+		mRoom = new GLGroup();
+		return mRoom;
 	}
 
 	public void reloadControlCenter(RemoteBinder binder) throws RemoteException {
 		IControlCenter control = binder.getControlCenter();
-		if (glObjects != null)
-			room.removeFigure(glObjects);
-		glMediaServers.clear();
-		glSwitches.clear();
+		clearScene();
+		mGLMediaServers.clear();
+		mGLSwitches.clear();
 		if (control == null)
 			return;
-		glObjects = new GLGroup();
 		GroundPlot ground = control.getGroundPlot();
 		addGroundToScene(ground);
 		for (String id : binder.getUnits().keySet()) {
-			try {
-				BufferdUnit unit = binder.getUnits().get(id);
-				if (unit.mObject instanceof IMediaServer) {
-					GLFigure glServer = createGLMediaServer(unit.mDescription);
-					glServer.position[0] = unit.mPosition[0];
-					glServer.position[1] = unit.mPosition[2];
-					glServer.position[2] = -unit.mPosition[1];
-					MediaServerListener listener = new MediaServerListener(unit.mID);
-					glServer.setOnClickListener(listener);
-					glObjects.addFigure(glServer);
-					glMediaServers.put(unit.mID, glServer);
-				}
-				if (unit.mObject instanceof IInternetSwitch) {
-					IInternetSwitch internet = (IInternetSwitch) unit.mObject;
-					String type = unit.mSwitchType;
-					GLSwitch light = loadGLSwitchByType(type);
-					light.setSwitch(internet.getState() == State.ON);
-					light.position[0] = unit.mPosition[0];
-					light.position[1] = unit.mPosition[2];
-					light.position[2] = -unit.mPosition[1];
-					InternetSwitchListener listener = new InternetSwitchListener(
-							light, internet);
-					light.setOnClickListener(listener);
-					glObjects.addFigure(light);
-					glSwitches.put(unit.mID, light);
-				}
-			} catch (RemoteException e) {
-
-			}
+			BufferdUnit unit = binder.getUnits().get(id);
+			addControlUnitToScene(unit);
 		}
-		room.addFigure(glObjects);
+	}
+
+	public void addControlUnitToScene(BufferdUnit unit) {
+		if (unit.mObject instanceof IMediaServer) {
+			GLFigure glServer = createGLMediaServer(unit.mDescription);
+			glServer.position[0] = unit.mPosition[0];
+			glServer.position[1] = unit.mPosition[2] + 5;
+			glServer.position[2] = -unit.mPosition[1];
+			MediaServerListener listener = new MediaServerListener(unit.mID);
+			glServer.setOnClickListener(listener);
+			addFigure(glServer);
+			mGLMediaServers.put(unit.mID, glServer);
+			mGLBufferdUnits.put(unit, glServer);
+		}
+		if (unit.mObject instanceof IInternetSwitch) {
+			IInternetSwitch internet = (IInternetSwitch) unit.mObject;
+			String type = unit.mSwitchType;
+			GLSwitch light = loadGLSwitchByType(type);
+			light.setSwitch(unit.mSwitchState == State.ON);
+			light.position[0] = unit.mPosition[0];
+			light.position[1] = unit.mPosition[2] + 5;
+			light.position[2] = -unit.mPosition[1];
+			InternetSwitchListener listener = new InternetSwitchListener(light,
+					internet);
+			light.setOnClickListener(listener);
+			addFigure(light);
+			mGLSwitches.put(unit.mID, light);
+			mGLBufferdUnits.put(unit, light);
+		}
 	}
 
 	private GLFigure createGLMediaServer(String description) {
@@ -157,7 +160,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return box;
 	}
 
-	private void addGroundToScene(GroundPlot ground) {
+	public void addGroundToScene(GroundPlot ground) {
 		float minX = Integer.MAX_VALUE;
 		float maxX = Integer.MIN_VALUE;
 		float minY = Integer.MAX_VALUE;
@@ -177,15 +180,15 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			}
 			GLPolynom glWall = new GLPolynom(points, 2);
 
-			glObjects.addFigure(glWall);
+			addFigure(glWall);
 		}
-		handler.translateScene[0] = -((maxX - minX) / 2 + minX);
-		handler.translateScene[1] = ((maxY - minY) / 2 + minY);
-		handler.zoom = -15;
-		handler.translateSceneBounds[0] = -minX;
-		handler.translateSceneBounds[1] = -maxX;
-		handler.translateSceneBounds[2] = maxY;// -minY;
-		handler.translateSceneBounds[3] = minY;// -maxY;
+		mHandler.translateScene[0] = -((maxX - minX) / 2 + minX);
+		mHandler.translateScene[1] = ((maxY - minY) / 2 + minY);
+		mHandler.zoom = -15;
+		mHandler.translateSceneBounds[0] = -minX;
+		mHandler.translateSceneBounds[1] = -maxX;
+		mHandler.translateSceneBounds[2] = maxY;// -minY;
+		mHandler.translateSceneBounds[3] = minY;// -maxY;
 
 		GLSquare laminat = new GLSquare(GLFigure.STYLE_PLANE);
 		laminat.position[0] = (maxX - minX) / 2 + minX;
@@ -197,7 +200,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		laminat.color[0] = laminat.color[1] = laminat.color[2] = 1;
 		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0],
 				laminat.size[1]);
-		glObjects.addFigure(laminat);
+		addFigure(laminat);
 
 		for (Feature feature : ground.features) {
 			GLFigure figure = null;
@@ -223,7 +226,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				figure.rotation.rotateByAngleAxis(180 * feature.az / Math.PI,
 						0, 1, 0);
 				figure.color[3] = 0.5f;
-				glObjects.addFigure(figure);
+				addFigure(figure);
 			}
 		}
 	}
@@ -261,6 +264,25 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return lamp;
 	}
 
+	@Override
+	public synchronized void onDrawFrame(GL10 gl) {
+		for (BufferdUnit unit : mGLBufferdUnits.keySet()) {
+			GLFigure figure = mGLBufferdUnits.get(unit);
+			if (figure != null) {
+				figure.position[1] = (figure.position[1] + unit.mPosition[2]) / 2;
+			}
+		}
+		super.onDrawFrame(gl);
+	}
+
+	private synchronized void addFigure(GLFigure figure) {
+		mRoom.addFigure(figure);
+	}
+
+	private synchronized void clearScene() {
+		mRoom.clear();
+	}
+
 	class MediaServerListener implements GLClickListener {
 
 		private String mID;
@@ -271,7 +293,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 		@Override
 		public void onGLClick() {
-			selecter.selectMediaServer(mID);
+			mMediaServerListener.selectMediaServer(mID);
 		}
 
 	}
@@ -307,7 +329,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	}
 
 	public void setPlayingBean(String mediaserver, PlayingBean bean) {
-		GLFigure glFigure = glMediaServers.get(mediaserver);
+		GLFigure glFigure = mGLMediaServers.get(mediaserver);
 		if (glFigure instanceof GLMediaServer) {
 			Bitmap bitmap = createBitmapByText(getBeanString(bean));
 			((GLMediaServer) glFigure).setTexture(GLFlatScreen.SCREEN, bitmap,
@@ -368,10 +390,14 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	}
 
 	public void powerSwitchChanged(String _switch, State state) {
-		GLSwitch glSwitch = glSwitches.get(_switch);
+		GLSwitch glSwitch = mGLSwitches.get(_switch);
 		if (glSwitch != null) {
 			glSwitch.setSwitch(state == State.ON);
 		}
+	}
+
+	public Set<BufferdUnit> getUnits() {
+		return mGLBufferdUnits.keySet();
 	}
 
 }

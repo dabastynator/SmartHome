@@ -66,7 +66,8 @@ public class SimpleTask extends AsyncTask<String, Integer, Exception> {
 		mActivity.dismissProgress();
 		if (result != null && mActivity.isActive()) {
 			new AbstractTask.ErrorDialog(mActivity, result).show();
-		} else if (result == null && mActivity.isActive()) {
+		} else if (result == null && mActivity.isActive() && mSuccess != null
+				&& mSuccess.length() > 0) {
 			Toast.makeText(mActivity, mSuccess, Toast.LENGTH_SHORT).show();
 		}
 	}

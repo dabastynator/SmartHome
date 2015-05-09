@@ -447,6 +447,13 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	}
 
+	@Override
+	public void onControlUnitCreated(BufferdUnit controlUnit) {
+	}
+
+	public void onGroundPlotCreated(de.neo.remote.api.GroundPlot plot) {
+	};
+
 	public int getImageForSwitchType(String type, boolean on) {
 		if (ControlSceneRenderer.AUDO.equals(type)) {
 			if (on)
