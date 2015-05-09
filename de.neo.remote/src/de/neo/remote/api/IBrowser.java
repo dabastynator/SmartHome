@@ -2,6 +2,7 @@ package de.neo.remote.api;
 
 import java.io.IOException;
 
+import de.neo.rmi.api.Oneway;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.protokol.ServerPort;
@@ -116,6 +117,7 @@ public interface IBrowser extends RemoteAble {
 	 * @param height
 	 * @throws RemoteException
 	 */
+	@Oneway
 	public void fireThumbnails(IThumbnailListener listener, int width,
 			int height) throws RemoteException;
 
