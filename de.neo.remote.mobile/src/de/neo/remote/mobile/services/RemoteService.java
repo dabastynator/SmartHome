@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -177,7 +178,8 @@ public class RemoteService extends Service {
 		public int directoryCount;
 	}
 
-	public void connectToServer(final RemoteServer server) {
+	public void connectToServer(final RemoteServer server,
+			final Activity activity) {
 		new AsyncTask<RemoteServer, Integer, Exception>() {
 
 			@Override
@@ -220,8 +222,8 @@ public class RemoteService extends Service {
 			protected void onPostExecute(Exception error) {
 				if (error != null) {
 					mCurrentServer = null;
-					new AbstractTask.ErrorDialog(RemoteService.this, error)
-							.show();
+					if (activity != null)
+						new AbstractTask.ErrorDialog(activity, error).show();
 				}
 				for (IRemoteActionListener listener : mActionListener)
 					listener.onServerConnectionChanged(mCurrentServer);

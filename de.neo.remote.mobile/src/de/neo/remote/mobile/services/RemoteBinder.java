@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Environment;
@@ -70,8 +71,8 @@ public class RemoteBinder extends Binder {
 	 * @param id
 	 * @param r
 	 */
-	public void connectToServer(RemoteServer server) {
-		service.connectToServer(server);
+	public void connectToServer(RemoteServer server, Activity activity) {
+		service.connectToServer(server, activity);
 	}
 
 	/**

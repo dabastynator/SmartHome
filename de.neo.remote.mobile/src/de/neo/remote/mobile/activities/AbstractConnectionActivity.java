@@ -90,7 +90,8 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 			}
 			// if there is a server id to connect -> connect
 			if (mCurrentServer != null && needReconnect)
-				mBinder.connectToServer(mCurrentServer);
+				mBinder.connectToServer(mCurrentServer,
+						AbstractConnectionActivity.this);
 			else if (!needReconnect)
 				AbstractConnectionActivity.this.onServerConnectionChanged(null);
 		}
@@ -152,7 +153,7 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 				mCurrentServer = dao.loadById(data.getExtras().getInt(
 						SelectServerActivity.SERVER_ID));
 				onStartConnecting();
-				mBinder.connectToServer(mCurrentServer);
+				mBinder.connectToServer(mCurrentServer, this);
 			} catch (DaoException e) {
 				e.printStackTrace();
 				mCurrentServer = null;

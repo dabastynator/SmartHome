@@ -74,6 +74,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
+		mRenderer.setConnections(mBinder.isConnected());
 		if (mBinder.getControlCenter() == null) {
 			setTitle(getResources().getString(R.string.no_controlcenter));
 			mProgress.setVisibility(View.GONE);
@@ -89,7 +90,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 			mRenderer.clearControlCenter();
 			setTitle(getResources().getString(R.string.refresh));
 			mProgress.setVisibility(View.VISIBLE);
-			mBinder.connectToServer(mBinder.getServer());
+			RemoteServer server = mBinder.getServer();
+			if (server == null)
+				server = getFavoriteServer();
+			mBinder.connectToServer(server, this);
 			break;
 		}
 		return super.onOptionsItemSelected(item);

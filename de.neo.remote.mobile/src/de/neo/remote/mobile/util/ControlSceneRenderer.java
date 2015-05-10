@@ -401,4 +401,14 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return mGLBufferdUnits.keySet();
 	}
 
+	public void setConnections(boolean connected) {
+		if (connected)
+			setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1,
+					1, 1 });
+		else
+			setGradient(new float[] { 1, 0.3f, 0.3f, 1 }, new float[] { 1, 1,
+					1, 1 });
+
+	}
+
 }
