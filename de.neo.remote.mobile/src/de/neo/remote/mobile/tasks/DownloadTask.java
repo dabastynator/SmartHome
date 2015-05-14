@@ -56,9 +56,9 @@ public class DownloadTask extends AbstractTask {
 			receiver = new DirectoryReceiver(serverport.getIp(),
 					serverport.getPort(), dir);
 		}
-		binder.receiver = receiver;
+		binder.mReceiver = receiver;
 		receiver.setBufferSize(BUFFER_SIZE);
-		receiver.getProgressListener().add(binder.service.downloadListener);
+		receiver.getProgressListener().add(binder.mService.downloadListener);
 		receiver.receiveSync();
 	}
 

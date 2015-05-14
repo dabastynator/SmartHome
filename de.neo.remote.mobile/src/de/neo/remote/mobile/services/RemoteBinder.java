@@ -45,12 +45,12 @@ public class RemoteBinder extends Binder {
 	/**
 	 * the service of this binder
 	 */
-	public RemoteService service;
+	public RemoteService mService;
 
 	/**
 	 * current receiver
 	 */
-	public AbstractReceiver receiver;
+	public AbstractReceiver mReceiver;
 
 	/**
 	 * allocate new binder.
@@ -58,11 +58,11 @@ public class RemoteBinder extends Binder {
 	 * @param service
 	 */
 	public RemoteBinder(RemoteService service) {
-		this.service = service;
+		this.mService = service;
 	}
 
 	public IControlCenter getControlCenter() {
-		return service.mCurrentControlCenter;
+		return mService.mCurrentControlCenter;
 	}
 
 	/**
@@ -72,14 +72,14 @@ public class RemoteBinder extends Binder {
 	 * @param r
 	 */
 	public void connectToServer(RemoteServer server, Activity activity) {
-		service.connectToServer(server, activity);
+		mService.connectToServer(server, activity);
 	}
 
 	/**
 	 * @return true if there is a connection wich a server
 	 */
 	public boolean isConnected() {
-		return service.mCurrentControlCenter != null;
+		return mService.mCurrentControlCenter != null;
 	}
 
 	/**
@@ -89,8 +89,8 @@ public class RemoteBinder extends Binder {
 	 * @param listener
 	 */
 	public void addRemoteActionListener(IRemoteActionListener listener) {
-		if (!service.mActionListener.contains(listener))
-			service.mActionListener.add(listener);
+		if (!mService.mActionListener.contains(listener))
+			mService.mActionListener.add(listener);
 	}
 
 	/**
@@ -99,14 +99,14 @@ public class RemoteBinder extends Binder {
 	 * @param listener
 	 */
 	public void removeRemoteActionListener(IRemoteActionListener listener) {
-		service.mActionListener.remove(listener);
+		mService.mActionListener.remove(listener);
 	}
 
 	/**
 	 * @return current playing file
 	 */
 	public PlayingBean getPlayingFile() {
-		return service.mCurrentPlayingFile;
+		return mService.mCurrentPlayingFile;
 	}
 
 	/**
@@ -117,8 +117,8 @@ public class RemoteBinder extends Binder {
 	public void downloadFile(AbstractConnectionActivity activity,
 			IBrowser browser, String file) {
 		new DownloadTask(activity, browser, file, null,
-				service.mCurrentServer.getName(), this).execute();
-		service.mNotificationHandler.setFile(file);
+				mService.mCurrentServer.getName(), this).execute();
+		mService.mNotificationHandler.setFile(file);
 	}
 
 	/**
@@ -129,15 +129,15 @@ public class RemoteBinder extends Binder {
 	public void downloadDirectory(AbstractConnectionActivity activity,
 			IBrowser browser, String directory) {
 		new DownloadTask(activity, browser, null, directory,
-				service.mCurrentServer.getName(), this).execute();
-		service.mNotificationHandler.setFile(directory);
+				mService.mCurrentServer.getName(), this).execute();
+		mService.mNotificationHandler.setFile(directory);
 	}
 
 	/**
 	 * get the current receiver
 	 */
 	public AbstractReceiver getReceiver() {
-		return receiver;
+		return mReceiver;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class RemoteBinder extends Binder {
 		try {
 			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1,
 					DownloadTask.PROGRESS_STEP);
-			fileSender.getProgressListener().add(service.uploadListener);
+			fileSender.getProgressListener().add(mService.uploadListener);
 			fileSender.setBufferSize(DownloadTask.BUFFER_SIZE);
 			fileSender.sendAsync();
 			new Thread() {
@@ -164,10 +164,10 @@ public class RemoteBinder extends Binder {
 					}
 				};
 			}.start();
-			Toast.makeText(service, "upload file started", Toast.LENGTH_SHORT)
+			Toast.makeText(mService, "upload file started", Toast.LENGTH_SHORT)
 					.show();
 		} catch (IOException e) {
-			Toast.makeText(service, "upload error: " + e.getMessage(),
+			Toast.makeText(mService, "upload error: " + e.getMessage(),
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -177,26 +177,26 @@ public class RemoteBinder extends Binder {
 
 			@Override
 			public void run() {
-				Toast.makeText(service, message, length).show();
+				Toast.makeText(mService, message, length).show();
 			}
 		};
-		service.mHandler.post(runnable);
+		mService.mHandler.post(runnable);
 	}
 
 	public Map<String, BufferdUnit> getUnits() {
-		return service.mUnitMap;
+		return mService.mUnitMap;
 	}
 
 	public void disconnect() {
-		service.disconnectFromServer();
+		mService.disconnectFromServer();
 	}
 
 	public void refreshControlCenter() {
-		service.refreshControlCenter();
+		mService.refreshControlCenter();
 	}
 
 	public StationStuff getMediaServerByID(String id) throws RemoteException {
-		BufferdUnit unit = service.mUnitMap.get(id);
+		BufferdUnit unit = mService.mUnitMap.get(id);
 		if (unit != null && unit.mObject instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) unit.mObject;
 			if (unit.mStation == null) {
@@ -212,14 +212,14 @@ public class RemoteBinder extends Binder {
 				unit.mStation.imageViewer = mediaServer.getImageViewer();
 				unit.mStation.name = unit.mName;
 			}
-			service.setCurrentMediaServer(unit.mStation);
+			mService.setCurrentMediaServer(unit.mStation);
 			return unit.mStation;
 		}
 		return null;
 	}
 
 	public StationStuff getLatestMediaServer() {
-		return service.mCurrentMediaServer;
+		return mService.mCurrentMediaServer;
 	}
 
 	public Map<String, BufferdUnit> getSwitches() {
@@ -242,7 +242,7 @@ public class RemoteBinder extends Binder {
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
-				Toast.makeText(service, "download started", Toast.LENGTH_SHORT)
+				Toast.makeText(mService, "download started", Toast.LENGTH_SHORT)
 						.show();
 			}
 
@@ -252,7 +252,7 @@ public class RemoteBinder extends Binder {
 					String folder = Environment.getExternalStorageDirectory()
 							.toString()
 							+ File.separator
-							+ service.mCurrentServer.getName();
+							+ mService.mCurrentServer.getName();
 					File base = new File(folder);
 					if (!base.exists())
 						base.mkdir();
@@ -272,8 +272,8 @@ public class RemoteBinder extends Binder {
 						// set maximum byte size to 1MB
 						receiver.setBufferSize(1000000);
 						receiver.getProgressListener().add(
-								service.downloadListener);
-						service.mNotificationHandler.setFile(itemName);
+								mService.downloadListener);
+						mService.mNotificationHandler.setFile(itemName);
 						receiver.receiveSync();
 					}
 				} catch (Exception e) {
@@ -286,6 +286,6 @@ public class RemoteBinder extends Binder {
 	}
 
 	public RemoteServer getServer() {
-		return service.mCurrentServer;
+		return mService.mCurrentServer;
 	}
 }
