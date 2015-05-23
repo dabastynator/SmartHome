@@ -51,8 +51,9 @@ public class PlaylistFragment extends BrowserFragment {
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
+		getListView().setFastScrollEnabled(true);
 		getActivity().registerForContextMenu(getListView());
-		refreshContent(getActivity());
+		// refreshContent(getActivity());
 	}
 
 	public void refreshContent(final Context context) {
@@ -95,15 +96,22 @@ public class PlaylistFragment extends BrowserFragment {
 
 			@Override
 			protected void onPostExecute(Exception result) {
-				if (result != null) {
-					new AbstractTask.ErrorDialog(context, result).show();
-					setListAdapter(new PlaylistAdapter(context, new String[] {}));
-					setListShown(true);
-					setEmptyText(result.getClass().getSimpleName());
-				} else {
-					if (getListAdapter() != null)
+				if (mActive) {
+					if (result != null) {
+						new AbstractTask.ErrorDialog(context, result).show();
+						setListAdapter(new PlaylistAdapter(context,
+								new String[] {}));
 						setListShown(true);
-					setListAdapter(new PlaylistAdapter(context, mItems));
+						setEmptyText(result.getClass().getSimpleName());
+					} else {
+						if (getListAdapter() != null)
+							setListShown(true);
+						setListAdapter(new PlaylistAdapter(context, mItems));
+						if (mListPosition != null) {
+							getListView().onRestoreInstanceState(mListPosition);
+							mListPosition = null;
+						}
+					}
 				}
 			}
 		};

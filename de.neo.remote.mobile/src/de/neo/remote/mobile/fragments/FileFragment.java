@@ -66,8 +66,9 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 		super.onStart();
 		getListView().setOnItemClickListener(new ListClickListener());
 		getListView().setOnItemLongClickListener(new ListLongClickListener());
+		getListView().setFastScrollEnabled(true);
 		getActivity().registerForContextMenu(getListView());
-		refreshContent(getActivity(), null, false);
+		// refreshContent(getActivity(), null, false);
 	}
 
 	private void refreshContent(final Context context, final String goTo,
@@ -115,18 +116,24 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 
 			@Override
 			protected void onPostExecute(Exception result) {
-				if (result != null) {
-					new AbstractTask.ErrorDialog(context, result).show();
-					setListAdapter(new FileAdapter(context, new String[] {}));
-					setListShown(true);
-					setEmptyText(result.getClass().getSimpleName());
-				} else {
-					if (getListAdapter() != null)
+				if (mActive) {
+					if (result != null) {
+						new AbstractTask.ErrorDialog(context, result).show();
+						setListAdapter(new FileAdapter(context, new String[] {}));
 						setListShown(true);
-					setListAdapter(new FileAdapter(context, mFileList));
+						setEmptyText(result.getClass().getSimpleName());
+					} else {
+						if (getListAdapter() != null)
+							setListShown(true);
+						setListAdapter(new FileAdapter(context, mFileList));
+						if (mListPosition != null) {
+							getListView().onRestoreInstanceState(mListPosition);
+							mListPosition = null;
+						}
+					}
+					if (mGoBack)
+						getActivity().onBackPressed();
 				}
-				if (mGoBack)
-					getActivity().onBackPressed();
 			}
 		};
 		task.execute();

@@ -1,12 +1,15 @@
 package de.neo.remote.mobile.util;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.FileFragment;
@@ -76,11 +79,45 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 	}
 
 	public static abstract class BrowserFragment extends ListFragment {
+
+		public static final String LIST_POSITION = "save_position";
+
+		protected Parcelable mListPosition;
+
+		protected boolean mActive = false;
+
 		public abstract void refreshContent(Context context);
 
 		public abstract boolean onKeyDown(int keyCode, KeyEvent event);
 
 		public abstract void setStation(StationStuff station);
+
+		@Override
+		public void onStart() {
+			super.onStart();
+			mActive = true;
+		}
+
+		@Override
+		public void onStop() {
+			super.onStop();
+			mActive = false;
+		}
+
+		@Override
+		public void onSaveInstanceState(Bundle outState) {
+			super.onSaveInstanceState(outState);
+			outState.putParcelable(LIST_POSITION, getListView()
+					.onSaveInstanceState());
+		}
+
+		@Override
+		public void onViewCreated(View view, Bundle savedInstanceState) {
+			super.onViewCreated(view, savedInstanceState);
+			if (savedInstanceState != null
+					&& savedInstanceState.containsKey(LIST_POSITION))
+				mListPosition = savedInstanceState.getParcelable(LIST_POSITION);
+		}
 	}
 
 }
