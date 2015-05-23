@@ -174,10 +174,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		@Override
 		protected void onPostExecute(Exception result) {
 			super.onPostExecute(result);
-			if (result == null)
+			if (result == null && mBinder.getServer() != null)
 				setTitle("Controlcenter@" + mBinder.getServer().getName());
 			else
 				setTitle(getResources().getString(R.string.no_conneciton));
+			mRenderer.setConnections(mBinder.isConnected());
 			mProgress.setVisibility(View.GONE);
 		}
 

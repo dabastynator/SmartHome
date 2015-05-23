@@ -253,14 +253,11 @@ public class RemoteService extends Service {
 		}.execute();
 	}
 
-	public void refreshControlCenter() {
+	public void refreshControlCenter() throws RemoteException {
 		String[] ids = null;
 		mCurrentControlCenter.clear();
-		try {
-			ids = mCurrentControlCenter.getControlUnitIDs();
-			fireGroundPlot(mCurrentControlCenter.getGroundPlot());
-		} catch (RemoteException e1) {
-		}
+		ids = mCurrentControlCenter.getControlUnitIDs();
+		fireGroundPlot(mCurrentControlCenter.getGroundPlot());
 		mCurrentMediaServer = null;
 		mUnitMap.clear();
 		for (String id : ids) {

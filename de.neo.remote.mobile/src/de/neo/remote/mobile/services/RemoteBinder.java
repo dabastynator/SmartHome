@@ -191,7 +191,7 @@ public class RemoteBinder extends Binder {
 		mService.disconnectFromServer();
 	}
 
-	public void refreshControlCenter() {
+	public void refreshControlCenter() throws RemoteException {
 		mService.refreshControlCenter();
 	}
 
