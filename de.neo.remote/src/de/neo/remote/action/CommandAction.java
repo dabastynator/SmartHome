@@ -29,14 +29,16 @@ public class CommandAction implements ICommandAction {
 	private int[] mThumbnail;
 	private int mWidth;
 	private int mHeight;
+	private String mClientAction = "";
 
 	public void initialize(Element element) throws SAXException, IOException {
 		if (!element.hasAttribute("command"))
 			throw new SAXException("command missing for internet switch");
 		mCommand = element.getAttribute("command");
-		if (element.hasAttribute("parameter")) {
+		if (element.hasAttribute("parameter"))
 			mParameter = element.getAttribute("parameter").split(" ");
-		}
+		if (element.hasAttribute("clientAction"))
+			mClientAction = element.getAttribute("clientAction");
 		if (element.hasAttribute("thumbnail")) {
 			String thumbnail = element.getAttribute("thumbnail");
 			BufferedImage src = ImageIO.read(new File(thumbnail));
@@ -131,6 +133,11 @@ public class CommandAction implements ICommandAction {
 	@Override
 	public int getThumbnailHeight() throws RemoteException {
 		return mHeight;
+	}
+
+	@Override
+	public String getClientAction() throws RemoteException {
+		return mClientAction;
 	}
 
 }

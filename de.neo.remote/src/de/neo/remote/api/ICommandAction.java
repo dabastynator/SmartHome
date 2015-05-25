@@ -58,4 +58,12 @@ public interface ICommandAction extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public boolean isRunning() throws RemoteException;
+
+	/**
+	 * Get a client action, if there is any one.
+	 * 
+	 * @return client action
+	 * @throws RemoteException
+	 */
+	public String getClientAction() throws RemoteException;
 }
