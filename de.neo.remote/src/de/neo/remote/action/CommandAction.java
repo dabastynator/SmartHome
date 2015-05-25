@@ -58,7 +58,9 @@ public class CommandAction implements ICommandAction {
 
 	@Override
 	public void startAction() throws IOException {
-		if (!isRunning()) {
+		if (isRunning()) {
+			throw new IOException("Process is already running");
+		} else {
 			mProcess = Runtime.getRuntime().exec(mCommand, mParameter);
 			mListener = new OutputListener(mProcess.getInputStream());
 		}
@@ -80,7 +82,15 @@ public class CommandAction implements ICommandAction {
 
 	@Override
 	public boolean isRunning() {
-		return mProcess != null;
+		try {
+			mProcess.exitValue();
+			mProcess = null;
+			mListener.mRunning = false;
+			mListener = null;
+			return false;
+		} catch (Exception e) {
+			return true;
+		}
 	}
 
 	class OutputListener extends Thread {
