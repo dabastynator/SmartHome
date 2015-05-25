@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager.LayoutParams;
@@ -13,17 +15,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.ICommandAction;
-import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
-import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -203,16 +206,39 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 				});
 			}
 			if (unit.mObject instanceof ICommandAction) {
-				new SimpleTask(ControlSceneActivity.this)
-						.setAction(new BackgroundAction() {
+				AsyncTask<BufferdUnit, Integer, Exception> task = new AsyncTask<BufferdUnit, Integer, Exception>() {
 
-							@Override
-							public void run() throws Exception {
-								ICommandAction action = (ICommandAction) unit.mObject;
-								action.startAction();
+					@Override
+					protected Exception doInBackground(BufferdUnit... params) {
+						try {
+							ICommandAction action = (ICommandAction) unit.mObject;
+							action.startAction();
+						} catch (Exception e) {
+							return e;
+						}
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(Exception result) {
+						if (result != null)
+							new AbstractTask.ErrorDialog(
+									ControlSceneActivity.this, result).show();
+						else {
+							Toast.makeText(getApplicationContext(),
+									"Execute: " + unit.mDescription,
+									Toast.LENGTH_SHORT).show();
+							if (unit.mClientAction != null
+									&& unit.mClientAction.length() > 0) {
+								Uri uri = Uri.parse(unit.mClientAction);
+								Intent intent = new Intent(Intent.ACTION_VIEW,
+										uri);
+								startActivity(intent);
 							}
-						}).setSuccess("Execute: " + unit.mDescription)
-						.execute();
+						}
+					}
+				};
+				task.execute(unit);
 			}
 
 		}

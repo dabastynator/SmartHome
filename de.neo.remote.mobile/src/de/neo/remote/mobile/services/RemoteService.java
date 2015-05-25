@@ -167,6 +167,7 @@ public class RemoteService extends Service {
 		public int[] mThumbnail;
 		public int mThumbnailWidth;
 		public int mThumbnailHeight;
+		public String mClientAction;
 	}
 
 	public static class StationStuff {
@@ -281,6 +282,7 @@ public class RemoteService extends Service {
 					bufferdUnit.mThumbnail = action.getThumbnail();
 					bufferdUnit.mThumbnailWidth = action.getThumbnailWidth();
 					bufferdUnit.mThumbnailHeight = action.getThumbnailHeight();
+					bufferdUnit.mClientAction = action.getClientAction();
 				}
 				fireControlUnit(bufferdUnit);
 			} catch (Exception e) {

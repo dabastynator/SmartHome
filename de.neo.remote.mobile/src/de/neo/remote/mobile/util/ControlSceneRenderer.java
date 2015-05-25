@@ -114,7 +114,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			glServer.setOnClickListener(new GLUnitClickListener(unit));
 			addFigure(glServer);
 			mGLMediaServers.put(unit.mID, glServer);
-			mGLBufferdUnits.put(unit, glServer);
+			putUnitFigure(unit, glServer);
 		}
 		if (unit.mObject instanceof IInternetSwitch) {
 			IInternetSwitch internet = (IInternetSwitch) unit.mObject;
@@ -129,7 +129,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			light.setOnClickListener(listener);
 			addFigure(light);
 			mGLSwitches.put(unit.mID, light);
-			mGLBufferdUnits.put(unit, light);
+			putUnitFigure(unit, light);
 		}
 		if (unit.mObject instanceof ICommandAction) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
@@ -149,7 +149,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			cube.position[2] = -unit.mPosition[1];
 			addFigure(cube);
 			cube.setOnClickListener(new GLUnitClickListener(unit));
-			mGLBufferdUnits.put(unit, cube);
+			putUnitFigure(unit, cube);
 		}
 	}
 
@@ -302,6 +302,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mRoom.addFigure(figure);
 	}
 
+	private synchronized void putUnitFigure(BufferdUnit unit, GLFigure figure) {
+		mGLBufferdUnits.put(unit, figure);
+	}
+
 	public synchronized void clearControlCenter() {
 		mGLBufferdUnits.clear();
 		mGLMediaServers.clear();
@@ -422,7 +426,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 	}
 
-	public Set<BufferdUnit> getUnits() {
+	public synchronized Set<BufferdUnit> getUnits() {
 		return mGLBufferdUnits.keySet();
 	}
 
