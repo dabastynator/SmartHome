@@ -1,5 +1,6 @@
 package de.neo.remote.mobile.util;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,13 +36,14 @@ import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Feature;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
+import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.ControlSceneActivity.SelectMediaServer;
+import de.neo.remote.mobile.activities.ControlSceneActivity.SelectControlUnit;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
@@ -56,17 +58,21 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public static final String LAMP_FLOOR = "floorlamp";
 	public static final String TABLE = "table";
 
+	public enum UnitType {
+		MediaServer, ActionComman
+	}
+
 	private GLGroup mRoom;
-	private SelectMediaServer mMediaServerListener;
+	private SelectControlUnit mControlUnitListener;
 
 	private Map<String, GLFigure> mGLMediaServers;
 	private Map<String, GLSwitch> mGLSwitches;
 	private Map<BufferdUnit, GLFigure> mGLBufferdUnits;
 	private TranslateSceneHandler mHandler;
 
-	public ControlSceneRenderer(Context context, SelectMediaServer selecter) {
+	public ControlSceneRenderer(Context context, SelectControlUnit selecter) {
 		super(context);
-		this.mMediaServerListener = selecter;
+		this.mControlUnitListener = selecter;
 		setGradient(new float[] { 0.3f, 0.3f, 1, 1 },
 				new float[] { 1, 1, 1, 1 });
 		mHandler = new TranslateSceneHandler();
@@ -105,8 +111,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			glServer.position[0] = unit.mPosition[0];
 			glServer.position[1] = unit.mPosition[2] + 5;
 			glServer.position[2] = -unit.mPosition[1];
-			MediaServerListener listener = new MediaServerListener(unit.mID);
-			glServer.setOnClickListener(listener);
+			glServer.setOnClickListener(new GLUnitClickListener(unit));
 			addFigure(glServer);
 			mGLMediaServers.put(unit.mID, glServer);
 			mGLBufferdUnits.put(unit, glServer);
@@ -125,6 +130,26 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			addFigure(light);
 			mGLSwitches.put(unit.mID, light);
 			mGLBufferdUnits.put(unit, light);
+		}
+		if (unit.mObject instanceof ICommandAction) {
+			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
+			if (unit.mThumbnail != null) {
+				Bitmap bm = Bitmap.createBitmap(unit.mThumbnailWidth,
+						unit.mThumbnailHeight, Bitmap.Config.RGB_565);
+				IntBuffer buf = IntBuffer.wrap(unit.mThumbnail); // data is my
+																	// array
+				bm.copyPixelsFromBuffer(buf);
+				cube.setTexture(bm);
+				cube.setColor(1, 1, 1);
+			} else
+				cube.setColor(0.2f, 0.2f, 0.2f);
+			cube.size[0] = cube.size[1] = cube.size[2] = 0.5f;
+			cube.position[0] = unit.mPosition[0];
+			cube.position[1] = unit.mPosition[2] + 5;
+			cube.position[2] = -unit.mPosition[1];
+			addFigure(cube);
+			cube.setOnClickListener(new GLUnitClickListener(unit));
+			mGLBufferdUnits.put(unit, cube);
 		}
 	}
 
@@ -284,17 +309,17 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mRoom.clear();
 	}
 
-	class MediaServerListener implements GLClickListener {
+	class GLUnitClickListener implements GLClickListener {
 
-		private String mID;
+		private BufferdUnit mUnit;
 
-		public MediaServerListener(String id) {
-			mID = id;
+		public GLUnitClickListener(BufferdUnit unit) {
+			mUnit = unit;
 		}
 
 		@Override
 		public void onGLClick() {
-			mMediaServerListener.selectMediaServer(mID);
+			mControlUnitListener.selectUnit(mUnit);
 		}
 
 	}

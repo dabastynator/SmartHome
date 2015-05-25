@@ -14,13 +14,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
-import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.GroundPlot;
+import de.neo.remote.api.ICommandAction;
+import de.neo.remote.api.IMediaServer;
+import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.tasks.SimpleTask;
+import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -38,7 +41,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 		mHandler = new Handler();
 
-		SelectMediaServer selecter = new SelectMediaServer();
+		SelectControlUnit selecter = new SelectControlUnit();
 
 		setContentView(R.layout.controlscene);
 		findComponents();
@@ -184,18 +187,34 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	}
 
-	public class SelectMediaServer {
-		public void selectMediaServer(final String id) {
-			mHandler.post(new Runnable() {
+	public class SelectControlUnit {
+		public void selectUnit(final BufferdUnit unit) {
+			if (unit.mObject instanceof IMediaServer) {
+				mHandler.post(new Runnable() {
 
-				@Override
-				public void run() {
-					Intent intent = new Intent(ControlSceneActivity.this,
-							MediaServerActivity.class);
-					intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, id);
-					ControlSceneActivity.this.startActivity(intent);
-				}
-			});
+					@Override
+					public void run() {
+						Intent intent = new Intent(ControlSceneActivity.this,
+								MediaServerActivity.class);
+						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID,
+								unit.mID);
+						ControlSceneActivity.this.startActivity(intent);
+					}
+				});
+			}
+			if (unit.mObject instanceof ICommandAction) {
+				new SimpleTask(ControlSceneActivity.this)
+						.setAction(new BackgroundAction() {
+
+							@Override
+							public void run() throws Exception {
+								ICommandAction action = (ICommandAction) unit.mObject;
+								action.startAction();
+							}
+						}).setSuccess("Execute: " + unit.mDescription)
+						.execute();
+			}
+
 		}
 	}
 

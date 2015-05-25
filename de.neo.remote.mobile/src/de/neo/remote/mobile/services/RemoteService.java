@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.GroundPlot;
+import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
@@ -163,6 +164,9 @@ public class RemoteService extends Service {
 		public IControlUnit mUnit;
 		public String mSwitchType;
 		public State mSwitchState;
+		public int[] mThumbnail;
+		public int mThumbnailWidth;
+		public int mThumbnailHeight;
 	}
 
 	public static class StationStuff {
@@ -271,6 +275,12 @@ public class RemoteService extends Service {
 					iswitch.registerPowerSwitchListener(internetSwitchListener);
 					bufferdUnit.mSwitchType = iswitch.getType();
 					bufferdUnit.mSwitchState = iswitch.getState();
+				}
+				if (bufferdUnit.mObject instanceof ICommandAction) {
+					ICommandAction action = (ICommandAction) bufferdUnit.mObject;
+					bufferdUnit.mThumbnail = action.getThumbnail();
+					bufferdUnit.mThumbnailWidth = action.getThumbnailWidth();
+					bufferdUnit.mThumbnailHeight = action.getThumbnailHeight();
 				}
 				fireControlUnit(bufferdUnit);
 			} catch (Exception e) {
