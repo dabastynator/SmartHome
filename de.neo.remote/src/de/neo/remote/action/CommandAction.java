@@ -82,6 +82,8 @@ public class CommandAction implements ICommandAction {
 
 	@Override
 	public boolean isRunning() {
+		if (mProcess == null)
+			return false;
 		try {
 			mProcess.exitValue();
 			mProcess = null;
