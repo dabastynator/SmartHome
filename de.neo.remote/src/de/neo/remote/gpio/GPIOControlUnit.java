@@ -1,28 +1,21 @@
 package de.neo.remote.gpio;
 
-import de.neo.remote.api.IControlUnit;
+import java.io.IOException;
+
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import de.neo.remote.AbstractControlUnit;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.rmi.protokol.RemoteException;
 
-public class GPIOControlUnit implements IControlUnit{
+public class GPIOControlUnit extends AbstractControlUnit {
 
-	private String mSwitchName;
-	private String mDescription;
-	private IInternetSwitch mPower;
-	private float[] mPosition;
-	private String mID;
+	private InternetSwitchImpl mSwitch;
+	private SwitchPower mPower;
 
-	public GPIOControlUnit(String id, String switchName, String description, IInternetSwitch power, float[] position) {
-		mSwitchName = switchName;
-		mDescription = description;
+	public GPIOControlUnit(SwitchPower power) {
 		mPower = power;
-		mPosition = position;
-		mID = id;
-	}
-	
-	@Override
-	public String getName() throws RemoteException {
-		return mSwitchName;
 	}
 
 	@Override
@@ -32,22 +25,14 @@ public class GPIOControlUnit implements IControlUnit{
 
 	@Override
 	public IInternetSwitch getRemoteableControlObject() throws RemoteException {
-		return mPower;
+		return mSwitch;
 	}
 
 	@Override
-	public String getDescription() throws RemoteException {
-		return mDescription;
-	}
-
-	@Override
-	public float[] getPosition() throws RemoteException {
-		return mPosition;
-	}
-
-	@Override
-	public String getID() throws RemoteException {
-		return mID;
+	public void initialize(Element element) throws SAXException, IOException {
+		super.initialize(element);
+		mSwitch = new InternetSwitchImpl(mPower);
+		mSwitch.initialize(element);
 	}
 
 }

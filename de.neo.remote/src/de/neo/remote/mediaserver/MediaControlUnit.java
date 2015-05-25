@@ -1,30 +1,17 @@
 package de.neo.remote.mediaserver;
 
-import de.neo.remote.api.IControlUnit;
+import java.io.IOException;
+
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import de.neo.remote.AbstractControlUnit;
 import de.neo.remote.api.IMediaServer;
 import de.neo.rmi.protokol.RemoteException;
 
-public class MediaControlUnit implements IControlUnit {
+public class MediaControlUnit extends AbstractControlUnit {
 
-	private String mName;
-	private IMediaServer mMediaServer;
-	private float[] mPosition;
-	private String mType;
-	private String mID;
-
-	public MediaControlUnit(String id, String name, IMediaServer mediaServer,
-			float[] position, String type) {
-		mName = name;
-		mMediaServer = mediaServer;
-		mPosition = position;
-		mType = type;
-		mID = id;
-	}
-
-	@Override
-	public String getName() throws RemoteException {
-		return mName;
-	}
+	private MediaServerImpl mMediaServer;
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -38,18 +25,10 @@ public class MediaControlUnit implements IControlUnit {
 	}
 
 	@Override
-	public String getDescription() throws RemoteException {
-		return mType;
-	}
-
-	@Override
-	public float[] getPosition() throws RemoteException {
-		return mPosition;
-	}
-
-	@Override
-	public String getID() throws RemoteException {
-		return mID;
+	public void initialize(Element element) throws SAXException, IOException {
+		super.initialize(element);
+		mMediaServer = new MediaServerImpl();
+		mMediaServer.initialize(element);
 	}
 
 }

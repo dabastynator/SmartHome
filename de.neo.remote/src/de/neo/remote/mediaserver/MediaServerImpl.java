@@ -3,6 +3,9 @@ package de.neo.remote.mediaserver;
 import java.io.File;
 import java.io.IOException;
 
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IDVDPlayer;
@@ -23,22 +26,6 @@ public class MediaServerImpl implements IMediaServer {
 	private String mBrowserLocation;
 	private OMXPlayer mOmxplayer;
 	private ImageViewerImpl mImageViewer;
-
-	public MediaServerImpl(String browseLocation, String playlistLocation,
-			boolean thumbnailWorker) throws IOException {
-		if (!new File(browseLocation).exists())
-			throw new IOException("Browser location does not exist: " + browseLocation);
-		if (!new File(playlistLocation).exists())
-			throw new IOException("Playlist location does not exist: " + playlistLocation);
-		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
-		mTotem = new TotemPlayer();
-		mMplayer = new MPlayerDVD(playlistLocation);
-		mBrowserLocation = browseLocation;
-		mControl = new ControlImpl();
-		mPlaylist = new PlayListImpl(playlistLocation);
-		mOmxplayer = new OMXPlayer();
-		mImageViewer = new ImageViewerImpl();
-	}
 
 	@Override
 	public IBrowser createBrowser() throws RemoteException {
@@ -73,6 +60,34 @@ public class MediaServerImpl implements IMediaServer {
 	@Override
 	public IImageViewer getImageViewer() throws RemoteException {
 		return mImageViewer;
+	}
+
+	public void initialize(Element element) throws SAXException, IOException {
+		for (String attribute : new String[] { "location", "playlistLocation" })
+			if (!element.hasAttribute(attribute))
+				throw new SAXException(attribute + " missing for mediaserver");
+		String browseLocation = element.getAttribute("location");
+		String playlistLocation = element.getAttribute("playlistLocation");
+		boolean thumbnailWorker = true;
+		if (element.hasAttribute("thumbnailWorker")) {
+			String worker = element.getAttribute("thumbnailWorker");
+			thumbnailWorker = worker.equals("true") || worker.equals("1");
+		}
+
+		if (!new File(browseLocation).exists())
+			throw new IOException("Browser location does not exist: "
+					+ browseLocation);
+		if (!new File(playlistLocation).exists())
+			throw new IOException("Playlist location does not exist: "
+					+ playlistLocation);
+		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
+		mTotem = new TotemPlayer();
+		mMplayer = new MPlayerDVD(playlistLocation);
+		mBrowserLocation = browseLocation;
+		mControl = new ControlImpl();
+		mPlaylist = new PlayListImpl(playlistLocation);
+		mOmxplayer = new OMXPlayer();
+		mImageViewer = new ImageViewerImpl();
 	}
 
 }

@@ -35,21 +35,26 @@ public class Registry {
 	/**
 	 * singleton
 	 */
-	private static Registry registry;
+	private static Registry mRegistry;
 
 	/**
 	 * all global objects
 	 */
-	private HashMap<String, GlobalObject> globalObjects = new HashMap<String, GlobalObject>();
-	
-	private List<RegistryHandler> handler = new ArrayList<RegistryHandler>();
+	private HashMap<String, GlobalObject> mGlobalObjects = new HashMap<String, GlobalObject>();
+
+	private List<RegistryHandler> mHandler = new ArrayList<RegistryHandler>();
 
 	/**
 	 * port for registry
 	 */
-	private int port = 5003;
+	private int mPort = 5003;
 
-	private ServerSocket registrySocket;
+	private ServerSocket mRegistrySocket;
+
+	/**
+	 * mRunning is true if registry runs and false otherwise.
+	 */
+	private boolean mRunning;
 
 	/**
 	 * private constructor for singleton
@@ -61,9 +66,9 @@ public class Registry {
 	 * @return registry
 	 */
 	public static Registry getRegistry() {
-		if (registry == null)
-			registry = new Registry();
-		return registry;
+		if (mRegistry == null)
+			mRegistry = new Registry();
+		return mRegistry;
 	}
 
 	/**
@@ -73,7 +78,7 @@ public class Registry {
 	 * @param object
 	 */
 	public void register(String id, GlobalObject object) {
-		globalObjects.put(id, object);
+		mGlobalObjects.put(id, object);
 		RMILogger.performLog(LogPriority.INFORMATION, "register object", id);
 	}
 
@@ -84,7 +89,7 @@ public class Registry {
 	 * @return globalObject
 	 */
 	public GlobalObject find(String id) {
-		return globalObjects.get(id);
+		return mGlobalObjects.get(id);
 	}
 
 	/**
@@ -93,7 +98,7 @@ public class Registry {
 	 * @param id
 	 */
 	public void unRegister(String id) {
-		globalObjects.remove(id);
+		mGlobalObjects.remove(id);
 		RMILogger.performLog(LogPriority.INFORMATION, "unregister object", id);
 	}
 
@@ -103,7 +108,7 @@ public class Registry {
 	 * @param port
 	 */
 	public void init(int port) {
-		this.port = port;
+		this.mPort = port;
 	}
 
 	/**
@@ -112,25 +117,28 @@ public class Registry {
 	 */
 	public void run() {
 		try {
-			registrySocket = new ServerSocket(port);
+			mRegistrySocket = new ServerSocket(mPort);
 			RMILogger.performLog(LogPriority.INFORMATION,
-					"registry is listening on port: " + port, null);
-			while (true) {
-				final Socket socket = registrySocket.accept();
+					"registry is listening on port: " + mPort, null);
+			mRunning = true;
+			while (mRunning) {
+				final Socket socket = mRegistrySocket.accept();
 
 				new Thread() {
 					@Override
 					public void run() {
 						RegistryHandler h = new RegistryHandler(socket);
-						handler.add(h);
+						mHandler.add(h);
 						h.handle();
 					}
 				}.start();
 			}
 		} catch (IOException e1) {
-			RMILogger.performLog(LogPriority.INFORMATION,
-					"registry closed", null);
+			RMILogger.performLog(LogPriority.WARNING, "registry exception: "
+					+ e1.getClass().getSimpleName() + ": " + e1.getMessage(),
+					null);
 		}
+		RMILogger.performLog(LogPriority.WARNING, "registry closed", null);
 	}
 
 	/**
@@ -153,10 +161,11 @@ public class Registry {
 
 	public void close() {
 		try {
-			for (RegistryHandler h: handler)
+			mRunning = false;
+			for (RegistryHandler h : mHandler)
 				h.close();
-			handler.clear();
-			registrySocket.close();
+			mHandler.clear();
+			mRegistrySocket.close();
 		} catch (IOException e) {
 		}
 	}
