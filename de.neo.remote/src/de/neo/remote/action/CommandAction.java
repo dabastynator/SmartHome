@@ -4,7 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,11 +27,13 @@ public class CommandAction implements ICommandAction {
 	private Process mProcess;
 	private String mCommand;
 	private String[] mParameter;
-	private OutputListener mListener;
+	private OutputListener mOutListener;
+	private OutputListener mErrListener;
 	private int[] mThumbnail;
 	private int mWidth;
 	private int mHeight;
 	private String mClientAction = "";
+	private File mLogfile;
 
 	public void initialize(Element element) throws SAXException, IOException {
 		if (!element.hasAttribute("command"))
@@ -56,6 +60,9 @@ public class CommandAction implements ICommandAction {
 					.getData();
 			mThumbnail = ThumbnailHandler.compressRGB565(rgb, mWidth, mHeight);
 		}
+		if (element.hasAttribute("logFile")) {
+			mLogfile = new File(element.getAttribute("logFile"));
+		}
 	}
 
 	@Override
@@ -64,7 +71,8 @@ public class CommandAction implements ICommandAction {
 			throw new IOException("Process is already running");
 		} else {
 			mProcess = Runtime.getRuntime().exec(mCommand, mParameter);
-			mListener = new OutputListener(mProcess.getInputStream());
+			mOutListener = new OutputListener(mProcess.getInputStream());
+			mErrListener = new OutputListener(mProcess.getErrorStream());
 		}
 	}
 
@@ -72,9 +80,12 @@ public class CommandAction implements ICommandAction {
 	public void stopAction() {
 		mProcess.destroy();
 		mProcess = null;
-		if (mListener != null)
-			mListener.mRunning = false;
-		mListener = null;
+		if (mOutListener != null)
+			mOutListener.mRunning = false;
+		if (mErrListener != null)
+			mErrListener.mRunning = false;
+		mOutListener = null;
+		mErrListener = null;
 	}
 
 	@Override
@@ -89,8 +100,10 @@ public class CommandAction implements ICommandAction {
 		try {
 			mProcess.exitValue();
 			mProcess = null;
-			mListener.mRunning = false;
-			mListener = null;
+			mOutListener.mRunning = false;
+			mOutListener = null;
+			mErrListener.mRunning = false;
+			mErrListener = null;
 			return false;
 		} catch (Exception e) {
 			return true;
@@ -101,9 +114,16 @@ public class CommandAction implements ICommandAction {
 
 		private InputStream mStream;
 		private boolean mRunning;
+		private BufferedWriter mLogStream;
 
 		public OutputListener(InputStream inputStream) {
 			mStream = inputStream;
+			try {
+				mLogStream = new BufferedWriter(new FileWriter(mLogfile));
+			} catch (IOException e) {
+				RMILogger.performLog(LogPriority.ERROR, "Cant create logfile: "
+						+ e.getMessage(), "CommandAction");
+			}
 		}
 
 		@Override
@@ -114,12 +134,17 @@ public class CommandAction implements ICommandAction {
 			String line = null;
 			try {
 				while ((line = mReader.readLine()) != null && mRunning) {
-					RMILogger.performLog(LogPriority.INFORMATION, line,
-							"CommandAction");
+					if (mLogStream != null)
+						mLogStream.write(line);
 				}
 			} catch (IOException e) {
-				RMILogger.performLog(LogPriority.INFORMATION, e.getMessage(),
-						"CommandAction");
+				try {
+					if (mLogStream != null)
+						mLogStream.write("ERROR: "
+								+ e.getClass().getSimpleName() + ": "
+								+ e.getMessage());
+				} catch (IOException ignore) {
+				}
 			}
 			mProcess = null;
 		}
