@@ -63,4 +63,32 @@ public interface IControlCenter extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public IControlUnit getControlUnit(String id) throws RemoteException;
+
+	/**
+	 * Trigger a trigger. The trigger is specified by the parameter. EventRules
+	 * are used to map events for control unit.
+	 * 
+	 * @param trigger
+	 * @throws RemoteException
+	 */
+	public void trigger(Trigger trigger) throws RemoteException;
+
+	/**
+	 * The IEventRule maps one event to several control-units.
+	 * 
+	 * @author sebastian
+	 *
+	 */
+	interface IEventRule {
+
+		/**
+		 * Get control-unit-ids for the specified event
+		 * 
+		 * @param event
+		 * @return control unit ids
+		 */
+		public Event[] getEventsForTrigger(Trigger trigger)
+				throws RemoteException;
+
+	}
 }

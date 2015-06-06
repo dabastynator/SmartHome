@@ -2,6 +2,7 @@ package de.neo.remote.gpio;
 
 import de.neo.remote.AbstractControlUnit;
 import de.neo.remote.ControlUnitFactory;
+import de.neo.remote.api.IControlCenter;
 
 public class GPIOUnitFactory implements ControlUnitFactory {
 
@@ -12,8 +13,8 @@ public class GPIOUnitFactory implements ControlUnitFactory {
 	}
 
 	@Override
-	public AbstractControlUnit createControlUnit() {
-		return new GPIOControlUnit(mPower);
+	public AbstractControlUnit createControlUnit(IControlCenter center) {
+		return new GPIOControlUnit(mPower, center);
 	}
 
 }

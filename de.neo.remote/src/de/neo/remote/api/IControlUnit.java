@@ -57,4 +57,34 @@ public interface IControlUnit extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public Object getRemoteableControlObject() throws RemoteException;
+
+	/**
+	 * Perform specified event on this control unit
+	 * 
+	 * @param event
+	 * @return true if successfully performed event, false otherwise
+	 * @throws RemoteException
+	 */
+	public boolean performEvent(Event event) throws RemoteException,
+			EventException;
+
+	/**
+	 * The EventException specifies occurring exceptions during executing an
+	 * event.
+	 * 
+	 * @author sebastian
+	 *
+	 */
+	public static class EventException extends Exception {
+
+		public EventException(String message) {
+			super(message);
+		}
+
+		/**
+		 * generated
+		 */
+		private static final long serialVersionUID = -1206040442786574653L;
+
+	}
 }

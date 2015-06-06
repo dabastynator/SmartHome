@@ -3,7 +3,9 @@ package de.neo.remote;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,8 @@ public class RemoteMain {
 
 	public static String REGISTRY_IP = "RegistryIp";
 	public static String SERVER_PORT = "ServerPort";
+	public static final SimpleDateFormat LogFormat = new SimpleDateFormat(
+			"MM.dd-HH:mm");
 
 	public static Map<String, ControlUnitFactory> mControlUnitFactory;
 
@@ -72,7 +76,7 @@ public class RemoteMain {
 						.getTextContent());
 
 			IControlCenter controlcenter = loadControlCenter(doc);
-			List<IControlUnit> units = loadControlUnits(doc);
+			List<IControlUnit> units = loadControlUnits(doc, controlcenter);
 
 			Server server = Server.getServer();
 			server.startServer(serverPort);
@@ -94,29 +98,29 @@ public class RemoteMain {
 			@Override
 			public void rmiLog(LogPriority priority, String message, String id,
 					long date) {
-				stream.println("RMI " + priority + ": " + message + " (" + id
-						+ ")");
+				stream.println(LogFormat.format(new Date()) + " RMI "
+						+ priority + " by " + message + " (" + id + ")");
 			}
 		});
 		RemoteLogger.mListeners.add(new RemoteLogListener() {
 			@Override
 			public void remoteLog(LogPriority priority, String message,
 					String object, long date) {
-				stream.println("REMOTE " + priority + " by " + object + ": "
-						+ message);
+				stream.println(LogFormat.format(new Date()) + " REMOTE "
+						+ priority + " by " + object + ": " + message);
 			}
 		});
 	}
 
-	private static List<IControlUnit> loadControlUnits(Document doc)
-			throws SAXException, IOException {
+	private static List<IControlUnit> loadControlUnits(Document doc,
+			IControlCenter center) throws SAXException, IOException {
 		List<IControlUnit> units = new ArrayList<IControlUnit>();
 		for (String unitName : mControlUnitFactory.keySet()) {
 			NodeList nodeList = doc.getElementsByTagName(unitName);
 			ControlUnitFactory factory = mControlUnitFactory.get(unitName);
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element element = (Element) nodeList.item(i);
-				AbstractControlUnit unit = factory.createControlUnit();
+				AbstractControlUnit unit = factory.createControlUnit(center);
 				unit.initialize(element);
 				units.add(unit);
 			}
@@ -128,7 +132,18 @@ public class RemoteMain {
 		NodeList controlCenterRoot = doc
 				.getElementsByTagName(ControlCenterImpl.ROOT);
 		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0) {
-			return new ControlCenterImpl(controlCenterRoot.item(0));
+			ControlCenterImpl center = new ControlCenterImpl(
+					controlCenterRoot.item(0));
+			try {
+				center.initializeRules(doc.getElementsByTagName("EventRule"));
+				center.initializeTrigger(doc
+						.getElementsByTagName("TimeTrigger"));
+			} catch (SAXException e) {
+				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
+						"Controlcenter");
+			}
+
+			return center;
 		}
 		return null;
 	}

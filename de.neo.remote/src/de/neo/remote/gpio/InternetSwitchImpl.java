@@ -2,7 +2,9 @@ package de.neo.remote.gpio;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -30,10 +32,12 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	private State mState;
 	private boolean mReadOnly;
 	private String mId;
+	private GPIOControlUnit mUnit;
 
-	public InternetSwitchImpl(SwitchPower power) {
+	public InternetSwitchImpl(SwitchPower power, GPIOControlUnit unit) {
 		mPower = power;
 		mState = State.OFF;
+		mUnit = unit;
 		SerialReader.getInstance().getListener().add(this);
 	}
 
@@ -57,13 +61,15 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 
 	@Override
 	public void setState(final State state) throws RemoteException {
-		mPower.setSwitchState(mFamilyCode, mSwitchNumber, state);
-		this.mState = state;
-		new Thread() {
-			public void run() {
-				informListener(state);
-			};
-		}.start();
+		if (mState != state) {
+			mPower.setSwitchState(mFamilyCode, mSwitchNumber, state);
+			this.mState = state;
+			new Thread() {
+				public void run() {
+					informListener(state);
+				};
+			}.start();
+		}
 	}
 
 	@Override
@@ -85,6 +91,10 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	}
 
 	private void informListener(State state) {
+		Map<String, String> parameterExchange = new HashMap<String, String>();
+		parameterExchange.put("@state", state.toString().toLowerCase());
+		mUnit.fireTrigger(parameterExchange, "@state="
+				+ state.toString().toLowerCase());
 		List<IInternetSwitchListener> exceptionList = new ArrayList<IInternetSwitchListener>();
 		for (IInternetSwitchListener listener : mListeners) {
 			try {

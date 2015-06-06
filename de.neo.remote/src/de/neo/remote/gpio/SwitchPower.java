@@ -39,8 +39,8 @@ public class SwitchPower {
 						"Internetswitch");
 			reader.close();
 		} catch (Exception e) {
-			System.err.println(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
+			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
+					"SwitchPower");
 		}
 	}
 

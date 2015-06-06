@@ -6,12 +6,20 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.AbstractControlUnit;
+import de.neo.remote.api.Event;
+import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IMediaServer;
+import de.neo.remote.api.IPlayer;
+import de.neo.remote.api.PlayerException;
 import de.neo.rmi.protokol.RemoteException;
 
 public class MediaControlUnit extends AbstractControlUnit {
 
 	private MediaServerImpl mMediaServer;
+
+	public MediaControlUnit(IControlCenter center) {
+		super(center);
+	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -31,4 +39,56 @@ public class MediaControlUnit extends AbstractControlUnit {
 		mMediaServer.initialize(element);
 	}
 
+	@Override
+	public boolean performEvent(Event event) throws RemoteException,
+			EventException {
+		try {
+			String action = event.getParameter("action");
+			String value = event.getParameter("value");
+			String player = event.getParameter("player");
+			IPlayer remotePlayer = null;
+			if (action == null)
+				throw new EventException(
+						"Parameter action (play|playList|pause|stop|volume) missing to execute media event!");
+			if ("mplayer".equals(player))
+				remotePlayer = mMediaServer.getMPlayer();
+			else if ("omxplayer".equals(player))
+				remotePlayer = mMediaServer.getOMXPlayer();
+			else if ("totem".equals(player))
+				remotePlayer = mMediaServer.getTotemPlayer();
+			if (remotePlayer == null)
+				throw new EventException(
+						"Parameter player (omxplayer|mplayer|totem) missing to execute media event!");
+
+			switch (action) {
+			case "play":
+				remotePlayer.play(value);
+				break;
+			case "playList":
+				remotePlayer.playPlayList(value);
+				break;
+			case "pause":
+				remotePlayer.playPause();
+				break;
+			case "vol":
+			case "volume":
+				if ("up".equals(value))
+					remotePlayer.volUp();
+				if ("down".equals(value))
+					remotePlayer.volUp();
+				break;
+			case "stop":
+			case "quit":
+				remotePlayer.quit();
+				break;
+			default:
+				throw new EventException("Unknown player action: " + action);
+			}
+
+		} catch (RemoteException | PlayerException e) {
+			throw new EventException(e.getClass().getSimpleName() + ": "
+					+ e.getMessage());
+		}
+		return true;
+	}
 }

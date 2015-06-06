@@ -10,12 +10,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import de.neo.remote.AbstractControlUnit;
 import de.neo.remote.api.ICommandAction;
 import de.neo.remote.mediaserver.ThumbnailHandler;
 import de.neo.rmi.api.RMILogger;
@@ -34,6 +37,11 @@ public class CommandAction implements ICommandAction {
 	private int mHeight;
 	private String mClientAction = "";
 	private File mLogfile;
+	private AbstractControlUnit mUnit;
+
+	public CommandAction(AbstractControlUnit unit) {
+		mUnit = unit;
+	}
 
 	public void initialize(Element element) throws SAXException, IOException {
 		if (!element.hasAttribute("command"))
@@ -73,6 +81,9 @@ public class CommandAction implements ICommandAction {
 			mProcess = Runtime.getRuntime().exec(mCommand, mParameter);
 			mOutListener = new OutputListener(mProcess.getInputStream());
 			mErrListener = new OutputListener(mProcess.getErrorStream());
+			Map<String, String> parameterExchange = new HashMap<String, String>();
+			parameterExchange.put("@action", "start");
+			mUnit.fireTrigger(parameterExchange, "@action=start");
 		}
 	}
 
@@ -86,6 +97,9 @@ public class CommandAction implements ICommandAction {
 			mErrListener.mRunning = false;
 		mOutListener = null;
 		mErrListener = null;
+		Map<String, String> parameterExchange = new HashMap<String, String>();
+		parameterExchange.put("@action", "stop");
+		mUnit.fireTrigger(parameterExchange, "@action=stop");
 	}
 
 	@Override
@@ -119,7 +133,8 @@ public class CommandAction implements ICommandAction {
 		public OutputListener(InputStream inputStream) {
 			mStream = inputStream;
 			try {
-				mLogStream = new BufferedWriter(new FileWriter(mLogfile));
+				if (mLogfile != null)
+					mLogStream = new BufferedWriter(new FileWriter(mLogfile));
 			} catch (IOException e) {
 				RMILogger.performLog(LogPriority.ERROR, "Cant create logfile: "
 						+ e.getMessage(), "CommandAction");
