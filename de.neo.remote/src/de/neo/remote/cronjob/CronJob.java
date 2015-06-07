@@ -115,12 +115,12 @@ public class CronJob {
 				String[] figures = token.split(",");
 				setFigures(figures);
 			} else if (token.contains("-")) {
-				String[] startStop = token.split(",");
+				String[] startStop = token.split("-");
 				if (startStop.length != 2)
 					throw new ParseException("Unexpected token '" + token
 							+ "' must look like 3-7", 0);
 				int start = Integer.parseInt(startStop[0]);
-				int stop = Integer.parseInt(startStop[0]);
+				int stop = Integer.parseInt(startStop[1]);
 				mFigures = new int[stop - start + 1];
 				int i = 0;
 				while (start <= stop) {
