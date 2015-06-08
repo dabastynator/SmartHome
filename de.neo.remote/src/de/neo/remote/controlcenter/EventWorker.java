@@ -31,6 +31,11 @@ public class EventWorker extends Thread {
 		notify();
 	}
 
+	public synchronized void queueEvent(Event event) {
+		mEventQueue.add(event);
+		notify();
+	}
+
 	private synchronized void executeEvents() {
 		while (mEventQueue.size() > 0) {
 			Event event = mEventQueue.get(0);
