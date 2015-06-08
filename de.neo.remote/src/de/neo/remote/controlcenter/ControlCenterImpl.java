@@ -170,11 +170,13 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		for (IEventRule rule : mEventRules) {
 			try {
 				Event[] events = rule.getEventsForTrigger(trigger);
-				for (Event event : events) {
-					event.getParameter().putAll(trigger.getParameter());
-					mEventWorker.queueEvent(event);
+				if (events != null) {
+					for (Event event : events) {
+						event.getParameter().putAll(trigger.getParameter());
+						mEventWorker.queueEvent(event);
+					}
+					eventCount += events.length;
 				}
-				eventCount += events.length;
 			} catch (Exception e) {
 				RemoteLogger.performLog(LogPriority.ERROR, "Perform event: "
 						+ e.getClass().getSimpleName() + ": " + e.getMessage(),
