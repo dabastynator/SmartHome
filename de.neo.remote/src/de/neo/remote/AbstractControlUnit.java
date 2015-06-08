@@ -90,7 +90,7 @@ public abstract class AbstractControlUnit implements IControlUnit {
 					fireTrigger.getParameter().putAll(exchange);
 				}
 				try {
-					mCenter.trigger(trigger);
+					mCenter.trigger(fireTrigger);
 				} catch (RemoteException e) {
 				}
 			}
