@@ -51,6 +51,10 @@ public class CronJob {
 			mDayOfWeek = new CronToken(tokens[4], Calendar.DAY_OF_WEEK,
 					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
 					Calendar.MONTH);
+			if (mDayOfWeek.mFigures != null)
+				for (int i = 0; i < mDayOfWeek.mFigures.length; i++)
+					mDayOfWeek.mFigures[i] = (mDayOfWeek.mFigures[i] % 7)
+							+ Calendar.MONDAY;
 		} catch (NumberFormatException e) {
 			throw new ParseException(e.getMessage(), 0);
 		}
