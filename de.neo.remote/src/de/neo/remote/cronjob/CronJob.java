@@ -2,8 +2,23 @@ package de.neo.remote.cronjob;
 
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CronJob {
+
+	private static final Map<Integer, Integer> DayOfWeekMap = new HashMap<Integer, Integer>();
+
+	static {
+		DayOfWeekMap.put(0, Calendar.SUNDAY);
+		DayOfWeekMap.put(1, Calendar.MONDAY);
+		DayOfWeekMap.put(2, Calendar.TUESDAY);
+		DayOfWeekMap.put(3, Calendar.WEDNESDAY);
+		DayOfWeekMap.put(4, Calendar.THURSDAY);
+		DayOfWeekMap.put(5, Calendar.FRIDAY);
+		DayOfWeekMap.put(6, Calendar.SATURDAY);
+		DayOfWeekMap.put(7, Calendar.SUNDAY);
+	}
 
 	private CronToken mMinute;
 
@@ -52,9 +67,11 @@ public class CronJob {
 					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
 					Calendar.MONTH);
 			if (mDayOfWeek.mFigures != null)
-				for (int i = 0; i < mDayOfWeek.mFigures.length; i++)
-					mDayOfWeek.mFigures[i] = (mDayOfWeek.mFigures[i] % 7)
-							+ Calendar.MONDAY;
+				for (int i = 0; i < mDayOfWeek.mFigures.length; i++) {
+					if (DayOfWeekMap.containsKey(mDayOfWeek.mFigures[i]))
+						mDayOfWeek.mFigures[i] = DayOfWeekMap
+								.get(mDayOfWeek.mFigures[i]);
+				}
 		} catch (NumberFormatException e) {
 			throw new ParseException(e.getMessage(), 0);
 		}
