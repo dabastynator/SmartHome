@@ -8,6 +8,7 @@ import java.util.Map;
 public class CronJob {
 
 	private static final Map<Integer, Integer> DayOfWeekMap = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> MonthMap = new HashMap<Integer, Integer>();
 
 	static {
 		DayOfWeekMap.put(0, Calendar.SUNDAY);
@@ -18,6 +19,19 @@ public class CronJob {
 		DayOfWeekMap.put(5, Calendar.FRIDAY);
 		DayOfWeekMap.put(6, Calendar.SATURDAY);
 		DayOfWeekMap.put(7, Calendar.SUNDAY);
+
+		MonthMap.put(1, Calendar.JANUARY);
+		MonthMap.put(2, Calendar.FEBRUARY);
+		MonthMap.put(3, Calendar.MARCH);
+		MonthMap.put(4, Calendar.APRIL);
+		MonthMap.put(5, Calendar.MAY);
+		MonthMap.put(6, Calendar.JUNE);
+		MonthMap.put(7, Calendar.JULY);
+		MonthMap.put(8, Calendar.AUGUST);
+		MonthMap.put(9, Calendar.SEPTEMBER);
+		MonthMap.put(10, Calendar.OCTOBER);
+		MonthMap.put(11, Calendar.NOVEMBER);
+		MonthMap.put(12, Calendar.DECEMBER);
 	}
 
 	private CronToken mMinute;
@@ -30,7 +44,7 @@ public class CronJob {
 
 	private CronToken mMonth;
 
-	private long mNextExecution = 0;
+	protected long mNextExecution = 0;
 
 	private Runnable mRunnable;
 
@@ -63,6 +77,11 @@ public class CronJob {
 			mMonth = new CronToken(tokens[3], Calendar.MONTH, new int[] {
 					Calendar.MINUTE, Calendar.HOUR_OF_DAY,
 					Calendar.DAY_OF_MONTH }, Calendar.YEAR);
+			if (mMonth.mFigures != null)
+				for (int i = 0; i < mMonth.mFigures.length; i++) {
+					if (MonthMap.containsKey(mMonth.mFigures[i]))
+						mMonth.mFigures[i] = MonthMap.get(mMonth.mFigures[i]);
+				}
 			mDayOfWeek = new CronToken(tokens[4], Calendar.DAY_OF_WEEK,
 					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
 					Calendar.MONTH);
@@ -164,6 +183,7 @@ public class CronJob {
 		public void calculateNextExecution(Calendar calendar) {
 			int currentValue = calendar.get(mCalendarField);
 			if (mRestricted) {
+				boolean reset = false;
 				int minimal = Integer.MAX_VALUE;
 				int minimalOffset = Integer.MAX_VALUE;
 				for (int i = 0; i < mFigures.length; i++) {
@@ -172,14 +192,20 @@ public class CronJob {
 					else
 						minimalOffset = Math.min(minimalOffset, mFigures[i]);
 				}
-				if (minimal < Integer.MAX_VALUE)
-					calendar.set(mCalendarField, minimal);
-				else {
+				if (minimal < Integer.MAX_VALUE) {
+					calendar.add(mCalendarField, minimal - currentValue);
+					reset = minimal > currentValue;
+				} else {
 					calendar.add(mNextField, 1);
 					calendar.set(mCalendarField, minimalOffset);
-					for (int reset : mResetFields)
-						calendar.set(reset, 0);
+					reset = true;
 				}
+				if (reset)
+					for (int field : mResetFields)
+						if (field == Calendar.DAY_OF_MONTH)
+							calendar.set(field, 1);
+						else
+							calendar.set(field, 0);
 			}
 		}
 

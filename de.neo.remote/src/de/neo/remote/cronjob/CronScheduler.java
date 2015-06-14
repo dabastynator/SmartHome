@@ -64,13 +64,17 @@ public class CronScheduler extends Thread {
 			try {
 				if (now < nextExecution)
 					wait(nextExecution - now);
-				mExecutor.executeJob(job.getRunnable());
-				if ((job.getRepeat() > 0 || job.getRepeat() == REPEAT_INFINIT)) {
-					if (job.getRepeat() != REPEAT_INFINIT)
-						job.setRepeat(job.getRepeat() - 1);
-					job.calculateNextExecution();
-					if (job.getNextExecution() < Long.MAX_VALUE)
-						mHeap.add(job);
+				if (System.currentTimeMillis() < nextExecution) {
+					mHeap.add(job);
+				} else {
+					mExecutor.executeJob(job.getRunnable());
+					if ((job.getRepeat() > 0 || job.getRepeat() == REPEAT_INFINIT)) {
+						if (job.getRepeat() != REPEAT_INFINIT)
+							job.setRepeat(job.getRepeat() - 1);
+						job.calculateNextExecution();
+						if (job.getNextExecution() < Long.MAX_VALUE)
+							mHeap.add(job);
+					}
 				}
 			} catch (InterruptedException e) {
 				mHeap.add(job);
@@ -106,7 +110,7 @@ public class CronScheduler extends Thread {
 
 		@Override
 		public int compare(CronJob o1, CronJob o2) {
-			return Long.compare(o1.getNextExecution(), o2.getNextExecution());
+			return Long.compare(o1.mNextExecution, o2.mNextExecution);
 		}
 
 	}
