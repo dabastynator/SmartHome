@@ -78,9 +78,18 @@ public class CommandAction implements ICommandAction {
 		if (isRunning()) {
 			throw new IOException("Process is already running");
 		} else {
-			mProcess = Runtime.getRuntime().exec(mCommand, mParameter);
+			if (mParameter != null) {
+				String[] execute = new String[mParameter.length + 1];
+				execute[0] = mCommand;
+				for (int i = 0; i < mParameter.length; i++)
+					execute[i + 1] = mParameter[i];
+				mProcess = Runtime.getRuntime().exec(execute);
+			} else
+				mProcess = Runtime.getRuntime().exec(mCommand);
 			mOutListener = new OutputListener(mProcess.getInputStream());
+			mOutListener.start();
 			mErrListener = new OutputListener(mProcess.getErrorStream());
+			mErrListener.start();
 			Map<String, String> parameterExchange = new HashMap<String, String>();
 			parameterExchange.put("@action", "start");
 			mUnit.fireTrigger(parameterExchange, "@action=start");
@@ -149,8 +158,9 @@ public class CommandAction implements ICommandAction {
 			String line = null;
 			try {
 				while ((line = mReader.readLine()) != null && mRunning) {
-					if (mLogStream != null)
+					if (mLogStream != null) {
 						mLogStream.write(line);
+					}
 				}
 			} catch (IOException e) {
 				try {
