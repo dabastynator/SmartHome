@@ -160,6 +160,7 @@ public class CommandAction implements ICommandAction {
 				while ((line = mReader.readLine()) != null && mRunning) {
 					if (mLogStream != null) {
 						mLogStream.write(line);
+						mLogStream.flush();
 					}
 				}
 			} catch (IOException e) {
