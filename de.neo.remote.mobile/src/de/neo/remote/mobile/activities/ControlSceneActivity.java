@@ -3,6 +3,9 @@ package de.neo.remote.mobile.activities;
 import java.util.Collection;
 import java.util.Set;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -190,7 +193,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 	}
 
-	public class SelectControlUnit {
+	public class SelectControlUnit implements OnClickListener {
 		public void selectUnit(final BufferdUnit unit) {
 			if (unit.mObject instanceof IMediaServer) {
 				mHandler.post(new Runnable() {
@@ -241,6 +244,67 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 				task.execute(unit);
 			}
 
+		}
+
+		private BufferdUnit mUnit;
+
+		public void selectLongClickUnit(final BufferdUnit unit) {
+			mUnit = unit;
+			mHandler.post(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+
+					new AlertDialog.Builder(ControlSceneActivity.this)
+							.setTitle(unit.mName)
+							.setMessage(
+									getResources().getString(
+											R.string.command_stop)
+											+ unit.mName)
+							.setPositiveButton(
+									getResources().getString(
+											android.R.string.ok),
+									SelectControlUnit.this).create().show();
+				}
+			});
+		}
+
+		public void stopCommand(final BufferdUnit unit) {
+			if (unit.mObject instanceof ICommandAction) {
+				AsyncTask<BufferdUnit, Integer, Exception> task = new AsyncTask<BufferdUnit, Integer, Exception>() {
+
+					@Override
+					protected Exception doInBackground(BufferdUnit... params) {
+						try {
+							ICommandAction action = (ICommandAction) unit.mObject;
+							action.stopAction();
+						} catch (Exception e) {
+							return e;
+						}
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(Exception result) {
+						if (result != null)
+							new AbstractTask.ErrorDialog(
+									ControlSceneActivity.this, result).show();
+						else {
+							Toast.makeText(getApplicationContext(),
+									"Stop: " + unit.mDescription,
+									Toast.LENGTH_SHORT).show();
+						}
+					}
+				};
+				task.execute(unit);
+			}
+
+		}
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			stopCommand(mUnit);
 		}
 	}
 

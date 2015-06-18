@@ -108,10 +108,11 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public void addControlUnitToScene(BufferdUnit unit) {
 		if (unit.mObject instanceof IMediaServer) {
 			GLFigure glServer = createGLMediaServer(unit.mDescription);
-			glServer.position[0] = unit.mPosition[0];
-			glServer.position[1] = unit.mPosition[2] + 5;
-			glServer.position[2] = -unit.mPosition[1];
+			glServer.mPosition[0] = unit.mPosition[0];
+			glServer.mPosition[1] = unit.mPosition[2] + 5;
+			glServer.mPosition[2] = -unit.mPosition[1];
 			glServer.setOnClickListener(new GLUnitClickListener(unit));
+			glServer.setOnLongClickListener(new GLUnitLongClickListener(unit));
 			addFigure(glServer);
 			mGLMediaServers.put(unit.mID, glServer);
 			putUnitFigure(unit, glServer);
@@ -121,9 +122,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			String type = unit.mSwitchType;
 			GLSwitch light = loadGLSwitchByType(type);
 			light.setSwitch(unit.mSwitchState == State.ON);
-			light.position[0] = unit.mPosition[0];
-			light.position[1] = unit.mPosition[2] + 5;
-			light.position[2] = -unit.mPosition[1];
+			light.mPosition[0] = unit.mPosition[0];
+			light.mPosition[1] = unit.mPosition[2] + 5;
+			light.mPosition[2] = -unit.mPosition[1];
 			InternetSwitchListener listener = new InternetSwitchListener(light,
 					internet);
 			light.setOnClickListener(listener);
@@ -143,12 +144,13 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 				cube.setColor(1, 1, 1);
 			} else
 				cube.setColor(0.2f, 0.2f, 0.2f);
-			cube.size[0] = cube.size[1] = cube.size[2] = 0.5f;
-			cube.position[0] = unit.mPosition[0];
-			cube.position[1] = unit.mPosition[2] + 5;
-			cube.position[2] = -unit.mPosition[1];
+			cube.mSize[0] = cube.mSize[1] = cube.mSize[2] = 0.5f;
+			cube.mPosition[0] = unit.mPosition[0];
+			cube.mPosition[1] = unit.mPosition[2] + 5;
+			cube.mPosition[2] = -unit.mPosition[1];
 			addFigure(cube);
 			cube.setOnClickListener(new GLUnitClickListener(unit));
+			cube.setOnLongClickListener(new GLUnitLongClickListener(unit));
 			putUnitFigure(unit, cube);
 		}
 	}
@@ -165,7 +167,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if ("remote".equals(description)) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
 			cube.setTexture(loadBitmap(R.drawable.ic_launcher));
-			cube.size[0] = cube.size[1] = cube.size[2] = 0.5f;
+			cube.mSize[0] = cube.mSize[1] = cube.mSize[2] = 0.5f;
 			cube.setColor(1, 1, 1);
 			return cube;
 		}
@@ -214,15 +216,15 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mHandler.translateSceneBounds[3] = minY;// -maxY;
 
 		GLSquare laminat = new GLSquare(GLFigure.STYLE_PLANE);
-		laminat.position[0] = (maxX - minX) / 2 + minX;
-		laminat.position[2] = -(maxY - minY) / 2 - minY;
-		laminat.position[1] = -0.03f;
-		laminat.size[0] = (maxX - minX);
-		laminat.size[1] = (maxY - minY);
-		laminat.rotation.rotateByAngleAxis(Math.PI / 2, 1, 0, 0);
-		laminat.color[0] = laminat.color[1] = laminat.color[2] = 1;
-		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.size[0],
-				laminat.size[1]);
+		laminat.mPosition[0] = (maxX - minX) / 2 + minX;
+		laminat.mPosition[2] = -(maxY - minY) / 2 - minY;
+		laminat.mPosition[1] = -0.03f;
+		laminat.mSize[0] = (maxX - minX);
+		laminat.mSize[1] = (maxY - minY);
+		laminat.mRotation.rotateByAngleAxis(Math.PI / 2, 1, 0, 0);
+		laminat.mColor[0] = laminat.mColor[1] = laminat.mColor[2] = 1;
+		laminat.setTexture(loadBitmap(R.drawable.textur_wood),
+				laminat.mSize[0], laminat.mSize[1]);
 		addFigure(laminat);
 
 		for (Feature feature : ground.features) {
@@ -233,8 +235,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			}
 			if (feature.type.equals("picture")) {
 				figure = new GLSquare(GLFigure.STYLE_PLANE);
-				figure.size[0] = 2.2f;
-				figure.color[0] = figure.color[1] = figure.color[2] = 1;
+				figure.mSize[0] = 2.2f;
+				figure.mColor[0] = figure.mColor[1] = figure.mColor[2] = 1;
 				if ("leaves".equals(feature.extra))
 					figure.setTexture(loadBitmap(R.drawable.textur_image_leaves));
 				if ("africa".equals(feature.extra))
@@ -243,12 +245,12 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 					figure.setTexture(loadBitmap(R.drawable.textur_image_sunset));
 			}
 			if (figure != null) {
-				figure.position[0] = feature.x;
-				figure.position[2] = -feature.y;
-				figure.position[1] = feature.z;
-				figure.rotation.rotateByAngleAxis(180 * feature.az / Math.PI,
+				figure.mPosition[0] = feature.x;
+				figure.mPosition[2] = -feature.y;
+				figure.mPosition[1] = feature.z;
+				figure.mRotation.rotateByAngleAxis(180 * feature.az / Math.PI,
 						0, 1, 0);
-				figure.color[3] = 0.5f;
+				figure.mColor[3] = 0.5f;
 				addFigure(figure);
 			}
 		}
@@ -292,7 +294,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		for (BufferdUnit unit : mGLBufferdUnits.keySet()) {
 			GLFigure figure = mGLBufferdUnits.get(unit);
 			if (figure != null) {
-				figure.position[1] = (figure.position[1] + unit.mPosition[2]) / 2;
+				figure.mPosition[1] = (figure.mPosition[1] + unit.mPosition[2]) / 2;
 			}
 		}
 		super.onDrawFrame(gl);
@@ -326,6 +328,20 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			mControlUnitListener.selectUnit(mUnit);
 		}
 
+	}
+
+	class GLUnitLongClickListener implements GLClickListener {
+
+		private BufferdUnit mUnit;
+
+		public GLUnitLongClickListener(BufferdUnit unit) {
+			mUnit = unit;
+		}
+
+		@Override
+		public void onGLClick() {
+			mControlUnitListener.selectLongClickUnit(mUnit);
+		}
 	}
 
 	class InternetSwitchListener implements GLClickListener {

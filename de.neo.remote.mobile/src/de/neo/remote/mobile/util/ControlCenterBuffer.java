@@ -6,6 +6,7 @@ import java.util.Map;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
+import de.neo.remote.api.Trigger;
 import de.neo.rmi.protokol.RemoteException;
 
 public class ControlCenterBuffer implements IControlCenter {
@@ -62,5 +63,10 @@ public class ControlCenterBuffer implements IControlCenter {
 				units.put(id, unit);
 		}
 		return unit;
+	}
+
+	@Override
+	public void trigger(Trigger trigger) throws RemoteException {
+		center.trigger(trigger);
 	}
 }

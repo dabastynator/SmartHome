@@ -61,6 +61,9 @@
     <string name="error_load_server">Connection error</string>
     <string name="refresh">Refresh</string>
 
+    <!-- Command action strings -->
+    <string name="command_stop">Do you want to stop the command action: </string>
+
     <!-- Media server strings -->
     <string name="mediaserver_load">Load mediaserver...</string>
     <string name="mediaserver_no_server">No mediaserver</string>
