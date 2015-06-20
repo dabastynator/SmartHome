@@ -21,7 +21,6 @@ public class MPlayer extends AbstractPlayer {
 	protected Process mMplayerProcess;
 	protected PrintStream mMplayerIn;
 	protected int mPositionLeft = 0;
-	protected int mVolume = 50;
 	private int mSeekValue;
 	private Object mPlayListfolder;
 
@@ -343,5 +342,11 @@ public class MPlayer extends AbstractPlayer {
 	public void useShuffle(boolean shuffle) throws RemoteException,
 			PlayerException {
 		throw new PlayerException("shuffle is not supported jet.");
+	}
+
+	@Override
+	public void setVolume(int volume) throws RemoteException, PlayerException {
+		mVolume = volume;
+		writeVolume();
 	}
 }

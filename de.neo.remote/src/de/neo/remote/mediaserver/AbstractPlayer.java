@@ -54,6 +54,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	 */
 	protected PlayingBean mPlayingBean;
 
+	protected int mVolume = 50;
+
 	public AbstractPlayer() {
 		new PlayingTimeCounter().start();
 		ThumbnailHandler.instance().calculationListener().add(this);
@@ -316,11 +318,9 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					thumbnail = new Thumbnail();
 					File thumbnailFile = ThumbnailHandler.instance()
 							.getStringThumbnailFile(bean.getArtist());
-					BufferedImage thumbnailImage = ThumbnailHandler.instance()
-							.toBufferedImage(
-									ThumbnailHandler.instance()
-											.createThumbnail(image,
-													THUMBNAIL_SIZE));
+					BufferedImage thumbnailImage = ThumbnailHandler
+							.toBufferedImage(ThumbnailHandler.instance()
+									.createThumbnail(image, THUMBNAIL_SIZE));
 					int rgb[] = ThumbnailHandler.instance().readImageIntArray(
 							thumbnailImage);
 					rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE,
@@ -377,5 +377,14 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void setVolume(int volume) throws RemoteException, PlayerException {
+		if (volume > mVolume)
+			volDown();
+		if (volume < mVolume)
+			volUp();
+		mVolume = volume;
 	}
 }

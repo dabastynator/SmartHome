@@ -7,6 +7,7 @@ import org.xml.sax.SAXException;
 
 import de.neo.remote.AbstractControlUnit;
 import de.neo.remote.api.Event;
+import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.IPlayer;
@@ -49,16 +50,15 @@ public class MediaControlUnit extends AbstractControlUnit {
 			IPlayer remotePlayer = null;
 			if (action == null)
 				throw new EventException(
-						"Parameter action (play|playList|pause|stop|volume) missing to execute media event!");
+						"Parameter action (play|playList|pause|stop|volume|shutdown) missing to execute media event!");
 			if ("mplayer".equals(player))
 				remotePlayer = mMediaServer.getMPlayer();
 			else if ("omxplayer".equals(player))
 				remotePlayer = mMediaServer.getOMXPlayer();
 			else if ("totem".equals(player))
 				remotePlayer = mMediaServer.getTotemPlayer();
-			if (remotePlayer == null)
-				throw new EventException(
-						"Parameter player (omxplayer|mplayer|totem) missing to execute media event!");
+
+			IControl control = mMediaServer.getControl();
 
 			switch (action) {
 			case "play":
@@ -74,13 +74,17 @@ public class MediaControlUnit extends AbstractControlUnit {
 			case "volume":
 				if ("up".equals(value))
 					remotePlayer.volUp();
-				if ("down".equals(value))
-					remotePlayer.volUp();
+				else if ("down".equals(value))
+					remotePlayer.volDown();
+				else
+					remotePlayer.setVolume(Integer.parseInt(value));
 				break;
 			case "stop":
 			case "quit":
 				remotePlayer.quit();
 				break;
+			case "shutdown":
+				control.shutdown();
 			default:
 				throw new EventException("Unknown player action: " + action);
 			}

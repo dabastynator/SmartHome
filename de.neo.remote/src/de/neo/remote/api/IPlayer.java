@@ -77,6 +77,15 @@ public interface IPlayer extends RemoteAble {
 	void volUp() throws RemoteException, PlayerException;
 
 	/**
+	 * set specified volume. The value must between 0 and 100.
+	 * 
+	 * @param file
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	void setVolume(int volume) throws RemoteException, PlayerException;
+
+	/**
 	 * volume down
 	 * 
 	 * @throws RemoteException
