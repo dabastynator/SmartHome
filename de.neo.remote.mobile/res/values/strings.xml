@@ -62,7 +62,8 @@
     <string name="refresh">Refresh</string>
 
     <!-- Command action strings -->
-    <string name="command_stop">Do you want to stop the command action: </string>
+    <string name="command_stop">Stop action</string>
+    <string name="command_stop_long">Do you want to stop the command action: </string>
 
     <!-- Media server strings -->
     <string name="mediaserver_load">Load mediaserver...</string>

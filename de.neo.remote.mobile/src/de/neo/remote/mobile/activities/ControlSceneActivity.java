@@ -231,13 +231,13 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 							Toast.makeText(getApplicationContext(),
 									"Execute: " + unit.mDescription,
 									Toast.LENGTH_SHORT).show();
-							if (unit.mClientAction != null
-									&& unit.mClientAction.length() > 0) {
-								Uri uri = Uri.parse(unit.mClientAction);
-								Intent intent = new Intent(Intent.ACTION_VIEW,
-										uri);
-								startActivity(intent);
-							}
+						}
+						if (unit.mClientAction != null
+								&& unit.mClientAction.length() > 0) {
+							Uri uri = Uri.parse(unit.mClientAction);
+							Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+							startActivity(intent);
+
 						}
 					}
 				};
@@ -257,15 +257,21 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 					// TODO Auto-generated method stub
 
 					new AlertDialog.Builder(ControlSceneActivity.this)
-							.setTitle(unit.mName)
+							.setTitle(
+									getResources().getString(
+											R.string.command_stop))
 							.setMessage(
 									getResources().getString(
-											R.string.command_stop)
-											+ unit.mName)
+											R.string.command_stop_long)
+											+ " " + unit.mName + "?")
 							.setPositiveButton(
 									getResources().getString(
-											android.R.string.ok),
-									SelectControlUnit.this).create().show();
+											android.R.string.yes),
+									SelectControlUnit.this)
+							.setNegativeButton(
+									getResources().getString(
+											android.R.string.no), null)
+							.create().show();
 				}
 			});
 		}

@@ -59,9 +59,10 @@
     <string name="no_conneciton_with_server">Kein Server verbunden</string>
     <string name="error_load_server">Fehler beim Verbinungsaufbau</string>
     <string name="refresh">Neu Laden</string>
-    
+
     <!-- Command action strings -->
-    <string name="command_stop">Möchten Sie wirkling die Aktion stoppen: </string>
+    <string name="command_stop">Aktion stoppen</string>
+    <string name="command_stop_long">Möchten Sie wirkling die Aktion stoppen: </string>
 
     <!-- Media server strings -->
     <string name="mediaserver_load">Lade Mediaserver...</string>
