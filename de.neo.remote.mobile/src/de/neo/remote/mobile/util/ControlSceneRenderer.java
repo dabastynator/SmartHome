@@ -1,5 +1,7 @@
 package de.neo.remote.mobile.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.Set;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -19,6 +22,7 @@ import de.neo.android.opengl.figures.GLFigure;
 import de.neo.android.opengl.figures.GLFigure.GLClickListener;
 import de.neo.android.opengl.figures.GLPolynom;
 import de.neo.android.opengl.figures.GLPolynom.GLPoint;
+import de.neo.android.opengl.figures.GLSTL;
 import de.neo.android.opengl.figures.GLSquare;
 import de.neo.android.opengl.systems.GLBox;
 import de.neo.android.opengl.systems.GLCube;
@@ -29,7 +33,7 @@ import de.neo.android.opengl.systems.GLLaptop;
 import de.neo.android.opengl.systems.GLLavalamp;
 import de.neo.android.opengl.systems.GLMediaServer;
 import de.neo.android.opengl.systems.GLReadinglamp;
-import de.neo.android.opengl.systems.GLSwitch;
+import de.neo.android.opengl.systems.IGLSwitch;
 import de.neo.android.opengl.touchhandler.TranslateSceneHandler;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Point;
@@ -65,7 +69,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	private SelectControlUnit mControlUnitListener;
 
 	private Map<String, GLFigure> mGLMediaServers;
-	private Map<String, GLSwitch> mGLSwitches;
+	private Map<String, IGLSwitch> mGLSwitches;
 	private Map<BufferdUnit, GLFigure> mGLBufferdUnits;
 	private TranslateSceneHandler mHandler;
 
@@ -81,7 +85,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		setTouchSceneHandler(mHandler);
 		setLighting(true);
 		mGLMediaServers = new HashMap<String, GLFigure>();
-		mGLSwitches = new HashMap<String, GLSwitch>();
+		mGLSwitches = new HashMap<String, IGLSwitch>();
 		mGLBufferdUnits = new HashMap<BufferdUnit, GLFigure>();
 	}
 
@@ -119,16 +123,16 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (unit.mObject instanceof IInternetSwitch) {
 			IInternetSwitch internet = (IInternetSwitch) unit.mObject;
 			String type = unit.mSwitchType;
-			GLSwitch light = loadGLSwitchByType(type);
-			light.setSwitch(unit.mSwitchState == State.ON);
+			GLFigure light = loadGLSwitchByType(type);
+			((IGLSwitch) light).setSwitch(unit.mSwitchState == State.ON);
 			light.mPosition[0] = unit.mPosition[0];
 			light.mPosition[1] = unit.mPosition[2] + 5;
 			light.mPosition[2] = -unit.mPosition[1];
-			InternetSwitchListener listener = new InternetSwitchListener(light,
-					internet);
+			InternetSwitchListener listener = new InternetSwitchListener(
+					(IGLSwitch) light, internet);
 			light.setOnClickListener(listener);
 			addFigure(light);
-			mGLSwitches.put(unit.mID, light);
+			mGLSwitches.put(unit.mID, (IGLSwitch) light);
 			putUnitFigure(unit, light);
 		}
 		if (unit.mObject instanceof ICommandAction) {
@@ -227,7 +231,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		addFigure(laminat);
 	}
 
-	private GLSwitch loadGLSwitchByType(String type) {
+	private GLFigure loadGLSwitchByType(String type) {
 		if (type.equalsIgnoreCase(LAMP_FLOOR)) {
 			GLFloorlamp lamp = new GLFloorlamp(GLFigure.STYLE_PLANE);
 			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR,
@@ -255,6 +259,16 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			GLMediaServer audio = new GLMediaServer(GLFigure.STYLE_PLANE, false);
 			audio.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
 			return audio;
+		}
+		if (type.equalsIgnoreCase(SWITCH_COFFEE)) {
+			GLSTLCup coffeeCup;
+			try {
+				coffeeCup = new GLSTLCup(mContext.getResources()
+						.openRawResource(R.raw.cup));
+				return coffeeCup;
+			} catch (NotFoundException | IOException e) {
+			}
+
 		}
 		GLLavalamp lamp = new GLLavalamp(20, GLFigure.STYLE_PLANE);
 		return lamp;
@@ -317,10 +331,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	class InternetSwitchListener implements GLClickListener {
 
-		private GLSwitch ligthtObject;
+		private IGLSwitch ligthtObject;
 		private IInternetSwitch internet;
 
-		public InternetSwitchListener(GLSwitch ligthtObject,
+		public InternetSwitchListener(IGLSwitch ligthtObject,
 				IInternetSwitch internet) {
 			this.ligthtObject = ligthtObject;
 			this.internet = internet;
@@ -407,7 +421,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	}
 
 	public void powerSwitchChanged(String _switch, State state) {
-		GLSwitch glSwitch = mGLSwitches.get(_switch);
+		IGLSwitch glSwitch = mGLSwitches.get(_switch);
 		if (glSwitch != null) {
 			glSwitch.setSwitch(state == State.ON);
 		}
@@ -424,6 +438,36 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		else
 			setGradient(new float[] { 1, 0.3f, 0.3f, 1 }, new float[] { 1, 1,
 					1, 1 });
+
+	}
+
+	class GLSTLCup extends GLSTL implements IGLSwitch {
+
+		boolean mState;
+
+		public GLSTLCup(InputStream stlStream) throws IOException {
+			super(stlStream);
+			mSize[0] = mSize[1] = mSize[2] = 0.7f;
+			mRotation.rotateByAngleAxis(-Math.PI / 2, 1, 0, 0);
+			setSwitch(false);
+		}
+
+		@Override
+		public void setSwitch(boolean on) {
+			mState = on;
+			if (mState) {
+				mColor[0] = 1f;
+				mColor[1] = mColor[2] = 0.4f;
+			} else {
+				mColor[0] = 0.5f;
+				mColor[1] = mColor[2] = 0.2f;
+			}
+		}
+
+		@Override
+		public boolean isSwitchOn() {
+			return mState;
+		}
 
 	}
 
