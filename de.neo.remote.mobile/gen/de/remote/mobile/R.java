@@ -1628,12 +1628,12 @@ containing a value of this type.
         public static final int abc_textfield_search_default_mtrl_alpha=0x7f020031;
         public static final int abc_textfield_search_material=0x7f020032;
         public static final int addserver=0x7f020033;
-        public static final int audio=0x7f020034;
-        public static final int browser=0x7f020035;
-        public static final int camera=0x7f020036;
-        public static final int cancel=0x7f020037;
-        public static final int chat=0x7f020038;
-        public static final int clear=0x7f020039;
+        public static final int browser=0x7f020034;
+        public static final int camera=0x7f020035;
+        public static final int cancel=0x7f020036;
+        public static final int coffee=0x7f020037;
+        public static final int coffee_off=0x7f020038;
+        public static final int coffee_on=0x7f020039;
         public static final int control=0x7f02003a;
         public static final int download=0x7f02003b;
         public static final int edit=0x7f02003c;
@@ -1757,20 +1757,16 @@ containing a value of this type.
         public static final int server=0x7f0200b2;
         public static final int switch_unknown=0x7f0200b3;
         public static final int textur_holz=0x7f0200b4;
-        public static final int textur_image_africa=0x7f0200b5;
-        public static final int textur_image_leaves=0x7f0200b6;
-        public static final int textur_image_sunset=0x7f0200b7;
-        public static final int textur_keyboard=0x7f0200b8;
-        public static final int textur_mamor=0x7f0200b9;
-        public static final int textur_metal=0x7f0200ba;
-        public static final int textur_wood=0x7f0200bb;
-        public static final int totem=0x7f0200bc;
-        public static final int tv=0x7f0200bd;
-        public static final int tv_off=0x7f0200be;
-        public static final int tv_on=0x7f0200bf;
-        public static final int upload=0x7f0200c0;
-        public static final int webcam=0x7f0200c1;
-        public static final int widget_shape=0x7f0200c2;
+        public static final int textur_keyboard=0x7f0200b5;
+        public static final int textur_mamor=0x7f0200b6;
+        public static final int textur_metal=0x7f0200b7;
+        public static final int textur_wood=0x7f0200b8;
+        public static final int totem=0x7f0200b9;
+        public static final int tv=0x7f0200ba;
+        public static final int tv_off=0x7f0200bb;
+        public static final int tv_on=0x7f0200bc;
+        public static final int upload=0x7f0200bd;
+        public static final int widget_shape=0x7f0200be;
     }
     public static final class id {
         public static final int action_bar=0x7f0a0031;
@@ -2053,12 +2049,17 @@ containing a value of this type.
         public static final int abc_toolbar_collapse_description=0x7f0b0004;
         public static final int app_name=0x7f0b0011;
         public static final int audio_track=0x7f0b0016;
+        /**  Command action strings 
+ Command action strings 
+         */
+        public static final int command_stop=0x7f0b0042;
+        public static final int command_stop_long=0x7f0b0043;
         /**  Remote connection strings 
  Remote connection strings 
          */
         public static final int connecting=0x7f0b0039;
         public static final int control=0x7f0b001a;
-        public static final int delete=0x7f0b0049;
+        public static final int delete=0x7f0b004b;
         /**  DVD Strings 
  DVD Strings 
          */
@@ -2081,9 +2082,9 @@ containing a value of this type.
         /**  Media server strings 
  Media server strings 
          */
-        public static final int mediaserver_load=0x7f0b0042;
-        public static final int mediaserver_no_server=0x7f0b0043;
-        public static final int mediaserver_no_server_selected_at=0x7f0b0044;
+        public static final int mediaserver_load=0x7f0b0044;
+        public static final int mediaserver_no_server=0x7f0b0045;
+        public static final int mediaserver_no_server_selected_at=0x7f0b0046;
         public static final int move_left=0x7f0b0018;
         public static final int move_right=0x7f0b0017;
         public static final int no_conneciton=0x7f0b003e;
@@ -2130,17 +2131,17 @@ containing a value of this type.
         /**  General 
  General 
          */
-        public static final int str_create=0x7f0b0047;
-        public static final int str_download=0x7f0b004a;
-        public static final int str_entry_add=0x7f0b004d;
-        public static final int str_entry_deleted=0x7f0b004c;
-        public static final int str_name=0x7f0b0048;
-        public static final int str_upload=0x7f0b004b;
-        public static final int switch_has_no_switch=0x7f0b0046;
+        public static final int str_create=0x7f0b0049;
+        public static final int str_download=0x7f0b004c;
+        public static final int str_entry_add=0x7f0b004f;
+        public static final int str_entry_deleted=0x7f0b004e;
+        public static final int str_name=0x7f0b004a;
+        public static final int str_upload=0x7f0b004d;
+        public static final int switch_has_no_switch=0x7f0b0048;
         /**  Power switch 
  Power switch 
          */
-        public static final int switch_power=0x7f0b0045;
+        public static final int switch_power=0x7f0b0047;
     }
     public static final class style {
         /** 

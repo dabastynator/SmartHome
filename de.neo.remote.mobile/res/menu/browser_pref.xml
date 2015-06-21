@@ -56,7 +56,6 @@
                 android:title="@string/make_dark"/>
             <item
                 android:id="@+id/opt_audiotrack"
-                android:icon="@drawable/audio"
                 android:title="@string/audio_track"/>
             <item
                 android:id="@+id/opt_right"

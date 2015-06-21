@@ -220,8 +220,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail,
 						thumbnail);
 			else
-				remoteViews.setImageViewResource(R.id.img_widget_thumbnail,
-						R.drawable.audio);
+				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail, null);
 			RemoteWidgetProvider.setWidgetClick(remoteViews, this);
 			if (playing)
 				remoteViews.setInt(R.id.button_widget_play,
@@ -483,6 +482,12 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				return R.drawable.reading_on;
 			else
 				return R.drawable.reading_off;
+		}
+		if (ControlSceneRenderer.SWITCH_COFFEE.equals(type)) {
+			if (on)
+				return R.drawable.coffee_on;
+			else
+				return R.drawable.coffee_off;
 		}
 		return R.drawable.switch_unknown;
 	}

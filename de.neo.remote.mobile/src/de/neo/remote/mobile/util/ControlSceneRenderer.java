@@ -30,10 +30,8 @@ import de.neo.android.opengl.systems.GLLavalamp;
 import de.neo.android.opengl.systems.GLMediaServer;
 import de.neo.android.opengl.systems.GLReadinglamp;
 import de.neo.android.opengl.systems.GLSwitch;
-import de.neo.android.opengl.systems.GLTableround;
 import de.neo.android.opengl.touchhandler.TranslateSceneHandler;
 import de.neo.remote.api.GroundPlot;
-import de.neo.remote.api.GroundPlot.Feature;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
 import de.neo.remote.api.ICommandAction;
@@ -55,6 +53,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public static final String VIDEO = "video";
 	public static final String LAMP_LAVA = "lavalamp";
 	public static final String LAMP_READ = "readinglamp";
+	public static final String SWITCH_COFFEE = "coffee";
 	public static final String LAMP_FLOOR = "floorlamp";
 	public static final String TABLE = "table";
 
@@ -175,7 +174,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			GLLaptop laptop = new GLLaptop(GLFigure.STYLE_PLANE,
 					(float) (3 * Math.PI / 4));
 			laptop.setTexture(GLLaptop.SURFACE_DISPLAY,
-					loadBitmap(R.drawable.textur_image_sunset));
+					loadBitmap(R.drawable.textur_mamor));
 			laptop.setTexture(GLLaptop.SURFACE_KEYBOARD,
 					loadBitmap(R.drawable.textur_keyboard));
 			return laptop;
@@ -226,34 +225,6 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		laminat.setTexture(loadBitmap(R.drawable.textur_wood),
 				laminat.mSize[0], laminat.mSize[1]);
 		addFigure(laminat);
-
-		for (Feature feature : ground.features) {
-			GLFigure figure = null;
-			if (feature.type.equals("table")) {
-				figure = new GLTableround(GLFigure.STYLE_PLANE, 1.4f, 1.5f);
-				figure.setTexture(loadBitmap(R.drawable.textur_wood));
-			}
-			if (feature.type.equals("picture")) {
-				figure = new GLSquare(GLFigure.STYLE_PLANE);
-				figure.mSize[0] = 2.2f;
-				figure.mColor[0] = figure.mColor[1] = figure.mColor[2] = 1;
-				if ("leaves".equals(feature.extra))
-					figure.setTexture(loadBitmap(R.drawable.textur_image_leaves));
-				if ("africa".equals(feature.extra))
-					figure.setTexture(loadBitmap(R.drawable.textur_image_africa));
-				if ("sunset".equals(feature.extra))
-					figure.setTexture(loadBitmap(R.drawable.textur_image_sunset));
-			}
-			if (figure != null) {
-				figure.mPosition[0] = feature.x;
-				figure.mPosition[2] = -feature.y;
-				figure.mPosition[1] = feature.z;
-				figure.mRotation.rotateByAngleAxis(180 * feature.az / Math.PI,
-						0, 1, 0);
-				figure.mColor[3] = 0.5f;
-				addFigure(figure);
-			}
-		}
 	}
 
 	private GLSwitch loadGLSwitchByType(String type) {
@@ -275,7 +246,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f,
 					0.67f, 2f);
 			video.setSwitchTexture(GLFlatScreen.SCREEN,
-					loadBitmap(R.drawable.textur_image_sunset), true);
+					loadBitmap(R.drawable.textur_mamor), true);
 			video.setTexture(GLFlatScreen.BOTTOM,
 					loadBitmap(R.drawable.textur_metal));
 			return video;
