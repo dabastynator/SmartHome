@@ -25,7 +25,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	 */
 	private List<IInternetSwitchListener> mListeners = Collections
 			.synchronizedList(new ArrayList<IInternetSwitchListener>());
-	private SwitchPower mPower;
+	private GPIOSender mPower;
 	private String mType;
 	private String mFamilyCode;
 	private int mSwitchNumber;
@@ -34,7 +34,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	private String mId;
 	private GPIOControlUnit mUnit;
 
-	public InternetSwitchImpl(SwitchPower power, GPIOControlUnit unit) {
+	public InternetSwitchImpl(GPIOSender power, GPIOControlUnit unit) {
 		mPower = power;
 		mState = State.OFF;
 		mUnit = unit;

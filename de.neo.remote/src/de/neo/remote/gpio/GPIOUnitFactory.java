@@ -6,10 +6,10 @@ import de.neo.remote.api.IControlCenter;
 
 public class GPIOUnitFactory implements ControlUnitFactory {
 
-	private SwitchPower mPower;
+	private GPIOSender mPower;
 
 	public GPIOUnitFactory() {
-		mPower = new SwitchPower();
+		mPower = GPIOSender.getInstance();
 	}
 
 	@Override

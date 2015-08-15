@@ -13,9 +13,22 @@ import de.neo.rmi.api.RMILogger.LogPriority;
  * @author sebastian
  * 
  */
-public class SwitchPower {
+public class GPIOSender {
 
 	private static final String SWITCH_SENDER = "/usr/bin/send";
+
+	private static final String COLOR_SENDER = "/usr/bin/sendInt";
+
+	private static GPIOSender mInstance;
+
+	private GPIOSender() {
+	}
+
+	public static GPIOSender getInstance() {
+		if (mInstance == null)
+			mInstance = new GPIOSender();
+		return mInstance;
+	}
 
 	public synchronized void setSwitchState(String familyCode,
 			int switchNumber, State state) {
@@ -37,6 +50,29 @@ public class SwitchPower {
 				RemoteLogger.performLog(LogPriority.INFORMATION, "Set switch "
 						+ familyCode + " " + switchNumber + " to " + state,
 						"Internetswitch");
+			reader.close();
+		} catch (Exception e) {
+			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
+					"SwitchPower");
+		}
+	}
+
+	public synchronized void setColor(int color) {
+		try {
+			Process sender = Runtime.getRuntime().exec(
+					new String[] { COLOR_SENDER, color + "" });
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					sender.getErrorStream()));
+			String line = null;
+			boolean success = true;
+			while ((line = reader.readLine()) != null) {
+				RemoteLogger.performLog(LogPriority.ERROR, line,
+						"Internetswitch");
+				success = false;
+			}
+			if (success)
+				RemoteLogger.performLog(LogPriority.INFORMATION, "Set color "
+						+ color, "RCColor");
 			reader.close();
 		} catch (Exception e) {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),

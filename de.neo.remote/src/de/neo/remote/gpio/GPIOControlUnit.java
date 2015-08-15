@@ -15,9 +15,9 @@ import de.neo.rmi.protokol.RemoteException;
 public class GPIOControlUnit extends AbstractControlUnit {
 
 	private InternetSwitchImpl mSwitch;
-	private SwitchPower mPower;
+	private GPIOSender mPower;
 
-	public GPIOControlUnit(SwitchPower power, IControlCenter center) {
+	public GPIOControlUnit(GPIOSender power, IControlCenter center) {
 		super(center);
 		mPower = power;
 	}

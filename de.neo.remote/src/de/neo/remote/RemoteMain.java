@@ -26,6 +26,7 @@ import de.neo.remote.api.IControlUnit;
 import de.neo.remote.controlcenter.ControlCenterImpl;
 import de.neo.remote.gpio.GPIOUnitFactory;
 import de.neo.remote.mediaserver.MediaUnitFactory;
+import de.neo.remote.rccolor.RCColorUnitFactory;
 import de.neo.rmi.api.IRegistryConnection;
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.RMILogger.LogPriority;
@@ -47,6 +48,7 @@ public class RemoteMain {
 		mControlUnitFactory.put("InternetSwitch", new GPIOUnitFactory());
 		mControlUnitFactory.put("CommandAction", new ActionUnitFactory());
 		mControlUnitFactory.put("MediaServer", new MediaUnitFactory());
+		mControlUnitFactory.put("ColorSetter", new RCColorUnitFactory());
 	}
 
 	public static void main(String args[]) {
