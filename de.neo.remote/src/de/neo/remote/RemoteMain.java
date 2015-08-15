@@ -23,6 +23,7 @@ import de.neo.remote.RemoteLogger.RemoteLogListener;
 import de.neo.remote.action.ActionUnitFactory;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
+import de.neo.remote.api.Trigger;
 import de.neo.remote.controlcenter.ControlCenterImpl;
 import de.neo.remote.gpio.GPIOUnitFactory;
 import de.neo.remote.mediaserver.MediaUnitFactory;
@@ -87,6 +88,13 @@ public class RemoteMain {
 					controlcenter, units);
 			server.manageConnector(connector, registryIp);
 
+			for (Trigger trigger : readStartupTrigger(doc
+					.getElementsByTagName("StartTrigger"))) {
+				try {
+					controlcenter.trigger(trigger);
+				} catch (RemoteException e) {
+				}
+			}
 		} catch (ParserConfigurationException | SAXException | IOException
 				| IllegalArgumentException e) {
 			System.err
@@ -232,6 +240,24 @@ public class RemoteMain {
 			return true;
 		}
 
+	}
+
+	public static List<Trigger> readStartupTrigger(NodeList nodeList)
+			throws SAXException {
+		List<Trigger> triggers = new ArrayList<Trigger>();
+		for (int i = 0; i < nodeList.getLength(); i++)
+			if (nodeList.item(i) instanceof Element) {
+				Element element = (Element) nodeList.item(i);
+				for (int j = 0; j < element.getChildNodes().getLength(); j++)
+					if (element.getChildNodes().item(j) instanceof Element) {
+						Element trigger = (Element) element.getChildNodes()
+								.item(i);
+						Trigger t = new Trigger();
+						t.initialize(trigger);
+						triggers.add(t);
+					}
+			}
+		return triggers;
 	}
 
 }

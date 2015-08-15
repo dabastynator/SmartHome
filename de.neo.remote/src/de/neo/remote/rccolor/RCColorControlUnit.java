@@ -6,10 +6,13 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IRCColor;
 import de.neo.rmi.protokol.RemoteException;
 
-public class RCColorControlUnit extends AbstractControlUnit{
+public class RCColorControlUnit extends AbstractControlUnit {
+
+	private RCColor mColorUnit;
 
 	public RCColorControlUnit(IControlCenter center) {
 		super(center);
+		mColorUnit = new RCColor();
 	}
 
 	@Override
@@ -18,9 +21,8 @@ public class RCColorControlUnit extends AbstractControlUnit{
 	}
 
 	@Override
-	public Object getRemoteableControlObject() throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+	public IRCColor getRemoteableControlObject() throws RemoteException {
+		return mColorUnit;
 	}
 
 	@Override
@@ -30,14 +32,19 @@ public class RCColorControlUnit extends AbstractControlUnit{
 		if (colorString == null)
 			throw new EventException(
 					"Parameter color missing to set the color!");
-		int color = 0;
-		try{
+		int color = 0, duration = 0;
+		try {
 			color = Integer.parseInt(colorString);
-		}catch(Exception e){
-			throw new EventException(
-					"Cannot parse color code");
+			String durationString = event.getParameter("duration");
+			if (durationString != null)
+				duration = Integer.parseInt(durationString);
+		} catch (Exception e) {
+			throw new EventException("Cannot parse color code or duration");
 		}
-		return false;
+		if (duration == 0)
+			mColorUnit.setColor(color);
+		else
+			mColorUnit.setColor(color, duration);
+		return true;
 	}
-
 }

@@ -60,7 +60,8 @@ public class GPIOSender {
 	public synchronized void setColor(int color) {
 		try {
 			Process sender = Runtime.getRuntime().exec(
-					new String[] { COLOR_SENDER, color + "" });
+					new String[] { COLOR_SENDER,
+							String.valueOf(0X0A000000 | color) });
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					sender.getErrorStream()));
 			String line = null;

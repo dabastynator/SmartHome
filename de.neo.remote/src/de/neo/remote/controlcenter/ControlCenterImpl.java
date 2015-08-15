@@ -57,9 +57,12 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 
 	private EventWorker mEventWorker;
 
+	private List<String> mStartUpTrigger;
+
 	public ControlCenterImpl(Node root) {
 		mGround = readGround((Element) root);
 		mEventWorker = new EventWorker(this);
+		mStartUpTrigger = new ArrayList<String>();
 		start();
 	}
 
