@@ -251,7 +251,7 @@ public class RemoteMain {
 				for (int j = 0; j < element.getChildNodes().getLength(); j++)
 					if (element.getChildNodes().item(j) instanceof Element) {
 						Element trigger = (Element) element.getChildNodes()
-								.item(i);
+								.item(j);
 						Trigger t = new Trigger();
 						t.initialize(trigger);
 						triggers.add(t);
