@@ -20,15 +20,23 @@ public interface IRCColor extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public void setColor(int color) throws RemoteException;
-	
+
 	/**
 	 * Set the specified color for the object, just for specified duration.
 	 * 
 	 * @param color
-	 * @param duration in ms
+	 * @param duration
+	 *            in ms
 	 * @throws RemoteException
 	 */
 	public void setColor(int color, int duration) throws RemoteException;
 
-	
+	/**
+	 * Get current color of the color object, temporary color will not returned.
+	 * 
+	 * @return current color
+	 * @throws RemoteException
+	 */
+	public int getColor() throws RemoteException;
+
 }
