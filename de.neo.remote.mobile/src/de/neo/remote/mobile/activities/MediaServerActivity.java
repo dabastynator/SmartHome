@@ -339,8 +339,12 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		checkIntentForAction();
+	}
+
+	private void checkIntentForAction() {
 		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
+		if (extras != null && mBinder != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 			if (youtubeURL != null) {
 				new PlayYoutubeTask(this, youtubeURL, mBinder)
@@ -547,8 +551,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	void onRemoteBinder(RemoteBinder mBinder) {
-		// mBrowserFragment.onRemoteBinder(mBinder);
-		// if (mBinder != null && )
+		checkIntentForAction();
 	}
 
 	public void refreshContent() {
