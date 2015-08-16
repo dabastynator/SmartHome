@@ -18,12 +18,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import de.neo.android.opengl.AbstractSceneRenderer;
+import de.neo.android.opengl.figures.GLBall;
 import de.neo.android.opengl.figures.GLFigure;
 import de.neo.android.opengl.figures.GLFigure.GLClickListener;
 import de.neo.android.opengl.figures.GLPolynom;
 import de.neo.android.opengl.figures.GLPolynom.GLPoint;
 import de.neo.android.opengl.figures.GLSTL;
 import de.neo.android.opengl.figures.GLSquare;
+import de.neo.android.opengl.figures.GLTorus;
 import de.neo.android.opengl.systems.GLBox;
 import de.neo.android.opengl.systems.GLCube;
 import de.neo.android.opengl.systems.GLFlatScreen;
@@ -41,6 +43,7 @@ import de.neo.remote.api.GroundPlot.Wall;
 import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
@@ -155,6 +158,18 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			cube.setOnClickListener(new GLUnitClickListener(unit));
 			cube.setOnLongClickListener(new GLUnitLongClickListener(unit));
 			putUnitFigure(unit, cube);
+		}
+		if (unit.mObject instanceof IRCColor) {
+			GLTorus color = new GLTorus(0.5f, 0.1f, GLFigure.STYLE_PLANE);
+			color.mColor[0] = 0.1f;color.mColor[1] = color.mColor[2] = 0.8f;
+			color.mSize[0] = color.mSize[1] = color.mSize[2] = 1f;
+			color.mPosition[0] = unit.mPosition[0];
+			color.mPosition[1] = unit.mPosition[2] + 5;
+			color.mPosition[2] = -unit.mPosition[1];
+			addFigure(color);
+			color.setOnClickListener(new GLUnitClickListener(unit));
+			color.setOnLongClickListener(new GLUnitLongClickListener(unit));
+			putUnitFigure(unit, color);
 		}
 	}
 

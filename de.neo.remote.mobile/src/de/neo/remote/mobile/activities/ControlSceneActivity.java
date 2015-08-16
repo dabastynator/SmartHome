@@ -3,6 +3,8 @@ package de.neo.remote.mobile.activities;
 import java.util.Collection;
 import java.util.Set;
 
+import colorpickerview.dialog.ColorPickerDialogFragment;
+import colorpickerview.dialog.ColorPickerDialogFragment.ColorPickerDialogListener;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.ICommandAction;
+import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
@@ -30,16 +33,19 @@ import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
+import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
-public class ControlSceneActivity extends AbstractConnectionActivity {
+public class ControlSceneActivity extends AbstractConnectionActivity implements
+		ColorPickerDialogListener {
 
 	private AbstractSceneSurfaceView mGLView;
 	private ControlSceneRenderer mRenderer;
 	private Handler mHandler;
 	private FrameLayout mLayout;
 	private ProgressBar mProgress;
+	private SelectControlUnit mSelecter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +53,12 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 
 		mHandler = new Handler();
 
-		SelectControlUnit selecter = new SelectControlUnit();
+		mSelecter = new SelectControlUnit();
 
 		setContentView(R.layout.controlscene);
 		findComponents();
 
-		mRenderer = new ControlSceneRenderer(this, selecter);
+		mRenderer = new ControlSceneRenderer(this, mSelecter);
 		mGLView = new AbstractSceneSurfaceView(this, savedInstanceState,
 				mRenderer);
 
@@ -194,7 +200,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 	}
 
 	public class SelectControlUnit implements OnClickListener {
+		private BufferdUnit mUnit;
+
 		public void selectUnit(final BufferdUnit unit) {
+			mUnit = unit;
 			if (unit.mObject instanceof IMediaServer) {
 				mHandler.post(new Runnable() {
 
@@ -244,9 +253,14 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 				task.execute(unit);
 			}
 
+			if (unit.mObject instanceof IRCColor) {
+				ColorPickerDialogFragment dialog = ColorPickerDialogFragment
+						.newInstance(unit.mID.hashCode(), "Pick color",
+								getString(android.R.string.ok), unit.mColor | 0xFF000000,
+								false);
+				dialog.show(getFragmentManager(), "colorpicker");
+			}
 		}
-
-		private BufferdUnit mUnit;
 
 		public void selectLongClickUnit(final BufferdUnit unit) {
 			mUnit = unit;
@@ -312,6 +326,30 @@ public class ControlSceneActivity extends AbstractConnectionActivity {
 		public void onClick(DialogInterface dialog, int which) {
 			stopCommand(mUnit);
 		}
+	}
+
+	@Override
+	public void onColorSelected(int dialogId, final int color) {
+		if (mSelecter.mUnit.mObject instanceof IRCColor) {
+			mSelecter.mUnit.mColor = color & 0xFFFFFF;
+			new SimpleTask(this).setSuccess("Color set")
+					.setDialogMessage("Set color to " + color)
+					.setDialogtitle("Set color...")
+					.setAction(new BackgroundAction() {
+
+						@Override
+						public void run() throws Exception {
+							IRCColor rccolor = (IRCColor) mSelecter.mUnit.mObject;
+							rccolor.setColor(mSelecter.mUnit.mColor);
+						}
+					}).execute();
+		}
+	}
+
+	@Override
+	public void onDialogDismissed(int dialogId) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

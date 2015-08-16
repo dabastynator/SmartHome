@@ -21,6 +21,7 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IImageViewer;
 import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IInternetSwitchListener;
 import de.neo.remote.api.IPlayList;
@@ -168,6 +169,7 @@ public class RemoteService extends Service {
 		public int mThumbnailWidth;
 		public int mThumbnailHeight;
 		public String mClientAction;
+		public int mColor;
 	}
 
 	public static class StationStuff {
@@ -283,6 +285,10 @@ public class RemoteService extends Service {
 					bufferdUnit.mThumbnailWidth = action.getThumbnailWidth();
 					bufferdUnit.mThumbnailHeight = action.getThumbnailHeight();
 					bufferdUnit.mClientAction = action.getClientAction();
+				}
+				if (bufferdUnit.mObject instanceof IRCColor) {
+					IRCColor color = (IRCColor) bufferdUnit.mObject;
+					bufferdUnit.mColor = color.getColor();
 				}
 				fireControlUnit(bufferdUnit);
 			} catch (Exception e) {
