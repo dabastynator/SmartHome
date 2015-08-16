@@ -255,9 +255,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 
 			if (unit.mObject instanceof IRCColor) {
 				ColorPickerDialogFragment dialog = ColorPickerDialogFragment
-						.newInstance(unit.mID.hashCode(), "Pick color",
-								getString(android.R.string.ok), unit.mColor | 0xFF000000,
-								false);
+						.newInstance(unit.mID.hashCode(), "Pick color for "
+								+ mSelecter.mUnit.mName,
+								getString(android.R.string.ok),
+								unit.mColor | 0xFF000000, false);
 				dialog.show(getFragmentManager(), "colorpicker");
 			}
 		}
@@ -332,9 +333,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 	public void onColorSelected(int dialogId, final int color) {
 		if (mSelecter.mUnit.mObject instanceof IRCColor) {
 			mSelecter.mUnit.mColor = color & 0xFFFFFF;
-			new SimpleTask(this).setSuccess("Color set")
-					.setDialogMessage("Set color to " + color)
-					.setDialogtitle("Set color...")
+			new SimpleTask(this)
+					.setSuccess("Color set")
+					.setDialogMessage(
+							"Set color for " + mSelecter.mUnit.mName + " to "
+									+ color).setDialogtitle("Set color...")
 					.setAction(new BackgroundAction() {
 
 						@Override
