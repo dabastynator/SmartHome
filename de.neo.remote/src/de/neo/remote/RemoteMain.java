@@ -40,7 +40,7 @@ public class RemoteMain {
 	public static String REGISTRY_IP = "RegistryIp";
 	public static String SERVER_PORT = "ServerPort";
 	public static final SimpleDateFormat LogFormat = new SimpleDateFormat(
-			"MM.dd-HH:mm");
+			"dd.MM-HH:mm");
 
 	public static Map<String, ControlUnitFactory> mControlUnitFactory;
 

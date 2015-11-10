@@ -59,27 +59,23 @@ public class CronScheduler extends Thread {
 	private synchronized void handleHeap() {
 		while (mHeap.size() > 0) {
 			CronJob job = mHeap.poll();
-			long nextExecution = job.getNextExecution();
-			long now = System.currentTimeMillis();
 			try {
+				long nextExecution = job.getNextExecution();
+				long now = System.currentTimeMillis();
 				if (now < nextExecution)
 					wait(nextExecution - now);
-				if (System.currentTimeMillis() < nextExecution) {
-					mHeap.add(job);
-				} else {
+				if (System.currentTimeMillis() >= nextExecution) {
 					mExecutor.executeJob(job.getRunnable());
-					if ((job.getRepeat() > 0 || job.getRepeat() == REPEAT_INFINIT)) {
-						if (job.getRepeat() != REPEAT_INFINIT)
-							job.setRepeat(job.getRepeat() - 1);
-						job.calculateNextExecution();
-						if (job.getNextExecution() < Long.MAX_VALUE)
-							mHeap.add(job);
-					}
+					if (job.getRepeat() != REPEAT_INFINIT)
+						job.setRepeat(job.getRepeat() - 1);
+					job.calculateNextExecution();
 				}
 			} catch (InterruptedException e) {
-				mHeap.add(job);
+				// ignore
+			} finally {
+				if (job.getRepeat() > 0 || job.getRepeat() == REPEAT_INFINIT)
+					mHeap.add(job);
 			}
-
 		}
 	}
 
@@ -89,9 +85,11 @@ public class CronScheduler extends Thread {
 		job.parseExpression(cronExpression);
 		job.setRepeat(repeat);
 		job.calculateNextExecution();
-		if (job.getNextExecution() < Long.MAX_VALUE)
+		if (job.getNextExecution() < Long.MAX_VALUE) {
 			mHeap.add(job);
-		else
+			RemoteLogger.performLog(LogPriority.INFORMATION,
+					"Schedule cron job", job.toString());
+		} else
 			RemoteLogger.performLog(LogPriority.ERROR, "Job can't scheduled",
 					job.toString());
 		notify();
