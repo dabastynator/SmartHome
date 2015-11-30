@@ -96,4 +96,9 @@ public class Trigger implements Serializable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return mTriggerID;
+	}
+
 }

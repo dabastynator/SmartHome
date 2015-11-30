@@ -62,6 +62,9 @@ public class CronScheduler extends Thread {
 			try {
 				long nextExecution = job.getNextExecution();
 				long now = System.currentTimeMillis();
+				RemoteLogger.performLog(LogPriority.INFORMATION, "Wait "
+						+ (nextExecution - now) + " ms for execution", job
+						.getRunnable().toString());
 				if (now < nextExecution)
 					wait(nextExecution - now);
 				if (System.currentTimeMillis() >= nextExecution) {

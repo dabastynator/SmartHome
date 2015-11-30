@@ -50,6 +50,11 @@ public class CronJobTrigger implements Runnable {
 	}
 
 	@Override
+	public String toString() {
+		return mTriggerList.toString();
+	}
+
+	@Override
 	public void run() {
 		for (Trigger trigger : mTriggerList)
 			mCenter.trigger(trigger);
