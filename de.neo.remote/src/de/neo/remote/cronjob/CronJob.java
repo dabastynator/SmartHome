@@ -49,6 +49,7 @@ public class CronJob {
 	private Runnable mRunnable;
 
 	private int mRepeat;
+	public int mNextFactor;
 
 	public CronJob(Runnable runnable) {
 		mRunnable = runnable;
@@ -84,7 +85,7 @@ public class CronJob {
 				}
 			mDayOfWeek = new CronToken(tokens[4], Calendar.DAY_OF_WEEK,
 					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
-					Calendar.MONTH);
+					Calendar.DAY_OF_MONTH, 7);
 			if (mDayOfWeek.mFigures != null)
 				for (int i = 0; i < mDayOfWeek.mFigures.length; i++) {
 					if (DayOfWeekMap.containsKey(mDayOfWeek.mFigures[i]))
@@ -145,6 +146,7 @@ public class CronJob {
 
 		public CronToken(String token, int calendarField, int[] resetFields,
 				int nextField) throws ParseException {
+			mNextFactor = 1;
 			mCalendarField = calendarField;
 			mRestricted = true;
 			mResetFields = resetFields;
@@ -180,6 +182,12 @@ public class CronJob {
 			}
 		}
 
+		public CronToken(String token, int calendarField, int[] resetFields,
+				int nextField, int nextFactor) throws ParseException {
+			this(token, calendarField, resetFields, nextField);
+			mNextFactor = nextFactor;
+		}
+
 		public void calculateNextExecution(Calendar calendar) {
 			int currentValue = calendar.get(mCalendarField);
 			if (mRestricted) {
@@ -196,7 +204,7 @@ public class CronJob {
 					calendar.add(mCalendarField, minimal - currentValue);
 					reset = minimal > currentValue;
 				} else {
-					calendar.add(mNextField, 1);
+					calendar.add(mNextField, mNextFactor);
 					calendar.set(mCalendarField, minimalOffset);
 					reset = true;
 				}
