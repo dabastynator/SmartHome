@@ -49,7 +49,6 @@ public class CronJob {
 	private Runnable mRunnable;
 
 	private int mRepeat;
-	public int mNextFactor;
 
 	public CronJob(Runnable runnable) {
 		mRunnable = runnable;
@@ -66,31 +65,25 @@ public class CronJob {
 			String[] tokens = cronExpression.split("\\s+");
 			if (tokens.length != 5)
 				throw new ParseException(
-						"Cronexpression must have 5 blocks, seperated by whitespace. Just found "
-								+ tokens.length, 0);
-			mMinute = new CronToken(tokens[0], Calendar.MINUTE, new int[] {},
-					Calendar.HOUR);
-			mHour = new CronToken(tokens[1], Calendar.HOUR_OF_DAY,
-					new int[] { Calendar.MINUTE }, Calendar.DAY_OF_MONTH);
+						"Cronexpression must have 5 blocks, seperated by whitespace. Just found " + tokens.length, 0);
+			mMinute = new CronToken(tokens[0], Calendar.MINUTE, new int[] {}, Calendar.HOUR);
+			mHour = new CronToken(tokens[1], Calendar.HOUR_OF_DAY, new int[] { Calendar.MINUTE },
+					Calendar.DATE);
 			mDayOfMonth = new CronToken(tokens[2], Calendar.DAY_OF_MONTH,
-					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
-					Calendar.MONTH);
-			mMonth = new CronToken(tokens[3], Calendar.MONTH, new int[] {
-					Calendar.MINUTE, Calendar.HOUR_OF_DAY,
-					Calendar.DAY_OF_MONTH }, Calendar.YEAR);
+					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY }, Calendar.MONTH);
+			mMonth = new CronToken(tokens[3], Calendar.MONTH,
+					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY, Calendar.DAY_OF_MONTH }, Calendar.YEAR);
 			if (mMonth.mFigures != null)
 				for (int i = 0; i < mMonth.mFigures.length; i++) {
 					if (MonthMap.containsKey(mMonth.mFigures[i]))
 						mMonth.mFigures[i] = MonthMap.get(mMonth.mFigures[i]);
 				}
 			mDayOfWeek = new CronToken(tokens[4], Calendar.DAY_OF_WEEK,
-					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY },
-					Calendar.DAY_OF_MONTH, 7);
+					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY }, Calendar.DATE, 7);
 			if (mDayOfWeek.mFigures != null)
 				for (int i = 0; i < mDayOfWeek.mFigures.length; i++) {
 					if (DayOfWeekMap.containsKey(mDayOfWeek.mFigures[i]))
-						mDayOfWeek.mFigures[i] = DayOfWeekMap
-								.get(mDayOfWeek.mFigures[i]);
+						mDayOfWeek.mFigures[i] = DayOfWeekMap.get(mDayOfWeek.mFigures[i]);
 				}
 		} catch (NumberFormatException e) {
 			throw new ParseException(e.getMessage(), 0);
@@ -111,8 +104,7 @@ public class CronJob {
 				Calendar d2 = Calendar.getInstance();
 				d2.setTimeInMillis(next.getTimeInMillis());
 				mDayOfWeek.calculateNextExecution(d2);
-				next.setTimeInMillis(Math.min(d1.getTimeInMillis(),
-						d2.getTimeInMillis()));
+				next.setTimeInMillis(Math.min(d1.getTimeInMillis(), d2.getTimeInMillis()));
 			} else {
 				mDayOfMonth.calculateNextExecution(next);
 				mDayOfWeek.calculateNextExecution(next);
@@ -132,7 +124,7 @@ public class CronJob {
 		return mNextExecution;
 	}
 
-	private class CronToken {
+	private static class CronToken {
 
 		private int[] mFigures;
 
@@ -144,8 +136,9 @@ public class CronJob {
 
 		private int mNextField;
 
-		public CronToken(String token, int calendarField, int[] resetFields,
-				int nextField) throws ParseException {
+		public int mNextFactor;
+
+		public CronToken(String token, int calendarField, int[] resetFields, int nextField) throws ParseException {
 			mNextFactor = 1;
 			mCalendarField = calendarField;
 			mRestricted = true;
@@ -159,8 +152,7 @@ public class CronJob {
 			} else if (token.contains("-")) {
 				String[] startStop = token.split("-");
 				if (startStop.length != 2)
-					throw new ParseException("Unexpected token '" + token
-							+ "' must look like 3-7", 0);
+					throw new ParseException("Unexpected token '" + token + "' must look like 3-7", 0);
 				int start = Integer.parseInt(startStop[0]);
 				int stop = Integer.parseInt(startStop[1]);
 				mFigures = new int[stop - start + 1];
@@ -171,8 +163,7 @@ public class CronJob {
 			} else if (token.contains("/")) {
 				String[] repeat = token.split("/");
 				if (repeat.length != 2 || !repeat[0].equals("*"))
-					throw new ParseException("Unknown token '" + token
-							+ "', expected */5", 0);
+					throw new ParseException("Unknown token '" + token + "', expected */5", 0);
 				int steps = Integer.parseInt(repeat[1]);
 				mFigures = new int[60 / steps];
 				for (int i = 0; i < 60 / steps; i++)
@@ -182,8 +173,8 @@ public class CronJob {
 			}
 		}
 
-		public CronToken(String token, int calendarField, int[] resetFields,
-				int nextField, int nextFactor) throws ParseException {
+		public CronToken(String token, int calendarField, int[] resetFields, int nextField, int nextFactor)
+				throws ParseException {
 			this(token, calendarField, resetFields, nextField);
 			mNextFactor = nextFactor;
 		}
@@ -233,5 +224,4 @@ public class CronJob {
 	public int getRepeat() {
 		return mRepeat;
 	}
-
 }
