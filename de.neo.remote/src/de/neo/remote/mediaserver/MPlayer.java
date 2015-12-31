@@ -58,33 +58,27 @@ public class MPlayer extends AbstractPlayer {
 
 	private void createPlayList(String file) {
 		try {
-			Process exec = Runtime.getRuntime().exec(
-					new String[] { "/usr/bin/find", file + "/" });
-			PrintStream output = new PrintStream(new FileOutputStream(
-					mPlayListfolder + "/playlist.pls"));
-			BufferedReader input = new BufferedReader(new InputStreamReader(
-					exec.getInputStream()));
-			BufferedReader error = new BufferedReader(new InputStreamReader(
-					exec.getErrorStream()));
+			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "find " + file + "/ | sort" });
+			PrintStream output = new PrintStream(new FileOutputStream(mPlayListfolder + "/playlist.pls"));
+			BufferedReader input = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+			BufferedReader error = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
 			String line = "";
 			while ((line = input.readLine()) != null)
 				output.println(line);
 			while ((line = error.readLine()) != null)
-				RemoteLogger.performLog(LogPriority.ERROR,
-						"Error creating playlist: " + line, "Mediaserver");
+				RemoteLogger.performLog(LogPriority.ERROR, "Error creating playlist: " + line, "Mediaserver");
 			output.close();
 			input.close();
 			error.close();
 		} catch (IOException e) {
-			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-					.getSimpleName() + ": " + e.getMessage(), "MPlayer");
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 	}
 
 	protected void startPlayer() {
 		try {
-			String[] args = new String[] { "/usr/bin/mplayer", "-slave",
-					"-quiet", "-idle", "-geometry", mPositionLeft + ":0" };
+			String[] args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet", "-idle", "-geometry",
+					mPositionLeft + ":0" };
 			mMplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			mMplayerIn = new PrintStream(mMplayerProcess.getOutputStream());
@@ -181,9 +175,7 @@ public class MPlayer extends AbstractPlayer {
 	public void moveLeft() throws PlayerException {
 		long time = 0;
 		if (mPlayingBean != null)
-			time = Math
-					.max(System.currentTimeMillis()
-							- mPlayingBean.getStartTime() - 3, 0);
+			time = Math.max(System.currentTimeMillis() - mPlayingBean.getStartTime() - 3, 0);
 		quit();
 		mPositionLeft -= 1680;
 		startPlayer();
@@ -192,23 +184,21 @@ public class MPlayer extends AbstractPlayer {
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-						.getSimpleName() + ": " + e.getMessage(), "MPlayer");
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+						"MPlayer");
 			}
 		}
 	}
 
 	@Override
-	public void playFromYoutube(String url) throws RemoteException,
-			PlayerException {
+	public void playFromYoutube(String url) throws RemoteException, PlayerException {
 		if (mMplayerIn == null)
 			startPlayer();
 		String[] split = url.split(" ");
 		String title = "";
 		for (int i = 0; i < split.length - 1; i++)
 			title = title + " " + split[i];
-		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE,
-				split[split.length - 1]);
+		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE, split[split.length - 1]);
 		writeCommand("loadfile " + youtubeStreamUrl);
 	}
 
@@ -216,9 +206,7 @@ public class MPlayer extends AbstractPlayer {
 	public void moveRight() throws PlayerException {
 		long time = 0;
 		if (mPlayingBean != null)
-			time = Math
-					.max(System.currentTimeMillis()
-							- mPlayingBean.getStartTime() - 3, 0);
+			time = Math.max(System.currentTimeMillis() - mPlayingBean.getStartTime() - 3, 0);
 		quit();
 		mPositionLeft += 1680;
 		startPlayer();
@@ -227,15 +215,14 @@ public class MPlayer extends AbstractPlayer {
 			try {
 				setPlayingPosition((int) time);
 			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-						.getSimpleName() + ": " + e.getMessage(), "MPlayer");
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+						"MPlayer");
 			}
 		}
 	}
 
 	@Override
-	public void playPlayList(String pls) throws RemoteException,
-			PlayerException {
+	public void playPlayList(String pls) throws RemoteException, PlayerException {
 		if (mMplayerIn == null) {
 			startPlayer();
 		}
@@ -259,14 +246,12 @@ public class MPlayer extends AbstractPlayer {
 	private String lineOfFile(String file, int line) {
 		String firstLine = null;
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(
-					file)));
+			BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
 			for (int i = 0; i < line; i++)
 				firstLine = reader.readLine();
 			reader.close();
 		} catch (IOException e) {
-			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-					.getSimpleName() + ": " + e.getMessage(), "MPlayer");
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 		return firstLine;
 	}
@@ -292,12 +277,10 @@ public class MPlayer extends AbstractPlayer {
 						} catch (IOException e) {
 							bean = new PlayingBean();
 						}
-						String file = line.substring(line
-								.lastIndexOf(File.separator) + 1);
+						String file = line.substring(line.lastIndexOf(File.separator) + 1);
 						file = file.substring(0, file.length() - 1);
 						bean.setFile(file.trim());
-						if (mPlayingBean != null
-								&& mPlayingBean.getPath() != null
+						if (mPlayingBean != null && mPlayingBean.getPath() != null
 								&& mPlayingBean.getPath().equals(bean.getPath()))
 							bean.setStartTime(mPlayingBean.getStartTime());
 					}
@@ -324,8 +307,7 @@ public class MPlayer extends AbstractPlayer {
 				bean.setState(PlayingBean.STATE.DOWN);
 				informPlayingBean(bean);
 			} catch (IOException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-						.getSimpleName() + ": " + e.getMessage(),
+				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
 						"MPlayerListener");
 			}
 		}
@@ -333,14 +315,12 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void setPlayingPosition(int second) throws RemoteException,
-			PlayerException {
+	public void setPlayingPosition(int second) throws RemoteException, PlayerException {
 		writeCommand("seek " + second + " 2");
 	}
 
 	@Override
-	public void useShuffle(boolean shuffle) throws RemoteException,
-			PlayerException {
+	public void useShuffle(boolean shuffle) throws RemoteException, PlayerException {
 		throw new PlayerException("shuffle is not supported jet.");
 	}
 
