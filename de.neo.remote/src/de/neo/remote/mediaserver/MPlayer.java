@@ -58,7 +58,7 @@ public class MPlayer extends AbstractPlayer {
 
 	private void createPlayList(String file) {
 		try {
-			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "find " + file + "/ | sort" });
+			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "find \"" + file + "/\" | sort" });
 			PrintStream output = new PrintStream(new FileOutputStream(mPlayListfolder + "/playlist.pls"));
 			BufferedReader input = new BufferedReader(new InputStreamReader(exec.getInputStream()));
 			BufferedReader error = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
