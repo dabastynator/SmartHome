@@ -271,25 +271,30 @@ public class RemoteService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (mCurrentControlCenter != null) {
-			if (ACTION_WIFI_CONNECTED.equals(intent.getAction())) {
-				new Thread() {
-
-					@Override
-					public void run() {
-						Trigger trigger = new Trigger();
-						trigger.setTriggerID(Trigger.CLIENT_ACTION);
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				Trigger trigger = new Trigger();
+				trigger.setTriggerID(Trigger.CLIENT_ACTION);
+				for (int i = 0; i < 5; i++) {
+					try {
+						mCurrentControlCenter.trigger(trigger);
+						return;
+					} catch (RemoteException e) {
 						try {
-							mCurrentControlCenter.trigger(trigger);
-						} catch (RemoteException e) {
+							Thread.sleep(2000);
+						} catch (InterruptedException e1) {
 							// Ignore
 						}
 					}
-				}.start();
-
+				}
 			}
-		}
+		};
+		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction()))
+			new Thread(r).start();
+
 		return super.onStartCommand(intent, flags, startId);
+
 	}
 
 	public void refreshControlCenter() throws RemoteException {
