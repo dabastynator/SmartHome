@@ -10,6 +10,8 @@ import org.xml.sax.SAXException;
 
 public class Trigger implements Serializable {
 
+	public static final String CLIENT_ACTION = "trigger.client_action";
+
 	/**
 	 * generated
 	 */
@@ -77,8 +79,7 @@ public class Trigger implements Serializable {
 	public void initialize(Element element) throws SAXException {
 		for (String attribute : new String[] { "triggerID" })
 			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for "
-						+ getClass().getSimpleName());
+				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
 		setTriggerID(element.getAttribute("triggerID"));
 		NodeList paramterNodes = element.getChildNodes();
 		for (int j = 0; j < paramterNodes.getLength(); j++) {
@@ -87,8 +88,7 @@ public class Trigger implements Serializable {
 				if (parameter.getNodeName().equals("Parameter")) {
 					for (String attribute : new String[] { "key", "value" })
 						if (!parameter.hasAttribute(attribute))
-							throw new SAXException(attribute + " missing for "
-									+ getClass().getSimpleName());
+							throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
 					putParameter(parameter.getAttribute("key").toLowerCase(),
 							parameter.getAttribute("value").toLowerCase());
 				}

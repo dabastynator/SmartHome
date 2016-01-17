@@ -9,6 +9,8 @@ import java.util.Map;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -29,9 +31,13 @@ import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.Trigger;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.receivers.WifiReceiver;
 import de.neo.remote.mobile.tasks.AbstractTask;
+import de.neo.remote.mobile.tasks.SimpleTask;
+import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
@@ -44,6 +50,8 @@ import de.neo.rmi.transceiver.ReceiverProgress;
 import de.neo.rmi.transceiver.SenderProgress;
 
 public class RemoteService extends Service {
+
+	public static final String ACTION_WIFI_CONNECTED = "wifi_connected";
 
 	protected RemoteServer mCurrentServer;
 	protected ControlCenterBuffer mCurrentControlCenter;
@@ -63,6 +71,7 @@ public class RemoteService extends Service {
 	protected Handler mHandler;
 
 	protected List<IRemoteActionListener> mActionListener;
+	protected WifiReceiver mWifiReceiver = new WifiReceiver();
 
 	@Override
 	public void onCreate() {
@@ -70,8 +79,7 @@ public class RemoteService extends Service {
 		mHandler = new Handler();
 		RMILogListener rmiLogListener = new RMILogListener() {
 			@Override
-			public void rmiLog(LogPriority priority, String message, String id,
-					long date) {
+			public void rmiLog(LogPriority priority, String message, String id, long date) {
 				Log.e("RMI Logs", message);
 			}
 		};
@@ -111,8 +119,7 @@ public class RemoteService extends Service {
 		return mLocalServer;
 	}
 
-	public void setCurrentMediaServer(final StationStuff mediaObjects)
-			throws RemoteException {
+	public void setCurrentMediaServer(final StationStuff mediaObjects) throws RemoteException {
 		if (mediaObjects != null) {
 			new Thread() {
 				@Override
@@ -121,23 +128,16 @@ public class RemoteService extends Service {
 					mCurrentMediaServer = mediaObjects;
 					try {
 						if (oldServer != null) {
-							oldServer.totem
-									.removePlayerMessageListener(mPlayerListener);
-							oldServer.mplayer
-									.removePlayerMessageListener(mPlayerListener);
+							oldServer.totem.removePlayerMessageListener(mPlayerListener);
+							oldServer.mplayer.removePlayerMessageListener(mPlayerListener);
 						}
 					} catch (RemoteException e) {
 					}
 					try {
-						mCurrentMediaServer.mplayer
-								.addPlayerMessageListener(mPlayerListener);
-						mCurrentMediaServer.totem
-								.addPlayerMessageListener(mPlayerListener);
-						mCurrentMediaServer.omxplayer
-								.addPlayerMessageListener(mPlayerListener);
-						mPlayerListener
-								.playerMessage(mCurrentMediaServer.player
-										.getPlayingBean());
+						mCurrentMediaServer.mplayer.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaServer.totem.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaServer.omxplayer.addPlayerMessageListener(mPlayerListener);
+						mPlayerListener.playerMessage(mCurrentMediaServer.player.getPlayingBean());
 					} catch (PlayerException | RemoteException e) {
 					}
 				}
@@ -185,14 +185,14 @@ public class RemoteService extends Service {
 		public int directoryCount;
 	}
 
-	public void connectToServer(final RemoteServer server,
-			final Activity activity) {
+	public void connectToServer(final RemoteServer server, final Activity activity) {
 		new AsyncTask<RemoteServer, Integer, Exception>() {
 
 			@Override
 			protected Exception doInBackground(RemoteServer... server) {
 				mLocalServer = Server.getServer();
 				try {
+					// Shutdown and restart the rmi-server
 					try {
 						if (mLocalServer != null)
 							mLocalServer.close();
@@ -211,11 +211,18 @@ public class RemoteService extends Service {
 					}
 					mLocalServer.startServer();
 
-					IControlCenter center = mLocalServer.find(
-							IControlCenter.ID, IControlCenter.class);
+					// Start foreground service to avoid killing of the service
+					startForeground(NotificationHandler.SERVICE_NOTIFICATION_ID,
+							NotificationHandler.createServiceNotification(RemoteService.this));
+
+					// Register WIFI broadcast-receiver
+					IntentFilter intentFilter = new IntentFilter();
+					intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+					registerReceiver(mWifiReceiver, intentFilter);
+
+					IControlCenter center = mLocalServer.find(IControlCenter.ID, IControlCenter.class);
 					if (center == null)
-						throw new RemoteException(IControlCenter.ID,
-								"control center not found in registry");
+						throw new RemoteException(IControlCenter.ID, "control center not found in registry");
 					mCurrentControlCenter = new ControlCenterBuffer(center);
 					mCurrentServer = server[0];
 					refreshControlCenter();
@@ -239,6 +246,8 @@ public class RemoteService extends Service {
 	}
 
 	public void disconnectFromServer() {
+		unregisterReceiver(mWifiReceiver);
+		stopForeground(true);
 		new AsyncTask<Void, Integer, Exception>() {
 
 			@Override
@@ -260,6 +269,29 @@ public class RemoteService extends Service {
 		}.execute();
 	}
 
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (mCurrentControlCenter != null) {
+			if (ACTION_WIFI_CONNECTED.equals(intent.getAction())) {
+				new Thread() {
+
+					@Override
+					public void run() {
+						Trigger trigger = new Trigger();
+						trigger.setTriggerID(Trigger.CLIENT_ACTION);
+						try {
+							mCurrentControlCenter.trigger(trigger);
+						} catch (RemoteException e) {
+							// Ignore
+						}
+					}
+				}.start();
+
+			}
+		}
+		return super.onStartCommand(intent, flags, startId);
+	}
+
 	public void refreshControlCenter() throws RemoteException {
 		String[] ids = null;
 		mCurrentControlCenter.clear();
@@ -269,8 +301,7 @@ public class RemoteService extends Service {
 		mUnitMap.clear();
 		for (String id : ids) {
 			try {
-				BufferdUnit bufferdUnit = new BufferdUnit(
-						mCurrentControlCenter.getControlUnit(id));
+				BufferdUnit bufferdUnit = new BufferdUnit(mCurrentControlCenter.getControlUnit(id));
 				Log.e("control unit", bufferdUnit.mName);
 				mUnitMap.put(bufferdUnit.mID, bufferdUnit);
 				if (bufferdUnit.mObject instanceof IInternetSwitch) {
@@ -292,8 +323,7 @@ public class RemoteService extends Service {
 				}
 				fireControlUnit(bufferdUnit);
 			} catch (Exception e) {
-				Log.e("error",
-						e.getClass().getSimpleName() + ": " + e.getMessage());
+				Log.e("error", e.getClass().getSimpleName() + ": " + e.getMessage());
 			}
 		}
 	}
@@ -350,8 +380,7 @@ public class RemoteService extends Service {
 	public class GPIOListener implements IInternetSwitchListener {
 
 		@Override
-		public void onPowerSwitchChange(final String switchName,
-				final State state) throws RemoteException {
+		public void onPowerSwitchChange(final String switchName, final State state) throws RemoteException {
 			BufferdUnit unit = mUnitMap.get(switchName);
 			if (unit != null)
 				unit.mSwitchState = state;
@@ -400,8 +429,7 @@ public class RemoteService extends Service {
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(RemoteService.this, "download finished",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(RemoteService.this, "download finished", Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : mActionListener)
 						l.endReceive(size);
 				}
@@ -413,8 +441,7 @@ public class RemoteService extends Service {
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(RemoteService.this,
-							"error occurred while loading: " + e.getMessage(),
+					Toast.makeText(RemoteService.this, "error occurred while loading: " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : mActionListener)
 						l.exceptionOccurred(e);
@@ -427,8 +454,7 @@ public class RemoteService extends Service {
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(RemoteService.this, "download cancled",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(RemoteService.this, "download cancled", Toast.LENGTH_SHORT).show();
 					for (IRemoteActionListener l : mActionListener)
 						l.downloadCanceled();
 				}
@@ -497,8 +523,7 @@ public class RemoteService extends Service {
 	 * 
 	 * @author sebastian
 	 */
-	public interface IRemoteActionListener extends ReceiverProgress,
-			SenderProgress {
+	public interface IRemoteActionListener extends ReceiverProgress, SenderProgress {
 
 		/**
 		 * server player plays new file
