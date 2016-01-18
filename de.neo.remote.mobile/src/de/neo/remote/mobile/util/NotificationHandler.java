@@ -19,6 +19,7 @@ import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
@@ -167,13 +168,14 @@ public class NotificationHandler implements IRemoteActionListener {
 		nm.notify(PLAYING_NOTIFICATION_ID, builder.build());
 	}
 
-	public static Notification createServiceNotification(Context context) {
+	public static Notification createServiceNotification(RemoteService context) {
 		Intent nIntent = new Intent(context, ControlSceneActivity.class);
 		nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		PendingIntent pInent = PendingIntent.getActivity(context, 0, nIntent, 0);
 
 		Builder builder = new NotificationCompat.Builder(context);
-		builder.setContentText(context.getResources().getString(R.string.app_name));
+		builder.setContentText(context.mCurrentSSID);
+		builder.setContentTitle(context.mCurrentServer.getName());
 		builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher));
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentIntent(pInent);

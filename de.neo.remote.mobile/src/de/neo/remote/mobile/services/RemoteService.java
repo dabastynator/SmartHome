@@ -23,12 +23,12 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IImageViewer;
 import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IInternetSwitchListener;
 import de.neo.remote.api.IPlayList;
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
+import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.Trigger;
@@ -36,8 +36,6 @@ import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.WifiReceiver;
 import de.neo.remote.mobile.tasks.AbstractTask;
-import de.neo.remote.mobile.tasks.SimpleTask;
-import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
@@ -53,7 +51,7 @@ public class RemoteService extends Service {
 
 	public static final String ACTION_WIFI_CONNECTED = "wifi_connected";
 
-	protected RemoteServer mCurrentServer;
+	public RemoteServer mCurrentServer;
 	protected ControlCenterBuffer mCurrentControlCenter;
 	public StationStuff mCurrentMediaServer;
 	protected PlayingBean mCurrentPlayingFile;
@@ -71,7 +69,9 @@ public class RemoteService extends Service {
 	protected Handler mHandler;
 
 	protected List<IRemoteActionListener> mActionListener;
-	protected WifiReceiver mWifiReceiver = new WifiReceiver();
+	protected WifiReceiver mWifiReceiver;
+
+	public String mCurrentSSID;
 
 	@Override
 	public void onCreate() {
@@ -211,20 +211,23 @@ public class RemoteService extends Service {
 					}
 					mLocalServer.startServer();
 
-					// Start foreground service to avoid killing of the service
-					startForeground(NotificationHandler.SERVICE_NOTIFICATION_ID,
-							NotificationHandler.createServiceNotification(RemoteService.this));
-
-					// Register WIFI broadcast-receiver
-					IntentFilter intentFilter = new IntentFilter();
-					intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-					registerReceiver(mWifiReceiver, intentFilter);
-
 					IControlCenter center = mLocalServer.find(IControlCenter.ID, IControlCenter.class);
 					if (center == null)
 						throw new RemoteException(IControlCenter.ID, "control center not found in registry");
 					mCurrentControlCenter = new ControlCenterBuffer(center);
 					mCurrentServer = server[0];
+
+					// Register WIFI broadcast-receiver
+					IntentFilter intentFilter = new IntentFilter();
+					intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+					mWifiReceiver = new WifiReceiver();
+					registerReceiver(mWifiReceiver, intentFilter);
+					mCurrentSSID = mWifiReceiver.currentSSID(RemoteService.this);
+
+					// Start foreground service to avoid killing of the service
+					startForeground(NotificationHandler.SERVICE_NOTIFICATION_ID,
+							NotificationHandler.createServiceNotification(RemoteService.this));
+
 					refreshControlCenter();
 				} catch (final Exception e) {
 					return e;
@@ -246,7 +249,9 @@ public class RemoteService extends Service {
 	}
 
 	public void disconnectFromServer() {
-		unregisterReceiver(mWifiReceiver);
+		if (mWifiReceiver != null)
+			unregisterReceiver(mWifiReceiver);
+		mWifiReceiver = null;
 		stopForeground(true);
 		new AsyncTask<Void, Integer, Exception>() {
 
@@ -276,16 +281,19 @@ public class RemoteService extends Service {
 			public void run() {
 				Trigger trigger = new Trigger();
 				trigger.setTriggerID(Trigger.CLIENT_ACTION);
-				for (int i = 0; i < 5; i++) {
+				for (int i = 0; i < 10; i++) {
 					try {
-						mCurrentControlCenter.trigger(trigger);
-						return;
-					} catch (RemoteException e) {
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e1) {
-							// Ignore
+						String ssid = mWifiReceiver.currentSSID(RemoteService.this);
+						if (mCurrentSSID.equals(ssid)) {
+							mCurrentControlCenter.trigger(trigger);
+							return;
 						}
+					} catch (RemoteException e) {
+					}
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e1) {
+						// Ignore
 					}
 				}
 			}
