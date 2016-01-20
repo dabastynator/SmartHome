@@ -70,6 +70,7 @@ public class RemoteService extends Service {
 
 	protected List<IRemoteActionListener> mActionListener;
 	protected WifiReceiver mWifiReceiver;
+	private long mLastClientAction = 0;
 
 	public String mCurrentSSID;
 
@@ -286,6 +287,7 @@ public class RemoteService extends Service {
 						String ssid = mWifiReceiver.currentSSID(RemoteService.this);
 						if (mCurrentSSID.equals(ssid)) {
 							mCurrentControlCenter.trigger(trigger);
+							mLastClientAction = System.currentTimeMillis();
 							return;
 						}
 					} catch (RemoteException e) {
@@ -298,7 +300,8 @@ public class RemoteService extends Service {
 				}
 			}
 		};
-		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction()))
+		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())
+				&& mLastClientAction <= System.currentTimeMillis() - 1000 * 60 * 5)
 			new Thread(r).start();
 
 		return super.onStartCommand(intent, flags, startId);
