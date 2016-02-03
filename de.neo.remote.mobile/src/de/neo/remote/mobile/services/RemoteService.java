@@ -50,6 +50,7 @@ import de.neo.rmi.transceiver.SenderProgress;
 public class RemoteService extends Service {
 
 	public static final String ACTION_WIFI_CONNECTED = "wifi_connected";
+	public static final String ACTION_WIFI_DISCONNECTED = "wifi_disconnected";
 
 	public RemoteServer mCurrentServer;
 	protected ControlCenterBuffer mCurrentControlCenter;
@@ -70,7 +71,8 @@ public class RemoteService extends Service {
 
 	protected List<IRemoteActionListener> mActionListener;
 	protected WifiReceiver mWifiReceiver;
-	private long mLastClientAction = 0;
+	private long mLastClientActionTime = 0;
+	private boolean mLastClientActionConnected;
 
 	public String mCurrentSSID;
 
@@ -219,6 +221,7 @@ public class RemoteService extends Service {
 					mCurrentServer = server[0];
 
 					// Register WIFI broadcast-receiver
+					mLastClientActionConnected = true;
 					IntentFilter intentFilter = new IntentFilter();
 					intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 					mWifiReceiver = new WifiReceiver();
@@ -285,9 +288,12 @@ public class RemoteService extends Service {
 				for (int i = 0; i < 10; i++) {
 					try {
 						String ssid = mWifiReceiver.currentSSID(RemoteService.this);
-						if (mCurrentSSID.equals(ssid)) {
+						if (mCurrentSSID.equals(ssid)
+								&& mLastClientActionTime <= System.currentTimeMillis() - 1000 * 60 * 7
+								&& !mLastClientActionConnected) {
 							mCurrentControlCenter.trigger(trigger);
-							mLastClientAction = System.currentTimeMillis();
+							mLastClientActionTime = System.currentTimeMillis();
+							mLastClientActionConnected = true;
 							return;
 						}
 					} catch (RemoteException e) {
@@ -301,8 +307,13 @@ public class RemoteService extends Service {
 			}
 		};
 		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())
-				&& mLastClientAction <= System.currentTimeMillis() - 1000 * 60 * 5)
+				&& !mLastClientActionConnected) {
 			new Thread(r).start();
+		}
+		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction()) && mLastClientActionConnected) {
+			mLastClientActionTime = System.currentTimeMillis();
+			mLastClientActionConnected = false;
+		}
 
 		return super.onStartCommand(intent, flags, startId);
 

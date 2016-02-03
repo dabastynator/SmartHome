@@ -17,12 +17,13 @@ public class WifiReceiver extends BroadcastReceiver {
 		final String action = intent.getAction();
 		if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 			NetworkInfo ni = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-			if (ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI && ni.isConnected()) {
+			if (ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 				Intent i = new Intent(context, RemoteService.class);
-				i.setAction(RemoteService.ACTION_WIFI_CONNECTED);
+				if (ni.isConnected())
+					i.setAction(RemoteService.ACTION_WIFI_CONNECTED);
+				else
+					i.setAction(RemoteService.ACTION_WIFI_DISCONNECTED);
 				context.startService(i);
-			} else {
-				// wifi connection was lost
 			}
 		}
 	}
