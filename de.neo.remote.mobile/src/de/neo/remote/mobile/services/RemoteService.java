@@ -21,7 +21,6 @@ import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
-import de.neo.remote.api.IImageViewer;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IInternetSwitchListener;
@@ -183,7 +182,6 @@ public class RemoteService extends Service {
 		public IPlayer mplayer;
 		public IPlayer totem;
 		public IPlayer omxplayer;
-		public IImageViewer imageViewer;
 		public String name;
 		public int directoryCount;
 	}

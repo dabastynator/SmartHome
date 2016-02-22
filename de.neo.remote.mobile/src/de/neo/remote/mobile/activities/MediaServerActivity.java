@@ -4,6 +4,7 @@ import java.io.File;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -88,9 +89,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		setContentView(R.layout.mediaserver_main);
 
 		findComponents();
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-		if (getIntent().getExtras() != null
-				&& getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
+		if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
 			mMediaServerID = getIntent().getExtras().getString(EXTRA_MEDIA_ID);
 		}
 	}
@@ -117,11 +118,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		// super.onCreateContextMenu(menu, v, menuInfo);
-		Fragment fragment = mBrowserPageAdapter.getItem(mListPager
-				.getCurrentItem());
+		Fragment fragment = mBrowserPageAdapter.getItem(mListPager.getCurrentItem());
 		if (fragment != null)
 			fragment.onCreateContextMenu(menu, v, menuInfo);
 	}
@@ -137,30 +136,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		final StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mBinder == null)
 			return super.onKeyDown(keyCode, event);
-		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.player.volDown();
-					} catch (Exception e) {
-					}
-				};
-			}.start();
-			return true;
-		}
-		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			new Thread() {
-				public void run() {
-					try {
-						mediaServer.player.volUp();
-					} catch (Exception e) {
-					}
-				};
-			}.start();
-			return true;
-		}
-		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager
-				.getCurrentItem());
+		/*
+		 * if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) { new Thread() { public
+		 * void run() { try { mediaServer.player.volDown(); } catch (Exception
+		 * e) { } }; }.start(); return true; } if (keyCode ==
+		 * KeyEvent.KEYCODE_VOLUME_UP) { new Thread() { public void run() { try
+		 * { mediaServer.player.volUp(); } catch (Exception e) { } }; }.start();
+		 * return true; }
+		 */
+		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager.getCurrentItem());
 		if (fragment != null && fragment.onKeyDown(keyCode, event))
 			return true;
 		return super.onKeyDown(keyCode, event);
@@ -174,8 +158,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		if (mBrowserPageAdapter.onContextItemSelected(item,
-				mListPager.getCurrentItem()))
+		if (mBrowserPageAdapter.onContextItemSelected(item, mListPager.getCurrentItem()))
 			return true;
 		return super.onContextItemSelected(item);
 	}
@@ -215,9 +198,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("image/*");
-				startActivityForResult(
-						Intent.createChooser(intent, "File Chooser"),
-						FILE_REQUEST);
+				startActivityForResult(Intent.createChooser(intent, "File Chooser"), FILE_REQUEST);
 				break;
 			case R.id.opt_create_playlist:
 				new PlayListTask(this, mediaServer).createPlaylist();
@@ -293,8 +274,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			}
 		});
 		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
-			mBrowserPageAdapter = new BrowserPageAdapter(
-					getSupportFragmentManager());
+			mBrowserPageAdapter = new BrowserPageAdapter(getSupportFragmentManager());
 			if (mBinder != null)
 				mBrowserPageAdapter.setStation(mBinder.getLatestMediaServer());
 			mListPager.setAdapter(mBrowserPageAdapter);
@@ -314,11 +294,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		String fileName = "unknown";// default fileName
 		Uri filePathUri = uri;
 		if (uri.getScheme().toString().compareTo("content") == 0) {
-			Cursor cursor = getContentResolver().query(uri, null, null, null,
-					null);
+			Cursor cursor = getContentResolver().query(uri, null, null, null, null);
 			if (cursor.moveToFirst()) {
-				int column_index = cursor
-						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 				filePathUri = Uri.parse(cursor.getString(column_index));
 				fileName = filePathUri.getPath();
 			}
@@ -347,8 +325,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (extras != null && mBinder != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 			if (youtubeURL != null) {
-				new PlayYoutubeTask(this, youtubeURL, mBinder)
-						.execute(new String[] {});
+				new PlayYoutubeTask(this, youtubeURL, mBinder).execute(new String[] {});
 				getIntent().removeExtra(Intent.EXTRA_TEXT);
 			}
 		}
@@ -389,8 +366,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			@Override
 			protected void onPostExecute(StationStuff station) {
 				if (error != null)
-					new AbstractTask.ErrorDialog(MediaServerActivity.this,
-							error).show();
+					new AbstractTask.ErrorDialog(MediaServerActivity.this, error).show();
 				else
 					setStation(station);
 			}
@@ -530,8 +506,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (receiver != null) {
 			receiver.cancel();
 		} else {
-			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT).show();
 			mDownloadLayout.setVisibility(View.GONE);
 		}
 	}
@@ -544,8 +519,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			return;
 		if (requestCode == MediaServerActivity.FILE_REQUEST) {
 			Uri uri = data.getData();
-			mBinder.uploadFile(mediaServer.browser, new File(
-					getFilePathByUri(uri)));
+			mBinder.uploadFile(mediaServer.browser, new File(getFilePathByUri(uri)));
 		}
 	}
 
@@ -555,8 +529,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void refreshContent() {
-		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager
-				.getCurrentItem());
+		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager.getCurrentItem());
 
 		if (fragment != null)
 			fragment.refreshContent(this);

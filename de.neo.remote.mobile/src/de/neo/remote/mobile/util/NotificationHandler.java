@@ -5,12 +5,18 @@ import java.nio.IntBuffer;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.RemoteControlClient;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
@@ -18,11 +24,13 @@ import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.receivers.MediaButtonReceiver;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.remote.mobile.R;
 
 /**
@@ -92,37 +100,125 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
+		Bitmap thumbnail = null;
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
-			return;
+
+			Intent i = new Intent("com.android.music.metachanged");
+			i.putExtra("artist", "");
+			i.putExtra("album", "");
+			i.putExtra("track", "");
+			i.putExtra("playing", false);
+			mContext.sendBroadcast(i);
+		} else {
+			StringBuilder sb = new StringBuilder();
+			String t = "Playing";
+			if (playing.getTitle() != null && playing.getTitle().length() > 0)
+				t = playing.getTitle();
+			else if (playing.getFile() != null)
+				t = playing.getFile();
+			if (playing.getArtist() != null && playing.getArtist().length() > 0)
+				sb.append(playing.getArtist());
+			if (playing.getAlbum() != null && playing.getAlbum().length() > 0)
+				sb.append(" <" + playing.getAlbum() + ">");
+			final String msg = sb.toString();
+			final String title = t;
+
+			if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
+				thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
+						Bitmap.Config.RGB_565);
+				IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
+																			// is
+																			// my
+																			// array
+				thumbnail.copyPixelsFromBuffer(buf);
+			}
+			if (playing.getState() == STATE.DOWN) {
+				NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+				nm.cancel(PLAYING_NOTIFICATION_ID);
+			} else
+				makePlayingNotification(title, msg, thumbnail, playing.getStartTime(),
+						playing.getState() == STATE.PLAY);
+
+			Intent i = new Intent("com.android.music.metachanged");
+			i.putExtra("artist", playing.getArtist());
+			i.putExtra("album", playing.getAlbum());
+			i.putExtra("track", playing.getTitle());
+			i.putExtra("playing", playing.getState() == STATE.PLAY);
+			mContext.sendBroadcast(i);
 		}
-		StringBuilder sb = new StringBuilder();
-		String t = "Playing";
-		if (playing.getTitle() != null && playing.getTitle().length() > 0)
-			t = playing.getTitle();
-		else if (playing.getFile() != null)
-			t = playing.getFile();
-		if (playing.getArtist() != null && playing.getArtist().length() > 0)
-			sb.append(playing.getArtist());
-		if (playing.getAlbum() != null && playing.getAlbum().length() > 0)
-			sb.append(" <" + playing.getAlbum() + ">");
-		final String msg = sb.toString();
-		final String title = t;
-		Bitmap thumbnail = null;
-		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
-			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
-					Bitmap.Config.RGB_565);
-			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
-																		// is my
-																		// array
-			thumbnail.copyPixelsFromBuffer(buf);
+
+		// Set music session
+		setMusicSession(playing, thumbnail);
+
+	}
+
+	private void setMusicSession(PlayingBean playing, Bitmap thumbnail) {
+		AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+		int stateflag = PlaybackStateCompat.STATE_NONE;
+		if (playing == null || playing.getState() == STATE.DOWN)
+			stateflag = PlaybackStateCompat.STATE_NONE;
+		else if (playing.getState() == STATE.PLAY)
+			stateflag = PlaybackStateCompat.STATE_PLAYING;
+		else if (playing.getState() == STATE.PAUSE)
+			stateflag = PlaybackStateCompat.STATE_PAUSED;
+		ComponentName component = new ComponentName(mContext, MediaButtonReceiver.class);
+		if (stateflag != PlaybackStateCompat.STATE_NONE) {
+			int result = am.requestAudioFocus(new PlayItemTask.AudioListener(am, mContext), AudioManager.STREAM_MUSIC,
+					AudioManager.AUDIOFOCUS_GAIN);
+			if (result == AudioManager.AUDIOFOCUS_GAIN) {
+				am.registerMediaButtonEventReceiver(component);
+
+				Intent i = new Intent(Intent.ACTION_MEDIA_BUTTON);
+				i.setComponent(component);
+				PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
+				@SuppressWarnings("deprecation")
+				RemoteControlClient rcClient = new RemoteControlClient(pi);
+				am.registerRemoteControlClient(rcClient);
+
+				int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
+						| RemoteControlClient.FLAG_KEY_MEDIA_PLAY | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
+						| RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
+				rcClient.setTransportControlFlags(flags);
+
+				MediaSessionCompat mSession = new MediaSessionCompat(mContext, mContext.getPackageName());
+				Intent intent = new Intent(mContext, MediaButtonReceiver.class);
+				PendingIntent pintent = PendingIntent.getBroadcast(mContext, 0, intent,
+						PendingIntent.FLAG_UPDATE_CURRENT);
+				mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+						| MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+				mSession.setMediaButtonReceiver(pintent);
+				mSession.setCallback(new MediaCallback(mContext));
+
+				PlaybackStateCompat state = new PlaybackStateCompat.Builder()
+						.setActions(PlaybackStateCompat.ACTION_FAST_FORWARD | PlaybackStateCompat.ACTION_PAUSE
+								| PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE
+								| PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+								| PlaybackStateCompat.ACTION_STOP)
+						.setState(stateflag, 0, 1, SystemClock.elapsedRealtime()).build();
+				mSession.setPlaybackState(state);
+				Intent nIntent = new Intent(mContext, MediaServerActivity.class);
+				nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+				nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, mCurrentServer.getId());
+				PendingIntent pInent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
+				mSession.setSessionActivity(pInent);
+				MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
+				if (playing != null) {
+					builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playing.getArtist());
+					builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, playing.getAlbum());
+					builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playing.getTitle());
+				}
+				builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail);
+				mSession.setMetadata(builder.build());
+				mSession.setActive(true);
+			}
+		} else {
+			MediaSessionCompat mSession = new MediaSessionCompat(mContext, mContext.getPackageName());
+			mSession.setActive(false);
+			am.unregisterMediaButtonEventReceiver(component);
 		}
-		if (playing.getState() == STATE.DOWN) {
-			NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.cancel(PLAYING_NOTIFICATION_ID);
-		} else
-			makePlayingNotification(title, msg, thumbnail, playing.getStartTime(), playing.getState() == STATE.PLAY);
+
 	}
 
 	/**
@@ -176,7 +272,6 @@ public class NotificationHandler implements IRemoteActionListener {
 		Builder builder = new NotificationCompat.Builder(context);
 		builder.setContentText(context.mCurrentSSID);
 		builder.setContentTitle(context.mCurrentServer.getName());
-		builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher));
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentIntent(pInent);
 		return builder.build();

@@ -114,10 +114,8 @@ public class RemoteBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void downloadFile(AbstractConnectionActivity activity,
-			IBrowser browser, String file) {
-		new DownloadTask(activity, browser, file, null,
-				mService.mCurrentServer.getName(), this).execute();
+	public void downloadFile(AbstractConnectionActivity activity, IBrowser browser, String file) {
+		new DownloadTask(activity, browser, file, null, mService.mCurrentServer.getName(), this).execute();
 		mService.mNotificationHandler.setFile(file);
 	}
 
@@ -126,10 +124,8 @@ public class RemoteBinder extends Binder {
 	 * 
 	 * @param directory
 	 */
-	public void downloadDirectory(AbstractConnectionActivity activity,
-			IBrowser browser, String directory) {
-		new DownloadTask(activity, browser, null, directory,
-				mService.mCurrentServer.getName(), this).execute();
+	public void downloadDirectory(AbstractConnectionActivity activity, IBrowser browser, String directory) {
+		new DownloadTask(activity, browser, null, directory, mService.mCurrentServer.getName(), this).execute();
 		mService.mNotificationHandler.setFile(directory);
 	}
 
@@ -147,28 +143,22 @@ public class RemoteBinder extends Binder {
 	 */
 	public void uploadFile(final IBrowser browser, final File file) {
 		try {
-			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1,
-					DownloadTask.PROGRESS_STEP);
+			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1, DownloadTask.PROGRESS_STEP);
 			fileSender.getProgressListener().add(mService.uploadListener);
 			fileSender.setBufferSize(DownloadTask.BUFFER_SIZE);
 			fileSender.sendAsync();
 			new Thread() {
 				public void run() {
 					try {
-						browser.updloadFile(file.getName(), Server.getServer()
-								.getServerPort().getIp(), UPLOAD_PORT);
+						browser.updloadFile(file.getName(), Server.getServer().getServerPort().getIp(), UPLOAD_PORT);
 					} catch (Exception e) {
-						showToastFromThread(
-								"upload remote error: " + e.getMessage(),
-								Toast.LENGTH_LONG);
+						showToastFromThread("upload remote error: " + e.getMessage(), Toast.LENGTH_LONG);
 					}
 				};
 			}.start();
-			Toast.makeText(mService, "upload file started", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(mService, "upload file started", Toast.LENGTH_SHORT).show();
 		} catch (IOException e) {
-			Toast.makeText(mService, "upload error: " + e.getMessage(),
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(mService, "upload error: " + e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -201,15 +191,13 @@ public class RemoteBinder extends Binder {
 			IMediaServer mediaServer = (IMediaServer) unit.mObject;
 			if (unit.mStation == null) {
 				unit.mStation = new StationStuff();
-				unit.mStation.browser = new BufferBrowser(
-						mediaServer.createBrowser());
+				unit.mStation.browser = new BufferBrowser(mediaServer.createBrowser());
 				unit.mStation.control = mediaServer.getControl();
 				unit.mStation.mplayer = mediaServer.getMPlayer();
 				unit.mStation.omxplayer = mediaServer.getOMXPlayer();
 				unit.mStation.player = unit.mStation.mplayer;
 				unit.mStation.pls = mediaServer.getPlayList();
 				unit.mStation.totem = mediaServer.getTotemPlayer();
-				unit.mStation.imageViewer = mediaServer.getImageViewer();
 				unit.mStation.name = unit.mName;
 			}
 			mService.setCurrentMediaServer(unit.mStation);
@@ -235,23 +223,19 @@ public class RemoteBinder extends Binder {
 		return power;
 	}
 
-	public void downloadPlaylist(final IBrowser browser,
-			final String[] playlist, final String name) {
+	public void downloadPlaylist(final IBrowser browser, final String[] playlist, final String name) {
 		AsyncTask<String, Integer, Exception> downloader = new AsyncTask<String, Integer, Exception>() {
 
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
-				Toast.makeText(mService, "download started", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(mService, "download started", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
 			protected Exception doInBackground(String... playlist) {
 				try {
-					String folder = Environment.getExternalStorageDirectory()
-							.toString()
-							+ File.separator
+					String folder = Environment.getExternalStorageDirectory().toString() + File.separator
 							+ mService.mCurrentServer.getName();
 					File base = new File(folder);
 					if (!base.exists())
@@ -260,19 +244,15 @@ public class RemoteBinder extends Binder {
 					if (!new File(plsDir).exists())
 						new File(plsDir).mkdir();
 					for (int i = 0; i < playlist.length; i++) {
-						ServerPort serverport = browser
-								.publishAbsoluteFile(playlist[i]);
+						ServerPort serverport = browser.publishAbsoluteFile(playlist[i]);
 						String[] split = playlist[i].split(File.separator);
 						String itemName = split[split.length - 1];
-						File newFile = new File(plsDir + File.separator
-								+ itemName);
-						FileReceiver receiver = new FileReceiver(
-								serverport.getIp(), serverport.getPort(),
-								200000, newFile);
+						File newFile = new File(plsDir + File.separator + itemName);
+						FileReceiver receiver = new FileReceiver(serverport.getIp(), serverport.getPort(), 200000,
+								newFile);
 						// set maximum byte size to 1MB
 						receiver.setBufferSize(1000000);
-						receiver.getProgressListener().add(
-								mService.downloadListener);
+						receiver.getProgressListener().add(mService.downloadListener);
 						mService.mNotificationHandler.setFile(itemName);
 						receiver.receiveSync();
 					}
