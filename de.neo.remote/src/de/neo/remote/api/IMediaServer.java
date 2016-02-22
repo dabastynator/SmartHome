@@ -24,14 +24,6 @@ public interface IMediaServer extends RemoteAble {
 	public IBrowser createBrowser() throws RemoteException;
 
 	/**
-	 * get image-viewer to show images.
-	 * 
-	 * @return
-	 * @throws RemoteException
-	 */
-	public IImageViewer getImageViewer() throws RemoteException;
-
-	/**
 	 * get totem player
 	 * 
 	 * @return player

@@ -9,7 +9,6 @@ import org.xml.sax.SAXException;
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.api.IControl;
 import de.neo.remote.api.IDVDPlayer;
-import de.neo.remote.api.IImageViewer;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.IPlayList;
 import de.neo.remote.api.IPlayer;
@@ -25,7 +24,6 @@ public class MediaServerImpl implements IMediaServer {
 	private PlayListImpl mPlaylist;
 	private String mBrowserLocation;
 	private OMXPlayer mOmxplayer;
-	private ImageViewerImpl mImageViewer;
 
 	@Override
 	public IBrowser createBrowser() throws RemoteException {
@@ -57,11 +55,6 @@ public class MediaServerImpl implements IMediaServer {
 		return mOmxplayer;
 	}
 
-	@Override
-	public IImageViewer getImageViewer() throws RemoteException {
-		return mImageViewer;
-	}
-
 	public void initialize(Element element) throws SAXException, IOException {
 		for (String attribute : new String[] { "location", "playlistLocation" })
 			if (!element.hasAttribute(attribute))
@@ -75,11 +68,9 @@ public class MediaServerImpl implements IMediaServer {
 		}
 
 		if (!new File(browseLocation).exists())
-			throw new IOException("Browser location does not exist: "
-					+ browseLocation);
+			throw new IOException("Browser location does not exist: " + browseLocation);
 		if (!new File(playlistLocation).exists())
-			throw new IOException("Playlist location does not exist: "
-					+ playlistLocation);
+			throw new IOException("Playlist location does not exist: " + playlistLocation);
 		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
 		mTotem = new TotemPlayer();
 		mMplayer = new MPlayerDVD(playlistLocation);
@@ -87,7 +78,6 @@ public class MediaServerImpl implements IMediaServer {
 		mControl = new ControlImpl();
 		mPlaylist = new PlayListImpl(playlistLocation);
 		mOmxplayer = new OMXPlayer();
-		mImageViewer = new ImageViewerImpl();
 	}
 
 }

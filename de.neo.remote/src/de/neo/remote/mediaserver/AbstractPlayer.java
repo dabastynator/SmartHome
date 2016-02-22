@@ -62,15 +62,13 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	@Override
-	public void addPlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
+	public void addPlayerMessageListener(IPlayerListener listener) throws RemoteException {
 		if (!mListeners.contains(listener))
 			mListeners.add(listener);
 	}
 
 	@Override
-	public void removePlayerMessageListener(IPlayerListener listener)
-			throws RemoteException {
+	public void removePlayerMessageListener(IPlayerListener listener) throws RemoteException {
 		mListeners.remove(listener);
 	}
 
@@ -97,9 +95,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
 			}
 		} catch (TagException e) {
-			RemoteLogger.performLog(LogPriority.ERROR,
-					"Cant read file-information: " + e.getMessage(),
-					"Mediaserver");
+			RemoteLogger.performLog(LogPriority.ERROR, "Cant read file-information: " + e.getMessage(), "Mediaserver");
 		}
 		return bean;
 	}
@@ -143,20 +139,16 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	@Override
 	public void playPause() throws PlayerException {
 		if (mPlayingBean != null) {
-			mPlayingBean
-					.setState((mPlayingBean.getState() == STATE.PLAY) ? STATE.PAUSE
-							: STATE.PLAY);
+			mPlayingBean.setState((mPlayingBean.getState() == STATE.PLAY) ? STATE.PAUSE : STATE.PLAY);
 			informPlayingBean(mPlayingBean);
 		}
 	}
 
-	protected String getStreamUrl(String script, String url)
-			throws PlayerException {
+	protected String getStreamUrl(String script, String url) throws PlayerException {
 		try {
 			String[] processArgs = new String[] { script, "-g", url };
 			Process process = Runtime.getRuntime().exec(processArgs);
-			InputStreamReader input = new InputStreamReader(
-					process.getErrorStream());
+			InputStreamReader input = new InputStreamReader(process.getErrorStream());
 			BufferedReader reader = new BufferedReader(input);
 			String line = null;
 			while ((line = reader.readLine()) != null) {
@@ -222,37 +214,32 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 				PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
 				ThumbnailHandler.instance().queueThumbnailJob(job);
 			} catch (Exception e) {
-				RemoteLogger.performLog(LogPriority.ERROR, "No thumbnail for "
-						+ bean.getArtist() + " ("
-						+ e.getClass().getSimpleName() + ")", "Mediaserver");
+				RemoteLogger.performLog(LogPriority.ERROR,
+						"No thumbnail for " + bean.getArtist() + " (" + e.getClass().getSimpleName() + ")",
+						"Mediaserver");
 			}
 		}
 	}
 
-	public static BufferedImage searchImageFromGoogle(String search,
-			int minResolution, int maxResolution) throws IOException,
-			JSONException {
-		URL url = new URL(
-				"https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
-						+ URLEncoder.encode(search, "UTF-8"));
+	public static BufferedImage searchImageFromGoogle(String search, int minResolution, int maxResolution)
+			throws IOException, JSONException {
+		URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
+				+ URLEncoder.encode(search, "UTF-8"));
 		URLConnection connection = url.openConnection();
 
 		String line;
 		StringBuilder builder = new StringBuilder();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				connection.getInputStream()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 		while ((line = reader.readLine()) != null) {
 			builder.append(line);
 		}
 
 		JSONObject json = new JSONObject(builder.toString());
-		JSONArray imageArray = json.getJSONObject("responseData").getJSONArray(
-				"results");
+		JSONArray imageArray = json.getJSONObject("responseData").getJSONArray("results");
 		for (int i = 0; i < imageArray.length(); i++) {
 			int width = imageArray.getJSONObject(i).getInt("width");
 			int height = imageArray.getJSONObject(i).getInt("height");
-			if (width * height >= minResolution
-					&& width * height <= maxResolution) {
+			if (width * height >= minResolution && width * height <= maxResolution) {
 				String imageUrl = imageArray.getJSONObject(i).getString("url");
 				return ImageIO.read(new URL(imageUrl));
 			}
@@ -261,19 +248,16 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	@Override
-	public void playFromYoutube(String url) throws RemoteException,
-			PlayerException {
+	public void playFromYoutube(String url) throws RemoteException, PlayerException {
 	}
 
 	@Override
 	public void onThumbnailCalculation(ThumbnailJob job) {
 		if (job instanceof PlayerThumbnailJob) {
 			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
-			if (playerJob.player == this && playerJob.bean != null
-					&& playerJob.thumbnail != null) {
+			if (playerJob.player == this && playerJob.bean != null && playerJob.thumbnail != null) {
 				playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
-				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width,
-						playerJob.thumbnail.height);
+				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width, playerJob.thumbnail.height);
 				informPlayingBean(playerJob.bean);
 			}
 		}
@@ -288,8 +272,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 				}
-				if (mPlayingBean != null
-						&& mPlayingBean.getState() == STATE.PLAY) {
+				if (mPlayingBean != null && mPlayingBean.getState() == STATE.PLAY) {
 					mPlayingBean.incrementCurrentTime(1);
 				}
 			}
@@ -309,42 +292,31 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 		@Override
 		protected void calculateThumbnail() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
-					bean.getArtist());
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
 			if (thumbnail == null) {
 				try {
-					BufferedImage image = searchImageFromGoogle(
-							bean.getArtist(), 0, 1000 * 1000);
+					BufferedImage image = searchImageFromGoogle(bean.getArtist(), 0, 1000 * 1000);
 					thumbnail = new Thumbnail();
-					File thumbnailFile = ThumbnailHandler.instance()
-							.getStringThumbnailFile(bean.getArtist());
+					File thumbnailFile = ThumbnailHandler.instance().getStringThumbnailFile(bean.getArtist());
 					BufferedImage thumbnailImage = ThumbnailHandler
-							.toBufferedImage(ThumbnailHandler.instance()
-									.createThumbnail(image, THUMBNAIL_SIZE));
-					int rgb[] = ThumbnailHandler.instance().readImageIntArray(
-							thumbnailImage);
-					rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE,
-							THUMBNAIL_SIZE);
+							.toBufferedImage(ThumbnailHandler.instance().createThumbnail(image, THUMBNAIL_SIZE));
+					int rgb[] = ThumbnailHandler.instance().readImageIntArray(thumbnailImage);
+					rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE, THUMBNAIL_SIZE);
 					thumbnail.width = THUMBNAIL_SIZE;
 					thumbnail.height = THUMBNAIL_SIZE;
 					thumbnail.rgb = rgb;
-					ThumbnailHandler.instance().writeThumbnail(thumbnailFile,
-							thumbnail);
+					ThumbnailHandler.instance().writeThumbnail(thumbnailFile, thumbnail);
 				} catch (IOException | JSONException e) {
-					RemoteLogger
-							.performLog(
-									LogPriority.ERROR,
-									"Could not build thumbnail for '"
-											+ bean.getArtist() + "': "
-											+ e.getMessage(), "Mediaserver");
+					RemoteLogger.performLog(LogPriority.ERROR,
+							"Could not build thumbnail for '" + bean.getArtist() + "': " + e.getMessage(),
+							"Mediaserver");
 				}
 			}
 		}
 
 		@Override
 		protected Thumbnail readThumbnail() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
-					bean.getArtist());
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
 			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
 			bean.setThumbnailRGB(thumbnail.rgb);
 			return thumbnail;
@@ -352,8 +324,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 		@Override
 		protected boolean needsCalculation() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(
-					bean.getArtist());
+			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
 			return thumbnail == null;
 		}
 
@@ -371,8 +342,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	public static void main(String[] args) {
 		try {
 			BufferedImage image = searchImageFromGoogle("hin", 100, 1000 * 600);
-			System.out.println("w=" + image.getWidth() + ", h="
-					+ image.getHeight());
+			System.out.println("w=" + image.getWidth() + ", h=" + image.getHeight());
 		} catch (IOException | JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -386,5 +356,10 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 		if (volume < mVolume)
 			volUp();
 		mVolume = volume;
+	}
+
+	@Override
+	public int getVolume() throws RemoteException, PlayerException {
+		return mVolume;
 	}
 }

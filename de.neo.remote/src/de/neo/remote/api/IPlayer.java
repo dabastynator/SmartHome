@@ -151,8 +151,7 @@ public interface IPlayer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@Oneway
-	void addPlayerMessageListener(IPlayerListener listener)
-			throws RemoteException;
+	void addPlayerMessageListener(IPlayerListener listener) throws RemoteException;
 
 	/**
 	 * remove listener for player states
@@ -161,8 +160,7 @@ public interface IPlayer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@Oneway
-	void removePlayerMessageListener(IPlayerListener listener)
-			throws RemoteException;
+	void removePlayerMessageListener(IPlayerListener listener) throws RemoteException;
 
 	/**
 	 * play the given playlist
@@ -190,5 +188,12 @@ public interface IPlayer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	void playFromYoutube(String url) throws RemoteException, PlayerException;
+
+	/**
+	 * @return current volume of the player between 0 and 100.
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	int getVolume() throws RemoteException, PlayerException;
 
 }
