@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.IBinder;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.neo.remote.api.IInternetSwitch;
@@ -202,10 +203,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			remoteViews.setTextViewText(R.id.lbl_widget_big, big);
 			remoteViews.setTextViewText(R.id.lbl_widget_small, small);
 			remoteViews.setTextViewText(R.id.lbl_widget_small2, small2);
-			if (thumbnail != null)
+			if (thumbnail != null) {
 				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail, thumbnail);
-			else
-				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail, null);
+				remoteViews.setViewVisibility(R.id.img_widget_thumbnail, View.VISIBLE);
+			} else
+				remoteViews.setViewVisibility(R.id.img_widget_thumbnail, View.INVISIBLE);
 			RemoteWidgetProvider.setWidgetClick(remoteViews, this);
 			if (playing)
 				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
