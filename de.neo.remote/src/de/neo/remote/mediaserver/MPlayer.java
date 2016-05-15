@@ -234,7 +234,7 @@ public class MPlayer extends AbstractPlayer {
 			url = url.substring(6);
 			mMplayerIn.print("loadfile " + url + "\n");
 		} else
-			mMplayerIn.print("loadlist " + pls + "\n");
+			mMplayerIn.print("loadlist \"" + pls + "\"\n");
 
 		writeVolume();
 	}
