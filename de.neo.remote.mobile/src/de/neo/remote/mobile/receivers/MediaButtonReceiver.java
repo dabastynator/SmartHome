@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.view.KeyEvent;
+import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.services.WidgetService;
 
 public class MediaButtonReceiver extends BroadcastReceiver {
@@ -35,13 +36,28 @@ public class MediaButtonReceiver extends BroadcastReceiver {
 		}
 		if ("android.media.VOLUME_CHANGED_ACTION".equals(intent.getAction())) {
 			AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-			int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 			int volume = (Integer) intent.getExtras().get("android.media.EXTRA_VOLUME_STREAM_VALUE");
 			Intent playIntent = new Intent(context, WidgetService.class);
 			playIntent.setAction(RemoteWidgetProvider.ACTION_VOLUME);
-			playIntent.putExtra(RemoteWidgetProvider.EXTRA_VOLUME, ((double) volume) / maxVolume);
+			double remoteVolume = volumeLocalToRemote(am, volume);
+			playIntent.putExtra(RemoteWidgetProvider.EXTRA_VOLUME, remoteVolume);
 			context.startService(playIntent);
 		}
+	}
+
+	public static double volumeLocalToRemote(AudioManager am, int localVolume) {
+		int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		// Remote volumes goes from 0 (silent) to 1 (loud)
+		// Because of the low steps of android (just 13) set volume from 50%
+		// to 100%
+		double remoteVolume = 0.5 + 0.5 * localVolume / maxVolume;
+		return remoteVolume;
+	}
+
+	public static int volumeRemoteToLocal(AudioManager am, PlayingBean playing) {
+		int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		int localVolume = (int) (maxVolume * 2 * (playing.getVolume() / 100.0 - 0.5));
+		return localVolume;
 	}
 
 }

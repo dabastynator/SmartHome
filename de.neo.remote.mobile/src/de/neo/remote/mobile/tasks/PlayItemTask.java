@@ -59,48 +59,4 @@ public class PlayItemTask extends AbstractTask {
 		mCurrentVolume = mediaServer.player.getVolume();
 	}
 
-	@Override
-	protected void onPostExecute(Exception result) {
-		if (result == null && !mCanceld) {
-			AudioManager am = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
-			// Request audio focus for playback
-			int request = am.requestAudioFocus(new AudioListener(am, mActivity), AudioManager.STREAM_MUSIC,
-					AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-			if (request == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-				am.registerMediaButtonEventReceiver(new ComponentName(mActivity, MediaButtonReceiver.class));
-				int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * mCurrentVolume / 100;
-				am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
-			}
-		}
-		super.onPostExecute(result);
-	}
-
-	public static class AudioListener implements OnAudioFocusChangeListener {
-
-		public AudioManager mAudioManager;
-		private Context mContext;
-
-		public AudioListener(AudioManager am, Context context) {
-			mAudioManager = am;
-			mContext = context;
-		}
-
-		@Override
-		public void onAudioFocusChange(int focusChange) {
-			if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-				// Pause playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-				// Resume playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-				mAudioManager.unregisterMediaButtonEventReceiver(
-						new ComponentName(mContext.getPackageName(), MediaButtonReceiver.class.getName()));
-				mAudioManager.abandonAudioFocus(this);
-				// Stop playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-			}
-
-		}
-
-	}
 }

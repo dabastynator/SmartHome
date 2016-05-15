@@ -10,7 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
-import android.media.RemoteControlClient;
+import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
@@ -30,7 +30,6 @@ import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
-import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.remote.mobile.R;
 
 /**
@@ -163,46 +162,36 @@ public class NotificationHandler implements IRemoteActionListener {
 			stateflag = PlaybackStateCompat.STATE_PLAYING;
 		else if (playing.getState() == STATE.PAUSE)
 			stateflag = PlaybackStateCompat.STATE_PAUSED;
-		ComponentName component = new ComponentName(mContext, MediaButtonReceiver.class);
 		if (stateflag != PlaybackStateCompat.STATE_NONE) {
-			int result = am.requestAudioFocus(new PlayItemTask.AudioListener(am, mContext), AudioManager.STREAM_MUSIC,
+			int result = am.requestAudioFocus(new AudioListener(am, mContext), AudioManager.STREAM_MUSIC,
 					AudioManager.AUDIOFOCUS_GAIN);
-			if (result == AudioManager.AUDIOFOCUS_GAIN) {
-				am.registerMediaButtonEventReceiver(component);
+			if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 
-				Intent i = new Intent(Intent.ACTION_MEDIA_BUTTON);
-				i.setComponent(component);
-				PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
-				@SuppressWarnings("deprecation")
-				RemoteControlClient rcClient = new RemoteControlClient(pi);
-				am.registerRemoteControlClient(rcClient);
-
-				int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
-						| RemoteControlClient.FLAG_KEY_MEDIA_PLAY | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-						| RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-				rcClient.setTransportControlFlags(flags);
-
-				MediaSessionCompat mSession = new MediaSessionCompat(mContext, mContext.getPackageName());
+				MediaSessionCompat session = new MediaSessionCompat(mContext, mContext.getPackageName());
 				Intent intent = new Intent(mContext, MediaButtonReceiver.class);
 				PendingIntent pintent = PendingIntent.getBroadcast(mContext, 0, intent,
 						PendingIntent.FLAG_UPDATE_CURRENT);
-				mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+				session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 						| MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-				mSession.setMediaButtonReceiver(pintent);
-				mSession.setCallback(new MediaCallback(mContext));
+				session.setMediaButtonReceiver(pintent);
 
+				// Set state
 				PlaybackStateCompat state = new PlaybackStateCompat.Builder()
 						.setActions(PlaybackStateCompat.ACTION_FAST_FORWARD | PlaybackStateCompat.ACTION_PAUSE
 								| PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE
 								| PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
 								| PlaybackStateCompat.ACTION_STOP)
 						.setState(stateflag, 0, 1, SystemClock.elapsedRealtime()).build();
-				mSession.setPlaybackState(state);
+				session.setPlaybackState(state);
+
+				// Set right activity
 				Intent nIntent = new Intent(mContext, MediaServerActivity.class);
 				nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 				nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, mCurrentServer.getId());
 				PendingIntent pInent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
-				mSession.setSessionActivity(pInent);
+				session.setSessionActivity(pInent);
+
+				// Set meta-info, artist album title
 				MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
 				if (playing != null) {
 					builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playing.getArtist());
@@ -210,13 +199,17 @@ public class NotificationHandler implements IRemoteActionListener {
 					builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playing.getTitle());
 				}
 				builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail);
-				mSession.setMetadata(builder.build());
-				mSession.setActive(true);
+				session.setMetadata(builder.build());
+
+				// Update volume
+				//int vol = MediaButtonReceiver.volumeRemoteToLocal(am, playing);
+				//am.setStreamVolume(AudioManager.STREAM_MUSIC, vol, 0);
+
+				session.setActive(true);
 			}
 		} else {
-			MediaSessionCompat mSession = new MediaSessionCompat(mContext, mContext.getPackageName());
-			mSession.setActive(false);
-			am.unregisterMediaButtonEventReceiver(component);
+			MediaSessionCompat session = new MediaSessionCompat(mContext, mContext.getPackageName());
+			session.setActive(false);
 		}
 
 	}
@@ -352,6 +345,35 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void onGroundPlotCreated(GroundPlot plot) {
+	}
+
+	public static class AudioListener implements OnAudioFocusChangeListener {
+
+		public AudioManager mAudioManager;
+		private Context mContext;
+
+		public AudioListener(AudioManager am, Context context) {
+			mAudioManager = am;
+			mContext = context;
+		}
+
+		@Override
+		public void onAudioFocusChange(int focusChange) {
+			if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+				// Pause playback
+			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+				// Resume playback
+			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+				mAudioManager.unregisterMediaButtonEventReceiver(
+						new ComponentName(mContext.getPackageName(), MediaButtonReceiver.class.getName()));
+				mAudioManager.abandonAudioFocus(this);
+				// Stop playback
+			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+			}
+
+		}
+
 	}
 
 }
