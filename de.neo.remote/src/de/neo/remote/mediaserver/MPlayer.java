@@ -304,6 +304,7 @@ public class MPlayer extends AbstractPlayer {
 						informPlayingBean(bean);
 					}
 				}
+				bean.setVolume(mVolume);
 				bean.setState(PlayingBean.STATE.DOWN);
 				informPlayingBean(bean);
 			} catch (IOException e) {

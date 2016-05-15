@@ -81,6 +81,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	 */
 	protected PlayingBean readFileInformations(File file) throws IOException {
 		PlayingBean bean = new PlayingBean();
+		bean.setVolume(mVolume);
 		try {
 			MP3File mp3File = new MP3File(file);
 			bean.setFile(file.getName().trim());
@@ -120,7 +121,8 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	 * @param bean
 	 */
 	protected void informPlayingBean(PlayingBean bean) {
-		this.mPlayingBean = new PlayingBean(bean);
+		mPlayingBean = new PlayingBean(bean);
+		mPlayingBean.setVolume(mVolume);
 		List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
 		for (IPlayerListener listener : mListeners)
 			try {

@@ -67,17 +67,22 @@ public class PlayingBean implements Serializable {
 	 * length of file in seconds
 	 */
 	private int lengthTime;
-	
+
 	/**
-	 * x and y size of the thumbnail 
+	 * x and y size of the thumbnail
 	 */
 	private int thumbnailWidth;
 	private int thumbnailHeight;
-	
+
 	/**
 	 * rgb content of the thumbnail in RGB_565
 	 */
 	private int[] thumbnailRGB;
+
+	/**
+	 * The volume is between 0 (silent) and 100 (loudest).
+	 */
+	private int mVolume;
 
 	/**
 	 * allocate new bean
@@ -118,8 +123,7 @@ public class PlayingBean implements Serializable {
 	 * @param radio
 	 * @param state
 	 */
-	public PlayingBean(String artist, String album, String title, String file,
-			String radio, String path, STATE state) {
+	public PlayingBean(String artist, String album, String title, String file, String radio, String path, STATE state) {
 		this.artist = artist;
 		this.album = album;
 		this.title = title;
@@ -264,7 +268,7 @@ public class PlayingBean implements Serializable {
 	public int getThumbnailWidth() {
 		return thumbnailWidth;
 	}
-	
+
 	public int getThumbnailHeight() {
 		return thumbnailHeight;
 	}
@@ -280,6 +284,14 @@ public class PlayingBean implements Serializable {
 
 	public void setThumbnailRGB(int[] thumbnailRGB) {
 		this.thumbnailRGB = thumbnailRGB;
+	}
+
+	public int getVolume() {
+		return mVolume;
+	}
+
+	public void setVolume(int volume) {
+		mVolume = volume;
 	}
 
 }
