@@ -229,9 +229,9 @@ public class MPlayer extends AbstractPlayer {
 		if (!new File(pls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
 
-		if (firstLineOf(pls).equals("[playlist]")) {
-			String url = lineOfFile(pls, 3);
-			url = url.substring(6);
+		if (lineOfFileStartsWith(pls, "[playlist]") != null) {
+			String url = lineOfFileStartsWith(pls, "File");
+			url = url.substring(url.indexOf("=") + 1);
 			mMplayerIn.print("loadfile " + url + "\n");
 		} else
 			mMplayerIn.print("loadlist \"" + pls + "\"\n");
@@ -239,21 +239,21 @@ public class MPlayer extends AbstractPlayer {
 		writeVolume();
 	}
 
-	private String firstLineOf(String pls) {
-		return lineOfFile(pls, 1);
-	}
-
-	private String lineOfFile(String file, int line) {
-		String firstLine = null;
+	private String lineOfFileStartsWith(String file, String prefix) {
+		String match = null;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
-			for (int i = 0; i < line; i++)
-				firstLine = reader.readLine();
+			String line = null;
+			while ((line = reader.readLine()) != null)
+				if (line.startsWith(prefix)) {
+					match = line;
+					break;
+				}
 			reader.close();
 		} catch (IOException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
-		return firstLine;
+		return match;
 	}
 
 	class PlayerObserver extends Thread {
