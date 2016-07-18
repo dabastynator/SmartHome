@@ -109,7 +109,7 @@ public class Server {
 	/**
 	 * list of all connections of the server
 	 */
-	private List<ConnectionHandler> handlers = new ArrayList<ConnectionHandler>();
+	private List<ConnectionHandler> handlers = Collections.synchronizedList(new ArrayList<ConnectionHandler>());
 
 	/**
 	 * server port
@@ -457,6 +457,14 @@ public class Server {
 		adapterMap.clear();
 		adapterObjectId.clear();
 		RMILogger.performLog(LogPriority.INFORMATION, "close server", null);
+	}
+	
+	/**
+	 * Remove obsolete connection handler
+	 * @param connectionHandler
+	 */
+	public void removeHandler(ConnectionHandler connectionHandler){
+		handlers.remove(connectionHandler);
 	}
 
 	/**

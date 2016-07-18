@@ -134,6 +134,7 @@ public class ConnectionHandler {
 			RMILogger.performLog(LogPriority.ERROR,
 					"Request-ClassNotFoundException: " + e.getMessage(), null);
 		} finally {
+			server.removeHandler(this);
 			try {
 				socket.close();
 			} catch (IOException e) {
