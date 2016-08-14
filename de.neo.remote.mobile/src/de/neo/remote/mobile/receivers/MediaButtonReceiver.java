@@ -48,15 +48,13 @@ public class MediaButtonReceiver extends BroadcastReceiver {
 	public static double volumeLocalToRemote(AudioManager am, int localVolume) {
 		int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		// Remote volumes goes from 0 (silent) to 1 (loud)
-		// Because of the low steps of android (just 13) set volume from 50%
-		// to 100%
-		double remoteVolume = 0.5 + 0.5 * localVolume / maxVolume;
+		double remoteVolume = localVolume / maxVolume;
 		return remoteVolume;
 	}
 
 	public static int volumeRemoteToLocal(AudioManager am, PlayingBean playing) {
 		int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		int localVolume = (int) (maxVolume * 2 * (playing.getVolume() / 100.0 - 0.5));
+		int localVolume = (int) (maxVolume * (playing.getVolume() / 100.0));
 		return localVolume;
 	}
 
