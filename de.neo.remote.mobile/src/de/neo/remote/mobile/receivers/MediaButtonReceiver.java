@@ -48,7 +48,7 @@ public class MediaButtonReceiver extends BroadcastReceiver {
 	public static double volumeLocalToRemote(AudioManager am, int localVolume) {
 		int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		// Remote volumes goes from 0 (silent) to 1 (loud)
-		double remoteVolume = localVolume / maxVolume;
+		double remoteVolume = ((double) localVolume) / maxVolume;
 		return remoteVolume;
 	}
 
