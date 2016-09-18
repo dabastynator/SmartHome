@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="de.neo.remove.appearance"
+        android:title="@string/appearance" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="de.neo.remote.playing_notify"
+            android:summary="@string/music_notify"
+            android:title="@string/music_notify" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="de.neo.remove.background"
+        android:title="@string/background" >
+        <EditTextPreference
+            android:key="de.neo.remote.connection_trigger"
+            android:summary="@string/connection_trigger"
+            android:title="@string/connection_trigger" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

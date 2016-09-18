@@ -12,6 +12,11 @@
     <string name="shutdown">Shutdown</string>
     <string name="control">Control</string>
     <string name="exit">Exit</string>
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="music_notify">Show song by notification</string>
+    <string name="background">Background</string>
+    <string name="connection_trigger">Action on wifi-connection</string>
 
     <!-- Play control strings -->
     <string name="player">Player</string>
@@ -21,12 +26,6 @@
     <string name="player_vol_up">Vol up</string>
     <string name="player_no_file_playing">No file playing</string>
     <string name="player_play_directory">Play directory</string>
-
-    <!-- DVD Strings -->
-    <string name="dvd_eject">Eject</string>
-    <string name="dvd_menu">Menu</string>
-    <string name="dvd_no_sub">Subtitles off</string>
-    <string name="dvd_next_sub">Next subtitle</string>
 
     <!-- Playlist strings -->
     <string name="playlist_add_item">Add to playlist</string>

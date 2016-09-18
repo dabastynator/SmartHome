@@ -13,6 +13,11 @@
     <string name="shutdown">Ausschalten</string>
     <string name="control">Kontrolle</string>
     <string name="exit">Beenden</string>
+    <string name="settings">Einstellungen</string>
+    <string name="appearance">Darstellung</string>
+    <string name="music_notify">Wiedergabe als Notification darstellen</string>
+    <string name="background">Hintergrund</string>
+    <string name="connection_trigger">Aktion bei WLAN Verbindung</string>
 
     <!-- Play control strings -->
     <string name="player_play">Abspielen</string>
@@ -21,12 +26,6 @@
     <string name="player_vol_up">Lauter</string>
     <string name="player_no_file_playing">Keine Wiedergabe</string>
     <string name="player_play_directory">Ordner abspielen</string>
-
-    <!-- DVD Strings -->
-    <string name="dvd_eject">Auswerfen</string>
-    <string name="dvd_menu">Menü</string>
-    <string name="dvd_no_sub">Untertitel aus</string>
-    <string name="dvd_next_sub">Nächster Untertitel</string>
 
     <!-- Playlist strings -->
     <string name="playlist_add_item">Zu Playlist hinzufügen</string>

@@ -8,10 +8,12 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.media.MediaMetadataCompat;
@@ -23,6 +25,7 @@ import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.MediaButtonReceiver;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
@@ -99,6 +102,10 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean notify = preferences.getBoolean(SettingsActivity.NOTIFY, false);
+		if (!notify)
+			return;
 		Bitmap thumbnail = null;
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -202,8 +209,9 @@ public class NotificationHandler implements IRemoteActionListener {
 				session.setMetadata(builder.build());
 
 				// Update volume
-				//int vol = MediaButtonReceiver.volumeRemoteToLocal(am, playing);
-				//am.setStreamVolume(AudioManager.STREAM_MUSIC, vol, 0);
+				// int vol = MediaButtonReceiver.volumeRemoteToLocal(am,
+				// playing);
+				// am.setStreamVolume(AudioManager.STREAM_MUSIC, vol, 0);
 
 				session.setActive(true);
 			}

@@ -37,8 +37,7 @@ import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
-public class ControlSceneActivity extends AbstractConnectionActivity implements
-		ColorPickerDialogListener {
+public class ControlSceneActivity extends AbstractConnectionActivity implements ColorPickerDialogListener {
 
 	private AbstractSceneSurfaceView mGLView;
 	private ControlSceneRenderer mRenderer;
@@ -59,8 +58,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 		findComponents();
 
 		mRenderer = new ControlSceneRenderer(this, mSelecter);
-		mGLView = new AbstractSceneSurfaceView(this, savedInstanceState,
-				mRenderer);
+		mGLView = new AbstractSceneSurfaceView(this, savedInstanceState, mRenderer);
 
 		LayoutParams params = new LayoutParams();
 		params.height = LayoutParams.MATCH_PARENT;
@@ -109,6 +107,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 			if (server == null)
 				server = getFavoriteServer();
 			mBinder.connectToServer(server, this);
+			break;
+		case R.id.opt_settings:
+			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -173,8 +175,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 		protected Exception doInBackground(String... params) {
 			try {
 				Set<BufferdUnit> renderUnits = mRenderer.getUnits();
-				Collection<BufferdUnit> remoteUnits = mBinder.getUnits()
-						.values();
+				Collection<BufferdUnit> remoteUnits = mBinder.getUnits().values();
 				boolean isDirty = renderUnits.size() != remoteUnits.size();
 				for (BufferdUnit unit : remoteUnits)
 					isDirty |= !renderUnits.contains(unit);
@@ -209,10 +210,8 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 
 					@Override
 					public void run() {
-						Intent intent = new Intent(ControlSceneActivity.this,
-								MediaServerActivity.class);
-						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID,
-								unit.mID);
+						Intent intent = new Intent(ControlSceneActivity.this, MediaServerActivity.class);
+						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, unit.mID);
 						ControlSceneActivity.this.startActivity(intent);
 					}
 				});
@@ -234,15 +233,12 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 					@Override
 					protected void onPostExecute(Exception result) {
 						if (result != null)
-							new AbstractTask.ErrorDialog(
-									ControlSceneActivity.this, result).show();
+							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
 						else {
-							Toast.makeText(getApplicationContext(),
-									"Execute: " + unit.mDescription,
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getApplicationContext(), "Execute: " + unit.mDescription, Toast.LENGTH_SHORT)
+									.show();
 						}
-						if (unit.mClientAction != null
-								&& unit.mClientAction.length() > 0) {
+						if (unit.mClientAction != null && unit.mClientAction.length() > 0) {
 							Uri uri = Uri.parse(unit.mClientAction);
 							Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 							startActivity(intent);
@@ -254,11 +250,9 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 			}
 
 			if (unit.mObject instanceof IRCColor) {
-				ColorPickerDialogFragment dialog = ColorPickerDialogFragment
-						.newInstance(unit.mID.hashCode(), "Pick color for "
-								+ mSelecter.mUnit.mName,
-								getString(android.R.string.ok),
-								unit.mColor | 0xFF000000, false);
+				ColorPickerDialogFragment dialog = ColorPickerDialogFragment.newInstance(unit.mID.hashCode(),
+						"Pick color for " + mSelecter.mUnit.mName, getString(android.R.string.ok),
+						unit.mColor | 0xFF000000, false);
 				dialog.show(getFragmentManager(), "colorpicker");
 			}
 		}
@@ -272,21 +266,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 					// TODO Auto-generated method stub
 
 					new AlertDialog.Builder(ControlSceneActivity.this)
-							.setTitle(
-									getResources().getString(
-											R.string.command_stop))
-							.setMessage(
-									getResources().getString(
-											R.string.command_stop_long)
-											+ " " + unit.mName + "?")
-							.setPositiveButton(
-									getResources().getString(
-											android.R.string.yes),
-									SelectControlUnit.this)
-							.setNegativeButton(
-									getResources().getString(
-											android.R.string.no), null)
-							.create().show();
+							.setTitle(getResources().getString(R.string.command_stop))
+							.setMessage(getResources().getString(R.string.command_stop_long) + " " + unit.mName + "?")
+							.setPositiveButton(getResources().getString(android.R.string.yes), SelectControlUnit.this)
+							.setNegativeButton(getResources().getString(android.R.string.no), null).create().show();
 				}
 			});
 		}
@@ -309,12 +292,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 					@Override
 					protected void onPostExecute(Exception result) {
 						if (result != null)
-							new AbstractTask.ErrorDialog(
-									ControlSceneActivity.this, result).show();
+							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
 						else {
-							Toast.makeText(getApplicationContext(),
-									"Stop: " + unit.mDescription,
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getApplicationContext(), "Stop: " + unit.mDescription, Toast.LENGTH_SHORT)
+									.show();
 						}
 					}
 				};
@@ -333,12 +314,9 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements
 	public void onColorSelected(int dialogId, final int color) {
 		if (mSelecter.mUnit.mObject instanceof IRCColor) {
 			mSelecter.mUnit.mColor = color & 0xFFFFFF;
-			new SimpleTask(this)
-					.setSuccess("Color set")
-					.setDialogMessage(
-							"Set color for " + mSelecter.mUnit.mName + " to "
-									+ color).setDialogtitle("Set color...")
-					.setAction(new BackgroundAction() {
+			new SimpleTask(this).setSuccess("Color set")
+					.setDialogMessage("Set color for " + mSelecter.mUnit.mName + " to " + color)
+					.setDialogtitle("Set color...").setAction(new BackgroundAction() {
 
 						@Override
 						public void run() throws Exception {

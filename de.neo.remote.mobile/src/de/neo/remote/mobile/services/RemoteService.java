@@ -10,9 +10,11 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import de.neo.android.persistence.DaoFactory;
@@ -31,6 +33,7 @@ import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.Trigger;
+import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.WifiReceiver;
@@ -278,11 +281,15 @@ public class RemoteService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				Trigger trigger = new Trigger();
-				trigger.setTriggerID(Trigger.CLIENT_ACTION);
+				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+				String triggerID = preferences.getString(SettingsActivity.NOTIFY, "");
+				trigger.setTriggerID(triggerID);
 				for (int i = 0; i < 10; i++) {
 					try {
 						String ssid = mWifiReceiver.currentSSID(RemoteService.this);
@@ -305,7 +312,7 @@ public class RemoteService extends Service {
 			}
 		};
 		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())
-				&& !mLastClientActionConnected) {
+				&& !mLastClientActionConnected && triggerID != null && triggerID.length() > 0) {
 			new Thread(r).start();
 		}
 		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction()) && mLastClientActionConnected) {
