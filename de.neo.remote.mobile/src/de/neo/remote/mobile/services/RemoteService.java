@@ -56,7 +56,7 @@ public class RemoteService extends Service {
 
 	public RemoteServer mCurrentServer;
 	protected ControlCenterBuffer mCurrentControlCenter;
-	public StationStuff mCurrentMediaServer;
+	public StationStuff mCurrentMediaCenter;
 	protected PlayingBean mCurrentPlayingFile;
 
 	protected RemoteBinder mBinder;
@@ -64,11 +64,11 @@ public class RemoteService extends Service {
 	protected Map<String, BufferdUnit> mUnitMap;
 	protected NotificationHandler mNotificationHandler;
 
-	public ProgressListener downloadListener;
-	public SenderProgress uploadListener;
+	public ProgressListener mDownloadListener;
+	public SenderProgress mUploadListener;
 	private PlayerListener mPlayerListener;
 
-	protected IInternetSwitchListener internetSwitchListener;
+	protected IInternetSwitchListener mInternetSwitchListener;
 	protected Handler mHandler;
 
 	protected List<IRemoteActionListener> mActionListener;
@@ -94,9 +94,9 @@ public class RemoteService extends Service {
 		mActionListener = new ArrayList<IRemoteActionListener>();
 		mNotificationHandler = new NotificationHandler(this);
 		mPlayerListener = new PlayerListener();
-		internetSwitchListener = new GPIOListener();
-		downloadListener = new ProgressListener();
-		uploadListener = new UploadProgressListenr();
+		mInternetSwitchListener = new GPIOListener();
+		mDownloadListener = new ProgressListener();
+		mUploadListener = new UploadProgressListenr();
 		mActionListener.add(mNotificationHandler);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
 	}
@@ -129,8 +129,8 @@ public class RemoteService extends Service {
 			new Thread() {
 				@Override
 				public void run() {
-					StationStuff oldServer = mCurrentMediaServer;
-					mCurrentMediaServer = mediaObjects;
+					StationStuff oldServer = mCurrentMediaCenter;
+					mCurrentMediaCenter = mediaObjects;
 					try {
 						if (oldServer != null) {
 							oldServer.totem.removePlayerMessageListener(mPlayerListener);
@@ -139,10 +139,10 @@ public class RemoteService extends Service {
 					} catch (RemoteException e) {
 					}
 					try {
-						mCurrentMediaServer.mplayer.addPlayerMessageListener(mPlayerListener);
-						mCurrentMediaServer.totem.addPlayerMessageListener(mPlayerListener);
-						mCurrentMediaServer.omxplayer.addPlayerMessageListener(mPlayerListener);
-						mPlayerListener.playerMessage(mCurrentMediaServer.player.getPlayingBean());
+						mCurrentMediaCenter.mplayer.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaCenter.totem.addPlayerMessageListener(mPlayerListener);
+						mCurrentMediaCenter.omxplayer.addPlayerMessageListener(mPlayerListener);
+						mPlayerListener.playerMessage(mCurrentMediaCenter.player.getPlayingBean());
 					} catch (PlayerException | RemoteException e) {
 					}
 				}
@@ -201,6 +201,7 @@ public class RemoteService extends Service {
 						if (mLocalServer != null)
 							mLocalServer.close();
 						mUnitMap.clear();
+						mCurrentControlCenter = null;
 						mCurrentControlCenter = null;
 						mCurrentServer = null;
 						mNotificationHandler.removeNotification();
@@ -267,6 +268,7 @@ public class RemoteService extends Service {
 				mUnitMap.clear();
 				mCurrentControlCenter = null;
 				mCurrentServer = null;
+				mCurrentMediaCenter = null;
 				mNotificationHandler.removeNotification();
 				return null;
 			}
@@ -281,14 +283,12 @@ public class RemoteService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				Trigger trigger = new Trigger();
 				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-				String triggerID = preferences.getString(SettingsActivity.NOTIFY, "");
+				String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
 				trigger.setTriggerID(triggerID);
 				for (int i = 0; i < 10; i++) {
 					try {
@@ -296,9 +296,15 @@ public class RemoteService extends Service {
 						if (mCurrentSSID.equals(ssid)
 								&& mLastClientActionTime <= System.currentTimeMillis() - 1000 * 60 * 7
 								&& !mLastClientActionConnected) {
-							mCurrentControlCenter.trigger(trigger);
+							if (triggerID != null && triggerID.length() > 0)
+								mCurrentControlCenter.trigger(trigger);
 							mLastClientActionTime = System.currentTimeMillis();
 							mLastClientActionConnected = true;
+							try {
+								refreshListener();
+							} catch (PlayerException | RemoteException e) {
+								// ignore
+							}
 							return;
 						}
 					} catch (RemoteException e) {
@@ -312,7 +318,7 @@ public class RemoteService extends Service {
 			}
 		};
 		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())
-				&& !mLastClientActionConnected && triggerID != null && triggerID.length() > 0) {
+				&& !mLastClientActionConnected) {
 			new Thread(r).start();
 		}
 		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction()) && mLastClientActionConnected) {
@@ -324,12 +330,27 @@ public class RemoteService extends Service {
 
 	}
 
+	public void refreshListener() throws RemoteException, PlayerException {
+		for (BufferdUnit unit : mUnitMap.values()) {
+			if (unit.mObject instanceof IInternetSwitch) {
+				IInternetSwitch iswitch = (IInternetSwitch) unit.mObject;
+				iswitch.registerPowerSwitchListener(mInternetSwitchListener);
+			}
+		}
+		if (mCurrentMediaCenter != null) {
+			mCurrentMediaCenter.mplayer.addPlayerMessageListener(mPlayerListener);
+			mCurrentMediaCenter.totem.addPlayerMessageListener(mPlayerListener);
+			mCurrentMediaCenter.omxplayer.addPlayerMessageListener(mPlayerListener);
+			mPlayerListener.playerMessage(mCurrentMediaCenter.player.getPlayingBean());
+		}
+	}
+
 	public void refreshControlCenter() throws RemoteException {
 		String[] ids = null;
 		mCurrentControlCenter.clear();
 		ids = mCurrentControlCenter.getControlUnitIDs();
 		fireGroundPlot(mCurrentControlCenter.getGroundPlot());
-		mCurrentMediaServer = null;
+		mCurrentMediaCenter = null;
 		mUnitMap.clear();
 		for (String id : ids) {
 			try {
@@ -338,7 +359,7 @@ public class RemoteService extends Service {
 				mUnitMap.put(bufferdUnit.mID, bufferdUnit);
 				if (bufferdUnit.mObject instanceof IInternetSwitch) {
 					IInternetSwitch iswitch = (IInternetSwitch) bufferdUnit.mObject;
-					iswitch.registerPowerSwitchListener(internetSwitchListener);
+					iswitch.registerPowerSwitchListener(mInternetSwitchListener);
 					bufferdUnit.mSwitchType = iswitch.getType();
 					bufferdUnit.mSwitchState = iswitch.getState();
 				}
@@ -394,8 +415,8 @@ public class RemoteService extends Service {
 				@Override
 				public void run() {
 					String media = "unknown";
-					if (mCurrentMediaServer != null)
-						media = mCurrentMediaServer.name;
+					if (mCurrentMediaCenter != null)
+						media = mCurrentMediaCenter.name;
 					for (IRemoteActionListener listener : mActionListener)
 						listener.onPlayingBeanChanged(media, playing);
 				}

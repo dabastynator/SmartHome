@@ -144,7 +144,7 @@ public class RemoteBinder extends Binder {
 	public void uploadFile(final IBrowser browser, final File file) {
 		try {
 			FileSender fileSender = new FileSender(file, UPLOAD_PORT, 1, DownloadTask.PROGRESS_STEP);
-			fileSender.getProgressListener().add(mService.uploadListener);
+			fileSender.getProgressListener().add(mService.mUploadListener);
 			fileSender.setBufferSize(DownloadTask.BUFFER_SIZE);
 			fileSender.sendAsync();
 			new Thread() {
@@ -207,7 +207,7 @@ public class RemoteBinder extends Binder {
 	}
 
 	public StationStuff getLatestMediaServer() {
-		return mService.mCurrentMediaServer;
+		return mService.mCurrentMediaCenter;
 	}
 
 	public Map<String, BufferdUnit> getSwitches() {
@@ -252,7 +252,7 @@ public class RemoteBinder extends Binder {
 								newFile);
 						// set maximum byte size to 1MB
 						receiver.setBufferSize(1000000);
-						receiver.getProgressListener().add(mService.downloadListener);
+						receiver.getProgressListener().add(mService.mDownloadListener);
 						mService.mNotificationHandler.setFile(itemName);
 						receiver.receiveSync();
 					}

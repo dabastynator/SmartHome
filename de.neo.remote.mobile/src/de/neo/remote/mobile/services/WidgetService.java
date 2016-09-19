@@ -361,6 +361,8 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		if (switchID == null)
 			return;
 		BufferdUnit unit = binder.getSwitches().get(switchID);
+		if (binder == null || binder.getServer() == null)
+			throw new Exception(getResources().getString(R.string.no_conneciton));
 		if (unit == null)
 			throw new Exception(binder.getServer().getName() + " "
 					+ getResources().getString(R.string.switch_has_no_switch) + " " + switchID);

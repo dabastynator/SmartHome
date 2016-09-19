@@ -58,7 +58,7 @@ public class DownloadTask extends AbstractTask {
 		}
 		binder.mReceiver = receiver;
 		receiver.setBufferSize(BUFFER_SIZE);
-		receiver.getProgressListener().add(binder.mService.downloadListener);
+		receiver.getProgressListener().add(binder.mService.mDownloadListener);
 		receiver.receiveSync();
 	}
 
