@@ -29,8 +29,7 @@ import de.neo.rmi.protokol.RegistryRequest.Type;
  * server api for all clients. to provide a remote object first initialize the
  * server then register the object.<br>
  * <br>
- * <code>
- * Server s = Server.getServer();<br>
+ * <code> Server s = Server.getServer();<br>
  * s.connectToRegistry(REGISTRY_LOCATION, REGISTRY_URL);<br>
  * s.startServer(SERVER_PORT);<br>
  * s.register(OBJECT_ID, remoteObject);<br>
@@ -53,78 +52,78 @@ public class Server {
 	/**
 	 * singleton server object
 	 */
-	private static Server server;
+	private static Server mServer;
 
 	/**
 	 * maximum sockets per connection
 	 */
-	private int connectionSocketCount = DEFAULT_CONNECTION_SOCKETCOUNT;
+	private int mConnectionSocketCount = DEFAULT_CONNECTION_SOCKETCOUNT;
 
 	/**
 	 * registry socket
 	 */
-	private Socket registrySocket;
+	private Socket mRegistrySocket;
 
 	/**
 	 * registry inputstream
 	 */
-	private ObjectInputStream registryIn;
+	private ObjectInputStream mRegistryIn;
 
 	/**
 	 * registry outputstream
 	 */
-	private ObjectOutputStream registryOut;
+	private ObjectOutputStream mRegistryOut;
 
 	/**
 	 * server socket
 	 */
-	private ServerSocket serverSocket;
+	private ServerSocket mServerSocket;
 
 	/**
 	 * shutdown handler of the server
 	 */
-	private ShutdownHandler shutdownHandler;
+	private ShutdownHandler mShutdownHandler;
 
 	/**
 	 * List of all registered ids in the registry.
 	 */
-	private List<String> registeredIDList = new ArrayList<String>();
+	private List<String> mRegisteredIDList = new ArrayList<String>();
 
 	/**
 	 * list of all adapters
 	 */
-	private Map<String, DynamicAdapter> adapterMap = new HashMap<String, DynamicAdapter>();
+	private Map<String, DynamicAdapter> mAdapterMap = new HashMap<String, DynamicAdapter>();
 
 	/**
 	 * map to get id of adapter object
 	 */
-	private Map<Object, String> adapterObjectId = new HashMap<Object, String>();
+	private Map<Object, String> mAdapterObjectId = new HashMap<Object, String>();
 
 	/**
 	 * list of all connections to other servers
 	 */
-	private Map<ServerPort, ServerConnection> serverConnections = Collections
+	private Map<ServerPort, ServerConnection> mServerConnections = Collections
 			.synchronizedMap(new HashMap<ServerPort, ServerConnection>());
 
 	/**
 	 * list of all connections of the server
 	 */
-	private List<ConnectionHandler> handlers = Collections.synchronizedList(new ArrayList<ConnectionHandler>());
+	private List<ConnectionHandler> mHandlers = Collections.synchronizedList(new ArrayList<ConnectionHandler>());
 
 	/**
 	 * server port
 	 */
-	private int port = PORT;
+	private int mPort = PORT;
 
 	/**
 	 * server ip
 	 */
-	private String ip;
+	private String mIp;
 
 	/**
 	 * is connected to registry
 	 */
-	private boolean isConnectedRegistry = false;
+	private boolean mIsConnectedRegistry = false;
 
 	/**
 	 * create connection to the registry. enables to register, find and
@@ -135,17 +134,15 @@ public class Server {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public void connectToRegistry(String registry, int port)
-			throws UnknownHostException, IOException {
-		registrySocket = new Socket(registry, port);
-		registryOut = new ObjectOutputStream(registrySocket.getOutputStream());
-		registryIn = new ObjectInputStream(registrySocket.getInputStream());
-		ip = registrySocket.getLocalAddress().getHostAddress();
-		isConnectedRegistry = true;
-		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry: "
-				+ registry + ":" + port, null);
-		shutdownHandler = new ShutdownHandler(this);
-		Runtime.getRuntime().addShutdownHook(shutdownHandler);
+	public void connectToRegistry(String registry, int port) throws UnknownHostException, IOException {
+		mRegistrySocket = new Socket(registry, port);
+		mRegistryOut = new ObjectOutputStream(mRegistrySocket.getOutputStream());
+		mRegistryIn = new ObjectInputStream(mRegistrySocket.getInputStream());
+		mIp = mRegistrySocket.getLocalAddress().getHostAddress();
+		mIsConnectedRegistry = true;
+		RMILogger.performLog(LogPriority.INFORMATION, "connect to registry: " + registry + ":" + port, null);
+		mShutdownHandler = new ShutdownHandler(this);
+		Runtime.getRuntime().addShutdownHook(mShutdownHandler);
 	}
 
 	/**
@@ -156,8 +153,7 @@ public class Server {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public void connectToRegistry(String registry) throws UnknownHostException,
-			IOException {
+	public void connectToRegistry(String registry) throws UnknownHostException, IOException {
 		connectToRegistry(registry, Registry.PORT);
 	}
 
@@ -165,13 +161,12 @@ public class Server {
 	 * force connection to given registry. Retry after 500 ms, if network is not
 	 * available.
 	 * 
-	 * @param ip
+	 * @param mIp
 	 *            of registry
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public void forceConnectToRegistry(String registry)
-			throws UnknownHostException, IOException {
+	public void forceConnectToRegistry(String registry) throws UnknownHostException, IOException {
 		boolean connected = false;
 		long waitTime = 100;
 		long maxTime = 1000 * 60 * 10;
@@ -182,8 +177,7 @@ public class Server {
 			} catch (SocketException e) {
 				connected = false;
 				RMILogger.performLog(LogPriority.WARNING,
-						"connection to registry refused. retry after "
-								+ waitTime + "ms", null);
+						"connection to registry refused. retry after " + waitTime + "ms", null);
 				try {
 					Thread.sleep(waitTime);
 					waitTime = Math.min(waitTime * 2, maxTime);
@@ -202,7 +196,7 @@ public class Server {
 	 * @param port
 	 */
 	public void startServer(int port) {
-		this.port = port;
+		this.mPort = port;
 		new ServerThread().start();
 	}
 
@@ -219,9 +213,9 @@ public class Server {
 	 * @return server
 	 */
 	public static Server getServer() {
-		if (server == null)
-			server = new Server();
-		return server;
+		if (mServer == null)
+			mServer = new Server();
+		return mServer;
 	}
 
 	/**
@@ -233,26 +227,25 @@ public class Server {
 	 */
 	public void register(String id, Object object) {
 		// add adapter
-		ServerPort serverPort = new ServerPort(ip, port);
-		adapterMap.put(id, new DynamicAdapter(id, object, this));
-		adapterObjectId.put(object, id);
+		ServerPort serverPort = new ServerPort(mIp, mPort);
+		mAdapterMap.put(id, new DynamicAdapter(id, object, this));
+		mAdapterObjectId.put(object, id);
 		// tell registry
 		GlobalObject globalObject = new GlobalObject(id, serverPort);
 		RegistryRequest request = new RegistryRequest(Type.REGISTER);
 		request.setObject(globalObject);
 		request.setId(id);
 		try {
-			registryOut.writeObject(request);
-			registryOut.flush();
-			registryOut.reset();
+			mRegistryOut.writeObject(request);
+			mRegistryOut.flush();
+			mRegistryOut.reset();
 			@SuppressWarnings("unused")
-			RegistryReply reply = (RegistryReply) registryIn.readObject();
-			registeredIDList.add(id);
-			RMILogger
-					.performLog(LogPriority.INFORMATION, "register object", id);
+			RegistryReply reply = (RegistryReply) mRegistryIn.readObject();
+			mRegisteredIDList.add(id);
+			RMILogger.performLog(LogPriority.INFORMATION, "register object", id);
 		} catch (IOException | ClassNotFoundException e) {
-			RMILogger.performLog(LogPriority.ERROR, "Error register object: "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage(), id);
+			RMILogger.performLog(LogPriority.ERROR,
+					"Error register object: " + e.getClass().getSimpleName() + ": " + e.getMessage(), id);
 		}
 	}
 
@@ -263,24 +256,21 @@ public class Server {
 	 * @param id
 	 */
 	public void unRegister(String id) {
-		adapterObjectId.remove(adapterMap.get(id));
-		adapterMap.remove(id);
+		mAdapterObjectId.remove(mAdapterMap.get(id));
+		mAdapterMap.remove(id);
 		RegistryRequest request = new RegistryRequest(Type.UNREGISTER);
 		try {
-			registryOut.writeObject(request);
-			registryOut.flush();
-			registryOut.reset();
+			mRegistryOut.writeObject(request);
+			mRegistryOut.flush();
+			mRegistryOut.reset();
 			@SuppressWarnings("unused")
-			RegistryReply reply = (RegistryReply) registryIn.readObject();
-			registeredIDList.remove(id);
-			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ",
-					id);
+			RegistryReply reply = (RegistryReply) mRegistryIn.readObject();
+			mRegisteredIDList.remove(id);
+			RMILogger.performLog(LogPriority.INFORMATION, "unregister object ", id);
 		} catch (IOException e) {
-			RMILogger.performLog(LogPriority.ERROR,
-					"unregister object " + e.getMessage(), id);
+			RMILogger.performLog(LogPriority.ERROR, "unregister object " + e.getMessage(), id);
 		} catch (ClassNotFoundException e) {
-			RMILogger.performLog(LogPriority.ERROR,
-					"unregister object " + e.getMessage(), id);
+			RMILogger.performLog(LogPriority.ERROR, "unregister object " + e.getMessage(), id);
 		}
 	}
 
@@ -298,15 +288,14 @@ public class Server {
 		try {
 			RegistryRequest request = new RegistryRequest(Type.FIND);
 			request.setId(id);
-			registryOut.writeObject(request);
-			registryOut.flush();
-			registryOut.reset();
-			RegistryReply reply = (RegistryReply) registryIn.readObject();
+			mRegistryOut.writeObject(request);
+			mRegistryOut.flush();
+			mRegistryOut.reset();
+			RegistryReply reply = (RegistryReply) mRegistryIn.readObject();
 			if (reply.getObject() == null)
 				return null;
 			// connect to server
-			ServerConnection sc = connectToServer(reply.getObject()
-					.getServerPort());
+			ServerConnection sc = connectToServer(reply.getObject().getServerPort());
 			// create proxy
 			return (T) sc.createProxy(id, template, true);
 		} catch (UnknownHostException e) {
@@ -337,22 +326,20 @@ public class Server {
 			Object result = null;
 			RegistryReply reply = null;
 			while (result == null) {
-				registryOut.writeObject(request);
-				registryOut.flush();
-				registryOut.reset();
-				reply = (RegistryReply) registryIn.readObject();
+				mRegistryOut.writeObject(request);
+				mRegistryOut.flush();
+				mRegistryOut.reset();
+				reply = (RegistryReply) mRegistryIn.readObject();
 				if (reply.getObject() == null) {
 					RMILogger.performLog(LogPriority.WARNING,
-							"object not found in registry. retry after "
-									+ sleepTime + "ms", id);
+							"object not found in registry. retry after " + sleepTime + "ms", id);
 					Thread.sleep(sleepTime);
 					sleepTime = Math.min(sleepTime * 2, 60 * 1000);
 				} else
 					result = reply.getObject();
 			}
 			// connect to server
-			ServerConnection sc = connectToServer(reply.getObject()
-					.getServerPort());
+			ServerConnection sc = connectToServer(reply.getObject().getServerPort());
 			// create proxy
 			return (T) sc.createProxy(id, template, true);
 		} catch (UnknownHostException e) {
@@ -372,7 +359,7 @@ public class Server {
 	 * @return id adapter map
 	 */
 	public Map<String, DynamicAdapter> getAdapterMap() {
-		return adapterMap;
+		return mAdapterMap;
 	}
 
 	/**
@@ -381,7 +368,7 @@ public class Server {
 	 * @return adapter id map
 	 */
 	public Map<Object, String> getAdapterObjectIdMap() {
-		return adapterObjectId;
+		return mAdapterObjectId;
 	}
 
 	/**
@@ -395,31 +382,27 @@ public class Server {
 		@Override
 		public void run() {
 			try {
-				serverSocket = new ServerSocket(port);
-				RMILogger.performLog(LogPriority.INFORMATION,
-						"server is listening on port: " + port, null);
-				while (serverSocket != null) {
-					final Socket socket = serverSocket.accept();
+				mServerSocket = new ServerSocket(mPort);
+				RMILogger.performLog(LogPriority.INFORMATION, "server is listening on port: " + mPort, null);
+				while (mServerSocket != null) {
+					final Socket socket = mServerSocket.accept();
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
 							try {
-								ConnectionHandler handler = new ConnectionHandler(
-										ip, port, socket, Server.this);
-								handlers.add(handler);
+								ConnectionHandler handler = new ConnectionHandler(mIp, mPort, socket, Server.this);
+								mHandlers.add(handler);
 								handler.handle();
 							} catch (IOException e) {
 								RMILogger.performLog(LogPriority.ERROR,
-										"Error creating new connection handler: "
-												+ e.getMessage(), null);
+										"Error creating new connection handler: " + e.getMessage(), null);
 							}
 						}
 					}).start();
 				}
 			} catch (IOException e1) {
 				if (e1 instanceof SocketException)
-					RMILogger.performLog(LogPriority.ERROR, "server closed "
-							+ "(" + e1.getMessage() + ")", null);
+					RMILogger.performLog(LogPriority.ERROR, "server closed " + "(" + e1.getMessage() + ")", null);
 				else
 					e1.printStackTrace();
 			}
@@ -434,37 +417,39 @@ public class Server {
 	 */
 	public synchronized void close() {
 		// close connections
-		for (ServerConnection sc : serverConnections.values())
+		for (ServerConnection sc : mServerConnections.values())
 			sc.disconnect();
-		for (ConnectionHandler handler : handlers)
+
+		for (ConnectionHandler handler : new ArrayList<>(mHandlers))
 			handler.close();
 		// close sockets
-		if (registrySocket != null)
+		if (mRegistrySocket != null)
 			try {
-				registrySocket.close();
+				mRegistrySocket.close();
 			} catch (IOException e) {
 			}
-		if (serverSocket != null)
+		if (mServerSocket != null)
 			try {
-				serverSocket.close();
+				mServerSocket.close();
 			} catch (IOException e) {
 			}
 
-		serverSocket = null;
-		registrySocket = null;
-		serverConnections.clear();
-		handlers.clear();
-		adapterMap.clear();
-		adapterObjectId.clear();
+		mServerSocket = null;
+		mRegistrySocket = null;
+		mServerConnections.clear();
+		mHandlers.clear();
+		mAdapterMap.clear();
+		mAdapterObjectId.clear();
 		RMILogger.performLog(LogPriority.INFORMATION, "close server", null);
 	}
-	
+
 	/**
 	 * Remove obsolete connection handler
+	 * 
 	 * @param connectionHandler
 	 */
-	public void removeHandler(ConnectionHandler connectionHandler){
-		handlers.remove(connectionHandler);
+	public void removeHandler(ConnectionHandler connectionHandler) {
+		mHandlers.remove(connectionHandler);
 	}
 
 	/**
@@ -480,11 +465,11 @@ public class Server {
 			throws UnknownHostException, IOException {
 		if (serverPort == null)
 			throw new RuntimeException("serverport must not be null");
-		ServerConnection serverConnection = serverConnections.get(serverPort);
+		ServerConnection serverConnection = mServerConnections.get(serverPort);
 		if (serverConnection != null)
 			return serverConnection;
 		serverConnection = new ServerConnection(serverPort, this);
-		serverConnections.put(serverPort, serverConnection);
+		mServerConnections.put(serverPort, serverConnection);
 		return serverConnection;
 	}
 
@@ -494,21 +479,21 @@ public class Server {
 	 * @return serverPort
 	 */
 	public ServerPort getServerPort() {
-		return new ServerPort(ip, port);
+		return new ServerPort(mIp, mPort);
 	}
 
 	/**
 	 * @return true if server is connected to the registry
 	 */
 	public boolean isConnectedToRegistry() {
-		return isConnectedRegistry;
+		return mIsConnectedRegistry;
 	}
 
 	/**
 	 * @return maximum number of sockets per connection
 	 */
 	public int getConnectionSocketCount() {
-		return connectionSocketCount;
+		return mConnectionSocketCount;
 	}
 
 	/**
@@ -518,26 +503,24 @@ public class Server {
 	 * @param connectionSocketCount
 	 */
 	public void setConnectionSocketCount(int connectionSocketCount) {
-		this.connectionSocketCount = connectionSocketCount;
+		this.mConnectionSocketCount = connectionSocketCount;
 	}
 
 	public List<String> getRegisteredIDs() {
-		return registeredIDList;
+		return mRegisteredIDList;
 	}
 
 	public synchronized void closeConnectionTo(ServerPort serverPort) {
-		ServerConnection connection = serverConnections.get(serverPort);
+		ServerConnection connection = mServerConnections.get(serverPort);
 		if (connection != null) {
 			connection.disconnect();
-			serverConnections.remove(serverPort);
-			RMILogger.performLog(LogPriority.INFORMATION, "Close connection",
-					serverPort.getIp());
+			mServerConnections.remove(serverPort);
+			RMILogger.performLog(LogPriority.INFORMATION, "Close connection", serverPort.getIp());
 		}
 	}
 
 	public void manageConnector(IRegistryConnection connector, String registry) {
-		ConnectorManager manager = new ConnectorManager(this, connector,
-				registry);
+		ConnectorManager manager = new ConnectorManager(this, connector, registry);
 		manager.start();
 	}
 
