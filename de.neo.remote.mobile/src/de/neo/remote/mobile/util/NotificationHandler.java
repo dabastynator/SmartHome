@@ -5,20 +5,13 @@ import java.nio.IntBuffer;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.PlayingBean;
@@ -27,7 +20,6 @@ import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.receivers.MediaButtonReceiver;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
@@ -103,10 +95,18 @@ public class NotificationHandler implements IRemoteActionListener {
 	@Override
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-		boolean notify = preferences.getBoolean(SettingsActivity.NOTIFY, false);
-		if (!notify)
-			return;
 		Bitmap thumbnail = null;
+		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
+			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
+					Bitmap.Config.RGB_565);
+			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB());
+			thumbnail.copyPixelsFromBuffer(buf);
+		}
+		if (preferences.getBoolean(SettingsActivity.NOTIFY, false))
+			sendNotification(playing, thumbnail);
+	}
+
+	private void sendNotification(PlayingBean playing, Bitmap thumbnail) {
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.cancel(PLAYING_NOTIFICATION_ID);
@@ -131,15 +131,6 @@ public class NotificationHandler implements IRemoteActionListener {
 			final String msg = sb.toString();
 			final String title = t;
 
-			if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
-				thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
-						Bitmap.Config.RGB_565);
-				IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
-																			// is
-																			// my
-																			// array
-				thumbnail.copyPixelsFromBuffer(buf);
-			}
 			if (playing.getState() == STATE.DOWN) {
 				NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 				nm.cancel(PLAYING_NOTIFICATION_ID);
@@ -154,72 +145,6 @@ public class NotificationHandler implements IRemoteActionListener {
 			i.putExtra("playing", playing.getState() == STATE.PLAY);
 			mContext.sendBroadcast(i);
 		}
-
-		// Set music session
-		setMusicSession(playing, thumbnail);
-
-	}
-
-	private void setMusicSession(PlayingBean playing, Bitmap thumbnail) {
-		AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-		int stateflag = PlaybackStateCompat.STATE_NONE;
-		if (playing == null || playing.getState() == STATE.DOWN)
-			stateflag = PlaybackStateCompat.STATE_NONE;
-		else if (playing.getState() == STATE.PLAY)
-			stateflag = PlaybackStateCompat.STATE_PLAYING;
-		else if (playing.getState() == STATE.PAUSE)
-			stateflag = PlaybackStateCompat.STATE_PAUSED;
-		if (stateflag != PlaybackStateCompat.STATE_NONE) {
-			int result = am.requestAudioFocus(new AudioListener(am, mContext), AudioManager.STREAM_MUSIC,
-					AudioManager.AUDIOFOCUS_GAIN);
-			if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-
-				MediaSessionCompat session = new MediaSessionCompat(mContext, mContext.getPackageName());
-				Intent intent = new Intent(mContext, MediaButtonReceiver.class);
-				PendingIntent pintent = PendingIntent.getBroadcast(mContext, 0, intent,
-						PendingIntent.FLAG_UPDATE_CURRENT);
-				session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-						| MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-				session.setMediaButtonReceiver(pintent);
-
-				// Set state
-				PlaybackStateCompat state = new PlaybackStateCompat.Builder()
-						.setActions(PlaybackStateCompat.ACTION_FAST_FORWARD | PlaybackStateCompat.ACTION_PAUSE
-								| PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE
-								| PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-								| PlaybackStateCompat.ACTION_STOP)
-						.setState(stateflag, 0, 1, SystemClock.elapsedRealtime()).build();
-				session.setPlaybackState(state);
-
-				// Set right activity
-				Intent nIntent = new Intent(mContext, MediaServerActivity.class);
-				nIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-				nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, mCurrentServer.getId());
-				PendingIntent pInent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
-				session.setSessionActivity(pInent);
-
-				// Set meta-info, artist album title
-				MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-				if (playing != null) {
-					builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playing.getArtist());
-					builder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, playing.getAlbum());
-					builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playing.getTitle());
-				}
-				builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail);
-				session.setMetadata(builder.build());
-
-				// Update volume
-				// int vol = MediaButtonReceiver.volumeRemoteToLocal(am,
-				// playing);
-				// am.setStreamVolume(AudioManager.STREAM_MUSIC, vol, 0);
-
-				session.setActive(true);
-			}
-		} else {
-			MediaSessionCompat session = new MediaSessionCompat(mContext, mContext.getPackageName());
-			session.setActive(false);
-		}
-
 	}
 
 	/**
@@ -353,35 +278,6 @@ public class NotificationHandler implements IRemoteActionListener {
 
 	@Override
 	public void onGroundPlotCreated(GroundPlot plot) {
-	}
-
-	public static class AudioListener implements OnAudioFocusChangeListener {
-
-		public AudioManager mAudioManager;
-		private Context mContext;
-
-		public AudioListener(AudioManager am, Context context) {
-			mAudioManager = am;
-			mContext = context;
-		}
-
-		@Override
-		public void onAudioFocusChange(int focusChange) {
-			if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-				// Pause playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-				// Resume playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-				mAudioManager.unregisterMediaButtonEventReceiver(
-						new ComponentName(mContext.getPackageName(), MediaButtonReceiver.class.getName()));
-				mAudioManager.abandonAudioFocus(this);
-				// Stop playback
-			} else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-			} else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-			}
-
-		}
-
 	}
 
 }

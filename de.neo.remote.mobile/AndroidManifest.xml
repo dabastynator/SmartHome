@@ -107,14 +107,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_power_info" />
         </receiver>
-        <receiver android:name="de.neo.remote.mobile.receivers.MediaButtonReceiver" >
-            <intent-filter android:priority="2000" >
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.VOLUME_CHANGED_ACTION" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

@@ -15,6 +15,7 @@
     <string name="settings">Settings</string>
     <string name="appearance">Appearance</string>
     <string name="music_notify">Show song by notification</string>
+    <string name="use_playing_session">Send playing-options to android</string>
     <string name="background">Background</string>
     <string name="connection_trigger">Action on wifi-connection</string>
 
