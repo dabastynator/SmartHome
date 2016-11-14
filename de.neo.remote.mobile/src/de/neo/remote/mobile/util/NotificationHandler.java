@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -196,11 +197,17 @@ public class NotificationHandler implements IRemoteActionListener {
 		PendingIntent pInent = PendingIntent.getActivity(context, 0, nIntent, 0);
 
 		Builder builder = new NotificationCompat.Builder(context);
-		builder.setContentText(context.mCurrentSSID);
+		builder.setContentText(getApplicationName(context));
 		builder.setContentTitle(context.mCurrentServer.getName());
 		builder.setSmallIcon(R.drawable.remote_icon);
 		builder.setContentIntent(pInent);
 		return builder.build();
+	}
+	
+	public static String getApplicationName(Context context) {
+	    ApplicationInfo applicationInfo = context.getApplicationInfo();
+	    int stringId = applicationInfo.labelRes;
+	    return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
 	}
 
 	public void removeNotification() {

@@ -35,6 +35,7 @@ import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.remote.mobile.util.VolumeDialogBuilder;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.remote.mobile.R;
 
@@ -136,14 +137,20 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		final StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (mBinder == null)
 			return super.onKeyDown(keyCode, event);
-		/*
-		 * if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) { new Thread() { public
-		 * void run() { try { mediaServer.player.volDown(); } catch (Exception
-		 * e) { } }; }.start(); return true; } if (keyCode ==
-		 * KeyEvent.KEYCODE_VOLUME_UP) { new Thread() { public void run() { try
-		 * { mediaServer.player.volUp(); } catch (Exception e) { } }; }.start();
-		 * return true; }
-		 */
+
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mediaServer);
+			dialog.changeVolume(-1);
+			dialog.show();
+			return true;
+		}
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mediaServer);
+			dialog.changeVolume(1);
+			dialog.show();
+			return true;
+		}
+
 		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager.getCurrentItem());
 		if (fragment != null && fragment.onKeyDown(keyCode, event))
 			return true;

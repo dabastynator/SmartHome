@@ -28,7 +28,7 @@ public class WifiReceiver extends BroadcastReceiver {
 		}
 	}
 
-	public String currentSSID(Context context) {
+	public static String currentSSID(Context context) {
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		return wifiInfo.getSSID();

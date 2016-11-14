@@ -18,6 +18,7 @@
     <string name="use_playing_session">Send playing-options to android</string>
     <string name="background">Background</string>
     <string name="connection_trigger">Action on wifi-connection</string>
+    <string name="volume">Volume</string>
 
     <!-- Play control strings -->
     <string name="player">Player</string>

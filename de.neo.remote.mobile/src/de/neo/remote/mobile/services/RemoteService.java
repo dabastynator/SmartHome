@@ -10,11 +10,9 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import de.neo.android.persistence.DaoFactory;
@@ -32,12 +30,11 @@ import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.api.Trigger;
-import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.WifiReceiver;
 import de.neo.remote.mobile.tasks.AbstractTask;
+import de.neo.remote.mobile.tasks.WifiSignalTask;
 import de.neo.remote.mobile.util.BufferBrowser;
 import de.neo.remote.mobile.util.ControlCenterBuffer;
 import de.neo.remote.mobile.util.NotificationHandler;
@@ -73,10 +70,7 @@ public class RemoteService extends Service {
 
 	protected List<IRemoteActionListener> mActionListener;
 	protected WifiReceiver mWifiReceiver;
-	private long mLastClientActionTime = 0;
-	private boolean mLastClientActionConnected;
-
-	public String mCurrentSSID;
+	protected WifiSignalTask mWifiSignalTask;
 
 	@Override
 	public void onCreate() {
@@ -99,6 +93,7 @@ public class RemoteService extends Service {
 		mUploadListener = new UploadProgressListenr();
 		mActionListener.add(mNotificationHandler);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
+		mWifiSignalTask = new WifiSignalTask(this);
 	}
 
 	@Override
@@ -122,6 +117,10 @@ public class RemoteService extends Service {
 	 */
 	public Server getServer() {
 		return mLocalServer;
+	}
+
+	public IControlCenter getControlCenter() {
+		return mCurrentControlCenter;
 	}
 
 	public void setCurrentMediaServer(final StationStuff mediaObjects) throws RemoteException {
@@ -223,12 +222,11 @@ public class RemoteService extends Service {
 					mCurrentServer = server[0];
 
 					// Register WIFI broadcast-receiver
-					mLastClientActionConnected = true;
 					IntentFilter intentFilter = new IntentFilter();
 					intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 					mWifiReceiver = new WifiReceiver();
 					registerReceiver(mWifiReceiver, intentFilter);
-					mCurrentSSID = mWifiReceiver.currentSSID(RemoteService.this);
+					mWifiSignalTask.setConnection(true);
 
 					// Start foreground service to avoid killing of the service
 					startForeground(NotificationHandler.SERVICE_NOTIFICATION_ID,
@@ -283,47 +281,11 @@ public class RemoteService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				Trigger trigger = new Trigger();
-				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-				String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
-				trigger.setTriggerID(triggerID);
-				for (int i = 0; i < 10; i++) {
-					try {
-						String ssid = mWifiReceiver.currentSSID(RemoteService.this);
-						if (mCurrentSSID.equals(ssid)
-								&& mLastClientActionTime <= System.currentTimeMillis() - 1000 * 60 * 7
-								&& !mLastClientActionConnected) {
-							if (triggerID != null && triggerID.length() > 0)
-								mCurrentControlCenter.trigger(trigger);
-							mLastClientActionTime = System.currentTimeMillis();
-							mLastClientActionConnected = true;
-							try {
-								refreshListener();
-							} catch (PlayerException | RemoteException e) {
-								// ignore
-							}
-							return;
-						}
-					} catch (RemoteException e) {
-					}
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e1) {
-						// Ignore
-					}
-				}
-			}
-		};
-		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())
-				&& !mLastClientActionConnected) {
-			new Thread(r).start();
+		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())) {
+			mWifiSignalTask.wifiConnect();
 		}
-		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction()) && mLastClientActionConnected) {
-			mLastClientActionTime = System.currentTimeMillis();
-			mLastClientActionConnected = false;
+		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction())) {
+			mWifiSignalTask.wifiDisconnect();
 		}
 
 		return super.onStartCommand(intent, flags, startId);
