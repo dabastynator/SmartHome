@@ -9,8 +9,6 @@ import java.util.Map;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -32,7 +30,6 @@ import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.receivers.WifiReceiver;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.WifiSignalTask;
 import de.neo.remote.mobile.util.BufferBrowser;
@@ -69,7 +66,6 @@ public class RemoteService extends Service {
 	protected Handler mHandler;
 
 	protected List<IRemoteActionListener> mActionListener;
-	protected WifiReceiver mWifiReceiver;
 	protected WifiSignalTask mWifiSignalTask;
 
 	@Override
@@ -94,10 +90,12 @@ public class RemoteService extends Service {
 		mActionListener.add(mNotificationHandler);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		mWifiSignalTask = new WifiSignalTask(this);
+		mWifiSignalTask.start();
 	}
 
 	@Override
 	public void onDestroy() {
+		mWifiSignalTask.end();
 		disconnectFromServer();
 		for (IRemoteActionListener listener : mActionListener) {
 			listener.onServerConnectionChanged(null);
@@ -222,10 +220,6 @@ public class RemoteService extends Service {
 					mCurrentServer = server[0];
 
 					// Register WIFI broadcast-receiver
-					IntentFilter intentFilter = new IntentFilter();
-					intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-					mWifiReceiver = new WifiReceiver();
-					registerReceiver(mWifiReceiver, intentFilter);
 					mWifiSignalTask.setConnection(true);
 
 					// Start foreground service to avoid killing of the service
@@ -253,9 +247,6 @@ public class RemoteService extends Service {
 	}
 
 	public void disconnectFromServer() {
-		if (mWifiReceiver != null)
-			unregisterReceiver(mWifiReceiver);
-		mWifiReceiver = null;
 		stopForeground(true);
 		new AsyncTask<Void, Integer, Exception>() {
 
@@ -277,19 +268,6 @@ public class RemoteService extends Service {
 			};
 
 		}.execute();
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (mCurrentControlCenter != null && ACTION_WIFI_CONNECTED.equals(intent.getAction())) {
-			mWifiSignalTask.wifiConnect();
-		}
-		if (ACTION_WIFI_DISCONNECTED.equals(intent.getAction())) {
-			mWifiSignalTask.wifiDisconnect();
-		}
-
-		return super.onStartCommand(intent, flags, startId);
-
 	}
 
 	public void refreshListener() throws RemoteException, PlayerException {
