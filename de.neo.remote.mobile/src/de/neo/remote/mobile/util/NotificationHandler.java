@@ -97,7 +97,8 @@ public class NotificationHandler implements IRemoteActionListener {
 	public void onPlayingBeanChanged(String mediaserver, PlayingBean playing) {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 		Bitmap thumbnail = null;
-		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
+		if (playing != null && playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0
+				&& playing.getThumbnailRGB() != null) {
 			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
 					Bitmap.Config.RGB_565);
 			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB());
@@ -203,11 +204,11 @@ public class NotificationHandler implements IRemoteActionListener {
 		builder.setContentIntent(pInent);
 		return builder.build();
 	}
-	
+
 	public static String getApplicationName(Context context) {
-	    ApplicationInfo applicationInfo = context.getApplicationInfo();
-	    int stringId = applicationInfo.labelRes;
-	    return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
+		ApplicationInfo applicationInfo = context.getApplicationInfo();
+		int stringId = applicationInfo.labelRes;
+		return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
 	}
 
 	public void removeNotification() {
