@@ -134,7 +134,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	@Override
-	public PlayingBean getPlayingBean() throws RemoteException, PlayerException {
+	public PlayingBean getPlayingBean() throws RemoteException {
 		return mPlayingBean;
 	}
 

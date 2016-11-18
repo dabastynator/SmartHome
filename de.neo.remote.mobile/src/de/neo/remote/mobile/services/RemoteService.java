@@ -26,7 +26,6 @@ import de.neo.remote.api.IPlayList;
 import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.IPlayerListener;
 import de.neo.remote.api.IRCColor;
-import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
@@ -140,7 +139,7 @@ public class RemoteService extends Service {
 						mCurrentMediaCenter.totem.addPlayerMessageListener(mPlayerListener);
 						mCurrentMediaCenter.omxplayer.addPlayerMessageListener(mPlayerListener);
 						mPlayerListener.playerMessage(mCurrentMediaCenter.player.getPlayingBean());
-					} catch (PlayerException | RemoteException e) {
+					} catch (RemoteException e) {
 					}
 				}
 			}.start();
@@ -270,7 +269,7 @@ public class RemoteService extends Service {
 		}.execute();
 	}
 
-	public void refreshListener() throws RemoteException, PlayerException {
+	public void refreshListener() throws RemoteException {
 		for (BufferdUnit unit : mUnitMap.values()) {
 			if (unit.mObject instanceof IInternetSwitch) {
 				IInternetSwitch iswitch = (IInternetSwitch) unit.mObject;

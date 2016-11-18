@@ -142,7 +142,7 @@ public interface IPlayer extends RemoteAble {
 	 * @throws RemoteException
 	 * @throws PlayerException
 	 */
-	PlayingBean getPlayingBean() throws RemoteException, PlayerException;
+	PlayingBean getPlayingBean() throws RemoteException;
 
 	/**
 	 * add listener for player states
