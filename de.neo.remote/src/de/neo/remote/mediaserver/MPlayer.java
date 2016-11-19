@@ -87,8 +87,12 @@ public class MPlayer extends AbstractPlayer {
 			// set default volume
 			mMplayerIn.print("volume " + mVolume + " 1\n");
 			mMplayerIn.flush();
+			// wait for mplayer to get the new volume
+			Thread.sleep(200);
 		} catch (IOException e) {
 			// throw new PlayerException(e.getMessage());
+		} catch (InterruptedException e) {
+			// ignore
 		}
 	}
 
