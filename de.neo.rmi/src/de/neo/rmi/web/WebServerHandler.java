@@ -67,8 +67,10 @@ public class WebServerHandler implements HttpHandler {
 				throw new IllegalArgumentException("Parameter of method missing WebGet annotation.");
 			Class<?> paramClass = parameterTypes[i];
 			String strValue = paramMap.get(annotation.name());
-			if (strValue == null)
+			if (strValue == null && annotation.required())
 				throw new IllegalArgumentException("Parameter missing: " + annotation.name());
+			if (strValue == null)
+				strValue = annotation.defaultvalue();
 			if (paramClass.equals(int.class) || paramClass.equals(Integer.class))
 				resultParams.add(Integer.valueOf(strValue));
 			else if (paramClass.equals(float.class) || paramClass.equals(Float.class))

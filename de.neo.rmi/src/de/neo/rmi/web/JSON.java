@@ -139,7 +139,7 @@ public class JSON {
 				}
 				sb.append(value);
 				if (--count > 0) {
-					sb.append(",");					
+					sb.append(",");
 				}
 			}
 			if (mValues.size() == 0)
@@ -166,6 +166,8 @@ public class JSON {
 	}
 
 	public static Object createByObject(Object o) {
+		if (o == null)
+			return null;
 		if (o instanceof List<?>) {
 			JSONArray result = new JSONArray();
 			List<?> list = (List<?>) o;
@@ -197,6 +199,8 @@ public class JSON {
 					result.put(key.toString(), (Boolean) value);
 				else if (value instanceof String)
 					result.put(key.toString(), (String) value);
+				else if (value == null)
+					result.put(key.toString(), (JSONObject) null);
 			}
 			return result;
 		} else {
@@ -217,11 +221,14 @@ public class JSON {
 						else if (field.getType().equals(String.class))
 							result.put(webField.name(), (String) field.get(o));
 						else {
-							Object sub = createByObject(field.get(o));
+							Object value = field.get(o);
+							Object sub = createByObject(value);
 							if (sub instanceof JSONObject)
 								result.put(webField.name(), (JSONObject) sub);
-							if (sub instanceof JSONArray)
+							else if (sub instanceof JSONArray)
 								result.put(webField.name(), (JSONArray) sub);
+							else if (value == null)
+								result.put(webField.name(), (JSONArray) null);
 						}
 					} catch (Exception e) {
 						// Ignore
