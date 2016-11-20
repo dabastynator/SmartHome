@@ -1,6 +1,8 @@
 package de.neo.rmi.web;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -15,14 +17,21 @@ import com.sun.net.httpserver.HttpHandler;
 import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.web.JSON.JSONArray;
+import de.neo.rmi.web.JSON.JSONObject;
 
 public class WebServerHandler implements HttpHandler {
 
 	private RemoteAble mRemoteable;
 	private Map<String, Method> mRemoteMethods;
+	private String mPath;
+	private String mToken;
+	private String mTokenParam;
 
-	public WebServerHandler(RemoteAble remoteAble) {
+	public WebServerHandler(RemoteAble remoteAble, String path) {
 		mRemoteable = remoteAble;
+		mPath = path;
+		mTokenParam = "token";
 		mRemoteMethods = new HashMap<>();
 		for (Method method : mRemoteable.getClass().getMethods()) {
 			WebRequest annotation = method.getAnnotation(WebRequest.class);
@@ -46,8 +55,7 @@ public class WebServerHandler implements HttpHandler {
 		return result;
 	}
 
-	private Object[] queryToParams(Method method, String query) {
-		Map<String, String> requestParams = queryToMap(query);
+	private Object[] queryToParams(Method method, Map<String, String> paramMap) {
 		List<Object> resultParams = new ArrayList<>();
 		Annotation[][] annotations = method.getParameterAnnotations();
 		Class<?>[] parameterTypes = method.getParameterTypes();
@@ -56,7 +64,7 @@ public class WebServerHandler implements HttpHandler {
 			if (annotation == null)
 				throw new IllegalArgumentException("Parameter of method missing WebGet annotation.");
 			Class<?> paramClass = parameterTypes[i];
-			String strValue = requestParams.get(annotation.name());
+			String strValue = paramMap.get(annotation.name());
 			if (strValue == null)
 				throw new IllegalArgumentException("Parameter missing: " + annotation.name());
 			if (paramClass.equals(int.class) || paramClass.equals(Integer.class))
@@ -81,26 +89,78 @@ public class WebServerHandler implements HttpHandler {
 		return null;
 	}
 
+	private JSONObject createJSONApi() {
+		JSONObject result = new JSONObject();
+		result.put("path", mPath);
+		JSONArray jsonMethods = new JSONArray();
+		for (String methodName : mRemoteMethods.keySet()) {
+			JSONObject jsonMethod = new JSONObject();
+			jsonMethod.put("name", methodName);
+			JSONArray parameter = new JSONArray();
+			Method method = mRemoteMethods.get(methodName);
+			WebRequest methodAnnotation = method.getAnnotation(WebRequest.class);
+			jsonMethod.put("description", methodAnnotation.description());
+			Annotation[][] annotations = method.getParameterAnnotations();
+			for (int i = 0; i < annotations.length; i++) {
+				WebGet annotation = findWebGetAnnotation(annotations[i]);
+				parameter.add(annotation.name());
+			}
+			jsonMethod.put("parameter", parameter);
+			jsonMethods.add(jsonMethod);
+		}
+		result.put("methods", jsonMethods);
+		return result;
+	}
+
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		String methodPath = exchange.getRequestURI().getPath();
-		if (methodPath.lastIndexOf('/') >= 0)
-			methodPath = methodPath.substring(methodPath.lastIndexOf('/') + 1);
-		Method method = mRemoteMethods.get(methodPath);
+		methodPath = methodPath.substring(mPath.length());
+		if (methodPath.startsWith("/"))
+			methodPath = methodPath.substring(1);
 		String resultString = "";
+
 		try {
-			if (method == null)
-				throw new IllegalArgumentException("Could not find method for " + methodPath);
-			Object[] params = queryToParams(method, exchange.getRequestURI().getQuery());
-			Object result = method.invoke(mRemoteable, params);
-			resultString = JSON.createByObject(result).toString();
+			Map<String, String> paramMap = queryToMap(exchange.getRequestURI().getQuery());
+			if (mToken != null && mToken.length() > 0)
+				if (!mToken.equals(paramMap.get(mTokenParam)))
+					throw new IllegalArgumentException("Access denied");
+			if (methodPath.length() == 0) {
+				resultString = createJSONApi().toString();
+			} else {
+				Method method = mRemoteMethods.get(methodPath);
+				if (method == null)
+					throw new IllegalArgumentException("Could not find method for " + methodPath);
+				Object[] params = queryToParams(method, paramMap);
+				Object result = method.invoke(mRemoteable, params);
+				resultString = JSON.createByObject(result).toString();
+			}
 		} catch (Exception e) {
 			resultString = JSON.createByException(e).toString();
 		}
-		exchange.sendResponseHeaders(200, resultString.length());
+		byte[] bytes = resultString.getBytes();
+		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+		exchange.sendResponseHeaders(200, bytes.length);
 		OutputStream os = exchange.getResponseBody();
-		os.write(resultString.getBytes());
+		ioCopyStream(is, os);
 		os.close();
+	}
+
+	private void ioCopyStream(InputStream in, OutputStream out) throws IOException {
+		byte[] buffer = new byte[1024];
+		int len = in.read(buffer);
+		while (len != -1) {
+			out.write(buffer, 0, len);
+			len = in.read(buffer);
+		}
+	}
+
+	public String getPath() {
+		return mPath;
+	}
+
+	public void setSecurityToken(String token) {
+		mToken = token;
 	}
 
 }

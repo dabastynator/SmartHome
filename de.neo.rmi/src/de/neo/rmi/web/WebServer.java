@@ -38,14 +38,28 @@ public class WebServer {
 	 * @throws IOException
 	 */
 	public void handle(RemoteAble remoteAble) throws IOException {
-		RMILogger.performLog(LogPriority.INFORMATION, "start handling remoteable object", null);
+		handle(remoteAble, null);
+	}
+
+	/**
+	 * Handle the remoteable object. Every request must have token parameter.
+	 * 
+	 * @param remoteAble
+	 * @param token
+	 * @throws IOException
+	 */
+	public void handle(RemoteAble remoteAble, String token) throws IOException {
 		if (mServer != null)
 			throw new IllegalStateException("Webserver is already running.");
 		WebObject webAnnotation = remoteAble.getClass().getAnnotation(WebObject.class);
 		if (webAnnotation == null)
 			throw new IllegalArgumentException("WebObject annotation missing for remoteable object");
+		String path = "/" + webAnnotation.path();
+		RMILogger.performLog(LogPriority.INFORMATION, "start handling remoteable object", mPort + path);
 		mServer = HttpServer.create(new InetSocketAddress(mPort), 0);
-		mServer.createContext("/" + webAnnotation.path(), new WebServerHandler(remoteAble));
+		WebServerHandler handler = new WebServerHandler(remoteAble, path);
+		handler.setSecurityToken(token);
+		mServer.createContext(path, handler);
 		mServer.setExecutor(null); // creates a default executor
 		mServer.start();
 	}

@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface WebGet {
 	public String name();
+	public boolean required() default true;
+	public String defaultvalue() default "";
 }

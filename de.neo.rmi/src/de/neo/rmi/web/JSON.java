@@ -13,6 +13,7 @@ public class JSON {
 	public static class JSONObject {
 
 		private Map<String, Object> mValues = new HashMap<>();
+		private int mDepth = 0;
 
 		public void put(String key, String value) {
 			mValues.put(key, "\"" + value + "\"");
@@ -44,18 +45,30 @@ public class JSON {
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder("{\n");
+			StringBuilder sb = new StringBuilder("\n");
+			for (int i = 0; i < mDepth; i++)
+				sb.append("  ");
+			sb.append("{\n");
 			int count = mValues.size();
 			for (String key : mValues.keySet()) {
-				sb.append("  \"" + key + "\": ");
-				sb.append(mValues.get(key));
+				Object value = mValues.get(key);
+				if (value instanceof JSONArray)
+					((JSONArray) value).mDepth = mDepth + 1;
+				if (value instanceof JSONObject)
+					((JSONObject) value).mDepth = mDepth + 1;
+				for (int i = 0; i <= mDepth; i++)
+					sb.append("  ");
+				sb.append("\"" + key + "\": ");
+				sb.append(value);
 				if (--count > 0) {
 					sb.append(",");
 					sb.append("\n");
 				}
 			}
-			sb.append("}");
 			sb.append("\n");
+			for (int i = 0; i < mDepth; i++)
+				sb.append("  ");
+			sb.append("}");
 			return sb.toString();
 		}
 	}
@@ -63,6 +76,7 @@ public class JSON {
 	public static class JSONArray {
 
 		private List<Object> mValues = new ArrayList<>();
+		private int mDepth = 0;
 
 		public void add(String value) {
 			mValues.add("\"" + value + "\"");
@@ -94,18 +108,47 @@ public class JSON {
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder("[");
+			StringBuilder sb = new StringBuilder("");
+
 			int count = mValues.size();
+			boolean flat = true;
 			for (Object value : mValues) {
-				sb.append("  ");
+				if (value instanceof JSONArray) {
+					((JSONArray) value).mDepth = mDepth + 1;
+					flat = false;
+				}
+				if (value instanceof JSONObject) {
+					((JSONObject) value).mDepth = mDepth + 1;
+					flat = false;
+				}
+				if (count == mValues.size()) {
+					if (!(flat && mValues.size() < 7)) {
+						sb.append("\n");
+						for (int i = 0; i < mDepth; i++)
+							sb.append("  ");
+						sb.append("[");
+						sb.append("\n");
+					} else
+						sb.append("[");
+				}
+				if (!(flat && mValues.size() < 7))
+					for (int i = 0; i <= mDepth; i++)
+						sb.append("  ");
 				sb.append(value);
 				if (--count > 0) {
 					sb.append(",");
-					sb.append("\n");
+					if (!(flat && mValues.size() < 7))
+						sb.append("\n");
 				}
 			}
+			if (mValues.size() == 0)
+				sb.append("[");
+			if (!(flat && mValues.size() < 7)) {
+				sb.append("\n");
+				for (int i = 0; i < mDepth; i++)
+					sb.append("  ");
+			}
 			sb.append("]");
-			sb.append("\n");
 			return sb.toString();
 		}
 
