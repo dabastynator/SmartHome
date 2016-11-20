@@ -2,12 +2,13 @@ package de.neo.rmi.web;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sun.net.httpserver.HttpServer;
 
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.RMILogger.LogPriority;
-import de.neo.rmi.api.WebObject;
 import de.neo.rmi.protokol.RemoteAble;
 
 public class WebServer {
@@ -20,11 +21,12 @@ public class WebServer {
 		return mInstance;
 	}
 
-	int mPort = 5060;
-	HttpServer mServer = null;
+	private int mPort = 5060;
+	private HttpServer mServer = null;
+	private List<WebServerHandler> mHandlerList;
 
 	private WebServer() {
-		// TODO Auto-generated constructor stub
+		mHandlerList = new ArrayList<>();
 	}
 
 	public void setPort(int port) {
@@ -32,13 +34,14 @@ public class WebServer {
 	}
 
 	/**
-	 * Handle remote able object.
+	 * Handle remote able object at specified path.
 	 * 
+	 * @param path
 	 * @param remoteAble
 	 * @throws IOException
 	 */
-	public void handle(RemoteAble remoteAble) throws IOException {
-		handle(remoteAble, null);
+	public void handle(String path, RemoteAble remoteAble) throws IOException {
+		handle(path, remoteAble, null);
 	}
 
 	/**
@@ -48,18 +51,25 @@ public class WebServer {
 	 * @param token
 	 * @throws IOException
 	 */
-	public void handle(RemoteAble remoteAble, String token) throws IOException {
-		if (mServer != null)
-			throw new IllegalStateException("Webserver is already running.");
-		WebObject webAnnotation = remoteAble.getClass().getAnnotation(WebObject.class);
-		if (webAnnotation == null)
-			throw new IllegalArgumentException("WebObject annotation missing for remoteable object");
-		String path = "/" + webAnnotation.path();
-		RMILogger.performLog(LogPriority.INFORMATION, "start handling remoteable object", mPort + path);
-		mServer = HttpServer.create(new InetSocketAddress(mPort), 0);
+	public void handle(String path, RemoteAble remoteAble, String token) throws IOException {
+
+		if (!path.startsWith("/"))
+			path = "/" + path;
+		RMILogger.performLog(LogPriority.INFORMATION, "Add web-handler", mPort + path);
+
 		WebServerHandler handler = new WebServerHandler(remoteAble, path);
 		handler.setSecurityToken(token);
-		mServer.createContext(path, handler);
+		mHandlerList.add(handler);
+	}
+
+	public void start() throws IOException {
+		if (mServer != null)
+			throw new IllegalStateException("Webserver is already running.");
+		RMILogger.performLog(LogPriority.INFORMATION, "Start webserver with " + mHandlerList.size() + " handler",
+				"localhost:" + mPort);
+		mServer = HttpServer.create(new InetSocketAddress(mPort), 0);
+		for (WebServerHandler handler : mHandlerList)
+			mServer.createContext(handler.getPath(), handler);
 		mServer.setExecutor(null); // creates a default executor
 		mServer.start();
 	}

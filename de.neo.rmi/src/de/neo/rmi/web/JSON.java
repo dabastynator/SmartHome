@@ -16,7 +16,10 @@ public class JSON {
 		private int mDepth = 0;
 
 		public void put(String key, String value) {
-			mValues.put(key, "\"" + value + "\"");
+			if (value == null)
+				mValues.put(key, "null");
+			else
+				mValues.put(key, "\"" + value + "\"");
 		}
 
 		public void put(String key, boolean value) {
@@ -24,19 +27,22 @@ public class JSON {
 		}
 
 		public void put(String key, int value) {
-			mValues.put(key, "\"" + value + "\"");
+			mValues.put(key, String.valueOf(value));
 		}
 
 		public void put(String key, double value) {
-			mValues.put(key, "\"" + value + "\"");
+			mValues.put(key, String.valueOf(value));
 		}
 
 		public void put(String key, float value) {
-			mValues.put(key, "\"" + value + "\"");
+			mValues.put(key, String.valueOf(value));
 		}
 
 		public void put(String key, JSONObject value) {
-			mValues.put(key, value);
+			if (value == null)
+				mValues.put(key, "null");
+			else
+				mValues.put(key, value);
 		}
 
 		public void put(String key, JSONArray value) {
@@ -45,6 +51,8 @@ public class JSON {
 
 		@Override
 		public String toString() {
+			if (mValues.size() == 0)
+				return "{}";
 			StringBuilder sb = new StringBuilder("\n");
 			for (int i = 0; i < mDepth; i++)
 				sb.append("  ");
@@ -79,19 +87,22 @@ public class JSON {
 		private int mDepth = 0;
 
 		public void add(String value) {
-			mValues.add("\"" + value + "\"");
+			if (value == null)
+				mValues.add("null");
+			else
+				mValues.add("\"" + value + "\"");
 		}
 
 		public void add(int value) {
-			mValues.add("\"" + value + "\"");
+			mValues.add(value);
 		}
 
 		public void add(double value) {
-			mValues.add("\"" + value + "\"");
+			mValues.add(value);
 		}
 
 		public void add(float value) {
-			mValues.add("\"" + value + "\"");
+			mValues.add(value);
 		}
 
 		public void add(JSONObject value) {
@@ -108,6 +119,8 @@ public class JSON {
 
 		@Override
 		public String toString() {
+			if (mValues.size() == 0)
+				return "[]";
 			StringBuilder sb = new StringBuilder("");
 
 			int count = mValues.size();
@@ -122,28 +135,16 @@ public class JSON {
 					flat = false;
 				}
 				if (count == mValues.size()) {
-					if (!(flat && mValues.size() < 7)) {
-						sb.append("\n");
-						for (int i = 0; i < mDepth; i++)
-							sb.append("  ");
-						sb.append("[");
-						sb.append("\n");
-					} else
-						sb.append("[");
+					sb.append("[");
 				}
-				if (!(flat && mValues.size() < 7))
-					for (int i = 0; i <= mDepth; i++)
-						sb.append("  ");
 				sb.append(value);
 				if (--count > 0) {
-					sb.append(",");
-					if (!(flat && mValues.size() < 7))
-						sb.append("\n");
+					sb.append(",");					
 				}
 			}
 			if (mValues.size() == 0)
 				sb.append("[");
-			if (!(flat && mValues.size() < 7)) {
+			if (!flat) {
 				sb.append("\n");
 				for (int i = 0; i < mDepth; i++)
 					sb.append("  ");
@@ -180,11 +181,22 @@ public class JSON {
 			JSONObject result = new JSONObject();
 			Map<?, ?> map = (Map<?, ?>) o;
 			for (Object key : map.keySet()) {
+				Object value = map.get(key);
 				Object element = createByObject(map.get(key));
 				if (element instanceof JSONObject)
 					result.put(key.toString(), (JSONObject) element);
-				if (element instanceof JSONArray)
+				else if (element instanceof JSONArray)
 					result.put(key.toString(), (JSONArray) element);
+				else if (value instanceof Integer)
+					result.put(key.toString(), (Integer) value);
+				else if (value instanceof Float)
+					result.put(key.toString(), (Float) value);
+				else if (value instanceof Double)
+					result.put(key.toString(), (Double) value);
+				else if (value instanceof Boolean)
+					result.put(key.toString(), (Boolean) value);
+				else if (value instanceof String)
+					result.put(key.toString(), (String) value);
 			}
 			return result;
 		} else {

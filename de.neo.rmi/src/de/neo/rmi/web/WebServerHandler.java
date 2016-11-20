@@ -27,11 +27,13 @@ public class WebServerHandler implements HttpHandler {
 	private String mPath;
 	private String mToken;
 	private String mTokenParam;
+	private String mEncoding;
 
 	public WebServerHandler(RemoteAble remoteAble, String path) {
 		mRemoteable = remoteAble;
 		mPath = path;
 		mTokenParam = "token";
+		mEncoding = "UTF-8";
 		mRemoteMethods = new HashMap<>();
 		for (Method method : mRemoteable.getClass().getMethods()) {
 			WebRequest annotation = method.getAnnotation(WebRequest.class);
@@ -92,6 +94,10 @@ public class WebServerHandler implements HttpHandler {
 	private JSONObject createJSONApi() {
 		JSONObject result = new JSONObject();
 		result.put("path", mPath);
+		if (mToken != null && mToken.length() > 0)
+			result.put("security", "Requires token");
+		else
+			result.put("security", "Requires no token");
 		JSONArray jsonMethods = new JSONArray();
 		for (String methodName : mRemoteMethods.keySet()) {
 			JSONObject jsonMethod = new JSONObject();
@@ -125,7 +131,7 @@ public class WebServerHandler implements HttpHandler {
 			if (mToken != null && mToken.length() > 0)
 				if (!mToken.equals(paramMap.get(mTokenParam)))
 					throw new IllegalArgumentException("Access denied");
-			if (methodPath.length() == 0) {
+			if ("api".equals(methodPath)) {
 				resultString = createJSONApi().toString();
 			} else {
 				Method method = mRemoteMethods.get(methodPath);
@@ -140,6 +146,7 @@ public class WebServerHandler implements HttpHandler {
 		}
 		byte[] bytes = resultString.getBytes();
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+		exchange.getResponseHeaders().set("Content-Type", "text/json; charset=" + mEncoding);
 		exchange.sendResponseHeaders(200, bytes.length);
 		OutputStream os = exchange.getResponseBody();
 		ioCopyStream(is, os);
