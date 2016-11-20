@@ -2,6 +2,8 @@ package de.neo.remote.api;
 
 import java.io.Serializable;
 
+import de.neo.rmi.api.WebField;
+
 /**
  * contains playing information
  * 
@@ -26,36 +28,43 @@ public class PlayingBean implements Serializable {
 	/**
 	 * current artist
 	 */
+	@WebField(name = "artist")
 	private String artist;
 
 	/**
 	 * current title;
 	 */
+	@WebField(name = "title")
 	private String title;
 
 	/**
 	 * current album
 	 */
+	@WebField(name = "album")
 	private String album;
 
 	/**
 	 * current radio
 	 */
+	@WebField(name = "radio")
 	private String radio;
 
 	/**
 	 * current file
 	 */
+	@WebField(name = "file")
 	private String file;
 
 	/**
 	 * current path of playing file
 	 */
+	@WebField(name = "path")
 	private String path;
 
 	/**
 	 * current state
 	 */
+	@WebField(name = "state")
 	private STATE state;
 
 	/**
@@ -82,6 +91,7 @@ public class PlayingBean implements Serializable {
 	/**
 	 * The volume is between 0 (silent) and 100 (loudest).
 	 */
+	@WebField(name = "volume")
 	private int mVolume;
 
 	/**

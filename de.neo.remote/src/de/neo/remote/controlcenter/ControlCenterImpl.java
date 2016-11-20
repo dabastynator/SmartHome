@@ -17,10 +17,13 @@ import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Feature;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
+import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.Trigger;
+import de.neo.remote.api.WebMediaServer;
 import de.neo.remote.api.WebSwitch;
 import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.api.WebField;
@@ -321,6 +324,41 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			return webSwitch;
 		}
 		return null;
+	}
+
+	/**
+	 * List all registered media-server with current playing state. Optional
+	 * parameter id specified required media-server.
+	 * 
+	 * @param id
+	 * @return media-server list
+	 */
+	@WebRequest(description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", path = "mediaserver")
+	public List<WebMediaServer> getMediaServer(@WebGet(name = "id", required = false, defaultvalue = "") String id) {
+		List<WebMediaServer> result = new ArrayList<>();
+		for (IControlUnit unit : mControlUnits.values()) {
+			try {
+				if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+					IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+					WebMediaServer webMedia = new WebMediaServer();
+					if (id.equals(unit.getID()) || id.length() == 0) {
+						webMedia.setID(unit.getID());
+						if (mediaServer.getMPlayer().getPlayingBean() != null
+								&& mediaServer.getMPlayer().getPlayingBean().getState() != STATE.DOWN)
+							webMedia.setCurrentPlaying(mediaServer.getMPlayer().getPlayingBean());
+						if (mediaServer.getOMXPlayer().getPlayingBean() != null
+								&& mediaServer.getOMXPlayer().getPlayingBean().getState() != STATE.DOWN)
+							webMedia.setCurrentPlaying(mediaServer.getOMXPlayer().getPlayingBean());
+						if (mediaServer.getTotemPlayer().getPlayingBean() != null
+								&& mediaServer.getTotemPlayer().getPlayingBean().getState() != STATE.DOWN)
+							webMedia.setCurrentPlaying(mediaServer.getTotemPlayer().getPlayingBean());
+						result.add(webMedia);
+					}
+				}
+			} catch (RemoteException e) {
+			}
+		}
+		return result;
 	}
 
 }
