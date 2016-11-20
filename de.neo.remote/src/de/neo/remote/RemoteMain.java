@@ -34,13 +34,16 @@ import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.api.RMILogger.RMILogListener;
 import de.neo.rmi.api.Server;
 import de.neo.rmi.protokol.RemoteException;
+import de.neo.rmi.web.WebServer;
 
 public class RemoteMain {
 
 	public static String REGISTRY_IP = "RegistryIp";
 	public static String SERVER_PORT = "ServerPort";
-	public static final SimpleDateFormat LogFormat = new SimpleDateFormat(
-			"dd.MM-HH:mm");
+	public static String WEBSERVER = "WebServer";
+	public static String WEBSERVER_PORT = "port";
+	public static String WEBSERVER_TOKEN = "token";
+	public static final SimpleDateFormat LogFormat = new SimpleDateFormat("dd.MM-HH:mm");
 
 	public static Map<String, ControlUnitFactory> mControlUnitFactory;
 
@@ -62,8 +65,7 @@ public class RemoteMain {
 		}
 		setupLoging(System.out);
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-					.newInstance();
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(config);
 			doc.getDocumentElement().normalize();
@@ -75,8 +77,7 @@ public class RemoteMain {
 			NodeList serverPortNode = doc.getElementsByTagName(SERVER_PORT);
 			int serverPort = IControlCenter.PORT;
 			if (serverPortNode != null && serverPortNode.getLength() > 0)
-				serverPort = Integer.parseInt(serverPortNode.item(0)
-						.getTextContent());
+				serverPort = Integer.parseInt(serverPortNode.item(0).getTextContent());
 
 			IControlCenter controlcenter = loadControlCenter(doc);
 			List<IControlUnit> units = loadControlUnits(doc, controlcenter);
@@ -84,21 +85,17 @@ public class RemoteMain {
 			Server server = Server.getServer();
 			server.startServer(serverPort);
 
-			ControlCenterRegistryConnection connector = new ControlCenterRegistryConnection(
-					controlcenter, units);
+			ControlCenterRegistryConnection connector = new ControlCenterRegistryConnection(controlcenter, units);
 			server.manageConnector(connector, registryIp);
 
-			for (Trigger trigger : readStartupTrigger(doc
-					.getElementsByTagName("StartTrigger"))) {
+			for (Trigger trigger : readStartupTrigger(doc.getElementsByTagName("StartTrigger"))) {
 				try {
 					controlcenter.trigger(trigger);
 				} catch (RemoteException e) {
 				}
 			}
-		} catch (ParserConfigurationException | SAXException | IOException
-				| IllegalArgumentException e) {
-			System.err
-					.println("Error parsing configuration: " + e.getMessage());
+		} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException e) {
+			System.err.println("Error parsing configuration: " + e.getMessage());
 			System.exit(1);
 		}
 	}
@@ -106,24 +103,20 @@ public class RemoteMain {
 	private static void setupLoging(final PrintStream stream) {
 		RMILogger.addLogListener(new RMILogListener() {
 			@Override
-			public void rmiLog(LogPriority priority, String message, String id,
-					long date) {
-				stream.println(LogFormat.format(new Date()) + " RMI "
-						+ priority + " by " + message + " (" + id + ")");
+			public void rmiLog(LogPriority priority, String message, String id, long date) {
+				stream.println(LogFormat.format(new Date()) + " RMI " + priority + " by " + message + " (" + id + ")");
 			}
 		});
 		RemoteLogger.mListeners.add(new RemoteLogListener() {
 			@Override
-			public void remoteLog(LogPriority priority, String message,
-					String object, long date) {
-				stream.println(LogFormat.format(new Date()) + " REMOTE "
-						+ priority + " by " + object + ": " + message);
+			public void remoteLog(LogPriority priority, String message, String object, long date) {
+				stream.println(LogFormat.format(new Date()) + " REMOTE " + priority + " by " + object + ": " + message);
 			}
 		});
 	}
 
-	private static List<IControlUnit> loadControlUnits(Document doc,
-			IControlCenter center) throws SAXException, IOException {
+	private static List<IControlUnit> loadControlUnits(Document doc, IControlCenter center)
+			throws SAXException, IOException {
 		List<IControlUnit> units = new ArrayList<IControlUnit>();
 		for (String unitName : mControlUnitFactory.keySet()) {
 			NodeList nodeList = doc.getElementsByTagName(unitName);
@@ -139,18 +132,23 @@ public class RemoteMain {
 	}
 
 	private static IControlCenter loadControlCenter(Document doc) {
-		NodeList controlCenterRoot = doc
-				.getElementsByTagName(ControlCenterImpl.ROOT);
+		NodeList controlCenterRoot = doc.getElementsByTagName(ControlCenterImpl.ROOT);
+		NodeList webServerRoot = doc.getElementsByTagName(WEBSERVER);
 		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0) {
-			ControlCenterImpl center = new ControlCenterImpl(
-					controlCenterRoot.item(0));
+			ControlCenterImpl center = new ControlCenterImpl(controlCenterRoot.item(0));
 			try {
 				center.initializeRules(doc.getElementsByTagName("EventRule"));
-				center.initializeTrigger(doc
-						.getElementsByTagName("TimeTrigger"));
-			} catch (SAXException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
-						"Controlcenter");
+				center.initializeTrigger(doc.getElementsByTagName("TimeTrigger"));
+
+				if (webServerRoot != null && webServerRoot.getLength() > 0) {
+					Element webRoot = (Element) webServerRoot.item(0);
+					if (webRoot.hasAttribute(WEBSERVER_PORT) && webRoot.hasAttribute(WEBSERVER_TOKEN)) {
+						WebServer.getInstance().setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
+						WebServer.getInstance().handle(center, webRoot.getAttribute(WEBSERVER_TOKEN));
+					}
+				}
+			} catch (SAXException | IOException e) {
+				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "Controlcenter");
 			}
 
 			return center;
@@ -190,14 +188,12 @@ public class RemoteMain {
 		System.out.println("  --xmlhelp     : print xml schema.");
 	}
 
-	public static class ControlCenterRegistryConnection implements
-			IRegistryConnection {
+	public static class ControlCenterRegistryConnection implements IRegistryConnection {
 
 		private IControlCenter m_controlcenter;
 		List<IControlUnit> m_units;
 
-		public ControlCenterRegistryConnection(IControlCenter controlcenter,
-				List<IControlUnit> units) {
+		public ControlCenterRegistryConnection(IControlCenter controlcenter, List<IControlUnit> units) {
 			m_controlcenter = controlcenter;
 			if (controlcenter != null && units != null) {
 				try {
@@ -215,8 +211,7 @@ public class RemoteMain {
 			try {
 				IControlCenter controlcenter = m_controlcenter;
 				if (controlcenter == null) {
-					controlcenter = server.forceFind(IControlCenter.ID,
-							IControlCenter.class);
+					controlcenter = server.forceFind(IControlCenter.ID, IControlCenter.class);
 				} else {
 					server.register(IControlCenter.ID, m_controlcenter);
 				}
@@ -224,8 +219,7 @@ public class RemoteMain {
 					for (IControlUnit unit : m_units)
 						controlcenter.addControlUnit(unit);
 			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
-						"RemoteMain");
+				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "RemoteMain");
 			}
 		}
 
@@ -242,16 +236,14 @@ public class RemoteMain {
 
 	}
 
-	public static List<Trigger> readStartupTrigger(NodeList nodeList)
-			throws SAXException {
+	public static List<Trigger> readStartupTrigger(NodeList nodeList) throws SAXException {
 		List<Trigger> triggers = new ArrayList<Trigger>();
 		for (int i = 0; i < nodeList.getLength(); i++)
 			if (nodeList.item(i) instanceof Element) {
 				Element element = (Element) nodeList.item(i);
 				for (int j = 0; j < element.getChildNodes().getLength(); j++)
 					if (element.getChildNodes().item(j) instanceof Element) {
-						Element trigger = (Element) element.getChildNodes()
-								.item(j);
+						Element trigger = (Element) element.getChildNodes().item(j);
 						Trigger t = new Trigger();
 						t.initialize(trigger);
 						triggers.add(t);

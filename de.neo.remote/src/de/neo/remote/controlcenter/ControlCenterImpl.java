@@ -19,8 +19,13 @@ import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
+import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.Trigger;
+import de.neo.remote.api.WebSwitch;
 import de.neo.rmi.api.RMILogger.LogPriority;
+import de.neo.rmi.api.WebGet;
+import de.neo.rmi.api.WebObject;
+import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteException;
 
 /**
@@ -28,6 +33,7 @@ import de.neo.rmi.protokol.RemoteException;
  * 
  * @author sebastian
  */
+@WebObject(path = "controlcenter")
 public class ControlCenterImpl extends Thread implements IControlCenter {
 
 	public static String ROOT = "GroundPlot";
@@ -35,20 +41,17 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	/**
 	 * List of all control units
 	 */
-	private Map<String, IControlUnit> mControlUnits = Collections
-			.synchronizedMap(new HashMap<String, IControlUnit>());
+	private Map<String, IControlUnit> mControlUnits = Collections.synchronizedMap(new HashMap<String, IControlUnit>());
 
 	/**
 	 * List of all event rules
 	 */
-	private List<IEventRule> mEventRules = Collections
-			.synchronizedList(new ArrayList<IEventRule>());
+	private List<IEventRule> mEventRules = Collections.synchronizedList(new ArrayList<IEventRule>());
 
 	/**
 	 * List of all cronjob trigger
 	 */
-	private List<CronJobTrigger> mCronjobTrigger = Collections
-			.synchronizedList(new ArrayList<CronJobTrigger>());
+	private List<CronJobTrigger> mCronjobTrigger = Collections.synchronizedList(new ArrayList<CronJobTrigger>());
 
 	/**
 	 * The ground plot of the control center area
@@ -128,9 +131,8 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			}
 		}
 		if (removed > 0)
-			RemoteLogger.performLog(LogPriority.WARNING, "Lost " + removed
-					+ " unit(s). " + mControlUnits.size() + " unit(s) left.",
-					"Controlcenter");
+			RemoteLogger.performLog(LogPriority.WARNING,
+					"Lost " + removed + " unit(s). " + mControlUnits.size() + " unit(s) left.", "Controlcenter");
 	}
 
 	@Override
@@ -139,8 +141,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			String id = controlUnit.getID();
 			mControlUnits.put(id, controlUnit);
 			RemoteLogger.performLog(LogPriority.INFORMATION,
-					"Add " + mControlUnits.size() + ". control unit: "
-							+ controlUnit.getName() + " (" + id + ")",
+					"Add " + mControlUnits.size() + ". control unit: " + controlUnit.getName() + " (" + id + ")",
 					"Controlcenter");
 		} catch (RemoteException e) {
 
@@ -181,13 +182,11 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 					eventCount += events.length;
 				}
 			} catch (Exception e) {
-				RemoteLogger.performLog(LogPriority.ERROR, "Perform event: "
-						+ e.getClass().getSimpleName() + ": " + e.getMessage(),
-						"controlcenter");
+				RemoteLogger.performLog(LogPriority.ERROR,
+						"Perform event: " + e.getClass().getSimpleName() + ": " + e.getMessage(), "controlcenter");
 			}
 		}
-		RemoteLogger.performLog(LogPriority.INFORMATION,
-				"Perform trigger with " + eventCount + " event(s)",
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Perform trigger with " + eventCount + " event(s)",
 				trigger.getTriggerID());
 	}
 
@@ -213,8 +212,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		public void initialize(Element xmlElement) throws SAXException {
 			for (String attribute : new String[] { "trigger" })
 				if (!xmlElement.hasAttribute(attribute))
-					throw new SAXException(attribute + " missing for "
-							+ getClass().getSimpleName());
+					throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
 			mTrigger = xmlElement.getAttribute("trigger");
 			if (xmlElement.hasAttribute("condition"))
 				mCondition = xmlElement.getAttribute("condition");
@@ -230,12 +228,10 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		}
 
 		@Override
-		public Event[] getEventsForTrigger(Trigger trigger)
-				throws RemoteException {
+		public Event[] getEventsForTrigger(Trigger trigger) throws RemoteException {
 			boolean fireEvents = trigger.getTriggerID().equals(mTrigger);
 			if (mCondition != null) {
-				fireEvents = mCondition.equals(trigger
-						.getParameter("condition"));
+				fireEvents = mCondition.equals(trigger.getParameter("condition"));
 			}
 			if (fireEvents)
 				return mEvents.toArray(new Event[mEvents.size()]);
@@ -253,4 +249,60 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 				mCronjobTrigger.add(trigger);
 			}
 	}
+
+	/**
+	 * Return list of all switches.
+	 * 
+	 * @return list of all switches
+	 */
+	@WebRequest(path = "switches", description = "List all switches of the controlcenter. A switch has an id, name and state.")
+	public List<WebSwitch> getSwitches() {
+		List<WebSwitch> result = new ArrayList<>();
+		for (IControlUnit unit : mControlUnits.values()) {
+			try {
+				if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
+					IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
+					WebSwitch webSwitch = new WebSwitch();
+					webSwitch.setID(unit.getID());
+					webSwitch.setName(unit.getName());
+					webSwitch.setState(switchObject.getState().toString());
+					result.add(webSwitch);
+				}
+			} catch (RemoteException e) {
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Set the state of switch with specified id.
+	 * 
+	 * @param id
+	 * @param state
+	 * @return state of switch
+	 * @throws IllegalArgumentException
+	 * @throws RemoteException
+	 */
+	@WebRequest(description = "Set the state of switch with specified id.", path = "setswitchstate")
+	public WebSwitch setSwitchState(@WebGet(name = "id") String id, @WebGet(name = "state") String state)
+			throws IllegalArgumentException, RemoteException {
+		IControlUnit unit = mControlUnits.get(id);
+		IInternetSwitch.State switchState = null;
+		try {
+			switchState = IInternetSwitch.State.valueOf(state);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Could not read state value: " + state);
+		}
+		if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
+			IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
+			switchObject.setState(switchState);
+			WebSwitch webSwitch = new WebSwitch();
+			webSwitch.setID(unit.getID());
+			webSwitch.setName(unit.getName());
+			webSwitch.setState(switchObject.getState().toString());
+			return webSwitch;
+		}
+		return null;
+	}
+
 }

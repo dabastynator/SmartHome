@@ -1,5 +1,9 @@
 package de.neo.remote.api;
 
+import java.util.List;
+
+import de.neo.rmi.api.WebObject;
+import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -52,8 +56,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @param controlUnit
 	 * @throws RemoteException
 	 */
-	public void removeControlUnit(IControlUnit controlUnit)
-			throws RemoteException;
+	public void removeControlUnit(IControlUnit controlUnit) throws RemoteException;
 
 	/**
 	 * Get control unit by specified unit-id.
@@ -87,8 +90,7 @@ public interface IControlCenter extends RemoteAble {
 		 * @param event
 		 * @return control unit ids
 		 */
-		public Event[] getEventsForTrigger(Trigger trigger)
-				throws RemoteException;
+		public Event[] getEventsForTrigger(Trigger trigger) throws RemoteException;
 
 	}
 }
