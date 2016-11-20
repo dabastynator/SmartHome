@@ -41,8 +41,7 @@ public class ControlCenterBuffer implements IControlCenter {
 	}
 
 	@Override
-	public void removeControlUnit(IControlUnit controlUnit)
-			throws RemoteException {
+	public void removeControlUnit(IControlUnit controlUnit) throws RemoteException {
 		center.removeControlUnit(controlUnit);
 		clear();
 	}
@@ -57,7 +56,7 @@ public class ControlCenterBuffer implements IControlCenter {
 	@Override
 	public IControlUnit getControlUnit(String id) throws RemoteException {
 		IControlUnit unit = units.get(id);
-		if (unit == null){
+		if (unit == null) {
 			unit = center.getControlUnit(id);
 			if (unit != null)
 				units.put(id, unit);
@@ -66,7 +65,7 @@ public class ControlCenterBuffer implements IControlCenter {
 	}
 
 	@Override
-	public void trigger(Trigger trigger) throws RemoteException {
-		center.trigger(trigger);
+	public int trigger(Trigger trigger) throws RemoteException {
+		return center.trigger(trigger);
 	}
 }
