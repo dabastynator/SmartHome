@@ -17,27 +17,16 @@ public class Trigger implements Serializable {
 	 */
 	private static final long serialVersionUID = -906066975333495388L;
 
-	private String mControlUnitId;
-
 	private String mTriggerID;
 
 	private Map<String, String> mParameter = new HashMap<String, String>();
 
 	public Trigger(Trigger tigger) {
-		mControlUnitId = tigger.getControlUnitId();
 		mTriggerID = tigger.getTriggerID();
 		mParameter.putAll(tigger.getParameter());
 	}
 
 	public Trigger() {
-	}
-
-	public String getControlUnitId() {
-		return mControlUnitId;
-	}
-
-	public void setControlUnitId(String controlUnitId) {
-		mControlUnitId = controlUnitId;
 	}
 
 	public String getTriggerID() {

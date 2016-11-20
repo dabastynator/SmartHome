@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.neo.rmi.api.WebField;
+
 public class Event implements Serializable {
 
 	/**
@@ -15,8 +17,10 @@ public class Event implements Serializable {
 	 */
 	private static final long serialVersionUID = -906066975333495388L;
 
+	@WebField(name = "unit_id")
 	private String mUnitID;
 
+	@WebField(name = "parameter")
 	private Map<String, String> mParameter = new HashMap<String, String>();
 
 	public Event(Event event) {
@@ -66,8 +70,7 @@ public class Event implements Serializable {
 	public void initialize(Element element) throws SAXException {
 		for (String attribute : new String[] { "unitID" })
 			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for "
-						+ getClass().getSimpleName());
+				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
 		setUnitID(element.getAttribute("unitID"));
 		NodeList paramterNodes = element.getChildNodes();
 		for (int j = 0; j < paramterNodes.getLength(); j++) {
@@ -76,10 +79,8 @@ public class Event implements Serializable {
 				if (parameter.getNodeName().equals("Parameter")) {
 					for (String attribute : new String[] { "key", "value" })
 						if (!parameter.hasAttribute(attribute))
-							throw new SAXException(attribute + " missing for "
-									+ getClass().getSimpleName());
-					putParameter(parameter.getAttribute("key").toLowerCase(),
-							parameter.getAttribute("value"));
+							throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
+					putParameter(parameter.getAttribute("key").toLowerCase(), parameter.getAttribute("value"));
 				}
 			}
 		}

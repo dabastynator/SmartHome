@@ -23,8 +23,8 @@ import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.Trigger;
 import de.neo.remote.api.WebSwitch;
 import de.neo.rmi.api.RMILogger.LogPriority;
+import de.neo.rmi.api.WebField;
 import de.neo.rmi.api.WebGet;
-import de.neo.rmi.api.WebObject;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -33,7 +33,6 @@ import de.neo.rmi.protokol.RemoteException;
  * 
  * @author sebastian
  */
-@WebObject(path = "controlcenter")
 public class ControlCenterImpl extends Thread implements IControlCenter {
 
 	public static String ROOT = "GroundPlot";
@@ -169,7 +168,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public void trigger(Trigger trigger) {
+	public int trigger(Trigger trigger) {
 		int eventCount = 0;
 		for (IEventRule rule : mEventRules) {
 			try {
@@ -188,6 +187,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		}
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Perform trigger with " + eventCount + " event(s)",
 				trigger.getTriggerID());
+		return eventCount;
 	}
 
 	public void initializeRules(NodeList nodes) throws SAXException {
@@ -203,10 +203,13 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 
 	public static class EventRule implements IEventRule {
 
+		@WebField(name = "events")
 		private List<Event> mEvents = new ArrayList<Event>();
 
+		@WebField(name = "condition")
 		private String mCondition;
 
+		@WebField(name = "trigger")
 		private String mTrigger;
 
 		public void initialize(Element xmlElement) throws SAXException {
@@ -248,6 +251,21 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 				trigger.schedule();
 				mCronjobTrigger.add(trigger);
 			}
+	}
+
+	@WebRequest(description = "Perform specified trigger", path = "dotrigger")
+	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) {
+		Trigger trigger = new Trigger();
+		trigger.setTriggerID(triggerID);
+		int eventcount = trigger(trigger);
+		Map<String, Integer> result = new HashMap<>();
+		result.put("triggered_rules", eventcount);
+		return result;
+	}
+
+	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
+	public List<IEventRule> getEvents() {
+		return mEventRules;
 	}
 
 	/**

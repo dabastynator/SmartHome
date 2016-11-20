@@ -43,6 +43,8 @@ public class RemoteMain {
 	public static String WEBSERVER = "WebServer";
 	public static String WEBSERVER_PORT = "port";
 	public static String WEBSERVER_TOKEN = "token";
+	public static String WEBSERVER_PATH = "controlcenter";
+
 	public static final SimpleDateFormat LogFormat = new SimpleDateFormat("dd.MM-HH:mm");
 
 	public static Map<String, ControlUnitFactory> mControlUnitFactory;
@@ -139,12 +141,13 @@ public class RemoteMain {
 			try {
 				center.initializeRules(doc.getElementsByTagName("EventRule"));
 				center.initializeTrigger(doc.getElementsByTagName("TimeTrigger"));
-
+				WebServer webServer = WebServer.getInstance();
 				if (webServerRoot != null && webServerRoot.getLength() > 0) {
 					Element webRoot = (Element) webServerRoot.item(0);
 					if (webRoot.hasAttribute(WEBSERVER_PORT) && webRoot.hasAttribute(WEBSERVER_TOKEN)) {
-						WebServer.getInstance().setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
-						WebServer.getInstance().handle(center, webRoot.getAttribute(WEBSERVER_TOKEN));
+						webServer.setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
+						webServer.handle(WEBSERVER_PATH, center, webRoot.getAttribute(WEBSERVER_TOKEN));
+						webServer.start();
 					}
 				}
 			} catch (SAXException | IOException e) {

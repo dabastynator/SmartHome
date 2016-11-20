@@ -1,9 +1,5 @@
 package de.neo.remote.api;
 
-import java.util.List;
-
-import de.neo.rmi.api.WebObject;
-import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -72,9 +68,10 @@ public interface IControlCenter extends RemoteAble {
 	 * are used to map events for control unit.
 	 * 
 	 * @param trigger
+	 * @return number of triggered events
 	 * @throws RemoteException
 	 */
-	public void trigger(Trigger trigger) throws RemoteException;
+	public int trigger(Trigger trigger) throws RemoteException;
 
 	/**
 	 * The IEventRule maps one event to several control-units.
