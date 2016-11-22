@@ -1,6 +1,7 @@
 package de.neo.remote.mobile.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.neo.remote.api.GroundPlot;
@@ -67,5 +68,23 @@ public class ControlCenterBuffer implements IControlCenter {
 	@Override
 	public int trigger(Trigger trigger) throws RemoteException {
 		return center.trigger(trigger);
+	}
+
+	@Override
+	public Map<String, Integer> performTrigger(String triggerID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<IEventRule> getEvents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, IControlUnit> getControlUnits() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

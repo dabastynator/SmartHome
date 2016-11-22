@@ -1,5 +1,6 @@
 package de.neo.remote.api;
 
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -15,10 +16,6 @@ public interface IInternetSwitch extends RemoteAble {
 	 * default port of the server
 	 */
 	public static final int PORT = 5034;
-
-	public enum State {
-		ON, OFF
-	}
 
 	/**
 	 * Set specified state on specified switch.
@@ -42,8 +39,7 @@ public interface IInternetSwitch extends RemoteAble {
 	 * @param listener
 	 * @throws RemoteException
 	 */
-	public void registerPowerSwitchListener(IInternetSwitchListener listener)
-			throws RemoteException;
+	public void registerPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException;
 
 	/**
 	 * Unregister power switch change listener.
@@ -51,8 +47,7 @@ public interface IInternetSwitch extends RemoteAble {
 	 * @param listener
 	 * @throws RemoteException
 	 */
-	public void unregisterPowerSwitchListener(IInternetSwitchListener listener)
-			throws RemoteException;
+	public void unregisterPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException;
 
 	/**
 	 * Get the type of the internet switch.

@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.SelectSwitchActivity;

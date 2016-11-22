@@ -17,14 +17,9 @@ import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Feature;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
-import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
-import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.Trigger;
-import de.neo.remote.api.WebMediaServer;
-import de.neo.remote.api.WebSwitch;
 import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.api.WebField;
 import de.neo.rmi.api.WebGet;
@@ -271,94 +266,9 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		return mEventRules;
 	}
 
-	/**
-	 * Return list of all switches.
-	 * 
-	 * @return list of all switches
-	 */
-	@WebRequest(path = "switches", description = "List all switches of the controlcenter. A switch has an id, name and state.")
-	public List<WebSwitch> getSwitches() {
-		List<WebSwitch> result = new ArrayList<>();
-		for (IControlUnit unit : mControlUnits.values()) {
-			try {
-				if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
-					IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
-					WebSwitch webSwitch = new WebSwitch();
-					webSwitch.setID(unit.getID());
-					webSwitch.setName(unit.getName());
-					webSwitch.setState(switchObject.getState().toString());
-					result.add(webSwitch);
-				}
-			} catch (RemoteException e) {
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Set the state of switch with specified id.
-	 * 
-	 * @param id
-	 * @param state
-	 * @return state of switch
-	 * @throws IllegalArgumentException
-	 * @throws RemoteException
-	 */
-	@WebRequest(description = "Set the state of switch with specified id.", path = "setswitchstate")
-	public WebSwitch setSwitchState(@WebGet(name = "id") String id, @WebGet(name = "state") String state)
-			throws IllegalArgumentException, RemoteException {
-		IControlUnit unit = mControlUnits.get(id);
-		IInternetSwitch.State switchState = null;
-		try {
-			switchState = IInternetSwitch.State.valueOf(state);
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not read state value: " + state);
-		}
-		if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
-			IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
-			switchObject.setState(switchState);
-			WebSwitch webSwitch = new WebSwitch();
-			webSwitch.setID(unit.getID());
-			webSwitch.setName(unit.getName());
-			webSwitch.setState(switchObject.getState().toString());
-			return webSwitch;
-		}
-		return null;
-	}
-
-	/**
-	 * List all registered media-server with current playing state. Optional
-	 * parameter id specified required media-server.
-	 * 
-	 * @param id
-	 * @return media-server list
-	 */
-	@WebRequest(description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", path = "mediaserver")
-	public List<WebMediaServer> getMediaServer(@WebGet(name = "id", required = false, defaultvalue = "") String id) {
-		List<WebMediaServer> result = new ArrayList<>();
-		for (IControlUnit unit : mControlUnits.values()) {
-			try {
-				if (unit.getRemoteableControlObject() instanceof IMediaServer) {
-					IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
-					WebMediaServer webMedia = new WebMediaServer();
-					if (id.equals(unit.getID()) || id.length() == 0) {
-						webMedia.setID(unit.getID());
-						if (mediaServer.getMPlayer().getPlayingBean() != null
-								&& mediaServer.getMPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getMPlayer().getPlayingBean());
-						if (mediaServer.getOMXPlayer().getPlayingBean() != null
-								&& mediaServer.getOMXPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getOMXPlayer().getPlayingBean());
-						if (mediaServer.getTotemPlayer().getPlayingBean() != null
-								&& mediaServer.getTotemPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getTotemPlayer().getPlayingBean());
-						result.add(webMedia);
-					}
-				}
-			} catch (RemoteException e) {
-			}
-		}
-		return result;
+	@Override
+	public Map<String, IControlUnit> getControlUnits() {
+		return mControlUnits;
 	}
 
 }

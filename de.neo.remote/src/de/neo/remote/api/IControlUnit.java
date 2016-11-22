@@ -1,5 +1,6 @@
 package de.neo.remote.api;
 
+import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -65,8 +66,7 @@ public interface IControlUnit extends RemoteAble {
 	 * @return true if successfully performed event, false otherwise
 	 * @throws RemoteException
 	 */
-	public boolean performEvent(Event event) throws RemoteException,
-			EventException;
+	public boolean performEvent(Event event) throws RemoteException, EventException;
 
 	/**
 	 * The EventException specifies occurring exceptions during executing an
@@ -87,4 +87,6 @@ public interface IControlUnit extends RemoteAble {
 		private static final long serialVersionUID = -1206040442786574653L;
 
 	}
+
+	public void config(BeanWeb bean);
 }

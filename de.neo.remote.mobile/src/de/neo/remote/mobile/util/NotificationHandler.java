@@ -14,7 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import de.neo.remote.api.GroundPlot;
-import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity;

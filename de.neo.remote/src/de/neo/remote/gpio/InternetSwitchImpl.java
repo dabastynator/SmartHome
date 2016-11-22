@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IInternetSwitchListener;
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.gpio.SerialReader.ISerialListener;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -42,11 +43,9 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	}
 
 	public void initialize(Element element) throws SAXException {
-		for (String attribute : new String[] { "readonly", "familyCode",
-				"type", "switchNumber" })
+		for (String attribute : new String[] { "readonly", "familyCode", "type", "switchNumber" })
 			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute
-						+ " missing for internet switch");
+				throw new SAXException(attribute + " missing for internet switch");
 		mFamilyCode = element.getAttribute("familyCode");
 		mSwitchNumber = Integer.parseInt(element.getAttribute("switchNumber"));
 		mType = element.getAttribute("type");
@@ -54,8 +53,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 		mReadOnly = readonly.equals("1") || readonly.equals("true");
 		mId = element.getAttribute("id");
 		if (!mFamilyCode.matches(FAMILY_REGEX))
-			throw new IllegalArgumentException("Invalid Familycode: "
-					+ mFamilyCode + ". must match " + FAMILY_REGEX);
+			throw new IllegalArgumentException("Invalid Familycode: " + mFamilyCode + ". must match " + FAMILY_REGEX);
 
 	}
 
@@ -78,23 +76,20 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	}
 
 	@Override
-	public void registerPowerSwitchListener(IInternetSwitchListener listener)
-			throws RemoteException {
+	public void registerPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException {
 		if (!mListeners.contains(listener))
 			mListeners.add(listener);
 	}
 
 	@Override
-	public void unregisterPowerSwitchListener(IInternetSwitchListener listener)
-			throws RemoteException {
+	public void unregisterPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException {
 		mListeners.remove(listener);
 	}
 
 	private void informListener(State state) {
 		Map<String, String> parameterExchange = new HashMap<String, String>();
 		parameterExchange.put("@state", state.toString().toLowerCase());
-		mUnit.fireTrigger(parameterExchange, "@state="
-				+ state.toString().toLowerCase());
+		mUnit.fireTrigger(parameterExchange, "@state=" + state.toString().toLowerCase());
 		List<IInternetSwitchListener> exceptionList = new ArrayList<IInternetSwitchListener>();
 		for (IInternetSwitchListener listener : mListeners) {
 			try {

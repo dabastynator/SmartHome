@@ -42,9 +42,9 @@ import de.neo.remote.api.GroundPlot.Wall;
 import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IInternetSwitch.State;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.IRCColor;
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity.SelectControlUnit;
@@ -78,8 +78,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	public ControlSceneRenderer(Context context, SelectControlUnit selecter) {
 		super(context);
 		this.mControlUnitListener = selecter;
-		setGradient(new float[] { 0.3f, 0.3f, 1, 1 },
-				new float[] { 1, 1, 1, 1 });
+		setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1, 1, 1 });
 		mHandler = new TranslateSceneHandler();
 		mHandler.sceneRotation.rotateByAngleAxis(Math.PI / 4, 1, 0, 0);
 		mHandler.zoomBounds[0] = -4;
@@ -130,8 +129,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			light.mPosition[0] = unit.mPosition[0];
 			light.mPosition[1] = unit.mPosition[2] + 5;
 			light.mPosition[2] = -unit.mPosition[1];
-			InternetSwitchListener listener = new InternetSwitchListener(
-					(IGLSwitch) light, internet);
+			InternetSwitchListener listener = new InternetSwitchListener((IGLSwitch) light, internet);
 			light.setOnClickListener(listener);
 			addFigure(light);
 			mGLSwitches.put(unit.mID, (IGLSwitch) light);
@@ -140,8 +138,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (unit.mObject instanceof ICommandAction) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
 			if (unit.mThumbnail != null) {
-				Bitmap bm = Bitmap.createBitmap(unit.mThumbnailWidth,
-						unit.mThumbnailHeight, Bitmap.Config.RGB_565);
+				Bitmap bm = Bitmap.createBitmap(unit.mThumbnailWidth, unit.mThumbnailHeight, Bitmap.Config.RGB_565);
 				IntBuffer buf = IntBuffer.wrap(unit.mThumbnail); // data is my
 																	// array
 				bm.copyPixelsFromBuffer(buf);
@@ -160,7 +157,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 		if (unit.mObject instanceof IRCColor) {
 			GLTorus color = new GLTorus(0.5f, 0.1f, GLFigure.STYLE_PLANE);
-			color.mColor[0] = 0.1f;color.mColor[1] = color.mColor[2] = 0.8f;
+			color.mColor[0] = 0.1f;
+			color.mColor[1] = color.mColor[2] = 0.8f;
 			color.mSize[0] = color.mSize[1] = color.mSize[2] = 1f;
 			color.mPosition[0] = unit.mPosition[0];
 			color.mPosition[1] = unit.mPosition[2] + 5;
@@ -174,11 +172,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	private GLFigure createGLMediaServer(String description) {
 		if ("multimedia".equals(description)) {
-			GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE,
-					true);
+			GLMediaServer glMusic = new GLMediaServer(GLFigure.STYLE_PLANE, true);
 			glMusic.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
-			glMusic.setTexture(GLFlatScreen.BOTTOM,
-					loadBitmap(R.drawable.textur_metal), 1);
+			glMusic.setTexture(GLFlatScreen.BOTTOM, loadBitmap(R.drawable.textur_metal), 1);
 			return glMusic;
 		}
 		if ("remote".equals(description)) {
@@ -189,12 +185,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			return cube;
 		}
 		if ("laptop".equals(description)) {
-			GLLaptop laptop = new GLLaptop(GLFigure.STYLE_PLANE,
-					(float) (3 * Math.PI / 4));
-			laptop.setTexture(GLLaptop.SURFACE_DISPLAY,
-					loadBitmap(R.drawable.textur_mamor));
-			laptop.setTexture(GLLaptop.SURFACE_KEYBOARD,
-					loadBitmap(R.drawable.textur_keyboard));
+			GLLaptop laptop = new GLLaptop(GLFigure.STYLE_PLANE, (float) (3 * Math.PI / 4));
+			laptop.setTexture(GLLaptop.SURFACE_DISPLAY, loadBitmap(R.drawable.textur_mamor));
+			laptop.setTexture(GLLaptop.SURFACE_KEYBOARD, loadBitmap(R.drawable.textur_keyboard));
 			return laptop;
 		}
 		GLBox box = new GLBox(GLFigure.STYLE_PLANE);
@@ -240,16 +233,14 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		laminat.mSize[1] = (maxY - minY);
 		laminat.mRotation.rotateByAngleAxis(Math.PI / 2, 1, 0, 0);
 		laminat.mColor[0] = laminat.mColor[1] = laminat.mColor[2] = 1;
-		laminat.setTexture(loadBitmap(R.drawable.textur_wood),
-				laminat.mSize[0], laminat.mSize[1]);
+		laminat.setTexture(loadBitmap(R.drawable.textur_wood), laminat.mSize[0], laminat.mSize[1]);
 		addFigure(laminat);
 	}
 
 	private GLFigure loadGLSwitchByType(String type) {
 		if (type.equalsIgnoreCase(LAMP_FLOOR)) {
 			GLFloorlamp lamp = new GLFloorlamp(GLFigure.STYLE_PLANE);
-			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR,
-					loadBitmap(R.drawable.textur_mamor));
+			lamp.setTexture(GLFloorlamp.BOTTOM | GLFloorlamp.PILLAR, loadBitmap(R.drawable.textur_mamor));
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(LAMP_READ)) {
@@ -261,12 +252,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			return lamp;
 		}
 		if (type.equalsIgnoreCase(VIDEO)) {
-			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f,
-					0.67f, 2f);
-			video.setSwitchTexture(GLFlatScreen.SCREEN,
-					loadBitmap(R.drawable.textur_mamor), true);
-			video.setTexture(GLFlatScreen.BOTTOM,
-					loadBitmap(R.drawable.textur_metal));
+			GLFlatScreen video = new GLFlatScreen(GLFigure.STYLE_PLANE, 1.2f, 0.67f, 2f);
+			video.setSwitchTexture(GLFlatScreen.SCREEN, loadBitmap(R.drawable.textur_mamor), true);
+			video.setTexture(GLFlatScreen.BOTTOM, loadBitmap(R.drawable.textur_metal));
 			return video;
 		}
 		if (type.equalsIgnoreCase(AUDO)) {
@@ -277,8 +265,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		if (type.equalsIgnoreCase(SWITCH_COFFEE)) {
 			GLSTLCup coffeeCup;
 			try {
-				coffeeCup = new GLSTLCup(mContext.getResources()
-						.openRawResource(R.raw.cup));
+				coffeeCup = new GLSTLCup(mContext.getResources().openRawResource(R.raw.cup));
 				return coffeeCup;
 			} catch (NotFoundException | IOException e) {
 			}
@@ -348,8 +335,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		private IGLSwitch ligthtObject;
 		private IInternetSwitch internet;
 
-		public InternetSwitchListener(IGLSwitch ligthtObject,
-				IInternetSwitch internet) {
+		public InternetSwitchListener(IGLSwitch ligthtObject, IInternetSwitch internet) {
 			this.ligthtObject = ligthtObject;
 			this.internet = internet;
 		}
@@ -360,9 +346,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			new Thread() {
 				public void run() {
 					try {
-						de.neo.remote.api.IInternetSwitch.State state = de.neo.remote.api.IInternetSwitch.State.OFF;
+						de.neo.remote.api.IWebSwitch.State state = de.neo.remote.api.IWebSwitch.State.OFF;
 						if (lightOn)
-							state = de.neo.remote.api.IInternetSwitch.State.ON;
+							state = de.neo.remote.api.IWebSwitch.State.ON;
 						internet.setState(state);
 					} catch (RemoteException e) {
 					}
@@ -377,8 +363,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		GLFigure glFigure = mGLMediaServers.get(mediaserver);
 		if (glFigure instanceof GLMediaServer) {
 			Bitmap bitmap = createBitmapByText(getBeanString(bean));
-			((GLMediaServer) glFigure).setTexture(GLFlatScreen.SCREEN, bitmap,
-					1);
+			((GLMediaServer) glFigure).setTexture(GLFlatScreen.SCREEN, bitmap, 1);
 		}
 	}
 
@@ -412,8 +397,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 		Matrix matrix = new Matrix();
 		matrix.preScale(1.0f, -1.0f);
-		Bitmap mirroredBitmap = Bitmap.createBitmap(bitmap, 0, 0,
-				bitmap.getWidth(), bitmap.getHeight(), matrix, false);
+		Bitmap mirroredBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 		return mirroredBitmap;
 	}
 
@@ -447,11 +431,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	public void setConnections(boolean connected) {
 		if (connected)
-			setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1,
-					1, 1 });
+			setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1, 1, 1 });
 		else
-			setGradient(new float[] { 1, 0.3f, 0.3f, 1 }, new float[] { 1, 1,
-					1, 1 });
+			setGradient(new float[] { 1, 0.3f, 0.3f, 1 }, new float[] { 1, 1, 1, 1 });
 
 	}
 

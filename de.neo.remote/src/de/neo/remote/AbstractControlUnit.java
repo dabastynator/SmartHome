@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.Trigger;
+import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.protokol.RemoteException;
 
 public abstract class AbstractControlUnit implements IControlUnit {
@@ -49,17 +50,14 @@ public abstract class AbstractControlUnit implements IControlUnit {
 	}
 
 	public void initialize(Element element) throws SAXException, IOException {
-		for (String attribute : new String[] { "id", "name", "type", "x", "y",
-				"z" })
+		for (String attribute : new String[] { "id", "name", "type", "x", "y", "z" })
 			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for "
-						+ getClass().getSimpleName());
+				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
 		mID = element.getAttribute("id");
 		mName = element.getAttribute("name");
 		mDescription = element.getAttribute("type");
 		mPosition = new float[] { Float.parseFloat(element.getAttribute("x")),
-				Float.parseFloat(element.getAttribute("y")),
-				Float.parseFloat(element.getAttribute("z")) };
+				Float.parseFloat(element.getAttribute("y")), Float.parseFloat(element.getAttribute("z")) };
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			if (childNodes.item(i) instanceof Element) {
@@ -73,12 +71,10 @@ public abstract class AbstractControlUnit implements IControlUnit {
 		}
 	}
 
-	public void fireTrigger(Map<String, String> parameterExchange,
-			String condition) {
+	public void fireTrigger(Map<String, String> parameterExchange, String condition) {
 		for (Trigger trigger : mTrigger) {
 			String triggerCondition = trigger.getParameter("condition");
-			if (triggerCondition == null
-					|| condition.equalsIgnoreCase(triggerCondition)) {
+			if (triggerCondition == null || condition.equalsIgnoreCase(triggerCondition)) {
 				Trigger fireTrigger = new Trigger(trigger);
 				if (parameterExchange != null) {
 					Map<String, String> exchange = new HashMap<String, String>();
@@ -95,5 +91,15 @@ public abstract class AbstractControlUnit implements IControlUnit {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void config(BeanWeb bean) {
+		bean.setID(mID);
+		bean.setName(mName);
+		bean.setDescription(mDescription);
+		bean.setX(mPosition[0]);
+		bean.setY(mPosition[1]);
+		bean.setZ(mPosition[2]);
 	}
 }

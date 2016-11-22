@@ -1,5 +1,11 @@
 package de.neo.remote.api;
 
+import java.util.List;
+import java.util.Map;
+
+import de.neo.rmi.api.WebField;
+import de.neo.rmi.api.WebGet;
+import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -88,6 +94,100 @@ public interface IControlCenter extends RemoteAble {
 		 * @return control unit ids
 		 */
 		public Event[] getEventsForTrigger(Trigger trigger) throws RemoteException;
+
+	}
+
+	/**
+	 * @param triggerID
+	 * @return map contains result
+	 */
+	@WebRequest(path = "dotrigger", description = "Perform specified trigger")
+	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID);
+
+	/**
+	 * List all event-rules of the controlcenter. A rule can be triggered by the
+	 * speicified trigger.
+	 * 
+	 * @return list of rules
+	 */
+	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
+	public List<IEventRule> getEvents();
+
+	/**
+	 * Get all controlunits of the controlcenter. The map maps the control-unit
+	 * id to the object.
+	 * 
+	 * @return map of controlunits
+	 */
+	public Map<String, IControlUnit> getControlUnits();
+
+	public static class BeanWeb {
+
+		@WebField(name = "name")
+		private String mName;
+
+		@WebField(name = "description")
+		private String mDescription;
+
+		@WebField(name = "x")
+		private float mX;
+
+		@WebField(name = "y")
+		private float mY;
+
+		@WebField(name = "z")
+		private float mZ;
+
+		@WebField(name = "id")
+		private String mID;
+
+		public String getName() {
+			return mName;
+		}
+
+		public void setName(String name) {
+			mName = name;
+		}
+
+		public String getDescription() {
+			return mDescription;
+		}
+
+		public void setDescription(String description) {
+			mDescription = description;
+		}
+
+		public float getX() {
+			return mX;
+		}
+
+		public void setX(float x) {
+			mX = x;
+		}
+
+		public float getY() {
+			return mY;
+		}
+
+		public void setY(float y) {
+			mY = y;
+		}
+
+		public float getZ() {
+			return mZ;
+		}
+
+		public void setZ(float z) {
+			mZ = z;
+		}
+
+		public String getID() {
+			return mID;
+		}
+
+		public void setID(String iD) {
+			mID = iD;
+		}
 
 	}
 }

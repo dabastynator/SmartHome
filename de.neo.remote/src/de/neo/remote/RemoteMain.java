@@ -146,6 +146,10 @@ public class RemoteMain {
 					Element webRoot = (Element) webServerRoot.item(0);
 					if (webRoot.hasAttribute(WEBSERVER_PORT) && webRoot.hasAttribute(WEBSERVER_TOKEN)) {
 						webServer.setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
+						for (ControlUnitFactory factory : mControlUnitFactory.values()) {
+							AbstractUnitHandler handler = factory.createUnitHandler(center);
+							webServer.handle(handler.getWebPath(), handler, webRoot.getAttribute(WEBSERVER_TOKEN));
+						}
 						webServer.handle(WEBSERVER_PATH, center, webRoot.getAttribute(WEBSERVER_TOKEN));
 						webServer.start();
 					}

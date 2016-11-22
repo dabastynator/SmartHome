@@ -47,8 +47,7 @@ public class SerialReader extends Thread {
 		}
 	}
 
-	private void informListener(String familyCode, int switchNumber,
-			de.neo.remote.api.IInternetSwitch.State state) {
+	private void informListener(String familyCode, int switchNumber, de.neo.remote.api.IWebSwitch.State state) {
 		for (ISerialListener listener : mListener)
 			listener.OnSwitchEvent(familyCode, switchNumber, state);
 	}
@@ -74,28 +73,21 @@ public class SerialReader extends Thread {
 				while ((line = mInput.readLine()) != null) {
 					Matcher matcher = mPattern.matcher(line);
 					if (!matcher.matches()) {
-						RemoteLogger.performLog(LogPriority.WARNING,
-								"No match for line: " + line, "SerialReader");
+						RemoteLogger.performLog(LogPriority.WARNING, "No match for line: " + line, "SerialReader");
 					} else {
 						String familyCode = matcher.group(1);
 						int switchNumber = Integer.parseInt(matcher.group(2));
-						de.neo.remote.api.IInternetSwitch.State switchState = (matcher
-								.group(3).equals("1") || matcher.group(3)
-								.equals("ON")) ? de.neo.remote.api.IInternetSwitch.State.ON
-								: de.neo.remote.api.IInternetSwitch.State.OFF;
-						SerialReader.getInstance().informListener(familyCode,
-								switchNumber, switchState);
-						RemoteLogger.performLog(LogPriority.INFORMATION,
-								"Switch change family: " + familyCode
-										+ " switch: " + switchNumber
-										+ " state: " + switchState,
-								"SerialReader");
+						de.neo.remote.api.IWebSwitch.State switchState = (matcher.group(3).equals("1")
+								|| matcher.group(3).equals("ON")) ? de.neo.remote.api.IWebSwitch.State.ON
+										: de.neo.remote.api.IWebSwitch.State.OFF;
+						SerialReader.getInstance().informListener(familyCode, switchNumber, switchState);
+						RemoteLogger.performLog(LogPriority.INFORMATION, "Switch change family: " + familyCode
+								+ " switch: " + switchNumber + " state: " + switchState, "SerialReader");
 					}
 				}
 			} catch (IOException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, "Listening failed: "
-						+ e.getClass().getSimpleName() + ": " + e.getMessage(),
-						"SerialReader");
+				RemoteLogger.performLog(LogPriority.ERROR,
+						"Listening failed: " + e.getClass().getSimpleName() + ": " + e.getMessage(), "SerialReader");
 			} finally {
 				try {
 					mInput.close();
@@ -108,15 +100,13 @@ public class SerialReader extends Thread {
 		private void initialize() throws IOException {
 			String line = mInput.readLine();
 			mPattern = Pattern.compile(line);
-			RemoteLogger.performLog(LogPriority.INFORMATION,
-					"Regex for switch lines: " + line, "SerialReader");
+			RemoteLogger.performLog(LogPriority.INFORMATION, "Regex for switch lines: " + line, "SerialReader");
 		}
 	}
 
 	public interface ISerialListener {
 
-		public void OnSwitchEvent(String family, int switchNumber,
-				de.neo.remote.api.IInternetSwitch.State state);
+		public void OnSwitchEvent(String family, int switchNumber, de.neo.remote.api.IWebSwitch.State state);
 
 	}
 }

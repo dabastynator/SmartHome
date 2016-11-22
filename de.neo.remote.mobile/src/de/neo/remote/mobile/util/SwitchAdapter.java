@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IInternetSwitch.State;
+import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.mobile.activities.SelectSwitchActivity.SelectSwitchListener;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
