@@ -5,20 +5,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.IPlayer;
@@ -225,28 +218,29 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 	public static BufferedImage searchImageFromGoogle(String search, int minResolution, int maxResolution)
 			throws IOException, JSONException {
-		URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="
-				+ URLEncoder.encode(search, "UTF-8"));
-		URLConnection connection = url.openConnection();
-
-		String line;
-		StringBuilder builder = new StringBuilder();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		while ((line = reader.readLine()) != null) {
-			builder.append(line);
-		}
-
-		JSONObject json = new JSONObject(builder.toString());
-		JSONArray imageArray = json.getJSONObject("responseData").getJSONArray("results");
-		for (int i = 0; i < imageArray.length(); i++) {
-			int width = imageArray.getJSONObject(i).getInt("width");
-			int height = imageArray.getJSONObject(i).getInt("height");
-			if (width * height >= minResolution && width * height <= maxResolution) {
-				String imageUrl = imageArray.getJSONObject(i).getString("url");
-				return ImageIO.read(new URL(imageUrl));
-			}
-		}
-		throw new IOException("No matching resolution found");
+		throw new IOException("not supported");
+		/*
+		 * URL url = new URL(
+		 * "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" +
+		 * URLEncoder.encode(search, "UTF-8")); URLConnection connection =
+		 * url.openConnection();
+		 * 
+		 * String line; StringBuilder builder = new StringBuilder();
+		 * BufferedReader reader = new BufferedReader(new
+		 * InputStreamReader(connection.getInputStream())); while ((line =
+		 * reader.readLine()) != null) { builder.append(line); }
+		 * 
+		 * JSONObject json = new JSONObject(builder.toString()); JSONArray
+		 * imageArray =
+		 * json.getJSONObject("responseData").getJSONArray("results"); for (int
+		 * i = 0; i < imageArray.length(); i++) { int width =
+		 * imageArray.getJSONObject(i).getInt("width"); int height =
+		 * imageArray.getJSONObject(i).getInt("height"); if (width * height >=
+		 * minResolution && width * height <= maxResolution) { String imageUrl =
+		 * imageArray.getJSONObject(i).getString("url"); return ImageIO.read(new
+		 * URL(imageUrl)); } } throw new IOException(
+		 * "No matching resolution found");
+		 */
 	}
 
 	@Override
