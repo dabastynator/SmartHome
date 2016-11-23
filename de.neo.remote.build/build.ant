@@ -1,11 +1,8 @@
 <project>
 
 	<property name="src.rmi" value="./../de.neo.rmi/src" />
-	<property name="src.webcam" value="./../de.webcam/src" />
 	<property name="src.remote" value="./../de.neo.remote/src" />
-	<property name="src.desktop" value="./../de.neo.remote.desktop/src" />
 
-	<property name="lib.webcam" value="./../de.webcam/lib" />
 	<property name="lib.remote" value="./../de.neo.remote/lib" />
 
 	<property name="classes.dir" value="./build/classes" />
@@ -14,7 +11,6 @@
 	<property name="jar.destiny" value="/opt/neo/" />
 
 	<path id="classpath">
-		<fileset dir="${lib.webcam}" includes="**/*.jar" />
 		<fileset dir="${lib.remote}" includes="**/*.jar" />
 	</path>
 
@@ -34,16 +30,6 @@
 		</jar>
 	</target>
 
-	<target name="jar_webcam" depends="jar_rmi">
-		<javac srcdir="${src.webcam}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
-		<jar destfile="${jar.dir}/webcam.jar" basedir="${classes.dir}">
-			<zipgroupfileset dir="${lib.webcam}" includes="*.jar" excludes="" />
-			<manifest>
-				<attribute name="Main-Class" value="de.webcam.server.WebcamServer" />
-			</manifest>
-		</jar>
-	</target>
-
 	<target name="jar_remote" depends="jar_rmi">
 		<javac srcdir="${src.remote}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/remote.jar" basedir="${classes.dir}">
@@ -54,18 +40,7 @@
 		</jar>
 	</target>
 
-	<target name="jar_desktop" depends="jar_webcam">
-		<javac srcdir="${src.desktop}" destdir="${classes.dir}" includeantruntime="false" />
-		<jar destfile="${jar.dir}/desktop.jar" basedir="${classes.dir}">
-			<fileset dir="${src.desktop}/.." includes="res/*.png" excludes="" />
-			<zipgroupfileset dir="${lib.webcam}" includes="*.jar" excludes="" />
-			<manifest>
-				<attribute name="Main-Class" value="de.neo.remote.desktop.RemoteControl" />
-			</manifest>
-		</jar>
-	</target>
-
-	<target name="build_remote" depends="jar_webcam,jar_remote">
+	<target name="build_remote" depends="jar_remote">
 		<copy file="${jar.dir}/registry.jar" tofile="${jar.destiny}/registry.jar" overwrite="true" />
 		<copy file="${jar.dir}/webcam.jar" tofile="${jar.destiny}/webcam.jar" overwrite="true" />
 		<copy file="${jar.dir}/remote.jar" tofile="${jar.destiny}/remote.jar" overwrite="true" />
