@@ -1,8 +1,7 @@
 package de.neo.remote.controlcenter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.Event;
@@ -15,8 +14,7 @@ public class EventWorker extends Thread {
 
 	boolean mRunning = true;
 
-	private List<Event> mEventQueue = Collections
-			.synchronizedList(new ArrayList<Event>());
+	private BlockingQueue<Event> mEventQueue = new LinkedBlockingQueue<>();
 
 	private ControlCenterImpl mCenter;
 
@@ -28,44 +26,28 @@ public class EventWorker extends Thread {
 	public synchronized void queueEvents(Event[] events) {
 		for (Event event : events)
 			mEventQueue.add(event);
-		notify();
 	}
 
 	public synchronized void queueEvent(Event event) {
 		mEventQueue.add(event);
-		notify();
-	}
-
-	private synchronized void executeEvents() {
-		while (mEventQueue.size() > 0) {
-			Event event = mEventQueue.get(0);
-			mEventQueue.remove(0);
-
-			try {
-				IControlUnit unit = mCenter.getControlUnit(event.getUnitID());
-				if (unit == null)
-					throw new EventException("No control unit found: "
-							+ event.getUnitID());
-				unit.performEvent(event);
-			} catch (EventException | RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
-						event.getUnitID());
-			}
-		}
 	}
 
 	@Override
 	public void run() {
-		try {
-			while (mRunning) {
-				executeEvents();
-				synchronized (this) {
-					wait();
+		while (mRunning) {
+			try {
+				Event event = mEventQueue.take();
+				try {
+					IControlUnit unit = mCenter.getControlUnit(event.getUnitID());
+					if (unit == null)
+						throw new EventException("No control unit found: " + event.getUnitID());
+					unit.performEvent(event);
+				} catch (EventException | RemoteException e) {
+					RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), event.getUnitID());
 				}
+			} catch (InterruptedException e) {
+				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "EventWorker");
 			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }
