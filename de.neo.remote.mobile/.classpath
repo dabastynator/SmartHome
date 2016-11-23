@@ -8,6 +8,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="/de.neo.remote"/>
-	<classpathentry kind="lib" path="jars/pebblekit-3.0.0-eclipse.jar"/>
+	<classpathentry kind="lib" path="libs/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
