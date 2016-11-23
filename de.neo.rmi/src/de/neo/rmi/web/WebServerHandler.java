@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import de.neo.rmi.api.JSONUtils;
 import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.dynamics.WebProxy;

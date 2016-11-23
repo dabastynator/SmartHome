@@ -12,12 +12,12 @@ import java.net.URLEncoder;
 
 import org.json.simple.parser.JSONParser;
 
+import de.neo.rmi.api.JSONUtils;
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteException;
-import de.neo.rmi.web.JSONUtils;
 
 public class WebProxy implements InvocationHandler {
 

@@ -1,4 +1,4 @@
-package de.neo.rmi.web;
+package de.neo.rmi.api;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -9,9 +9,6 @@ import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import de.neo.rmi.api.WebField;
-import de.neo.rmi.api.WebRequest;
 
 public class JSONUtils {
 
