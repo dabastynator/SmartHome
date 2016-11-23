@@ -9,6 +9,7 @@ import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IWebSwitch;
 import de.neo.rmi.api.WebGet;
+import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -19,9 +20,9 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 	}
 
 	@Override
-	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.")
-	public List<BeanSwitch> getSwitches() {
-		List<BeanSwitch> result = new ArrayList<>();
+	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.", genericClass = BeanSwitch.class)
+	public ArrayList<BeanSwitch> getSwitches() {
+		ArrayList<BeanSwitch> result = new ArrayList<>();
 		for (IControlUnit unit : mCenter.getControlUnits().values()) {
 			try {
 				if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
@@ -37,6 +38,13 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 			}
 		}
 		return result;
+	}
+
+	public static void main(String[] args) {
+		IWebSwitch webSwitch = new WebProxyBuilder().setEndPoint("http://localhost:5061/switch")
+				.setSecurityToken("w4kzd4HQ").setInterface(IWebSwitch.class).create();
+		List<BeanSwitch> switches = webSwitch.getSwitches();
+		System.out.println(switches.size());
 	}
 
 	@Override

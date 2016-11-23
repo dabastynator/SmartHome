@@ -1,7 +1,6 @@
 package de.neo.remote.rccolor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.neo.remote.AbstractUnitHandler;
 import de.neo.remote.api.IControlCenter;
@@ -19,9 +18,9 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	}
 
 	@Override
-	@WebRequest(path = "list", description = "List all led strips.")
-	public List<BeanLEDStrips> getLEDStrips() {
-		List<BeanLEDStrips> result = new ArrayList<>();
+	@WebRequest(path = "list", description = "List all led strips.", genericClass = BeanLEDStrips.class)
+	public ArrayList<BeanLEDStrips> getLEDStrips() {
+		ArrayList<BeanLEDStrips> result = new ArrayList<>();
 		for (IControlUnit unit : mCenter.getControlUnits().values()) {
 			try {
 				if (unit.getRemoteableControlObject() instanceof IRCColor) {

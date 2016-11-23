@@ -251,7 +251,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			}
 	}
 
-	@WebRequest(description = "Perform specified trigger", path = "dotrigger")
+	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
 	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) {
 		Trigger trigger = new Trigger();
 		trigger.setTriggerID(triggerID);

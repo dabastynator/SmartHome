@@ -1,7 +1,6 @@
 package de.neo.remote.mediaserver;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.neo.remote.AbstractUnitHandler;
 import de.neo.remote.api.IControlCenter;
@@ -20,9 +19,10 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	}
 
 	@Override
-	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.")
-	public List<BeanMediaServer> getMediaServer(@WebGet(name = "id", required = false, defaultvalue = "") String id) {
-		List<BeanMediaServer> result = new ArrayList<>();
+	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", genericClass = BeanMediaServer.class)
+	public ArrayList<BeanMediaServer> getMediaServer(
+			@WebGet(name = "id", required = false, defaultvalue = "") String id) {
+		ArrayList<BeanMediaServer> result = new ArrayList<>();
 		for (IControlUnit unit : mCenter.getControlUnits().values()) {
 			try {
 				if (unit.getRemoteableControlObject() instanceof IMediaServer) {
@@ -50,9 +50,9 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	}
 
 	@Override
-	@WebRequest(path = "playlists", description = "List all playlists of specified media server.")
-	public List<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) {
-		List<BeanPlaylist> result = new ArrayList<>();
+	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanMediaServer.class)
+	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) {
+		ArrayList<BeanPlaylist> result = new ArrayList<>();
 		try {
 			IControlUnit unit = mCenter.getControlUnit(id);
 			if (unit.getRemoteableControlObject() instanceof IMediaServer) {

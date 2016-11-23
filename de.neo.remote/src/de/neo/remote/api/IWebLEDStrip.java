@@ -1,6 +1,6 @@
 package de.neo.remote.api;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.api.WebField;
@@ -15,8 +15,8 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * 
 	 * @return list of led strips
 	 */
-	@WebRequest(path = "list", description = "List all led strips.")
-	public List<BeanLEDStrips> getLEDStrips();
+	@WebRequest(path = "list", description = "List all led strips.", genericClass = BeanLEDStrips.class)
+	public ArrayList<BeanLEDStrips> getLEDStrips();
 
 	/**
 	 * Set color for specified led strip. Red, green and blue must between 0 and

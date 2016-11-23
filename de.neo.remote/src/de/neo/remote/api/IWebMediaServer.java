@@ -1,6 +1,6 @@
 package de.neo.remote.api;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.api.WebField;
@@ -17,8 +17,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @param id
 	 * @return media-server list
 	 */
-	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.")
-	public List<BeanMediaServer> getMediaServer(@WebGet(name = "id", required = false, defaultvalue = "") String id);
+	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", genericClass = BeanMediaServer.class)
+	public ArrayList<BeanMediaServer> getMediaServer(
+			@WebGet(name = "id", required = false, defaultvalue = "") String id);
 
 	/**
 	 * List all playlists of specified media server.
@@ -26,8 +27,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @param id
 	 * @return playlists
 	 */
-	@WebRequest(path = "playlists", description = "List all playlists of specified media server.")
-	public List<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id);
+	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanMediaServer.class)
+	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id);
 
 	public static class BeanPlaylist {
 

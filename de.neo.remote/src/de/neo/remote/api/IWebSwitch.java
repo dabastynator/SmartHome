@@ -1,6 +1,6 @@
 package de.neo.remote.api;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.api.WebField;
@@ -20,8 +20,8 @@ public interface IWebSwitch extends RemoteAble {
 	 * 
 	 * @return list of all switches
 	 */
-	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.")
-	public List<BeanSwitch> getSwitches();
+	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.", genericClass = BeanSwitch.class)
+	public ArrayList<BeanSwitch> getSwitches();
 
 	/**
 	 * Set the state of switch with specified id.

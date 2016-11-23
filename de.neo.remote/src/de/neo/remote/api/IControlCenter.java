@@ -101,7 +101,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @param triggerID
 	 * @return map contains result
 	 */
-	@WebRequest(path = "dotrigger", description = "Perform specified trigger")
+	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
 	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID);
 
 	/**

@@ -1,7 +1,6 @@
 package de.neo.remote.action;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.neo.remote.AbstractUnitHandler;
 import de.neo.remote.api.ICommandAction;
@@ -18,9 +17,9 @@ public class WebActionImpl extends AbstractUnitHandler implements IWebAction {
 	}
 
 	@Override
-	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.")
-	public List<BeanAction> getActions() {
-		List<BeanAction> result = new ArrayList<>();
+	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.", genericClass = BeanAction.class)
+	public ArrayList<BeanAction> getActions() {
+		ArrayList<BeanAction> result = new ArrayList<>();
 		for (IControlUnit unit : mCenter.getControlUnits().values()) {
 			try {
 				if (unit.getRemoteableControlObject() instanceof ICommandAction) {

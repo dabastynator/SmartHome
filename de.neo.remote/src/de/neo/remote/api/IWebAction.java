@@ -1,6 +1,6 @@
 package de.neo.remote.api;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.api.WebField;
@@ -15,7 +15,7 @@ public interface IWebAction extends RemoteAble {
 	 * @return action list
 	 */
 	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.")
-	public List<BeanAction> getActions();
+	public ArrayList<BeanAction> getActions();
 
 	public class BeanAction extends BeanWeb {
 
