@@ -25,6 +25,7 @@
 		<mkdir dir="${jar.dir}" />
 		<javac srcdir="${src.rmi}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/registry.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.rmi}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.neo.rmi.api.Registry" />
 			</manifest>
@@ -36,6 +37,7 @@
 		<javac srcdir="${src.remote}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/remote.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.remote}" includes="*.jar" excludes="" />
+			<zipgroupfileset dir="${lib.rmi}" includes="*.jar" excludes="" />
 			<manifest>
 				<attribute name="Main-Class" value="de.neo.remote.RemoteMain" />
 			</manifest>
