@@ -11,14 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
+import de.neo.rmi.dynamics.WebProxy;
 import de.neo.rmi.protokol.RemoteAble;
-import de.neo.rmi.web.JSON.JSONArray;
-import de.neo.rmi.web.JSON.JSONObject;
 
 public class WebServerHandler implements HttpHandler {
 
@@ -62,7 +64,7 @@ public class WebServerHandler implements HttpHandler {
 		Annotation[][] annotations = method.getParameterAnnotations();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (int i = 0; i < annotations.length; i++) {
-			WebGet annotation = findWebGetAnnotation(annotations[i]);
+			WebGet annotation = WebProxy.findWebGetAnnotation(annotations[i]);
 			if (annotation == null)
 				throw new IllegalArgumentException("Parameter of method missing WebGet annotation.");
 			Class<?> paramClass = parameterTypes[i];
@@ -86,13 +88,7 @@ public class WebServerHandler implements HttpHandler {
 		return resultParams.toArray();
 	}
 
-	private WebGet findWebGetAnnotation(Annotation[] annotations) {
-		for (Annotation a : annotations)
-			if (a instanceof WebGet)
-				return (WebGet) a;
-		return null;
-	}
-
+	@SuppressWarnings("unchecked")
 	private JSONObject createJSONApi() {
 		JSONObject result = new JSONObject();
 		result.put("path", mPath);
@@ -110,7 +106,7 @@ public class WebServerHandler implements HttpHandler {
 			jsonMethod.put("description", methodAnnotation.description());
 			Annotation[][] annotations = method.getParameterAnnotations();
 			for (int i = 0; i < annotations.length; i++) {
-				WebGet annotation = findWebGetAnnotation(annotations[i]);
+				WebGet annotation = WebProxy.findWebGetAnnotation(annotations[i]);
 				parameter.add(annotation.name());
 			}
 			jsonMethod.put("parameter", parameter);
@@ -141,14 +137,14 @@ public class WebServerHandler implements HttpHandler {
 					throw new IllegalArgumentException("Could not find method for " + methodPath);
 				Object[] params = queryToParams(method, paramMap);
 				Object result = method.invoke(mRemoteable, params);
-				resultString = JSON.createByObject(result).toString();
+				resultString = JSONUtils.objectToJson(result).toString();
 			}
 		} catch (Exception e) {
-			resultString = JSON.createByException(e).toString();
+			resultString = JSONUtils.exceptionToJson(e).toString();
 		}
 		byte[] bytes = resultString.getBytes();
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-		exchange.getResponseHeaders().set("Content-Type", "text/json; charset=" + mEncoding);
+		exchange.getResponseHeaders().set("Content-Type", "application/json; charset=" + mEncoding);
 		exchange.sendResponseHeaders(200, bytes.length);
 		OutputStream os = exchange.getResponseBody();
 		ioCopyStream(is, os);

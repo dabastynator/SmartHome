@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WebField {
 	public String name();
+	public Class<?> genericClass() default Object.class;
 }

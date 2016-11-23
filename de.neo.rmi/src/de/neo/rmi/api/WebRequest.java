@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 public @interface WebRequest {
 	public String path();
 	public String description();
+	public Class<?> genericClass() default Object.class;
 }
