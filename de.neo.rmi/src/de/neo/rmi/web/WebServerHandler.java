@@ -145,7 +145,8 @@ public class WebServerHandler implements HttpHandler {
 		}
 		byte[] bytes = resultString.getBytes();
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-		exchange.getResponseHeaders().set("Content-Type", "application/json; charset=" + mEncoding);
+		exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+		exchange.getResponseHeaders().set("Content-Type", "application/json charset=" + mEncoding);
 		exchange.sendResponseHeaders(200, bytes.length);
 		OutputStream os = exchange.getResponseBody();
 		ioCopyStream(is, os);
