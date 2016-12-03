@@ -1,0 +1,59 @@
+body {
+	background: black;
+	color: white;
+	font-family: Ubuntu, sans-serif;
+}
+
+.time {
+	font-size: 7em;
+	text-align: center;
+}
+
+.date {
+	font-size: 2.5em;
+	text-align: center;
+}
+
+.music {
+	font-size: 2em;
+	margin: 5px;
+}
+
+.switch {
+	font-size: 1em;
+}
+
+.weather {
+	font-size: 6em;
+}
+
+.container_time {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+}
+
+.container_music {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+}
+
+.container_switches {
+	font-size: 1.8em;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+}
+
+.container_weather {
+	font-size: 5em;
+	text-align: right;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.elem {
+	
+}

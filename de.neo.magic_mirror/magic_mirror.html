@@ -1,0 +1,40 @@
+<html>
+<header>
+	<title>Magic Mirror</title>
+	<script src="magic_config.js"></script>
+	<script src="magic_mirror.js"></script>
+	<link rel="stylesheet" type="text/css"
+		href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
+	<link href="magic_mirror.css" rel="stylesheet">
+</header>
+<body onload="initialize()">
+	<div class="container_time" id="container_time" style="width: 500px">
+		<div id="time" class="time elem">time</div>
+		<div id="date" class="date elem">date</div>
+	</div>
+	<div class="container_music" id="container_music">
+		<table>
+			<tr>
+				<td><img class="music" src="img/speaker.png" width="80px"></td>
+				<td>
+					<div id="song" class="music elem">song</div>
+					<div id="artist" class="music elem">artist</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="container_switches" id="container_switches">switches</div>
+	<div class="container_weather" id="container_weather">
+		<table>
+			<tr>
+				<td>
+					<div id="temperature" class="weather elem">temperature</div>
+				</td>
+				<td>
+					<div id="weather_img" class="weather elem">wether_img</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>
