@@ -531,7 +531,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	void onRemoteBinder(RemoteBinder mBinder) {
+	protected void onRemoteBinder(RemoteBinder mBinder) {
 		checkIntentForAction();
 	}
 

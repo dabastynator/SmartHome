@@ -17,6 +17,11 @@ import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.GroundPlot;
+import de.neo.remote.api.IControlCenter;
+import de.neo.remote.api.IWebAction;
+import de.neo.remote.api.IWebLEDStrip;
+import de.neo.remote.api.IWebMediaServer;
+import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
@@ -26,6 +31,7 @@ import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
+import de.neo.rmi.api.WebProxyBuilder;
 import de.remote.mobile.R;
 
 /**
@@ -34,8 +40,7 @@ import de.remote.mobile.R;
  * @author sebastian
  * 
  */
-public abstract class AbstractConnectionActivity extends ActionBarActivity
-		implements IRemoteActionListener {
+public abstract class AbstractConnectionActivity extends ActionBarActivity implements IRemoteActionListener {
 
 	public static final String EXTRA_SERVER_ID = "server_id";
 
@@ -44,14 +49,18 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 	protected RemoteServer mCurrentServer;
 	protected boolean mIsActive;
 
+	protected IWebSwitch mWebSwitch;
+	protected IWebLEDStrip mWebLEDStrip;
+	protected IWebAction mWebAction;
+	protected IWebMediaServer mWebMediaServer;
+	protected IControlCenter mWebControlCenter;
+
 	protected ServiceConnection mPlayerConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			mBinder.removeRemoteActionListener(AbstractConnectionActivity.this);
-			Log.e("disconnect service", "class: "
-					+ AbstractConnectionActivity.this.getClass()
-							.getSimpleName());
+			Log.e("disconnect service", "class: " + AbstractConnectionActivity.this.getClass().getSimpleName());
 		}
 
 		@Override
@@ -61,14 +70,11 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 			onRemoteBinder(mBinder);
 			onStartConnecting();
 			mBinder.addRemoteActionListener(AbstractConnectionActivity.this);
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			// if there is a server in extra -> connect with this server
-			if (getIntent().getExtras() != null
-					&& getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
+			if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
 				try {
-					mCurrentServer = dao.loadById(getIntent().getExtras()
-							.getInt(EXTRA_SERVER_ID));
+					mCurrentServer = dao.loadById(getIntent().getExtras().getInt(EXTRA_SERVER_ID));
 					needReconnect = true;
 				} catch (DaoException e) {
 					e.printStackTrace();
@@ -79,19 +85,15 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 			else if (needReconnect) {
 				mCurrentServer = getFavoriteServer();
 				if (mCurrentServer == null) {
-					Toast.makeText(AbstractConnectionActivity.this,
-							getString(R.string.server_no_favorite),
+					Toast.makeText(AbstractConnectionActivity.this, getString(R.string.server_no_favorite),
 							Toast.LENGTH_SHORT).show();
-					Intent intent = new Intent(AbstractConnectionActivity.this,
-							SelectServerActivity.class);
-					startActivityForResult(intent,
-							SelectServerActivity.RESULT_CODE);
+					Intent intent = new Intent(AbstractConnectionActivity.this, SelectServerActivity.class);
+					startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 				}
 			}
 			// if there is a server id to connect -> connect
 			if (mCurrentServer != null && needReconnect)
-				mBinder.connectToServer(mCurrentServer,
-						AbstractConnectionActivity.this);
+				mBinder.connectToServer(mCurrentServer, AbstractConnectionActivity.this);
 			else if (!needReconnect)
 				AbstractConnectionActivity.this.onServerConnectionChanged(null);
 		}
@@ -114,12 +116,27 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 		startService(intent);
 
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
+		RemoteServer server = getFavoriteServer();
+		if (server != null)
+			initializeWebApi(server);
+	}
+
+	private void initializeWebApi(RemoteServer server) {
+		mWebSwitch = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
+				.setSecurityToken(server.getApiToken()).setInterface(IWebSwitch.class).create();
+		mWebLEDStrip = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/ledstrip")
+				.setSecurityToken(server.getApiToken()).setInterface(IWebLEDStrip.class).create();
+		mWebMediaServer = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
+				.setSecurityToken(server.getApiToken()).setInterface(IWebMediaServer.class).create();
+		mWebAction = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/action")
+				.setSecurityToken(server.getApiToken()).setInterface(IWebAction.class).create();
+		mWebControlCenter = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/controlcenter")
+				.setSecurityToken(server.getApiToken()).setInterface(IControlCenter.class).create();
 	}
 
 	protected RemoteServer getFavoriteServer() {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();
 			for (RemoteServer server : serverList) {
 				if (server.isFavorite())
@@ -147,11 +164,9 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 		if (requestCode == SelectServerActivity.RESULT_CODE) {
 			if (data == null || data.getExtras() == null)
 				return;
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			try {
-				mCurrentServer = dao.loadById(data.getExtras().getInt(
-						SelectServerActivity.SERVER_ID));
+				mCurrentServer = dao.loadById(data.getExtras().getInt(SelectServerActivity.SERVER_ID));
 				onStartConnecting();
 				mBinder.connectToServer(mCurrentServer, this);
 			} catch (DaoException e) {
@@ -199,12 +214,16 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity
 		mProgress = null;
 	}
 
-	abstract void onRemoteBinder(RemoteBinder mBinder);
+	protected void onRemoteBinder(RemoteBinder mBinder) {
+
+	}
 
 	/**
 	 * start connection. inform user about connecting status.
 	 */
-	abstract void onStartConnecting();
+	protected void onStartConnecting() {
+
+	}
 
 	@Override
 	protected void onDestroy() {

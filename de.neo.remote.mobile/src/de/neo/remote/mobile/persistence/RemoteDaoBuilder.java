@@ -11,7 +11,7 @@ import de.neo.android.persistence.NeoDataBase;
 public class RemoteDaoBuilder extends DaoBuilder {
 
 	public RemoteDaoBuilder(Context context) {
-		setDatabase(new NeoDataBase(context, "de.neo.remote", 1));
+		setDatabase(new NeoDataBase(context, "de.neo.remote", 2));
 		setDaoMapFilling(new RemoteDaoFilling());
 	}
 

@@ -1,6 +1,7 @@
 package de.neo.remote.mobile.services;
 
 import java.nio.IntBuffer;
+import java.util.List;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -15,17 +16,24 @@ import android.os.IBinder;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import de.neo.android.persistence.Dao;
+import de.neo.android.persistence.DaoException;
+import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IWebSwitch;
+import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.SelectSwitchActivity;
+import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
 import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
+import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -38,31 +46,22 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	public static boolean DEBUGGING = false;
 
-	/**
-	 * binder for connection with the remote service
-	 */
-	private RemoteBinder binder;
+	private RemoteBinder mBinder;
+	private Handler mHandler = new Handler();
+	private IWebSwitch mWebSwitch;
 
-	/**
-	 * the handler executes runnables in the ui thread
-	 */
-	private Handler handler = new Handler();
-
-	/**
-	 * connection to the service
-	 */
 	private ServiceConnection playerConnection = new ServiceConnection() {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			binder.removeRemoteActionListener(WidgetService.this);
+			mBinder.removeRemoteActionListener(WidgetService.this);
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			binder = (RemoteBinder) service;
-			binder.addRemoteActionListener(WidgetService.this);
-			if (binder.isConnected())
+			mBinder = (RemoteBinder) service;
+			mBinder.addRemoteActionListener(WidgetService.this);
+			if (mBinder.isConnected())
 				updateMusicWidget(null);
 			else
 				setMusicWidgetText(getResources().getString(R.string.no_conneciton),
@@ -83,22 +82,41 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		updateSwitchWidget();
 	};
 
+	private void refreshWebApi() {
+		DaoFactory.initiate(new RemoteDaoBuilder(this));
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			List<RemoteServer> serverList = dao.loadAll();
+			RemoteServer favorite = null;
+			for (RemoteServer server : serverList) {
+				if (server.isFavorite())
+					favorite = server;
+			}
+			if (favorite != null) {
+				mWebSwitch = new WebProxyBuilder().setEndPoint(favorite.getEndPoint() + "/switch")
+						.setSecurityToken(favorite.getApiToken()).setInterface(IWebSwitch.class).create();
+			}
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
+	}
+
 	protected void updateMusicWidget(PlayingBean playing) {
-		if (binder.getLatestMediaServer() == null) {
-			if (binder.getServer() == null)
+		if (mBinder.getLatestMediaServer() == null) {
+			if (mBinder.getServer() == null)
 				setMusicWidgetText(getString(R.string.no_conneciton), getString(R.string.no_conneciton_with_server), "",
 						false, null);
 			else
 				setMusicWidgetText(getString(R.string.mediaserver_no_server),
-						getString(R.string.mediaserver_no_server) + " (" + binder.getServer().getName() + ")", "",
+						getString(R.string.mediaserver_no_server) + " (" + mBinder.getServer().getName() + ")", "",
 						false, null);
 			return;
 		}
-		if (binder.getLatestMediaServer().player != null && playing == null)
-			playing = binder.getPlayingFile();
+		if (mBinder.getLatestMediaServer().player != null && playing == null)
+			playing = mBinder.getPlayingFile();
 		if (playing == null || playing.getState() == STATE.DOWN) {
 			setMusicWidgetText(getResources().getString(R.string.player_no_file_playing),
-					binder.getLatestMediaServer().name, "", false, null);
+					mBinder.getLatestMediaServer().name, "", false, null);
 			return;
 		}
 		String title = "playing";
@@ -147,35 +165,35 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		new Thread() {
 			public void run() {
 				try {
-					if (binder == null)
+					if (mBinder == null)
 						throw new RemoteException("not binded", "not binded");
 					if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
 						int widgetID = intent.getIntExtra(SelectSwitchActivity.SWITCH_NUMBER, 0);
 						switchPower(widgetID);
 						return;
 					}
-					if (binder.getLatestMediaServer() == null || binder.getLatestMediaServer().player == null)
+					if (mBinder.getLatestMediaServer() == null || mBinder.getLatestMediaServer().player == null)
 						throw new RemoteException(getResources().getString(R.string.mediaserver_no_server),
 								getResources().getString(R.string.mediaserver_no_server));
 					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
-						binder.getLatestMediaServer().player.playPause();
+						mBinder.getLatestMediaServer().player.playPause();
 					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
-						binder.getLatestMediaServer().player.quit();
+						mBinder.getLatestMediaServer().player.quit();
 					else if (action.equals(RemoteWidgetProvider.ACTION_NEXT))
-						binder.getLatestMediaServer().player.next();
+						mBinder.getLatestMediaServer().player.next();
 					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
-						binder.getLatestMediaServer().player.previous();
+						mBinder.getLatestMediaServer().player.previous();
 					else if (action.equals(RemoteWidgetProvider.ACTION_VOLDOWN))
-						binder.getLatestMediaServer().player.volDown();
+						mBinder.getLatestMediaServer().player.volDown();
 					else if (action.equals(RemoteWidgetProvider.ACTION_VOLUP))
-						binder.getLatestMediaServer().player.volUp();
+						mBinder.getLatestMediaServer().player.volUp();
 					else if (action.equals(RemoteWidgetProvider.ACTION_VOLUME)) {
 						int volume = (int) (100 * intent.getDoubleExtra(RemoteWidgetProvider.EXTRA_VOLUME, 0.5));
-						binder.getLatestMediaServer().player.setVolume(volume);
+						mBinder.getLatestMediaServer().player.setVolume(volume);
 					}
 				} catch (final Exception e) {
 					e.printStackTrace();
-					handler.post(new Runnable() {
+					mHandler.post(new Runnable() {
 						public void run() {
 							Toast.makeText(WidgetService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 						}
@@ -186,7 +204,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	private void initializeMusicWidgets() {
-		if (binder != null && binder.isConnected())
+		if (mBinder != null && mBinder.isConnected())
 			updateMusicWidget(null);
 		else
 			setMusicWidgetText(getResources().getString(R.string.no_conneciton),
@@ -221,13 +239,13 @@ public class WidgetService extends Service implements IRemoteActionListener {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return binder;
+		return mBinder;
 	}
 
 	@Override
 	public void onDestroy() {
-		if (binder != null)
-			binder.removeRemoteActionListener(this);
+		if (mBinder != null)
+			mBinder.removeRemoteActionListener(this);
 		unbindService(playerConnection);
 		super.onDestroy();
 	}
@@ -293,7 +311,7 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		for (int i = 0; i < appWidgetIds.length; ++i) {
 
 			String id = prefs.getString(appWidgetIds[i] + "", null);
-			BufferdUnit bufferdUnit = binder.getSwitches().get(id);
+			BufferdUnit bufferdUnit = mBinder.getSwitches().get(id);
 			if (switchId.equals(id) && bufferdUnit != null) {
 				updateSwitchWidget(appWidgetIds[i], getImageForSwitchType(bufferdUnit.mSwitchType, state == State.ON),
 						bufferdUnit.mName);
@@ -324,16 +342,16 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	private void updateSwitchWidget(int widgetID) throws Exception {
-		if (binder == null)
+		if (mBinder == null)
 			throw new Exception(getResources().getString(R.string.no_conneciton));
 		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
 		String switchID = prefs.getString(widgetID + "", null);
 		if (switchID == null)
 			return;
-		BufferdUnit unit = binder.getSwitches().get(switchID);
+		BufferdUnit unit = mBinder.getSwitches().get(switchID);
 		if (unit == null) {
 			updateSwitchWidget(widgetID, R.drawable.switch_unknown, switchID);
-			throw new Exception(binder.getServer().getName() + " "
+			throw new Exception(mBinder.getServer().getName() + " "
 					+ getResources().getString(R.string.switch_has_no_switch) + " " + switchID);
 		}
 		IInternetSwitch power = (IInternetSwitch) unit.mObject;
@@ -354,41 +372,27 @@ public class WidgetService extends Service implements IRemoteActionListener {
 	}
 
 	private void switchPower(final int widgetID) throws Exception {
-		if (binder == null)
-			throw new Exception(getResources().getString(R.string.no_conneciton));
+		refreshWebApi();
 		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
 		final String switchID = prefs.getString(widgetID + "", null);
 		if (switchID == null)
 			return;
-		BufferdUnit unit = binder.getSwitches().get(switchID);
-		if (binder == null || binder.getServer() == null)
-			throw new Exception(getResources().getString(R.string.no_conneciton));
-		if (unit == null)
-			throw new Exception(binder.getServer().getName() + " "
-					+ getResources().getString(R.string.switch_has_no_switch) + " " + switchID);
-		if (DEBUGGING)
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(getApplicationContext(), "Switch " + switchID + " id=" + widgetID,
-							Toast.LENGTH_SHORT).show();
-				}
-			});
-		IInternetSwitch power = (IInternetSwitch) unit.mObject;
-		State state = power.getState();
-		if (state == State.ON)
-			state = State.OFF;
-		else
-			state = State.ON;
-		power.setState(state);
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-		RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext().getPackageName(),
-				R.layout.switch_widget);
-		remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-				getImageForSwitchType(unit.mSwitchType, state == State.ON));
-		remoteSwitchViews.setTextViewText(R.id.text_power_widget, unit.mName);
-		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this, widgetID);
-		appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
+		for (BeanSwitch bSwitch : mWebSwitch.getSwitches()) {
+			if (bSwitch.getID().equals(switchID)) {
+				String newState = (bSwitch.getState().equals("ON") ? "OFF" : "ON");
+				mWebSwitch.setSwitchState(bSwitch.getID(), newState);
+
+				AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
+				RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext().getPackageName(),
+						R.layout.switch_widget);
+				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+						getImageForSwitchType(bSwitch.getType(), newState.equals("ON")));
+				remoteSwitchViews.setTextViewText(R.id.text_power_widget, bSwitch.getName());
+				RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this, widgetID);
+				appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
+			}
+		}
+
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import de.neo.remote.api.IRCColor;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
@@ -136,13 +135,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 	}
 
 	@Override
-	void onRemoteBinder(RemoteBinder mBinder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	void onStartConnecting() {
+	protected void onStartConnecting() {
 		setTitle(getResources().getString(R.string.connecting));
 		mProgress.setVisibility(View.VISIBLE);
 	}

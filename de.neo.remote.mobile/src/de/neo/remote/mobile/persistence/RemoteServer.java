@@ -14,6 +14,12 @@ public class RemoteServer extends DomainBase {
 	@Persistent
 	private boolean mIsFavorite;
 
+	@Persistent
+	private String mEndPoint;
+
+	@Persistent
+	private String mApiToken;
+
 	public String getIP() {
 		return mIP;
 	}
@@ -42,5 +48,23 @@ public class RemoteServer extends DomainBase {
 	public String toString() {
 		return mName;
 	}
+
+	public String getEndPoint() {
+		return mEndPoint;
+	}
+
+	public void setEndPoint(String endPoint) {
+		mEndPoint = endPoint;
+	}
+
+	public String getApiToken() {
+		return mApiToken;
+	}
+
+	public void setApiToken(String apiToken) {
+		mApiToken = apiToken;
+	}
+	
+	
 
 }

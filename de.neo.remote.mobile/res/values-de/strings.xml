@@ -43,7 +43,9 @@
     <!-- Server strings -->
     <string name="server_favorite">Als Favorit setzen</string>
     <string name="server_edit">Bearbeiten</string>
-    <string name="server_name">Server</string>
+    <string name="server_name">Name</string>
+    <string name="server_endpoint">Adresse</string>
+    <string name="server_apitoken">API Sicherheitstoken</string>
     <string name="server_add_new_server">Neuen Server anlegen</string>
     <string name="server_ip">IP</string>
     <string name="server_post">Senden</string>

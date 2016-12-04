@@ -50,16 +50,13 @@ public class SelectServerActivity extends ActionBarActivity {
 
 		setContentView(R.layout.server);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
-		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-				RemoteServer.class);
+		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 		findComponents();
 
 		mServerList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> adapter, View view,
-					int position, long arg3) {
-				mCurrentServer = (RemoteServer) adapter
-						.getItemAtPosition(position);
+			public void onItemClick(AdapterView<?> adapter, View view, int position, long arg3) {
+				mCurrentServer = (RemoteServer) adapter.getItemAtPosition(position);
 				Intent i = new Intent();
 				i.putExtra(SERVER_ID, (int) mCurrentServer.getId());
 				setResult(RESULT_CODE, i);
@@ -69,10 +66,8 @@ public class SelectServerActivity extends ActionBarActivity {
 		});
 		mServerList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
-			public boolean onItemLongClick(AdapterView<?> adapter, View view,
-					int position, long arg3) {
-				mCurrentServer = (RemoteServer) adapter
-						.getItemAtPosition(position);
+			public boolean onItemLongClick(AdapterView<?> adapter, View view, int position, long arg3) {
+				mCurrentServer = (RemoteServer) adapter.getItemAtPosition(position);
 				return false;
 			}
 		});
@@ -97,8 +92,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater mi = new MenuInflater(getApplication());
 		mi.inflate(R.menu.server_pref, menu);
@@ -107,8 +101,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			switch (item.getItemId()) {
 			case R.id.opt_server_delete:
 				dao.delete(mCurrentServer.getId());
@@ -136,8 +129,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	 */
 	private void updateList() {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();
 			ServerAdapter adapter = new ServerAdapter(this, serverList);
 			mServerList.setAdapter(adapter);
@@ -177,36 +169,38 @@ public class SelectServerActivity extends ActionBarActivity {
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View dialogView = inflater.inflate(R.layout.server_edit, null);
 		builder.setView(dialogView);
-		final TextView name = (TextView) dialogView
-				.findViewById(R.id.server_edit_name);
-		final TextView ip = (TextView) dialogView
-				.findViewById(R.id.server_edit_ip);
+		final TextView name = (TextView) dialogView.findViewById(R.id.server_edit_name);
+		final TextView ip = (TextView) dialogView.findViewById(R.id.server_edit_ip);
+		final TextView endpoint = (TextView) dialogView.findViewById(R.id.server_endpoint);
+		final TextView apitoken = (TextView) dialogView.findViewById(R.id.server_apitoken);
 		if (server != null) {
 			builder.setTitle(getString(R.string.server_edit));
 			name.setText(server.getName());
 			ip.setText(server.getIP());
+			endpoint.setText(server.getEndPoint());
+			apitoken.setText(server.getApiToken());
 		} else
 			builder.setTitle(getString(R.string.server_add_new_server));
-		builder.setPositiveButton(getString(R.string.server_post),
-				new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getString(R.string.server_post), new DialogInterface.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						RemoteServer newServer = server;
-						if (newServer == null)
-							newServer = new RemoteServer();
-						newServer.setName(name.getText().toString());
-						newServer.setIP(ip.getText().toString());
-						saveServer(newServer, server == null);
-					}
-				});
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				RemoteServer newServer = server;
+				if (newServer == null)
+					newServer = new RemoteServer();
+				newServer.setName(name.getText().toString());
+				newServer.setIP(ip.getText().toString());
+				newServer.setApiToken(apitoken.getText().toString());
+				newServer.setEndPoint(endpoint.getText().toString());
+				saveServer(newServer, server == null);
+			}
+		});
 		builder.create().show();
 	}
 
 	protected void saveServer(RemoteServer newServer, boolean createNew) {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(
-					RemoteServer.class);
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			if (createNew)
 				dao.save(newServer);
 			else
