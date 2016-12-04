@@ -21,7 +21,7 @@ public interface IWebSwitch extends RemoteAble {
 	 * @return list of all switches
 	 */
 	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.", genericClass = BeanSwitch.class)
-	public ArrayList<BeanSwitch> getSwitches();
+	public ArrayList<BeanSwitch> getSwitches() throws RemoteException;
 
 	/**
 	 * Set the state of switch with specified id.
@@ -39,16 +39,16 @@ public interface IWebSwitch extends RemoteAble {
 	public static class BeanSwitch extends BeanWeb {
 
 		@WebField(name = "state")
-		private String mState;
+		private State mState;
 
 		@WebField(name = "type")
 		private String mType;
 
-		public String getState() {
+		public State getState() {
 			return mState;
 		}
 
-		public void setState(String state) {
+		public void setState(State state) {
 			mState = state;
 		}
 

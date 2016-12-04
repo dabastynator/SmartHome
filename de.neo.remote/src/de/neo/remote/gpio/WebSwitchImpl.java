@@ -31,7 +31,8 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 					unit.config(webSwitch);
 					webSwitch.setID(unit.getID());
 					webSwitch.setName(unit.getName());
-					webSwitch.setState(switchObject.getState().toString());
+					webSwitch.setState(switchObject.getState());
+					webSwitch.setType(switchObject.getType());
 					result.add(webSwitch);
 				}
 			} catch (RemoteException e) {
@@ -43,8 +44,14 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 	public static void main(String[] args) {
 		IWebSwitch webSwitch = new WebProxyBuilder().setEndPoint("http://localhost:5061/switch")
 				.setSecurityToken("w4kzd4HQ").setInterface(IWebSwitch.class).create();
-		List<BeanSwitch> switches = webSwitch.getSwitches();
-		System.out.println(switches.size());
+		List<BeanSwitch> switches;
+		try {
+			switches = webSwitch.getSwitches();
+			System.out.println(switches.size());
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -65,7 +72,7 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 			unit.config(webSwitch);
 			webSwitch.setID(unit.getID());
 			webSwitch.setName(unit.getName());
-			webSwitch.setState(switchObject.getState().toString());
+			webSwitch.setState(switchObject.getState());
 			webSwitch.setType(switchObject.getType());
 			return webSwitch;
 		}
