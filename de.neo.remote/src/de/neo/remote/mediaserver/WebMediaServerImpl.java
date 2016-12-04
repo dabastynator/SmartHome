@@ -77,7 +77,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return "mediaserver";
 	}
 
-	@WebRequest(path = "files", description = "Get files and directories at specific path.")
+	@WebRequest(path = "files", description = "Get files and directories at specific path.", genericClass = BeanFileSystem.class)
 	public ArrayList<BeanFileSystem> getFiles(@WebGet(name = "id") String id,
 			@WebGet(name = "path", required = false, defaultvalue = "") String path) {
 		ArrayList<BeanFileSystem> result = new ArrayList<>();
@@ -143,7 +143,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException {
 		IPlayer p = getPlayer(id, player);
 		IControlUnit unit = mCenter.getControlUnit(id);
-		if (p != null&& unit != null && unit.getRemoteableControlObject() instanceof IMediaServer) {
+		if (p != null && unit != null && unit.getRemoteableControlObject() instanceof IMediaServer) {
 			IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
 			String path = mediaServer.getPlayList().getPlaylistFullpath(playlist);
 			p.playPlayList(path);

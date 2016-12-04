@@ -45,7 +45,7 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @return playing bean
 	 * @throws RemoteException
 	 */
-	@WebRequest(path = "files", description = "Get files and directories at specific path.")
+	@WebRequest(path = "files", description = "Get files and directories at specific path.", genericClass = BeanFileSystem.class)
 	public ArrayList<BeanFileSystem> getFiles(@WebGet(name = "id") String id,
 			@WebGet(name = "path", required = false, defaultvalue = "") String path) throws RemoteException;
 
