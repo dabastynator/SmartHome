@@ -147,16 +147,19 @@ public class JSONUtils {
 					field.setAccessible(true);
 					try {
 						if (field.getType().equals(int.class) || field.getType().equals(Integer.class))
-							field.setInt(result, (int) jsonObject.get(webField.name()));
+							field.setInt(result, ((Integer) jsonObject.get(webField.name())).intValue());
 						else if (field.getType().equals(float.class) || field.getType().equals(Float.class))
 							field.setFloat(result, ((Double) jsonObject.get(webField.name())).floatValue());
 						else if (field.getType().equals(double.class) || field.getType().equals(Double.class))
-							field.setDouble(result, (double) jsonObject.get(webField.name()));
+							field.setDouble(result, ((Double) jsonObject.get(webField.name())).doubleValue());
 						else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class))
-							field.setBoolean(result, (boolean) jsonObject.get(webField.name()));
+							field.setBoolean(result, ((Boolean) jsonObject.get(webField.name())).booleanValue());
 						else if (field.getType().equals(String.class))
 							field.set(result, jsonObject.get(webField.name()));
-						else {
+						else if (field.getType().isEnum()) {
+							Class cls = field.getType();
+							field.set(result, Enum.valueOf(cls, jsonObject.get(webField.name()).toString()));
+						} else {
 							if (jsonObject.get(webField.name()) instanceof JSONObject) {
 								Object child = jsonToObject(field.getType(), jsonObject.get(webField.name()), null,
 										webField);
