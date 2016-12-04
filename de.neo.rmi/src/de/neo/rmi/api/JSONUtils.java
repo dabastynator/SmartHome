@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
 public class JSONUtils {
 
 	@SuppressWarnings("unchecked")
-	public static JSONObject exceptionToJson(Exception e) {
+	public static JSONObject exceptionToJson(Throwable e) {
 		JSONObject result = new JSONObject();
 		JSONObject error = new JSONObject();
 		error.put("message", e.getMessage());
@@ -97,6 +97,8 @@ public class JSONUtils {
 								result.put(webField.name(), (JSONArray) sub);
 							else if (value == null)
 								result.put(webField.name(), (JSONArray) null);
+							else
+								result.put(webField.name(), sub);
 						}
 					} catch (Exception e) {
 						// Ignore

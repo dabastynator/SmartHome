@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,10 +139,17 @@ public class WebServerHandler implements HttpHandler {
 					throw new IllegalArgumentException("Could not find method for " + methodPath);
 				Object[] params = queryToParams(method, paramMap);
 				Object result = method.invoke(mRemoteable, params);
-				resultString = JSONUtils.objectToJson(result).toString();
+				if (result == null)
+					resultString = "null";
+				else
+					resultString = JSONUtils.objectToJson(result).toString();
 			}
 		} catch (Exception e) {
-			resultString = JSONUtils.exceptionToJson(e).toString();
+			if (e instanceof InvocationTargetException) {
+				InvocationTargetException te = (InvocationTargetException) e;
+				resultString = JSONUtils.exceptionToJson(te.getTargetException()).toString();
+			} else
+				resultString = JSONUtils.exceptionToJson(e).toString();
 		}
 		byte[] bytes = resultString.getBytes();
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
