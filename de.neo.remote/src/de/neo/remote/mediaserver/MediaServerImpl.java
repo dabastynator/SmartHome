@@ -2,6 +2,8 @@ package de.neo.remote.mediaserver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -75,9 +77,46 @@ public class MediaServerImpl implements IMediaServer {
 		mTotem = new TotemPlayer();
 		mMplayer = new MPlayerDVD(playlistLocation);
 		mBrowserLocation = browseLocation;
+		if (!mBrowserLocation.endsWith(File.separator))
+			mBrowserLocation += File.separator;
 		mControl = new ControlImpl();
 		mPlaylist = new PlayListImpl(playlistLocation);
 		mOmxplayer = new OMXPlayer();
+	}
+
+	@Override
+	public String[] listDirectories(String path) throws RemoteException {
+		if (path.startsWith("..") || path.contains(File.separator + ".."))
+			throw new IllegalArgumentException("Path must not contain '..'");
+		String location = mBrowserLocation + path;
+		if (!location.endsWith(File.separator))
+			location += File.separator;
+		List<String> list = new ArrayList<String>();
+		for (String str : new File(location).list())
+			if (new File(location + str).isDirectory())
+				if (str.length() > 0 && str.charAt(0) != '.')
+					list.add(str);
+		return list.toArray(new String[] {});
+	}
+
+	@Override
+	public String[] listFiles(String path) throws RemoteException {
+		if (path.startsWith("..") || path.contains(File.separator + ".."))
+			throw new IllegalArgumentException("Path must not contain '..'");
+		String location = mBrowserLocation + path;
+		if (!location.endsWith(File.separator))
+			location += File.separator;
+		List<String> list = new ArrayList<String>();
+		for (String str : new File(location).list())
+			if (new File(location + str).isFile())
+				if (str.length() > 0 && str.charAt(0) != '.')
+					list.add(str);
+		return list.toArray(new String[] {});
+	}
+
+	@Override
+	public String getBrowserPath() {
+		return mBrowserLocation;
 	}
 
 }

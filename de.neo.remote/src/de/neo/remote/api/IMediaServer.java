@@ -63,4 +63,10 @@ public interface IMediaServer extends RemoteAble {
 	 */
 	public IPlayList getPlayList() throws RemoteException;
 
+	public String[] listDirectories(String path) throws RemoteException;
+
+	public String[] listFiles(String path) throws RemoteException;
+
+	public String getBrowserPath();
+
 }

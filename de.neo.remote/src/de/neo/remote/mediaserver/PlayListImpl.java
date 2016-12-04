@@ -33,7 +33,7 @@ public class PlayListImpl implements IPlayList {
 		File playlistFolder = new File(mPlaylistLocation);
 		for (File pls : playlistFolder.listFiles()) {
 			String n = pls.getName();
-			if (!n.startsWith("."))
+			if (!n.startsWith(".") && n.length() > 4)
 				plsList.add(n.substring(0, n.length() - 4));
 		}
 		return plsList.toArray(new String[plsList.size()]);

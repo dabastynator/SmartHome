@@ -332,6 +332,8 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void setVolume(int volume) throws RemoteException, PlayerException {
 		mVolume = volume;
+		if (mPlayingBean != null)
+			mPlayingBean.setVolume(volume);
 		writeVolume();
 	}
 }
