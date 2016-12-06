@@ -149,7 +149,7 @@ public class JSONUtils {
 					field.setAccessible(true);
 					try {
 						if (field.getType().equals(int.class) || field.getType().equals(Integer.class))
-							field.setInt(result, ((Integer) jsonObject.get(webField.name())).intValue());
+							field.setInt(result, ((Long) jsonObject.get(webField.name())).intValue());
 						else if (field.getType().equals(float.class) || field.getType().equals(Float.class))
 							field.setFloat(result, ((Double) jsonObject.get(webField.name())).floatValue());
 						else if (field.getType().equals(double.class) || field.getType().equals(Double.class))

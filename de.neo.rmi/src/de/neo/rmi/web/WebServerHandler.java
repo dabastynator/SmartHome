@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -155,7 +156,7 @@ public class WebServerHandler implements HttpHandler {
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
 		exchange.getResponseHeaders().set("Content-Type", "application/json charset=" + mEncoding);
-		exchange.sendResponseHeaders(200, bytes.length);
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
 		OutputStream os = exchange.getResponseBody();
 		ioCopyStream(is, os);
 		os.close();
