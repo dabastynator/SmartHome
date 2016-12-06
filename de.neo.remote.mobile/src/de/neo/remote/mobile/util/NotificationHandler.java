@@ -21,7 +21,6 @@ import de.neo.remote.mobile.activities.ControlSceneActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -163,15 +162,15 @@ public class NotificationHandler implements IRemoteActionListener {
 		nIntent.putExtra(MediaServerActivity.EXTRA_SERVER_ID, mCurrentServer.getId());
 		PendingIntent pInent = PendingIntent.getActivity(mContext, 0, nIntent, 0);
 		Intent playIntent = new Intent(mContext, WidgetService.class);
-		playIntent.setAction(RemoteWidgetProvider.ACTION_PLAY);
+		playIntent.setAction(WidgetService.ACTION_PLAY);
 		PendingIntent playPending = PendingIntent.getService(mContext, 0, playIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		Intent nextIntent = new Intent(mContext, WidgetService.class);
-		nextIntent.setAction(RemoteWidgetProvider.ACTION_VOLUP);
+		nextIntent.setAction(WidgetService.ACTION_VOLUP);
 		PendingIntent nextPending = PendingIntent.getService(mContext, 0, nextIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		Intent prevIntent = new Intent(mContext, WidgetService.class);
-		prevIntent.setAction(RemoteWidgetProvider.ACTION_VOLDOWN);
+		prevIntent.setAction(WidgetService.ACTION_VOLDOWN);
 		PendingIntent prevPending = PendingIntent.getService(mContext, 0, prevIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 

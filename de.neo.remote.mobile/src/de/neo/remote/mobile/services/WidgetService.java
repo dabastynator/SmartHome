@@ -1,16 +1,18 @@
 package de.neo.remote.mobile.services;
 
-import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.view.View;
@@ -19,19 +21,18 @@ import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.api.IInternetSwitch;
+import de.neo.remote.api.IWebMediaServer;
+import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.api.IWebSwitch.State;
-import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.SelectSwitchActivity;
+import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.receivers.RemotePowerWidgetProvider;
-import de.neo.remote.mobile.receivers.RemoteWidgetProvider;
-import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
-import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
+import de.neo.remote.mobile.receivers.MusicWidgetProvider;
+import de.neo.remote.mobile.receivers.SwitchWidgetProvider;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
@@ -42,43 +43,32 @@ import de.remote.mobile.R;
  * 
  * @author sebastian
  */
-public class WidgetService extends Service implements IRemoteActionListener {
+public class WidgetService extends Service {
+
+	public static final String ACTION_SWITCH = "de.remote.power.SWITCH";
+	public static final String ACTION_UPDATE = "de.remote.power.UPDATE";
+	public static final String ACTION_PLAY = "de.remote.mobile.ACTION_PLAY";
+	public static final String ACTION_STOP = "de.remote.mobile.ACTION_STOP";
+	public static final String ACTION_NEXT = "de.remote.mobile.ACTION_NEXT";
+	public static final String ACTION_PREV = "de.remote.mobile.ACTION_PREV";
+	public static final String ACTION_VOLUP = "de.remote.mobile.ACTION_VOL_UP";
+	public static final String ACTION_VOLDOWN = "de.remote.mobile.ACTION_VOL_DOWN";
+	public static final String ACTION_VOLUME = "de.remote.mobile.ACTION_VOLUME";
+
+	public static final String EXTRA_WIDGET = "widget_id";
+	public static final String PREFERENCES = "preferences.widget";
 
 	public static boolean DEBUGGING = false;
 
-	private RemoteBinder mBinder;
 	private Handler mHandler = new Handler();
 	private IWebSwitch mWebSwitch;
-
-	private ServiceConnection playerConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mBinder.removeRemoteActionListener(WidgetService.this);
-		}
-
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			mBinder = (RemoteBinder) service;
-			mBinder.addRemoteActionListener(WidgetService.this);
-			if (mBinder.isConnected())
-				updateMusicWidget(null);
-			else
-				setMusicWidgetText(getResources().getString(R.string.no_conneciton),
-						getResources().getString(R.string.no_conneciton_with_server), "", false, null);
-			updateSwitchWidget();
-
-		}
-	};
+	private IWebMediaServer mWebMediaServer;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		// bind service
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
-		bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
-		initializeMusicWidgets();
+		refreshWebApi();
+		updateMusicWidget();
 		updateSwitchWidget();
 	};
 
@@ -95,61 +85,25 @@ public class WidgetService extends Service implements IRemoteActionListener {
 			if (favorite != null) {
 				mWebSwitch = new WebProxyBuilder().setEndPoint(favorite.getEndPoint() + "/switch")
 						.setSecurityToken(favorite.getApiToken()).setInterface(IWebSwitch.class).create();
+				mWebMediaServer = new WebProxyBuilder().setEndPoint(favorite.getEndPoint() + "/mediaserver")
+						.setSecurityToken(favorite.getApiToken()).setInterface(IWebMediaServer.class).create();
 			}
 		} catch (DaoException e) {
 			e.printStackTrace();
 		}
 	}
 
-	protected void updateMusicWidget(PlayingBean playing) {
-		if (mBinder.getLatestMediaServer() == null) {
-			if (mBinder.getServer() == null)
-				setMusicWidgetText(getString(R.string.no_conneciton), getString(R.string.no_conneciton_with_server), "",
-						false, null);
-			else
-				setMusicWidgetText(getString(R.string.mediaserver_no_server),
-						getString(R.string.mediaserver_no_server) + " (" + mBinder.getServer().getName() + ")", "",
-						false, null);
-			return;
-		}
-		if (mBinder.getLatestMediaServer().player != null && playing == null)
-			playing = mBinder.getPlayingFile();
-		if (playing == null || playing.getState() == STATE.DOWN) {
-			setMusicWidgetText(getResources().getString(R.string.player_no_file_playing),
-					mBinder.getLatestMediaServer().name, "", false, null);
-			return;
-		}
-		String title = "playing";
-		if (playing.getTitle() != null) {
-			title = playing.getTitle();
-			if (title.length() == 0)
-				title = playing.getFile();
-		} else
-			title = playing.getFile();
-		String author = "";
-		if (playing.getArtist() != null)
-			author = playing.getArtist();
-		String album = "";
-		if (playing.getAlbum() != null)
-			album = playing.getAlbum();
-		Bitmap thumbnail = null;
-		if (playing.getThumbnailWidth() * playing.getThumbnailHeight() > 0 && playing.getThumbnailRGB() != null) {
-			thumbnail = Bitmap.createBitmap(playing.getThumbnailWidth(), playing.getThumbnailHeight(),
-					Bitmap.Config.RGB_565);
-			IntBuffer buf = IntBuffer.wrap(playing.getThumbnailRGB()); // data
-																		// is my
-																		// array
-			thumbnail.copyPixelsFromBuffer(buf);
-		}
-		setMusicWidgetText(title, author, album, playing.getState() == STATE.PLAY, thumbnail);
-	}
-
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent != null && intent.getAction() != null)
-			executeCommand(intent.getAction(), intent);
-		else {
-			initializeMusicWidgets();
+		refreshWebApi();
+		if (intent != null && intent.getAction() != null) {
+			if (ACTION_UPDATE.equals(intent.getAction())) {
+				updateMusicWidget();
+				updateSwitchWidget();
+			} else
+				executeCommand(intent.getAction(), intent);
+		} else {
+			updateMusicWidget();
 			updateSwitchWidget();
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -165,32 +119,19 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		new Thread() {
 			public void run() {
 				try {
-					if (mBinder == null)
-						throw new RemoteException("not binded", "not binded");
-					if (action.equals(RemotePowerWidgetProvider.ACTION_SWITCH)) {
-						int widgetID = intent.getIntExtra(SelectSwitchActivity.SWITCH_NUMBER, 0);
-						switchPower(widgetID);
+					int widgetID = intent.getIntExtra(EXTRA_WIDGET, 0);
+					SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
+					final String remoteID = prefs.getString(widgetID + "", null);
+					if (remoteID == null)
 						return;
+					if (action.equals(ACTION_SWITCH)) {
+						switchPower(remoteID, widgetID);
+					} else if (action.equals(ACTION_PLAY) || action.equals(ACTION_STOP) || action.equals(ACTION_NEXT)
+							|| action.equals(ACTION_PREV) || action.equals(ACTION_VOLDOWN)
+							|| action.equals(ACTION_VOLUP)) {
+						musicAction(remoteID, widgetID, action);
 					}
-					if (mBinder.getLatestMediaServer() == null || mBinder.getLatestMediaServer().player == null)
-						throw new RemoteException(getResources().getString(R.string.mediaserver_no_server),
-								getResources().getString(R.string.mediaserver_no_server));
-					else if (action.equals(RemoteWidgetProvider.ACTION_PLAY))
-						mBinder.getLatestMediaServer().player.playPause();
-					else if (action.equals(RemoteWidgetProvider.ACTION_STOP))
-						mBinder.getLatestMediaServer().player.quit();
-					else if (action.equals(RemoteWidgetProvider.ACTION_NEXT))
-						mBinder.getLatestMediaServer().player.next();
-					else if (action.equals(RemoteWidgetProvider.ACTION_PREV))
-						mBinder.getLatestMediaServer().player.previous();
-					else if (action.equals(RemoteWidgetProvider.ACTION_VOLDOWN))
-						mBinder.getLatestMediaServer().player.volDown();
-					else if (action.equals(RemoteWidgetProvider.ACTION_VOLUP))
-						mBinder.getLatestMediaServer().player.volUp();
-					else if (action.equals(RemoteWidgetProvider.ACTION_VOLUME)) {
-						int volume = (int) (100 * intent.getDoubleExtra(RemoteWidgetProvider.EXTRA_VOLUME, 0.5));
-						mBinder.getLatestMediaServer().player.setVolume(volume);
-					}
+
 				} catch (final Exception e) {
 					e.printStackTrace();
 					mHandler.post(new Runnable() {
@@ -203,230 +144,210 @@ public class WidgetService extends Service implements IRemoteActionListener {
 		}.start();
 	}
 
-	private void initializeMusicWidgets() {
-		if (mBinder != null && mBinder.isConnected())
-			updateMusicWidget(null);
-		else
-			setMusicWidgetText(getResources().getString(R.string.no_conneciton),
-					getResources().getString(R.string.no_conneciton_with_server), "", false, null);
-	}
-
-	protected void setMusicWidgetText(String big, String small, String small2, boolean playing, Bitmap thumbnail) {
-		ComponentName thisWidget = new ComponentName(getApplicationContext(), RemoteWidgetProvider.class);
-		// for (RemoteViews remote : remoteViewsList)
-		RemoteViews remoteViews = new RemoteViews(getApplicationContext().getPackageName(),
-				R.layout.mediaserver_widget);
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-		if (remoteViews != null) {
-			remoteViews.setTextViewText(R.id.lbl_widget_big, big);
-			remoteViews.setTextViewText(R.id.lbl_widget_small, small);
-			remoteViews.setTextViewText(R.id.lbl_widget_small2, small2);
-			if (thumbnail != null) {
-				remoteViews.setImageViewBitmap(R.id.img_widget_thumbnail, thumbnail);
-				remoteViews.setViewVisibility(R.id.img_widget_thumbnail, View.VISIBLE);
-			} else
-				remoteViews.setViewVisibility(R.id.img_widget_thumbnail, View.INVISIBLE);
-			RemoteWidgetProvider.setWidgetClick(remoteViews, this);
-			if (playing)
-				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
-			else
-				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_play);
-			appWidgetManager.updateAppWidget(thisWidget, remoteViews);
-			if (DEBUGGING)
-				Toast.makeText(this, small, Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		return mBinder;
-	}
-
-	@Override
-	public void onDestroy() {
-		if (mBinder != null)
-			mBinder.removeRemoteActionListener(this);
-		unbindService(playerConnection);
-		super.onDestroy();
-	}
-
-	@Override
-	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		updateMusicWidget(bean);
-	}
-
-	@Override
-	public void onServerConnectionChanged(RemoteServer server) {
-		initializeMusicWidgets();
-		updateSwitchWidget();
-	}
-
-	@Override
-	public void startReceive(long size, String file) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void progressReceive(long size, String file) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void endReceive(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void exceptionOccurred(Exception e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void downloadCanceled() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onStopService() {
-		setMusicWidgetText(getResources().getString(R.string.no_conneciton),
-				getResources().getString(R.string.no_conneciton_with_server), "", false, null);
-		updateSwitchWidget();
-		stopSelf();
-	}
-
-	@Override
-	public void onPowerSwitchChange(String switchId, State state) {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-
-		ComponentName thisWidget = new ComponentName(getApplicationContext(), RemotePowerWidgetProvider.class);
-		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
-
-		// update each of the app widgets with the remote adapter
-		for (int i = 0; i < appWidgetIds.length; ++i) {
-
-			String id = prefs.getString(appWidgetIds[i] + "", null);
-			BufferdUnit bufferdUnit = mBinder.getSwitches().get(id);
-			if (switchId.equals(id) && bufferdUnit != null) {
-				updateSwitchWidget(appWidgetIds[i], getImageForSwitchType(bufferdUnit.mSwitchType, state == State.ON),
-						bufferdUnit.mName);
+	protected void musicAction(String remoteID, int widgetID, String action) throws RemoteException, PlayerException {
+		String player = "mplayer";
+		ArrayList<BeanMediaServer> list = null;
+		switch (action) {
+		case ACTION_PLAY:
+			mWebMediaServer.playPause(remoteID, player);
+			break;
+		case ACTION_STOP:
+			mWebMediaServer.playStop(remoteID, player);
+			break;
+		case ACTION_NEXT:
+			mWebMediaServer.playNext(remoteID, player);
+			break;
+		case ACTION_PREV:
+			mWebMediaServer.playPrevious(remoteID, player);
+			break;
+		case ACTION_VOLDOWN:
+			list = mWebMediaServer.getMediaServer(remoteID);
+			if (list.size() > 0 && list.get(0).getCurrentPlaying() != null) {
+				int volume = list.get(0).getCurrentPlaying().getVolume();
+				mWebMediaServer.setVolume(remoteID, player, Math.max(0, volume - 5));
+			}
+			break;
+		case ACTION_VOLUP:
+			list = mWebMediaServer.getMediaServer(remoteID);
+			if (list.size() > 0 && list.get(0).getCurrentPlaying() != null) {
+				int volume = list.get(0).getCurrentPlaying().getVolume();
+				mWebMediaServer.setVolume(remoteID, player, Math.min(100, volume + 5));
 			}
 		}
+		list = mWebMediaServer.getMediaServer(remoteID);
+		if (list.size() == 1) {
+			updateMusicWidget(getApplicationContext(), widgetID, list.get(0));
+		}
 	}
 
-	private void updateSwitchWidget() {
+	public static void updateMusicWidget(Context context, int widgetID, BeanMediaServer mediaserver) {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.mediaserver_widget);
+		if (remoteViews != null) {
+			remoteViews.setViewVisibility(R.id.img_widget_thumbnail, View.INVISIBLE);
+			if (mediaserver == null) {
+				remoteViews.setTextViewText(R.id.lbl_widget_big, context.getString(R.string.no_conneciton));
+				remoteViews.setTextViewText(R.id.lbl_widget_small,
+						context.getString(R.string.no_conneciton_with_server));
+				remoteViews.setTextViewText(R.id.lbl_widget_small2, "");
+				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
+			} else if (mediaserver.getCurrentPlaying() != null) {
+				remoteViews.setTextViewText(R.id.lbl_widget_big, mediaserver.getCurrentPlaying().getTitle());
+				remoteViews.setTextViewText(R.id.lbl_widget_small, mediaserver.getCurrentPlaying().getArtist());
+				remoteViews.setTextViewText(R.id.lbl_widget_small2, mediaserver.getCurrentPlaying().getAlbum());
+				Intent browserIntent = new Intent(context, MediaServerActivity.class);
+				browserIntent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, mediaserver.getID());
+				PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, browserIntent, 0);
+
+				remoteViews.setOnClickPendingIntent(R.id.lbl_widget_big, pendingIntent);
+
+				if (mediaserver.getCurrentPlaying().getState() == STATE.PLAY)
+					remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
+				else
+					remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_play);
+			} else {
+				remoteViews.setTextViewText(R.id.lbl_widget_big, context.getString(R.string.player_no_file_playing));
+				remoteViews.setTextViewText(R.id.lbl_widget_small, mediaserver.getName());
+				remoteViews.setTextViewText(R.id.lbl_widget_small2, "");
+				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
+			}
+
+			// set play functionality
+			Intent playIntent = new Intent(context, WidgetService.class);
+			playIntent.setAction(ACTION_PLAY);
+			playIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			playIntent.putExtra(EXTRA_WIDGET, widgetID);
+			PendingIntent playPending = PendingIntent.getService(context, 0, playIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.button_widget_play, playPending);
+
+			// set stop functionality
+			Intent stopIntent = new Intent(context, WidgetService.class);
+			stopIntent.setAction(ACTION_STOP);
+			stopIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			stopIntent.putExtra(EXTRA_WIDGET, widgetID);
+			PendingIntent stopPending = PendingIntent.getService(context, 0, stopIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.button_widget_quit, stopPending);
+
+			// set vol up functionality
+			Intent nextIntent = new Intent(context, WidgetService.class);
+			nextIntent.setAction(ACTION_VOLUP);
+			nextIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			nextIntent.putExtra(EXTRA_WIDGET, widgetID);
+			PendingIntent nextPending = PendingIntent.getService(context, 0, nextIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.button_widget_vol_up, nextPending);
+
+			// set vol down functionality
+			Intent prevIntent = new Intent(context, WidgetService.class);
+			prevIntent.setAction(ACTION_VOLDOWN);
+			prevIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			prevIntent.putExtra(EXTRA_WIDGET, widgetID);
+			PendingIntent prevPending = PendingIntent.getService(context, 0, prevIntent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.button_widget_vol_down, prevPending);
+
+			appWidgetManager.updateAppWidget(widgetID, remoteViews);
+			if (DEBUGGING)
+				Toast.makeText(context, mediaserver.getCurrentPlaying().getArtist(), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private void updateMusicWidget() {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
 
-		ComponentName thisWidget = new ComponentName(getApplicationContext(), RemotePowerWidgetProvider.class);
+		ComponentName thisWidget = new ComponentName(getApplicationContext(), MusicWidgetProvider.class);
 		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 
 		// update each of the app widgets with the remote adapter
 		Thread thread = new Thread() {
 			public void run() {
-				for (int i = 0; i < appWidgetIds.length; ++i) {
-					try {
-						updateSwitchWidget(appWidgetIds[i]);
-					} catch (Exception e) {
-						// e.printStackTrace();
-						System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+				try {
+					SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
+					ArrayList<BeanMediaServer> server = mWebMediaServer.getMediaServer("");
+					Map<String, BeanMediaServer> serverMap = new HashMap<>();
+					for (BeanMediaServer s : server)
+						serverMap.put(s.getID(), s);
+					for (int widgetID : appWidgetIds) {
+						String serverID = prefs.getString(widgetID + "", null);
+						BeanMediaServer s = serverMap.get(serverID);
+						if (s != null)
+							updateMusicWidget(getApplicationContext(), widgetID, s);
 					}
+				} catch (Exception e) {
+					System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
 				}
 			};
 		};
 		thread.start();
 	}
 
-	private void updateSwitchWidget(int widgetID) throws Exception {
-		if (mBinder == null)
-			throw new Exception(getResources().getString(R.string.no_conneciton));
-		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
-		String switchID = prefs.getString(widgetID + "", null);
-		if (switchID == null)
-			return;
-		BufferdUnit unit = mBinder.getSwitches().get(switchID);
-		if (unit == null) {
-			updateSwitchWidget(widgetID, R.drawable.switch_unknown, switchID);
-			throw new Exception(mBinder.getServer().getName() + " "
-					+ getResources().getString(R.string.switch_has_no_switch) + " " + switchID);
-		}
-		IInternetSwitch power = (IInternetSwitch) unit.mObject;
-		State state = power.getState();
-		updateSwitchWidget(widgetID, getImageForSwitchType(unit.mSwitchType, state == State.ON), unit.mName);
+	private void updateSwitchWidget() {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
+
+		ComponentName thisWidget = new ComponentName(getApplicationContext(), SwitchWidgetProvider.class);
+		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+		// update each of the app widgets with the remote adapter
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
+					ArrayList<BeanSwitch> switches = mWebSwitch.getSwitches();
+					Map<String, BeanSwitch> switchMap = new HashMap<>();
+					for (BeanSwitch s : switches)
+						switchMap.put(s.getID(), s);
+					for (int widgetID : appWidgetIds) {
+						String switchID = prefs.getString(widgetID + "", null);
+						BeanSwitch s = switchMap.get(switchID);
+						if (s != null)
+							updateSwitchWidget(getApplicationContext(), widgetID, s);
+					}
+				} catch (Exception e) {
+					System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+				}
+			};
+		};
+		thread.start();
 	}
 
-	private void updateSwitchWidget(int widgetID, int image, String text) {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-		RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext().getPackageName(),
-				R.layout.switch_widget);
-		remoteSwitchViews.setImageViewResource(R.id.image_power_widget, image);
-		remoteSwitchViews.setTextViewText(R.id.text_power_widget, text);
+	public static void updateSwitchWidget(Context context, int widgetID, BeanSwitch s) {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+		RemoteViews remoteSwitchViews = new RemoteViews(context.getPackageName(), R.layout.switch_widget);
+		remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
+				getImageForSwitchType(s.getType(), s.getState() == State.ON));
+		remoteSwitchViews.setTextViewText(R.id.text_power_widget, s.getName());
 
-		RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this, widgetID);
+		// set switch functionality
+		Intent switchIntent = new Intent(context, WidgetService.class);
+		switchIntent.setAction(ACTION_SWITCH);
+		switchIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+		switchIntent.putExtra(EXTRA_WIDGET, widgetID);
+		PendingIntent switchPending = PendingIntent.getService(context, widgetID, switchIntent,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+
+		remoteSwitchViews.setOnClickPendingIntent(R.id.widget_power_layout, switchPending);
 
 		appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
 	}
 
-	private void switchPower(final int widgetID) throws Exception {
-		refreshWebApi();
-		SharedPreferences prefs = getSharedPreferences(SelectSwitchActivity.WIDGET_PREFS, 0);
-		final String switchID = prefs.getString(widgetID + "", null);
-		if (switchID == null)
-			return;
+	private void switchPower(String switchID, int widgetID) throws Exception {
+
 		for (BeanSwitch bSwitch : mWebSwitch.getSwitches()) {
 			if (bSwitch.getID().equals(switchID)) {
-				String newState = (bSwitch.getState().equals("ON") ? "OFF" : "ON");
-				mWebSwitch.setSwitchState(bSwitch.getID(), newState);
-
-				AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-				RemoteViews remoteSwitchViews = new RemoteViews(getApplicationContext().getPackageName(),
-						R.layout.switch_widget);
-				remoteSwitchViews.setImageViewResource(R.id.image_power_widget,
-						getImageForSwitchType(bSwitch.getType(), newState.equals("ON")));
-				remoteSwitchViews.setTextViewText(R.id.text_power_widget, bSwitch.getName());
-				RemotePowerWidgetProvider.setSwitchIntent(remoteSwitchViews, this, widgetID);
-				appWidgetManager.updateAppWidget(widgetID, remoteSwitchViews);
+				String newState = (bSwitch.getState() == State.ON ? "OFF" : "ON");
+				BeanSwitch newSwitch = mWebSwitch.setSwitchState(bSwitch.getID(), newState);
+				updateSwitchWidget(getApplicationContext(), widgetID, newSwitch);
 			}
 		}
 
 	}
 
-	@Override
-	public void startSending(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void progressSending(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void endSending(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void sendingCanceled() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onControlUnitCreated(BufferdUnit controlUnit) {
-	}
-
 	public void onGroundPlotCreated(de.neo.remote.api.GroundPlot plot) {
 	};
 
-	public int getImageForSwitchType(String type, boolean on) {
+	public static int getImageForSwitchType(String type, boolean on) {
 		if (ControlSceneRenderer.AUDO.equals(type)) {
 			if (on)
 				return R.drawable.music_on;
@@ -458,5 +379,11 @@ public class WidgetService extends Service implements IRemoteActionListener {
 				return R.drawable.coffee_off;
 		}
 		return R.drawable.switch_unknown;
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

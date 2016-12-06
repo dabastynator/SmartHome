@@ -134,7 +134,23 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity imple
 				.setSecurityToken(server.getApiToken()).setInterface(IControlCenter.class).create();
 	}
 
-	protected RemoteServer getFavoriteServer() {
+	public static IWebSwitch createWebSwitch() {
+		RemoteServer server = getFavoriteServer();
+		if (server != null)
+			return new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
+					.setSecurityToken(server.getApiToken()).setInterface(IWebSwitch.class).create();
+		return null;
+	}
+
+	public static IWebMediaServer createWebMediaServer() {
+		RemoteServer server = getFavoriteServer();
+		if (server != null)
+			return new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
+					.setSecurityToken(server.getApiToken()).setInterface(IWebMediaServer.class).create();
+		return null;
+	}
+
+	public static RemoteServer getFavoriteServer() {
 		try {
 			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();

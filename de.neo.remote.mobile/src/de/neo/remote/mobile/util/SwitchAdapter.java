@@ -32,7 +32,7 @@ public class SwitchAdapter extends ArrayAdapter<String> {
 		ToggleButton button = (ToggleButton) view.findViewById(R.id.btn_switch_state);
 		TextView lable = (TextView) view.findViewById(R.id.lbl_switch_name);
 		lable.setText(s.getName());
-		OnClickSwitchListener switchListner = new OnClickSwitchListener(s.getID(), s.getName());
+		OnClickSwitchListener switchListner = new OnClickSwitchListener(s);
 		lable.setOnClickListener(switchListner);
 		view.setOnClickListener(switchListner);
 		button.setChecked(s.getState() == State.ON);
@@ -42,18 +42,16 @@ public class SwitchAdapter extends ArrayAdapter<String> {
 
 	public class OnClickSwitchListener implements OnClickListener {
 
-		private String mID;
-		private String mName;
+		BeanSwitch mSwitch;
 
-		public OnClickSwitchListener(String id, String name) {
-			mID = id;
-			mName = name;
+		public OnClickSwitchListener(BeanSwitch webSwitch) {
+			mSwitch = webSwitch;
 		}
 
 		@Override
 		public void onClick(View arg0) {
 			if (mListener != null)
-				mListener.onSelectSwitch(mID, mName);
+				mListener.onSelectSwitch(mSwitch);
 		}
 
 	}
