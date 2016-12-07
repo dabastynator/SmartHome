@@ -24,8 +24,12 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.neo.android.persistence.Dao;
+import de.neo.android.persistence.DaoException;
+import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
+import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -70,7 +74,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	public ImageView mTotemButton;
 	public ImageView mFilesystemButton;
 	public ImageView mPlaylistButton;
-	protected String mMediaServerID;
 	public ImageView mOmxButton;
 	protected TextView mDownloadText;
 	public PlayingBean mPlayingBean;
@@ -78,10 +81,12 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	private PlayerButtonFragment mButtonFragmentRight;
 	private ViewPager mListPager;
 	private BrowserPageAdapter mBrowserPageAdapter;
+	private String mMediaServerID;
 
 	protected LinearLayout mDownloadLayout;
 	protected ProgressBar mDownloadProgress;
 	private long mMaxDonwloadSize = 0;
+	private MediaServerState mMediaServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +98,36 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
-			mMediaServerID = getIntent().getExtras().getString(EXTRA_MEDIA_ID);
+			mMediaServer = createMediaServerForId(getIntent().getExtras().getString(EXTRA_MEDIA_ID));
+			mMediaServer.initialize(mWebMediaServer);
+			mMediaServerID = mMediaServer.getMediaServerID();
+		} else {
+			mMediaServer = null;
 		}
+	}
+
+	public MediaServerState getMediaServerState() {
+		return mMediaServer;
+	}
+
+	public static MediaServerState createMediaServerForId(String remoteID) {
+		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
+		try {
+			for (MediaServerState ms : dao.loadAll())
+				if (ms.getMediaServerID().equals(remoteID)) {
+					return ms;
+				}
+			MediaServerState ms = new MediaServerState();
+			ms.setBrowserLocation("");
+			ms.setMediaServerID(remoteID);
+			ms.setPlayer("mplayer");
+			dao.save(ms);
+			return ms;
+		} catch (DaoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override

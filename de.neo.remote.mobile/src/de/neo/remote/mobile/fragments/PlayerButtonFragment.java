@@ -7,11 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
-import de.neo.remote.api.IPlayer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.persistence.MediaServerState;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.remote.mobile.R;
 
 public class PlayerButtonFragment extends Fragment {
@@ -20,11 +20,9 @@ public class PlayerButtonFragment extends Fragment {
 	private Button playButton;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (getId() == R.id.mediaserver_fragment_button_right)
-			return inflater.inflate(R.layout.mediaserver_buttons_right,
-					container, false);
+			return inflater.inflate(R.layout.mediaserver_buttons_right, container, false);
 		return inflater.inflate(R.layout.mediaserver_buttons, container, false);
 	}
 
@@ -35,10 +33,8 @@ public class PlayerButtonFragment extends Fragment {
 	}
 
 	private void findComponents() {
-		int[] playerButtons = new int[] { R.id.button_play, R.id.button_next,
-				R.id.button_pref, R.id.button_seek_bwd, R.id.button_seek_fwd,
-				R.id.button_vol_down, R.id.button_vol_up, R.id.button_full,
-				R.id.button_quit };
+		int[] playerButtons = new int[] { R.id.button_play, R.id.button_next, R.id.button_pref, R.id.button_seek_bwd,
+				R.id.button_seek_fwd, R.id.button_vol_down, R.id.button_vol_up, R.id.button_full, R.id.button_quit };
 		playButton = (Button) getActivity().findViewById(R.id.button_play);
 		View.OnClickListener listener = new View.OnClickListener() {
 			public void onClick(View v) {
@@ -49,67 +45,64 @@ public class PlayerButtonFragment extends Fragment {
 			View playerButton = getActivity().findViewById(playerButtonId);
 			if (playerButton != null) {
 				playerButton.setOnClickListener(listener);
-				// int btnSize = Math.min(playerButton.getLayoutParams().width,
-				// playerButton.getLayoutParams().height);
-				// playerButton
-				// .setLayoutParams(new LinearLayout.LayoutParams(btnSize,
-				// btnSize));
 			}
 		}
 	}
 
 	public void playerAction(final View v) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		if (activity.mBinder == null
-				|| activity.mBinder.getLatestMediaServer() == null)
+		final MediaServerState state = activity.getMediaServerState();
+		if (state == null)
 			return;
-		final IPlayer player = activity.mBinder.getLatestMediaServer().player;
-		AsyncTask<String, Integer, String> task = new AsyncTask<String, Integer, String>() {
+		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
+
+			PlayingBean mPlaying = null;
 
 			@Override
-			protected String doInBackground(String... params) {
+			protected Exception doInBackground(String... params) {
 				try {
 					switch (v.getId()) {
 					case R.id.button_play:
-						player.playPause();
+						mPlaying = state.playPause();
 						break;
 					case R.id.button_next:
-						player.next();
+						mPlaying = state.next();
 						break;
 					case R.id.button_pref:
-						player.previous();
+						mPlaying = state.previous();
 						break;
 					case R.id.button_vol_up:
-						player.volUp();
+						mPlaying = state.volUp();
 						break;
 					case R.id.button_vol_down:
-						player.volDown();
+						mPlaying = state.volDown();
 						break;
 					case R.id.button_seek_bwd:
-						player.seekBackwards();
+						mPlaying = state.seekBackwards();
 						break;
 					case R.id.button_seek_fwd:
-						player.seekForwards();
+						mPlaying = state.seekForwards();
 						break;
 					case R.id.button_full:
-						player.fullScreen(isFullscreen = !isFullscreen);
+						mPlaying = state.fullScreen(isFullscreen = !isFullscreen);
 						break;
 					case R.id.button_quit:
-						player.quit();
+						mPlaying = state.stop();
 						break;
 					}
 				} catch (Exception e) {
-					return e.getClass().getSimpleName() + ": " + e.getMessage();
+					return e;
 				}
 				return null;
 			}
 
 			@Override
-			protected void onPostExecute(String result) {
-				super.onPostExecute(result);
-				if (result != null && result.length() > 0)
-					Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT)
-							.show();
+			protected void onPostExecute(Exception exception) {
+				super.onPostExecute(exception);
+				if (exception != null)
+					new AbstractTask.ErrorDialog(getContext(), exception).show();
+				if (mPlaying != null)
+					onPlayingBeanChanged(state.getMediaServerID(), mPlaying);
 			}
 		};
 		task.execute(new String[] {});

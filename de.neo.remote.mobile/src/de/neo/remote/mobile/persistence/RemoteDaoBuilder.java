@@ -11,7 +11,7 @@ import de.neo.android.persistence.NeoDataBase;
 public class RemoteDaoBuilder extends DaoBuilder {
 
 	public RemoteDaoBuilder(Context context) {
-		setDatabase(new NeoDataBase(context, "de.neo.remote", 2));
+		setDatabase(new NeoDataBase(context, "de.neo.remote", 3));
 		setDaoMapFilling(new RemoteDaoFilling());
 	}
 
@@ -19,8 +19,8 @@ public class RemoteDaoBuilder extends DaoBuilder {
 
 		@Override
 		public void createDaos(Map<Class<?>, Dao<?>> daoMap, DaoBuilder builder) {
-			daoMap.put(RemoteServer.class, new DatabaseDao<RemoteServer>(
-					RemoteServer.class, builder));
+			daoMap.put(RemoteServer.class, new DatabaseDao<RemoteServer>(RemoteServer.class, builder));
+			daoMap.put(MediaServerState.class, new DatabaseDao<MediaServerState>(MediaServerState.class, builder));
 		}
 	}
 
