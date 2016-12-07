@@ -240,4 +240,15 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return null;
 	}
 
+	@WebRequest(path = "set_fullscreen", description = "Set the specified player in fullsceen mode or change to windowed mode.")
+	public PlayingBean playSetFullscreen(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
+			@WebGet(name = "fullscreen") boolean fullscreen) throws RemoteException, PlayerException {
+		IPlayer p = getPlayer(id, player);
+		if (p != null) {
+			p.fullScreen(fullscreen);
+			return p.getPlayingBean();
+		}
+		return null;
+	}
+
 }

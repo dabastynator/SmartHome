@@ -158,6 +158,19 @@ public interface IWebMediaServer extends RemoteAble {
 			throws RemoteException, PlayerException;
 
 	/**
+	 * Set the specified player in fullsceen mode or change to windowed mode.
+	 * 
+	 * @param id
+	 * @param player
+	 * @return playing bean
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	@WebRequest(path = "set_fullscreen", description = "Set the specified player in fullsceen mode or change to windowed mode.")
+	public PlayingBean playSetFullscreen(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
+			@WebGet(name = "fullscreen") boolean fullscreen) throws RemoteException, PlayerException;
+
+	/**
 	 * Stop playing.
 	 * 
 	 * @param id
