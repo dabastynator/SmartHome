@@ -147,31 +147,28 @@ public class JSONUtils {
 				WebField webField = field.getAnnotation(WebField.class);
 				if (webField != null) {
 					field.setAccessible(true);
-					try {
+					Object jsonValue = jsonObject.get(webField.name());
+					if (jsonValue != null) {
 						if (field.getType().equals(int.class) || field.getType().equals(Integer.class))
-							field.setInt(result, ((Long) jsonObject.get(webField.name())).intValue());
+							field.setInt(result, ((Long) jsonValue).intValue());
 						else if (field.getType().equals(float.class) || field.getType().equals(Float.class))
-							field.setFloat(result, ((Double) jsonObject.get(webField.name())).floatValue());
+							field.setFloat(result, ((Double) jsonValue).floatValue());
 						else if (field.getType().equals(double.class) || field.getType().equals(Double.class))
-							field.setDouble(result, ((Double) jsonObject.get(webField.name())).doubleValue());
+							field.setDouble(result, ((Double) jsonValue).doubleValue());
 						else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class))
-							field.setBoolean(result, ((Boolean) jsonObject.get(webField.name())).booleanValue());
+							field.setBoolean(result, ((Boolean) jsonValue).booleanValue());
 						else if (field.getType().equals(String.class))
-							field.set(result, jsonObject.get(webField.name()));
+							field.set(result, jsonValue);
 						else if (field.getType().isEnum()) {
 							Class cls = field.getType();
-							field.set(result, Enum.valueOf(cls, jsonObject.get(webField.name()).toString()));
+							field.set(result, Enum.valueOf(cls, jsonValue.toString()));
 						} else {
-							if (jsonObject.get(webField.name()) instanceof JSONObject) {
-								Object child = jsonToObject(field.getType(), jsonObject.get(webField.name()), null,
-										webField);
+							if (jsonValue instanceof JSONObject) {
+								Object child = jsonToObject(field.getType(), jsonValue, null, webField);
 								if (child != null)
 									field.set(result, child);
 							}
 						}
-					} catch (Exception e) {
-						// Ignore
-						System.out.println(e.getMessage());
 					}
 				}
 			}
