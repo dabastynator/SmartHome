@@ -9,6 +9,7 @@ import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -198,6 +199,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 			BeanFileSystem item = mFileBeans.get(position);
 			if (item.getFileType() == FileType.Directory) {
 				mMediaServer.goTo(item.getName());
+				activity.saveMediaServer(mMediaServer);
 				refreshContent(activity);
 			} else {
 				PlayItemTask task = new PlayItemTask(activity, mMediaServer, item);
@@ -210,6 +212,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
 		if (activity.mBinder != null && keyCode == KeyEvent.KEYCODE_BACK) {
 			if (mMediaServer.goBack()) {
+				activity.saveMediaServer(mMediaServer);
 				refreshContent(activity);
 				return true;
 			}
@@ -238,9 +241,14 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 	}
 
 	@Override
-	public void setMesiaServer(MediaServerState mediaServer) {
-		mMediaServer = mediaServer;
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		refreshContent(getActivity());
+	}
+
+	@Override
+	public void setMediaServer(MediaServerState mediaServer) {
+		mMediaServer = mediaServer;
 	}
 
 }

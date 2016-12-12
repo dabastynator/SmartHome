@@ -2,9 +2,12 @@ package de.neo.remote.mobile.fragments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -72,11 +75,11 @@ public class PlaylistFragment extends BrowserFragment {
 					else if (mViewerState == ViewerState.PLAYLISTS) {
 						ArrayList<String> items = new ArrayList<>();
 						mPlaylists = mMediaServer.getPlayLists();
+						Collections.sort(mPlaylists);
 						for (BeanPlaylist pls : mPlaylists) {
 							items.add(pls.getName());
 						}
 						mItems = items.toArray(new String[items.size()]);
-						Arrays.sort(mItems);
 					} else {
 						mPlsItems = mMediaServer.getPlayListContent(mCurrentPlayList.getName());
 						ArrayList<String> items = new ArrayList<>();
@@ -216,8 +219,13 @@ public class PlaylistFragment extends BrowserFragment {
 	}
 
 	@Override
-	public void setMesiaServer(MediaServerState mediaServer) {
-		mMediaServer = mediaServer;
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		refreshContent(getActivity());
+	}
+
+	@Override
+	public void setMediaServer(MediaServerState mediaServer) {
+		mMediaServer = mediaServer;
 	}
 }

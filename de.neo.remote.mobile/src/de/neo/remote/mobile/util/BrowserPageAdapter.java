@@ -20,6 +20,7 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
 	private FileFragment mFileFragment;
 	private PlaylistFragment mPlaylistFragment;
+	private MediaServerState mMediaServer;
 
 	public BrowserPageAdapter(FragmentManager fm) {
 		super(fm);
@@ -28,13 +29,17 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 	@Override
 	public BrowserFragment getItem(int position) {
 		if (position == 0) {
-			if (mFileFragment == null)
+			if (mFileFragment == null) {
 				mFileFragment = new FileFragment();
+				mFileFragment.setMediaServer(mMediaServer);
+			}
 			return mFileFragment;
 		}
 		if (position == 1) {
-			if (mPlaylistFragment == null)
+			if (mPlaylistFragment == null) {
 				mPlaylistFragment = new PlaylistFragment();
+				mPlaylistFragment.setMediaServer(mMediaServer);
+			}
 			return mPlaylistFragment;
 		}
 		return null;
@@ -47,20 +52,24 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
 	@Override
 	public Object instantiateItem(ViewGroup container, int position) {
-		Fragment fragment = (Fragment) super.instantiateItem(container,
-				position);
-		if (fragment instanceof FileFragment)
+		Fragment fragment = (Fragment) super.instantiateItem(container, position);
+		if (fragment instanceof FileFragment) {
 			mFileFragment = (FileFragment) fragment;
-		if (fragment instanceof PlaylistFragment)
+			mFileFragment.setMediaServer(mMediaServer);
+		}
+		if (fragment instanceof PlaylistFragment) {
 			mPlaylistFragment = (PlaylistFragment) fragment;
+			mPlaylistFragment.setMediaServer(mMediaServer);
+		}
 		return fragment;
 	}
 
 	public void setMediaServer(MediaServerState server) {
 		if (mFileFragment != null)
-			mFileFragment.setMesiaServer(server);
+			mFileFragment.setMediaServer(server);
 		if (mPlaylistFragment != null)
-			mPlaylistFragment.setMesiaServer(server);
+			mPlaylistFragment.setMediaServer(server);
+		mMediaServer = server;
 	}
 
 	public boolean onContextItemSelected(MenuItem item, int position) {
@@ -90,7 +99,7 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
 		public abstract boolean onKeyDown(int keyCode, KeyEvent event);
 
-		public abstract void setMesiaServer(MediaServerState mediaServer);
+		public abstract void setMediaServer(MediaServerState mediaServer);
 
 		@Override
 		public void onStart() {
@@ -107,15 +116,13 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 		@Override
 		public void onSaveInstanceState(Bundle outState) {
 			super.onSaveInstanceState(outState);
-			outState.putParcelable(LIST_POSITION, getListView()
-					.onSaveInstanceState());
+			outState.putParcelable(LIST_POSITION, getListView().onSaveInstanceState());
 		}
 
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
 			super.onViewCreated(view, savedInstanceState);
-			if (savedInstanceState != null
-					&& savedInstanceState.containsKey(LIST_POSITION))
+			if (savedInstanceState != null && savedInstanceState.containsKey(LIST_POSITION))
 				mListPosition = savedInstanceState.getParcelable(LIST_POSITION);
 		}
 	}

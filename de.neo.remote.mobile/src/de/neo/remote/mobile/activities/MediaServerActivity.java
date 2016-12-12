@@ -96,6 +96,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			mMediaServer = createMediaServerForId(getIntent().getExtras().getString(EXTRA_MEDIA_ID));
 			mMediaServer.initialize(mWebMediaServer);
 			updatePlayerButtons();
+			mBrowserPageAdapter.setMediaServer(mMediaServer);
 		} else {
 			mMediaServer = null;
 		}
@@ -294,8 +295,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		});
 		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
 			mBrowserPageAdapter = new BrowserPageAdapter(getSupportFragmentManager());
-			if (mBinder != null)
-				mBrowserPageAdapter.setMediaServer(mMediaServer);
 			mListPager.setAdapter(mBrowserPageAdapter);
 		}
 		mDownloadLayout = (LinearLayout) findViewById(R.id.layout_download);
@@ -377,7 +376,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		mTotemButton.setBackgroundResource(R.drawable.image_border);
 	}
 
-	private void saveMediaServer(MediaServerState mediaServer) {
+	public void saveMediaServer(MediaServerState mediaServer) {
 		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
 		try {
 			dao.update(mediaServer);
