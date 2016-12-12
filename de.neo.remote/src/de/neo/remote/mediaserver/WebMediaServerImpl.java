@@ -54,7 +54,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	}
 
 	@Override
-	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanMediaServer.class)
+	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanPlaylist.class)
 	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) {
 		ArrayList<BeanPlaylist> result = new ArrayList<>();
 		try {
@@ -72,7 +72,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return result;
 	}
 
-	@WebRequest(path = "playlist_content", description = "List items of specified playlist.")
+	@WebRequest(path = "playlist_content", description = "List items of specified playlist.", genericClass = BeanPlaylistItem.class)
 	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
 			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException {
 		ArrayList<BeanPlaylistItem> result = new ArrayList<>();

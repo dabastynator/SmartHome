@@ -34,7 +34,7 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @param id
 	 * @return playlists
 	 */
-	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanMediaServer.class)
+	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanPlaylist.class)
 	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) throws RemoteException;
 
 	/**
@@ -91,7 +91,7 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 * @throws PlayerException
 	 */
-	@WebRequest(path = "playlist_content", description = "List items of specified playlist.")
+	@WebRequest(path = "playlist_content", description = "List items of specified playlist.", genericClass = BeanPlaylistItem.class)
 	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
 			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException;
 
@@ -280,7 +280,7 @@ public interface IWebMediaServer extends RemoteAble {
 		}
 	}
 
-	public static class BeanPlaylist {
+	public static class BeanPlaylist implements Comparable<BeanPlaylist> {
 
 		@WebField(name = "name")
 		private String mName;
@@ -302,6 +302,11 @@ public interface IWebMediaServer extends RemoteAble {
 
 		public void setItemCount(int itemCount) {
 			mItemCount = itemCount;
+		}
+
+		@Override
+		public int compareTo(BeanPlaylist another) {
+			return mName.compareTo(another.mName);
 		}
 
 	}
