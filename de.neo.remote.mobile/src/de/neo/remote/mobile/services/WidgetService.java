@@ -212,6 +212,12 @@ public class WidgetService extends Service {
 				remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
 			}
 
+			Intent browserIntent = new Intent(context, MediaServerActivity.class);
+			browserIntent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, mediaserver.getID());
+			browserIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, browserIntent, 0);
+			remoteViews.setOnClickPendingIntent(R.id.lbl_widget_big, pendingIntent);
+
 			// set play functionality
 			Intent playIntent = new Intent(context, WidgetService.class);
 			playIntent.setAction(ACTION_PLAY);

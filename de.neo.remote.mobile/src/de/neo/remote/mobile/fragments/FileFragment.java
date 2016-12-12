@@ -243,12 +243,15 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		refreshContent(getActivity());
+		if (mMediaServer != null)
+			refreshContent(getActivity());
 	}
 
 	@Override
 	public void setMediaServer(MediaServerState mediaServer) {
 		mMediaServer = mediaServer;
+		if (getView() != null)
+			refreshContent(getActivity());
 	}
 
 }

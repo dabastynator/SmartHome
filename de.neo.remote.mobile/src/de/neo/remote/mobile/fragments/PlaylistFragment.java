@@ -1,8 +1,6 @@
 package de.neo.remote.mobile.fragments;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import android.content.Context;
@@ -221,11 +219,14 @@ public class PlaylistFragment extends BrowserFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		refreshContent(getActivity());
+		if (mMediaServer != null)
+			refreshContent(getActivity());
 	}
 
 	@Override
 	public void setMediaServer(MediaServerState mediaServer) {
 		mMediaServer = mediaServer;
+		if (getView() != null)
+			refreshContent(getActivity());
 	}
 }

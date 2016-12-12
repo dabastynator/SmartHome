@@ -1,9 +1,12 @@
 package de.neo.remote.mobile.activities;
 
+import java.util.ArrayList;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -24,6 +27,7 @@ import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
+import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.MediaServerState;
@@ -36,6 +40,7 @@ import de.neo.remote.mobile.tasks.PlayYoutubeTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.neo.remote.mobile.util.VolumeDialogBuilder;
+import de.neo.rmi.protokol.RemoteException;
 import de.neo.rmi.transceiver.AbstractReceiver;
 import de.remote.mobile.R;
 
@@ -97,7 +102,9 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			mMediaServer.initialize(mWebMediaServer);
 			updatePlayerButtons();
 			mBrowserPageAdapter.setMediaServer(mMediaServer);
+			refreshTitle();
 		} else {
+			setTitle(getString(R.string.mediaserver_no_server));
 			mMediaServer = null;
 		}
 	}
@@ -326,11 +333,34 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		return fileName;
 	}
 
-	@Override
-	protected void onStartConnecting() {
-		setTitle(getString(R.string.connecting));
-		setProgressBarVisibility(true);
-	};
+	private void refreshTitle() {
+		new AsyncTask<String, Integer, String>() {
+
+			protected void onPreExecute() {
+				setTitle(getString(R.string.connecting));
+				setProgressBarVisibility(true);
+			};
+
+			@Override
+			protected String doInBackground(String... params) {
+				try {
+					ArrayList<BeanMediaServer> mediaServer = mWebMediaServer
+							.getMediaServer(mMediaServer.getMediaServerID());
+					if (mediaServer.size() > 0)
+						return mediaServer.get(0).getName();
+				} catch (RemoteException e) {
+					return getString(R.string.error_load_server);
+				}
+				return getString(R.string.mediaserver_no_server);
+			}
+
+			protected void onPostExecute(String result) {
+				setTitle(result);
+				setProgressBarVisibility(false);
+			};
+
+		}.execute();
+	}
 
 	@Override
 	protected void onResume() {
