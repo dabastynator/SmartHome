@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.FileFragment;
 import de.neo.remote.mobile.fragments.PlaylistFragment;
-import de.neo.remote.mobile.services.RemoteService.StationStuff;
+import de.neo.remote.mobile.persistence.MediaServerState;
 
 public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
@@ -56,11 +56,11 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 		return fragment;
 	}
 
-	public void setStation(StationStuff station) {
+	public void setMediaServer(MediaServerState server) {
 		if (mFileFragment != null)
-			mFileFragment.setStation(station);
+			mFileFragment.setMesiaServer(server);
 		if (mPlaylistFragment != null)
-			mPlaylistFragment.setStation(station);
+			mPlaylistFragment.setMesiaServer(server);
 	}
 
 	public boolean onContextItemSelected(MenuItem item, int position) {
@@ -90,7 +90,7 @@ public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 
 		public abstract boolean onKeyDown(int keyCode, KeyEvent event);
 
-		public abstract void setStation(StationStuff station);
+		public abstract void setMesiaServer(MediaServerState mediaServer);
 
 		@Override
 		public void onStart() {

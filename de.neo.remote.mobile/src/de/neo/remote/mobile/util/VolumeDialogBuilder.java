@@ -6,14 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.os.Handler;
-import android.transition.Slide;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import de.neo.remote.api.PlayerException;
-import de.neo.remote.mobile.services.RemoteService.StationStuff;
+import de.neo.remote.api.PlayingBean;
+import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
@@ -22,7 +22,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 
 	private Builder mBuilder;
 	private SeekBar mVolume;
-	private StationStuff mMediaServer;
+	private MediaServerState mMediaServer;
 	private int mVolumeValue;
 	private Exception mError;
 	private Handler mHandler;
@@ -31,11 +31,11 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 	private AlertDialog mDialog;
 	private int mShowDuration;
 
-	public VolumeDialogBuilder(Context context, StationStuff media) {
+	public VolumeDialogBuilder(Context context, MediaServerState mediaserver) {
 		mHandler = new Handler();
 		mContext = context;
 		mBuilder = new AlertDialog.Builder(context);
-		mMediaServer = media;
+		mMediaServer = mediaserver;
 		LayoutInflater inflater = LayoutInflater.from(context);
 		View dialogView = inflater.inflate(R.layout.volume, null);
 		mBuilder.setView(dialogView);
@@ -55,11 +55,15 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 		try {
 			mVolumeValue = -1;
 			mError = null;
+			PlayingBean result = null;
 			if (mChangeVolume < 0)
-				mMediaServer.player.volDown();
+				result = mMediaServer.volDown();
 			if (mChangeVolume > 0)
-				mMediaServer.player.volUp();
-			mVolumeValue = mMediaServer.player.getVolume();
+				result = mMediaServer.volUp();
+			if (result == null)
+				result = mMediaServer.getPlaying();
+			if (result != null)
+				mVolumeValue = result.getVolume();
 		} catch (RemoteException | PlayerException e) {
 			mError = e;
 		}
@@ -114,7 +118,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 			@Override
 			public void run() {
 				try {
-					mMediaServer.player.setVolume(progress);
+					mMediaServer.setVolume(progress);
 				} catch (RemoteException | PlayerException e) {
 					// ignore
 				}

@@ -1,26 +1,29 @@
 package de.neo.remote.mobile.tasks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.widget.EditText;
+import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
-import de.neo.remote.mobile.services.RemoteService.StationStuff;
+import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.remote.mobile.R;
 
 public class PlayListTask {
 
 	private AbstractConnectionActivity mActivity;
-	private StationStuff mMedia;
+	private MediaServerState mMedia;
 	private String mItem;
 
-	public PlayListTask(AbstractConnectionActivity activity, StationStuff media) {
+	public PlayListTask(AbstractConnectionActivity activity, MediaServerState mediaserver) {
 		mActivity = activity;
-		mMedia = media;
+		mMedia = mediaserver;
 	}
 
 	public void addItem(String item) {
@@ -29,15 +32,12 @@ public class PlayListTask {
 	}
 
 	public void addItemToPlayList(final String item, final String playlist) {
-		new SimpleTask(mActivity)
-				.setSuccess(
-						mActivity.getString(R.string.str_entry_add) + " :"
-								+ item).setAction(new BackgroundAction() {
+		new SimpleTask(mActivity).setSuccess(mActivity.getString(R.string.str_entry_add) + " :" + item)
+				.setAction(new BackgroundAction() {
 
 					@Override
 					public void run() throws Exception {
-						mMedia.pls.extendPlayList(playlist,
-								mMedia.browser.getFullLocation() + item);
+						mMedia.extendPlayList(playlist, item);
 					}
 				}).execute();
 	}
@@ -52,16 +52,14 @@ public class PlayListTask {
 		final EditText input = new EditText(mActivity);
 		alert.setView(input);
 
-		alert.setPositiveButton(mActivity.getString(android.R.string.ok),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						createPlaylist(input.getText().toString());
+		alert.setPositiveButton(mActivity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				createPlaylist(input.getText().toString());
 
-					}
-				});
+			}
+		});
 
-		alert.setNegativeButton(mActivity.getString(android.R.string.cancel),
-				null);
+		alert.setNegativeButton(mActivity.getString(android.R.string.cancel), null);
 		alert.show();
 	}
 
@@ -78,11 +76,10 @@ public class PlayListTask {
 
 			@Override
 			public void run() throws Exception {
-				mMedia.pls.removePlayList(playlist);
+				mMedia.playlistDelete(playlist);
 			}
 		});
-		task.setSuccess(mActivity.getString(R.string.playlist_delete) + ": "
-				+ playlist);
+		task.setSuccess(mActivity.getString(R.string.playlist_delete) + ": " + playlist);
 		task.execute();
 
 	}
@@ -100,11 +97,10 @@ public class PlayListTask {
 
 			@Override
 			public void run() throws Exception {
-				mMedia.pls.removeItem(playlist, item);
+				mMedia.playlistDeleteItem(playlist, item);
 			}
 		});
-		task.setSuccess(mActivity.getString(R.string.playlist_remove_item)
-				+ ": " + item);
+		task.setSuccess(mActivity.getString(R.string.playlist_remove_item) + ": " + item);
 		task.execute();
 	}
 
@@ -121,11 +117,10 @@ public class PlayListTask {
 
 			@Override
 			public void run() throws Exception {
-				mMedia.pls.addPlayList(playlist);
+				mMedia.playlistCreate(playlist);
 			}
 		});
-		task.setSuccess(mActivity.getString(R.string.playlist_added) + ": "
-				+ playlist);
+		task.setSuccess(mActivity.getString(R.string.playlist_added) + ": " + playlist);
 		task.execute();
 	}
 
@@ -139,7 +134,10 @@ public class PlayListTask {
 
 				@Override
 				public void run() throws Exception {
-					mPlayLists = mMedia.pls.getPlayLists();
+					List<String> items = new ArrayList<>();
+					for (BeanPlaylist pls : mMedia.getPlayLists())
+						items.add(pls.getName());
+					mPlayLists = items.toArray(new String[items.size()]);
 					Arrays.sort(mPlayLists);
 				}
 			});

@@ -1,12 +1,9 @@
 package de.neo.remote.mobile.activities;
 
-import java.io.File;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -33,7 +30,6 @@ import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
-import de.neo.remote.mobile.services.RemoteService.StationStuff;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
@@ -81,7 +77,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	private PlayerButtonFragment mButtonFragmentRight;
 	private ViewPager mListPager;
 	private BrowserPageAdapter mBrowserPageAdapter;
-	private String mMediaServerID;
 
 	protected LinearLayout mDownloadLayout;
 	protected ProgressBar mDownloadProgress;
@@ -100,7 +95,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
 			mMediaServer = createMediaServerForId(getIntent().getExtras().getString(EXTRA_MEDIA_ID));
 			mMediaServer.initialize(mWebMediaServer);
-			mMediaServerID = mMediaServer.getMediaServerID();
+			updatePlayerButtons();
 		} else {
 			mMediaServer = null;
 		}
@@ -159,26 +154,16 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 			fragment.onCreateContextMenu(menu, v, menuInfo);
 	}
 
-	/**
-	 * update gui elements, show current directory or playlist
-	 * 
-	 * @param gotoPath
-	 */
-
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		final StationStuff mediaServer = mBinder.getLatestMediaServer();
-		if (mBinder == null)
-			return super.onKeyDown(keyCode, event);
-
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mediaServer);
+			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mMediaServer);
 			dialog.changeVolume(-1);
 			dialog.show();
 			return true;
 		}
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mediaServer);
+			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mMediaServer);
 			dialog.changeVolume(1);
 			dialog.show();
 			return true;
@@ -205,7 +190,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		StationStuff mediaServer = mBinder.getLatestMediaServer();
 		try {
 			switch (item.getItemId()) {
 			case R.id.opt_mplayer:
@@ -215,25 +199,31 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				setTotem(null);
 				break;
 			case R.id.opt_light_off:
-				mediaServer.control.displayDark();
+				// TODO
+				// mediaServer.control.displayDark();
 				break;
 			case R.id.opt_light_on:
-				mediaServer.control.displayBride();
+				// TODO
+				// mediaServer.control.displayBride();
 				break;
 			case R.id.opt_shutdown:
-				mediaServer.control.shutdown();
+				// TODO
+				// mediaServer.control.shutdown();
 				break;
 			case R.id.opt_audiotrack:
-				mediaServer.player.nextAudio();
+				// TODO
+				// mediaServer.player.nextAudio();
 				break;
 			case R.id.opt_left:
-				mediaServer.player.moveLeft();
+				// TODO
+				// mediaServer.player.moveLeft();
 				break;
 			case R.id.opt_right:
-				mediaServer.player.moveRight();
+				// TODO
+				// mediaServer.player.moveRight();
 				break;
 			case R.id.opt_refresh:
-				setStation(mediaServer);
+				refreshContent();
 				break;
 			case R.id.opt_upload:
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -241,7 +231,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 				startActivityForResult(Intent.createChooser(intent, "File Chooser"), FILE_REQUEST);
 				break;
 			case R.id.opt_create_playlist:
-				new PlayListTask(this, mediaServer).createPlaylist();
+				new PlayListTask(this, mMediaServer).createPlaylist();
 				break;
 			}
 		} catch (Exception e) {
@@ -250,27 +240,16 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void setStation(StationStuff station) {
-		mBrowserPageAdapter.setStation(station);
-		updateFilePlsButtons();
-		updatePlayerButtons();
-		if (station != null)
-			setTitle(station.name);
-		else
-			setTitle(getString(R.string.mediaserver_no_server));
-	}
-
 	private void updatePlayerButtons() {
-		StationStuff server = mBinder.getLatestMediaServer();
-		if (server != null && server.player == server.mplayer)
+		if ("mplayer".equals(mMediaServer.getPlayer()))
 			mMplayerButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mMplayerButton.setBackgroundResource(0);
-		if (server != null && server.player == server.omxplayer)
+		if ("omxplayer".equals(mMediaServer.getPlayer()))
 			mOmxButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mOmxButton.setBackgroundResource(0);
-		if (server != null && server.player == server.totem)
+		if ("totem".equals(mMediaServer.getPlayer()))
 			mTotemButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mTotemButton.setBackgroundResource(0);
@@ -316,7 +295,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (mListPager.getAdapter() == null || mBrowserPageAdapter == null) {
 			mBrowserPageAdapter = new BrowserPageAdapter(getSupportFragmentManager());
 			if (mBinder != null)
-				mBrowserPageAdapter.setStation(mBinder.getLatestMediaServer());
+				mBrowserPageAdapter.setMediaServer(mMediaServer);
 			mListPager.setAdapter(mBrowserPageAdapter);
 		}
 		mDownloadLayout = (LinearLayout) findViewById(R.id.layout_download);
@@ -380,40 +359,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	@Override
 	public void onServerConnectionChanged(RemoteServer server) {
-		AsyncTask<String, Integer, StationStuff> task = new AsyncTask<String, Integer, StationStuff>() {
-			private Exception error;
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				setProgressBarVisibility(true);
-				setTitle(getString(R.string.mediaserver_load));
-			}
-
-			@Override
-			protected StationStuff doInBackground(String... params) {
-				try {
-					if (mMediaServerID == null)
-						return mBinder.getLatestMediaServer();
-					else
-						return mBinder.getMediaServerByID(mMediaServerID);
-				} catch (Exception e) {
-					error = e;
-				}
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(StationStuff station) {
-				if (error != null)
-					new AbstractTask.ErrorDialog(MediaServerActivity.this, error).show();
-				else
-					setStation(station);
-			}
-
-		};
-		if (mIsActive)
-			task.execute();
 	}
 
 	public void showFileSystem(View view) {
@@ -425,47 +370,47 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setTotem(View view) {
-		StationStuff mediaServer = mBinder.getLatestMediaServer();
-		if (mediaServer != null) {
-			mediaServer.player = mediaServer.totem;
-			mTotemButton.setBackgroundResource(R.drawable.image_border);
-			mMplayerButton.setBackgroundResource(0);
-			if (mOmxButton != null)
-				mOmxButton.setBackgroundResource(0);
+		mMediaServer.setPlayer("totem");
+		saveMediaServer(mMediaServer);
+		mMplayerButton.setBackgroundResource(0);
+		mOmxButton.setBackgroundResource(0);
+		mTotemButton.setBackgroundResource(R.drawable.image_border);
+	}
+
+	private void saveMediaServer(MediaServerState mediaServer) {
+		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
+		try {
+			dao.update(mediaServer);
+		} catch (DaoException e) {
+			new AbstractTask.ErrorDialog(getApplicationContext(), e).show();
 		}
 	}
 
 	private void updateFilePlsButtons() {
-		StationStuff mediaServer = mBinder.getLatestMediaServer();
-		if (mediaServer != null && mListPager.getCurrentItem() == 0)
+		if (mListPager.getCurrentItem() == 0)
 			mFilesystemButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mFilesystemButton.setBackgroundResource(0);
-		if (mediaServer != null && mListPager.getCurrentItem() == 1)
+		if (mListPager.getCurrentItem() == 1)
 			mPlaylistButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mPlaylistButton.setBackgroundResource(0);
 	}
 
 	public void setMPlayer(View view) {
-		StationStuff mediaServer = mBinder.getLatestMediaServer();
-		if (mediaServer != null) {
-			mediaServer.player = mediaServer.mplayer;
-			mMplayerButton.setBackgroundResource(R.drawable.image_border);
-			mTotemButton.setBackgroundResource(0);
-			if (mOmxButton != null)
-				mOmxButton.setBackgroundResource(0);
-		}
+		mMediaServer.setPlayer("mplayer");
+		saveMediaServer(mMediaServer);
+		mMplayerButton.setBackgroundResource(R.drawable.image_border);
+		mTotemButton.setBackgroundResource(0);
+		mOmxButton.setBackgroundResource(0);
 	}
 
 	public void setOMXPlayer(View view) {
-		StationStuff server = mBinder.getLatestMediaServer();
-		if (server != null) {
-			server.player = server.omxplayer;
-			mOmxButton.setBackgroundResource(R.drawable.image_border);
-			mTotemButton.setBackgroundResource(0);
-			mMplayerButton.setBackgroundResource(0);
-		}
+		mMediaServer.setPlayer("mplayer");
+		saveMediaServer(mMediaServer);
+		mMplayerButton.setBackgroundResource(0);
+		mOmxButton.setBackgroundResource(R.drawable.image_border);
+		mTotemButton.setBackgroundResource(0);
 	}
 
 	@Override
@@ -554,13 +499,14 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		final StationStuff mediaServer = mBinder.getLatestMediaServer();
 		if (data == null)
 			return;
-		if (requestCode == MediaServerActivity.FILE_REQUEST) {
-			Uri uri = data.getData();
-			mBinder.uploadFile(mediaServer.browser, new File(getFilePathByUri(uri)));
-		}
+		// TODO
+		// if (requestCode == MediaServerActivity.FILE_REQUEST) {
+		// Uri uri = data.getData();
+		// mBinder.uploadFile(mediaServer.browser, new
+		// File(getFilePathByUri(uri)));
+		// }
 	}
 
 	@Override
@@ -569,6 +515,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void refreshContent() {
+		updatePlayerButtons();
 		BrowserFragment fragment = mBrowserPageAdapter.getItem(mListPager.getCurrentItem());
 
 		if (fragment != null)

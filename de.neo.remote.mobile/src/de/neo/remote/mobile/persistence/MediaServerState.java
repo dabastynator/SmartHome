@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import de.neo.android.persistence.DomainBase;
 import de.neo.android.persistence.Persistent;
 import de.neo.remote.api.IWebMediaServer;
+import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
+import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
+import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.api.PlayerException;
 import de.neo.remote.api.PlayingBean;
 import de.neo.rmi.protokol.RemoteException;
@@ -96,6 +99,66 @@ public class MediaServerState extends DomainBase {
 
 	public PlayingBean stop() throws RemoteException, PlayerException {
 		return mWebMediaServer.playStop(mMediaServerID, mPlayer);
+	}
+
+	public ArrayList<BeanPlaylist> getPlayLists() throws RemoteException {
+		return mWebMediaServer.getPlaylists(mMediaServerID);
+	}
+
+	public ArrayList<BeanPlaylistItem> getPlayListContent(String playlist) throws RemoteException, PlayerException {
+		return mWebMediaServer.getPlaylistContent(mMediaServerID, playlist);
+	}
+
+	public PlayingBean playPlaylist(String playlist) throws RemoteException, PlayerException {
+		return mWebMediaServer.playPlaylist(mMediaServerID, mPlayer, playlist);
+	}
+
+	public PlayingBean playFile(String file) throws RemoteException, PlayerException {
+		return mWebMediaServer.playFile(mMediaServerID, mPlayer, file);
+	}
+
+	public PlayingBean getPlaying() throws RemoteException {
+		ArrayList<BeanMediaServer> list = mWebMediaServer.getMediaServer(mMediaServerID);
+		if (list.size() > 0)
+			return list.get(0).getCurrentPlaying();
+		return null;
+	}
+
+	public PlayingBean setVolume(int volume) throws RemoteException, PlayerException {
+		return mWebMediaServer.setVolume(mMediaServerID, mPlayer, volume);
+	}
+
+	public void extendPlayList(String playlist, String item) throws RemoteException, PlayerException {
+		mWebMediaServer.playlistExtend(mMediaServerID, playlist, item);
+	}
+
+	public void playlistDelete(String playlist) throws RemoteException, PlayerException {
+		mWebMediaServer.playlistDelete(mMediaServerID, playlist);
+	}
+
+	public void playlistDeleteItem(String playlist, String item) throws RemoteException, PlayerException {
+		mWebMediaServer.playlistDeleteItem(mMediaServerID, playlist, item);
+	}
+
+	public void playlistCreate(String playlist) throws RemoteException {
+		mWebMediaServer.playlistCreate(mMediaServerID, playlist);
+	}
+
+	public void goTo(String goTo) {
+		mBrowserLocation += IWebMediaServer.FileSeparator + goTo;
+	}
+
+	public boolean goBack() {
+		if (mBrowserLocation.contains(IWebMediaServer.FileSeparator)) {
+			mBrowserLocation = mBrowserLocation.substring(0,
+					mBrowserLocation.lastIndexOf(IWebMediaServer.FileSeparator));
+			return true;
+		}
+		return false;
+	}
+
+	public ArrayList<BeanFileSystem> getFiles() throws RemoteException {
+		return mWebMediaServer.getFiles(mMediaServerID, mBrowserLocation);
 	}
 
 }
