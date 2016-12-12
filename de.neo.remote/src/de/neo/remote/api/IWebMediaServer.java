@@ -38,6 +38,64 @@ public interface IWebMediaServer extends RemoteAble {
 	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) throws RemoteException;
 
 	/**
+	 * Add item to specified playlist.
+	 * 
+	 * @param id
+	 * @param playlist
+	 * @param item
+	 * @throws RemoteException
+	 */
+	@WebRequest(path = "playlist_extend", description = "Add item to specified playlist.")
+	public void playlistExtend(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
+			@WebGet(name = "item") String item) throws RemoteException, PlayerException;
+
+	/**
+	 * Create new playlist.
+	 * 
+	 * @param id
+	 * @param playlist
+	 */
+	@WebRequest(path = "playlist_create", description = "Create new playlist.")
+	public void playlistCreate(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
+			throws RemoteException;
+
+	/**
+	 * Delete specified playlist
+	 * 
+	 * @param id
+	 * @param playlist
+	 * @throws RemoteException
+	 */
+	@WebRequest(path = "playlist_delete", description = "Delete specified playlist.")
+	public void playlistDelete(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
+			throws RemoteException, PlayerException;
+
+	/**
+	 * Delete item from specified playlist.
+	 * 
+	 * @param id
+	 * @param playlist
+	 * @param item
+	 * @throws RemoteException
+	 */
+	@WebRequest(path = "playlist_delete_item", description = "Delete item from specified playlist.")
+	public void playlistDeleteItem(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
+			@WebGet(name = "item") String item) throws RemoteException, PlayerException;
+
+	/**
+	 * List items of specified playlist.
+	 * 
+	 * @param id
+	 * @param playlist
+	 * @return playlist content
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	@WebRequest(path = "playlist_content", description = "List items of specified playlist.")
+	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException;
+
+	/**
 	 * Get files and directories at specific path.
 	 * 
 	 * @param id
@@ -227,12 +285,49 @@ public interface IWebMediaServer extends RemoteAble {
 		@WebField(name = "name")
 		private String mName;
 
+		@WebField(name = "item_count")
+		private int mItemCount;
+
 		public String getName() {
 			return mName;
 		}
 
 		public void setName(String name) {
 			mName = name;
+		}
+
+		public int getItemCount() {
+			return mItemCount;
+		}
+
+		public void setItemCount(int itemCount) {
+			mItemCount = itemCount;
+		}
+
+	}
+
+	public static class BeanPlaylistItem {
+
+		@WebField(name = "name")
+		private String mName;
+
+		@WebField(name = "path")
+		private String mPath;
+
+		public String getName() {
+			return mName;
+		}
+
+		public void setName(String name) {
+			mName = name;
+		}
+
+		public String getPath() {
+			return mPath;
+		}
+
+		public void setPath(String path) {
+			mPath = path;
 		}
 
 	}

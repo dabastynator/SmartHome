@@ -72,6 +72,69 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return result;
 	}
 
+	@WebRequest(path = "playlist_content", description = "List items of specified playlist.")
+	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException {
+		ArrayList<BeanPlaylistItem> result = new ArrayList<>();
+		try {
+			IControlUnit unit = mCenter.getControlUnit(id);
+			if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+				IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+				for (String str : mediaServer.getPlayList().listContent(playlist)) {
+					BeanPlaylistItem pls = new BeanPlaylistItem();
+					pls.setPath(str);
+					if (str.indexOf("/") >= 0)
+						pls.setName(str.substring(str.lastIndexOf("/") + 1));
+					else
+						pls.setName(str);
+					result.add(pls);
+				}
+			}
+		} catch (RemoteException e) {
+		}
+		return result;
+	}
+
+	@WebRequest(path = "playlist_extend", description = "Add item to specified playlist.")
+	public void playlistExtend(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
+			@WebGet(name = "item") String item) throws RemoteException, PlayerException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+			mediaServer.getPlayList().extendPlayList(playlist, item);
+		}
+	}
+
+	@WebRequest(path = "playlist_create", description = "Create new playlist.")
+	public void playlistCreate(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
+			throws RemoteException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+			mediaServer.getPlayList().addPlayList(playlist);
+		}
+	}
+
+	@WebRequest(path = "playlist_delete", description = "Delete specified playlist.")
+	public void playlistDelete(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
+			throws RemoteException, PlayerException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+			mediaServer.getPlayList().removePlayList(playlist);
+		}
+	}
+
+	@WebRequest(path = "playlist_delete_item", description = "Delete item from specified playlist.")
+	public void playlistDeleteItem(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
+			@WebGet(name = "item") String item) throws RemoteException, PlayerException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+			IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+			mediaServer.getPlayList().removeItem(playlist, item);
+		}
+	}
+
 	@Override
 	public String getWebPath() {
 		return "mediaserver";
