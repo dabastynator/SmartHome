@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +56,12 @@ public class WebServerHandler implements HttpHandler {
 		for (String param : query.split("&")) {
 			String pair[] = param.split("=");
 			if (pair.length > 1) {
-				result.put(pair[0], pair[1]);
+				try {
+					result.put(pair[0], URLDecoder.decode(pair[1], "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					result.put(pair[0], "");
+					e.printStackTrace();
+				}
 			} else {
 				result.put(pair[0], "");
 			}
