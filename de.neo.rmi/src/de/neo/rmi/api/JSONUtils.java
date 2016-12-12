@@ -17,7 +17,7 @@ public class JSONUtils {
 		JSONObject result = new JSONObject();
 		JSONObject error = new JSONObject();
 		error.put("message", e.getMessage());
-		error.put("class", e.getClass().getSimpleName());
+		error.put("class", e.getClass().getName());
 		result.put("error", error);
 		result.put("success", false);
 		return result;
