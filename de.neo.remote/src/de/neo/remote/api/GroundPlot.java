@@ -2,7 +2,8 @@ package de.neo.remote.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+
+import de.neo.rmi.api.WebField;
 
 /**
  * The ground plot is a bean that holds information about the ground plot.
@@ -19,20 +20,22 @@ public class GroundPlot implements Serializable {
 	/**
 	 * List of walls of the ground plot
 	 */
-	public List<Wall> walls;
+	@WebField(name = "walls", genericClass = Wall.class)
+	public ArrayList<Wall> mWalls;
 
 	/**
 	 * List of features of the ground plot
 	 */
-	public List<Feature> features;
+	@WebField(name = "features", genericClass = Feature.class)
+	public ArrayList<Feature> mFeatures;
 
 	/**
 	 * The ground plot is a bean that holds information about the ground plot.
 	 * The information is in the list of walls.
 	 */
 	public GroundPlot() {
-		walls = new ArrayList<GroundPlot.Wall>();
-		features = new ArrayList<GroundPlot.Feature>();
+		mWalls = new ArrayList<GroundPlot.Wall>();
+		mFeatures = new ArrayList<GroundPlot.Feature>();
 	}
 
 	/**
@@ -46,14 +49,15 @@ public class GroundPlot implements Serializable {
 		 * Generated uid
 		 */
 		private static final long serialVersionUID = 4963248372236235849L;
-		
+
 		/**
-		 * all points of the wall 
+		 * all points of the wall
 		 */
-		public ArrayList<Point> points;
+		@WebField(name = "points", genericClass = Point.class)
+		public ArrayList<Point> mPoints;
 
 		public Wall() {
-			points = new ArrayList<Point>();
+			mPoints = new ArrayList<Point>();
 		}
 
 	}
@@ -70,10 +74,12 @@ public class GroundPlot implements Serializable {
 		 */
 		private static final long serialVersionUID = 1045224009502795464L;
 
-		/**
-		 * coordinates of the point.
-		 */
-		public float x, y, z;
+		@WebField(name = "x")
+		public float x;
+		@WebField(name = "y")
+		public float y;
+		@WebField(name = "z")
+		public float z;
 
 	}
 

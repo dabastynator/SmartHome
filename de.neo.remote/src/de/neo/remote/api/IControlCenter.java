@@ -50,6 +50,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @return ground plot
 	 * @throws RemoteException
 	 */
+	@WebRequest(path = "groundplot", description = "Get the ground plot of the control center area.")
 	public GroundPlot getGroundPlot() throws RemoteException;
 
 	/**
