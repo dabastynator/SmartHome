@@ -1,11 +1,14 @@
 package de.neo.remote.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.rmi.api.WebField;
+import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteAble;
+import de.neo.rmi.protokol.RemoteException;
 
 public interface IWebAction extends RemoteAble {
 
@@ -16,6 +19,23 @@ public interface IWebAction extends RemoteAble {
 	 */
 	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.")
 	public ArrayList<BeanAction> getActions();
+
+	/**
+	 * Start the action. Throws io exception, if error occur on executing
+	 * 
+	 * @throws RemoteException
+	 * @throws IOException
+	 */
+	@WebRequest(path = "start_action", description = "Start the action. Throws io exception, if error occur on executing")
+	public void startAction(@WebGet(name = "id") String id) throws RemoteException, IOException;
+
+	/**
+	 * Stop current action.
+	 * 
+	 * @throws RemoteException
+	 */
+	@WebRequest(path = "stop_action", description = "Stop current action.")
+	public void stopAction(@WebGet(name = "id") String id) throws RemoteException;
 
 	public class BeanAction extends BeanWeb {
 

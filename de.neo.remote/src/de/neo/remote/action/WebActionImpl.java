@@ -1,5 +1,6 @@
 package de.neo.remote.action;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import de.neo.remote.AbstractUnitHandler;
@@ -7,6 +8,7 @@ import de.neo.remote.api.ICommandAction;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IControlUnit;
 import de.neo.remote.api.IWebAction;
+import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -35,6 +37,24 @@ public class WebActionImpl extends AbstractUnitHandler implements IWebAction {
 			}
 		}
 		return result;
+	}
+
+	@WebRequest(path = "start_action", description = "Start the action. Throws io exception, if error occur on executing")
+	public void startAction(@WebGet(name = "id") String id) throws RemoteException, IOException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit != null && unit.getRemoteableControlObject() instanceof ICommandAction) {
+			ICommandAction action = (ICommandAction) unit.getRemoteableControlObject();
+			action.startAction();
+		}
+	}
+
+	@WebRequest(path = "stop_action", description = "Stop current action.")
+	public void stopAction(@WebGet(name = "id") String id) throws RemoteException {
+		IControlUnit unit = mCenter.getControlUnit(id);
+		if (unit != null && unit.getRemoteableControlObject() instanceof ICommandAction) {
+			ICommandAction action = (ICommandAction) unit.getRemoteableControlObject();
+			action.stopAction();
+		}
 	}
 
 	@Override

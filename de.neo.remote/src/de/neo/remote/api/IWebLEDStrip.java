@@ -66,6 +66,10 @@ public interface IWebLEDStrip extends RemoteAble {
 		public void setBlue(int blue) {
 			mBlue = blue;
 		}
+
+		public int getColor() {
+			return mRed | (mGreen << 8) | (mBlue << 16);
+		}
 	}
 
 }

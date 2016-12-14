@@ -79,9 +79,9 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 				point.x = Float.parseFloat(pointElement.getAttribute("x"));
 				point.y = Float.parseFloat(pointElement.getAttribute("y"));
 				point.z = Float.parseFloat(pointElement.getAttribute("z"));
-				wall.mPoints.add(point);
+				wall.points.add(point);
 			}
-			ground.mWalls.add(wall);
+			ground.walls.add(wall);
 		}
 		NodeList features = root.getElementsByTagName("Feature");
 		for (int i = 0; i < features.getLength(); i++) {
@@ -97,7 +97,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 			if (featureElement.hasAttribute("extra"))
 				feature.extra = featureElement.getAttribute("extra");
 
-			ground.mFeatures.add(feature);
+			ground.features.add(feature);
 		}
 		return ground;
 	}

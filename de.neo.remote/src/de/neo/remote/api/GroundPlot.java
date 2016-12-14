@@ -21,21 +21,21 @@ public class GroundPlot implements Serializable {
 	 * List of walls of the ground plot
 	 */
 	@WebField(name = "walls", genericClass = Wall.class)
-	public ArrayList<Wall> mWalls;
+	public ArrayList<Wall> walls;
 
 	/**
 	 * List of features of the ground plot
 	 */
 	@WebField(name = "features", genericClass = Feature.class)
-	public ArrayList<Feature> mFeatures;
+	public ArrayList<Feature> features;
 
 	/**
 	 * The ground plot is a bean that holds information about the ground plot.
 	 * The information is in the list of walls.
 	 */
 	public GroundPlot() {
-		mWalls = new ArrayList<GroundPlot.Wall>();
-		mFeatures = new ArrayList<GroundPlot.Feature>();
+		walls = new ArrayList<GroundPlot.Wall>();
+		features = new ArrayList<GroundPlot.Feature>();
 	}
 
 	/**
@@ -54,10 +54,10 @@ public class GroundPlot implements Serializable {
 		 * all points of the wall
 		 */
 		@WebField(name = "points", genericClass = Point.class)
-		public ArrayList<Point> mPoints;
+		public ArrayList<Point> points;
 
 		public Wall() {
-			mPoints = new ArrayList<Point>();
+			points = new ArrayList<Point>();
 		}
 
 	}
