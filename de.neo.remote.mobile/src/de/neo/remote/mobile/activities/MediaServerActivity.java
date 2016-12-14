@@ -31,8 +31,6 @@ import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.MediaServerState;
-import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
@@ -41,7 +39,6 @@ import de.neo.remote.mobile.util.BrowserPageAdapter;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.neo.remote.mobile.util.VolumeDialogBuilder;
 import de.neo.rmi.protokol.RemoteException;
-import de.neo.rmi.transceiver.AbstractReceiver;
 import de.remote.mobile.R;
 
 /**
@@ -134,19 +131,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	@Override
-	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		if (mBinder == null || mBinder.getLatestMediaServer() == null
-				|| !mediaserver.equals(mBinder.getLatestMediaServer().name))
-			return;
-		if (mButtonFragment != null)
-			mButtonFragment.onPlayingBeanChanged(mediaserver, bean);
-		if (mButtonFragmentRight != null)
-			mButtonFragmentRight.onPlayingBeanChanged(mediaserver, bean);
-		mBrowserPageAdapter.onPlayingBeanChanged(mediaserver, bean);
-		mPlayingBean = bean;
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater mi = new MenuInflater(getApplication());
@@ -181,12 +165,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		if (fragment != null && fragment.onKeyDown(keyCode, event))
 			return true;
 		return super.onKeyDown(keyCode, event);
-	}
-
-	@Override
-	protected void onDestroy() {
-		unbindService(mPlayerConnection);
-		super.onDestroy();
 	}
 
 	@Override
@@ -370,10 +348,10 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 
 	private void checkIntentForAction() {
 		Bundle extras = getIntent().getExtras();
-		if (extras != null && mBinder != null) {
+		if (extras != null) {
 			String youtubeURL = extras.getString(Intent.EXTRA_TEXT);
 			if (youtubeURL != null) {
-				new PlayYoutubeTask(this, youtubeURL, mBinder).execute(new String[] {});
+				new PlayYoutubeTask(this, youtubeURL, mMediaServer).execute(new String[] {});
 				getIntent().removeExtra(Intent.EXTRA_TEXT);
 			}
 		}
@@ -384,10 +362,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		super.onNewIntent(intent);
 		setIntent(intent);
 		// now getIntent() should always return the last received intent
-	}
-
-	@Override
-	public void onServerConnectionChanged(RemoteServer server) {
 	}
 
 	public void showFileSystem(View view) {
@@ -442,87 +416,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		mTotemButton.setBackgroundResource(0);
 	}
 
-	@Override
-	public void startSending(long size) {
-		super.startSending(size);
-		mMaxDonwloadSize = size;
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		mDownloadProgress.setProgress(0);
-		mDownloadText.setText(getString(R.string.str_upload));
-	}
-
-	@Override
-	public void progressSending(long size) {
-		super.progressSending(size);
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		if (mMaxDonwloadSize == 0)
-			mMaxDonwloadSize = mBinder.getReceiver().getFullSize();
-		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
-	}
-
-	@Override
-	public void endSending(long size) {
-		super.endSending(size);
-		mDownloadLayout.setVisibility(View.GONE);
-	}
-
-	@Override
-	public void sendingCanceled() {
-		super.sendingCanceled();
-		mDownloadLayout.setVisibility(View.GONE);
-	}
-
-	@Override
-	public void startReceive(long size, String file) {
-		super.startReceive(size, file);
-		mMaxDonwloadSize = size;
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		mDownloadProgress.setProgress(0);
-		if (file != null)
-			mDownloadText.setText(file);
-		else
-			mDownloadText.setText(getString(R.string.str_download));
-	}
-
-	@Override
-	public void progressReceive(long size, String file) {
-		super.progressReceive(size, file);
-		mDownloadLayout.setVisibility(View.VISIBLE);
-		if (mMaxDonwloadSize == 0)
-			mMaxDonwloadSize = mBinder.getReceiver().getFullSize();
-		mDownloadProgress.setProgress((int) ((100d * size) / mMaxDonwloadSize));
-		if (file != null)
-			mDownloadText.setText(file);
-	}
-
-	@Override
-	public void endReceive(long size) {
-		super.endReceive(size);
-		mDownloadLayout.setVisibility(View.GONE);
-	}
-
-	@Override
-	public void exceptionOccurred(Exception e) {
-		super.exceptionOccurred(e);
-		mDownloadLayout.setVisibility(View.GONE);
-		new AbstractTask.ErrorDialog(this, e).show();
-	}
-
-	@Override
-	public void downloadCanceled() {
-		super.downloadCanceled();
-		mDownloadLayout.setVisibility(View.GONE);
-	}
-
 	public void cancelDownload(View v) {
-		AbstractReceiver receiver = mBinder.getReceiver();
-		mDownloadLayout.setVisibility(View.GONE);
-		if (receiver != null) {
-			receiver.cancel();
-		} else {
-			Toast.makeText(this, "no receiver available", Toast.LENGTH_SHORT).show();
-			mDownloadLayout.setVisibility(View.GONE);
-		}
+		// TODO
+		/*
+		 * AbstractReceiver receiver = mBinder.getReceiver();
+		 * mDownloadLayout.setVisibility(View.GONE); if (receiver != null) {
+		 * receiver.cancel(); } else { Toast.makeText(this,
+		 * "no receiver available", Toast.LENGTH_SHORT).show();
+		 * mDownloadLayout.setVisibility(View.GONE); }
+		 */
 	}
 
 	@Override
@@ -536,11 +438,6 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 		// mBinder.uploadFile(mediaServer.browser, new
 		// File(getFilePathByUri(uri)));
 		// }
-	}
-
-	@Override
-	protected void onRemoteBinder(RemoteBinder mBinder) {
-		checkIntentForAction();
 	}
 
 	public void refreshContent() {

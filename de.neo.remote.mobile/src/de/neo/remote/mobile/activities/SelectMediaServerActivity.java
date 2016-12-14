@@ -2,21 +2,20 @@ package de.neo.remote.mobile.activities;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ListView;
-import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.MediaServerAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class SelectMediaServerActivity extends Activity {
+public class SelectMediaServerActivity extends AbstractConnectionActivity {
 
 	public static final String MS_NUMBER = "ms_number";
 
@@ -25,13 +24,9 @@ public class SelectMediaServerActivity extends Activity {
 	private SelectMSListener listener;
 	protected ListView msList;
 
-	private IWebMediaServer mWebMediaServer;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		mWebMediaServer = AbstractConnectionActivity.createWebMediaServer();
 
 		setContentView(R.layout.mediaserver_list);
 
@@ -41,28 +36,29 @@ public class SelectMediaServerActivity extends Activity {
 		appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		listener = new SelectMSListener();
 
-		new AsyncTask<Integer, Integer, Void>() {
+		new AsyncTask<Integer, Integer, Exception>() {
 
 			ArrayList<BeanMediaServer> mediaserver;
 			String[] ids;
 
 			@Override
-			protected Void doInBackground(Integer... params) {
+			protected Exception doInBackground(Integer... params) {
 				try {
 					mediaserver = mWebMediaServer.getMediaServer("");
 					ids = new String[mediaserver.size()];
 					for (int i = 0; i < mediaserver.size(); i++)
 						ids[i] = mediaserver.get(i).getID();
 				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return e;
 				}
 				return null;
 
 			}
 
 			@Override
-			protected void onPostExecute(Void result) {
+			protected void onPostExecute(Exception result) {
+				if (result != null)
+					new AbstractTask.ErrorDialog(getApplicationContext(), result).show();
 				msList.setAdapter(new MediaServerAdapter(getApplicationContext(), mediaserver, ids, listener));
 			}
 		}.execute();

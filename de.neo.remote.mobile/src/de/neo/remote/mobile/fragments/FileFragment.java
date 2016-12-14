@@ -210,7 +210,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		if (activity.mBinder != null && keyCode == KeyEvent.KEYCODE_BACK) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			if (mMediaServer.goBack()) {
 				activity.saveMediaServer(mMediaServer);
 				refreshContent(activity);

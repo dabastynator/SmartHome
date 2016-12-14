@@ -161,4 +161,8 @@ public class MediaServerState extends DomainBase {
 		return mWebMediaServer.getFiles(mMediaServerID, mBrowserLocation);
 	}
 
+	public void playYoutube(String youtubeURL) throws RemoteException, PlayerException {
+		mWebMediaServer.playYoutube(mMediaServerID, mPlayer, youtubeURL);
+	}
+
 }

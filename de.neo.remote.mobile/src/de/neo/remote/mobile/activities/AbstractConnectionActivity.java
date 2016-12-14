@@ -3,33 +3,20 @@ package de.neo.remote.mobile.activities;
 import java.util.List;
 
 import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IWebAction;
 import de.neo.remote.api.IWebLEDStrip;
 import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebSwitch;
-import de.neo.remote.api.IWebSwitch.State;
-import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.RemoteBinder;
-import de.neo.remote.mobile.services.RemoteService;
-import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
-import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.services.WidgetService;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.remote.mobile.R;
@@ -40,11 +27,10 @@ import de.remote.mobile.R;
  * @author sebastian
  * 
  */
-public abstract class AbstractConnectionActivity extends ActionBarActivity implements IRemoteActionListener {
+public class AbstractConnectionActivity extends ActionBarActivity {
 
 	public static final String EXTRA_SERVER_ID = "server_id";
 
-	public RemoteBinder mBinder;
 	protected ProgressDialog mProgress;
 	protected RemoteServer mCurrentServer;
 	protected boolean mIsActive;
@@ -55,99 +41,34 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity imple
 	protected IWebMediaServer mWebMediaServer;
 	protected IControlCenter mWebControlCenter;
 
-	protected ServiceConnection mPlayerConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mBinder.removeRemoteActionListener(AbstractConnectionActivity.this);
-			Log.e("disconnect service", "class: " + AbstractConnectionActivity.this.getClass().getSimpleName());
-		}
-
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			mBinder = (RemoteBinder) service;
-			boolean needReconnect = !mBinder.isConnected();
-			onRemoteBinder(mBinder);
-			onStartConnecting();
-			mBinder.addRemoteActionListener(AbstractConnectionActivity.this);
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
-			// if there is a server in extra -> connect with this server
-			if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_SERVER_ID)) {
-				try {
-					mCurrentServer = dao.loadById(getIntent().getExtras().getInt(EXTRA_SERVER_ID));
-					needReconnect = true;
-				} catch (DaoException e) {
-					e.printStackTrace();
-				}
-
-			}
-			// else just connect if there is no connection
-			else if (needReconnect) {
-				mCurrentServer = getFavoriteServer();
-				if (mCurrentServer == null) {
-					Toast.makeText(AbstractConnectionActivity.this, getString(R.string.server_no_favorite),
-							Toast.LENGTH_SHORT).show();
-					Intent intent = new Intent(AbstractConnectionActivity.this, SelectServerActivity.class);
-					startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
-				}
-			}
-			// if there is a server id to connect -> connect
-			if (mCurrentServer != null && needReconnect)
-				mBinder.connectToServer(mCurrentServer, AbstractConnectionActivity.this);
-			else if (!needReconnect)
-				AbstractConnectionActivity.this.onServerConnectionChanged(null);
-		}
-
-	};
-
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 		getSupportActionBar().setLogo(R.drawable.ic_launcher);
 
-		// bind remote service
-		Intent intent = new Intent(this, RemoteService.class);
-		startService(intent);
-		bindService(intent, mPlayerConnection, Context.BIND_AUTO_CREATE);
-
 		// start widget service
-		intent = new Intent(this, WidgetService.class);
+		Intent intent = new Intent(this, WidgetService.class);
 		startService(intent);
 
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
-		RemoteServer server = getFavoriteServer();
-		if (server != null)
-			initializeWebApi(server);
+		mCurrentServer = getFavoriteServer();
+		loadWebApi(mCurrentServer);
 	}
 
-	private void initializeWebApi(RemoteServer server) {
-		mWebSwitch = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
-				.setSecurityToken(server.getApiToken()).setInterface(IWebSwitch.class).create();
-		mWebLEDStrip = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/ledstrip")
-				.setSecurityToken(server.getApiToken()).setInterface(IWebLEDStrip.class).create();
-		mWebMediaServer = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
-				.setSecurityToken(server.getApiToken()).setInterface(IWebMediaServer.class).create();
-		mWebAction = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/action")
-				.setSecurityToken(server.getApiToken()).setInterface(IWebAction.class).create();
-		mWebControlCenter = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/controlcenter")
-				.setSecurityToken(server.getApiToken()).setInterface(IControlCenter.class).create();
-	}
-
-	public static IWebSwitch createWebSwitch() {
-		RemoteServer server = getFavoriteServer();
-		if (server != null)
-			return new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
+	protected void loadWebApi(RemoteServer server) {
+		if (server != null) {
+			mWebSwitch = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
 					.setSecurityToken(server.getApiToken()).setInterface(IWebSwitch.class).create();
-		return null;
-	}
-
-	public static IWebMediaServer createWebMediaServer() {
-		RemoteServer server = getFavoriteServer();
-		if (server != null)
-			return new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
+			mWebLEDStrip = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/ledstrip")
+					.setSecurityToken(server.getApiToken()).setInterface(IWebLEDStrip.class).create();
+			mWebMediaServer = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
 					.setSecurityToken(server.getApiToken()).setInterface(IWebMediaServer.class).create();
-		return null;
+			mWebAction = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/action")
+					.setSecurityToken(server.getApiToken()).setInterface(IWebAction.class).create();
+			mWebControlCenter = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/controlcenter")
+					.setSecurityToken(server.getApiToken()).setInterface(IControlCenter.class).create();
+		}
 	}
 
 	public static RemoteServer getFavoriteServer() {
@@ -183,8 +104,7 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity imple
 			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
 			try {
 				mCurrentServer = dao.loadById(data.getExtras().getInt(SelectServerActivity.SERVER_ID));
-				onStartConnecting();
-				mBinder.connectToServer(mCurrentServer, this);
+				loadWebApi(mCurrentServer);
 			} catch (DaoException e) {
 				e.printStackTrace();
 				mCurrentServer = null;
@@ -200,11 +120,6 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity imple
 			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
 			break;
 		case R.id.opt_exit:
-			// intent = new Intent(this, RemoteService.class);
-			// stopService(intent);
-			mBinder.disconnect();
-			mBinder.removeRemoteActionListener(this);
-			unbindService(mPlayerConnection);
 			finish();
 			break;
 		}
@@ -230,80 +145,14 @@ public abstract class AbstractConnectionActivity extends ActionBarActivity imple
 		mProgress = null;
 	}
 
-	protected void onRemoteBinder(RemoteBinder mBinder) {
-
-	}
-
-	/**
-	 * start connection. inform user about connecting status.
-	 */
-	protected void onStartConnecting() {
-
-	}
-
 	@Override
 	protected void onDestroy() {
 		DaoFactory.finilize();
 		super.onDestroy();
 	}
 
-	@Override
-	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-	}
-
-	@Override
-	public void onControlUnitCreated(BufferdUnit controlUnit) {
-	}
-
-	@Override
-	public void onGroundPlotCreated(GroundPlot plot) {
-	}
-
-	@Override
-	public void onStopService() {
-	}
-
-	@Override
-	public void startReceive(long size, String file) {
-	}
-
-	@Override
-	public void progressReceive(long size, String file) {
-	}
-
-	@Override
-	public void endReceive(long size) {
-	}
-
-	@Override
-	public void exceptionOccurred(Exception e) {
-	}
-
-	@Override
-	public void downloadCanceled() {
-	}
-
-	@Override
-	public void onPowerSwitchChange(String _switch, State state) {
-	}
-
-	@Override
-	public void startSending(long size) {
-	}
-
-	@Override
-	public void progressSending(long size) {
-	}
-
-	@Override
-	public void endSending(long size) {
-	}
-
-	@Override
-	public void sendingCanceled() {
-	}
-
 	public void progressFinished(Object result) {
+
 	}
 
 }

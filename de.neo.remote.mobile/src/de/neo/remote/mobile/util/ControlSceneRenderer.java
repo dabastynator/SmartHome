@@ -2,7 +2,6 @@ package de.neo.remote.mobile.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +13,11 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.util.Base64;
 import de.neo.android.opengl.AbstractSceneRenderer;
 import de.neo.android.opengl.figures.GLFigure;
 import de.neo.android.opengl.figures.GLFigure.GLClickListener;
@@ -39,17 +40,16 @@ import de.neo.android.opengl.touchhandler.TranslateSceneHandler;
 import de.neo.remote.api.GroundPlot;
 import de.neo.remote.api.GroundPlot.Point;
 import de.neo.remote.api.GroundPlot.Wall;
-import de.neo.remote.api.ICommandAction;
-import de.neo.remote.api.IControlCenter;
-import de.neo.remote.api.IInternetSwitch;
-import de.neo.remote.api.IMediaServer;
-import de.neo.remote.api.IRCColor;
+import de.neo.remote.api.IControlCenter.BeanWeb;
+import de.neo.remote.api.IWebAction.BeanAction;
+import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
+import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
+import de.neo.remote.api.IWebSwitch;
+import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.ControlSceneActivity.SelectControlUnit;
-import de.neo.remote.mobile.services.RemoteBinder;
-import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -72,8 +72,9 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	private Map<String, GLFigure> mGLMediaServers;
 	private Map<String, IGLSwitch> mGLSwitches;
-	private Map<BufferdUnit, GLFigure> mGLBufferdUnits;
+	private Map<BeanWeb, GLFigure> mGLBeanFigureMap;
 	private TranslateSceneHandler mHandler;
+	private IWebSwitch mWebSwitch;
 
 	public ControlSceneRenderer(Context context, SelectControlUnit selecter) {
 		super(context);
@@ -87,7 +88,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		setLighting(true);
 		mGLMediaServers = new HashMap<String, GLFigure>();
 		mGLSwitches = new HashMap<String, IGLSwitch>();
-		mGLBufferdUnits = new HashMap<BufferdUnit, GLFigure>();
+		mGLBeanFigureMap = new HashMap<BeanWeb, GLFigure>();
 	}
 
 	@Override
@@ -96,78 +97,62 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return mRoom;
 	}
 
-	public void reloadControlCenter(RemoteBinder binder) throws RemoteException {
-		IControlCenter control = binder.getControlCenter();
-		clearControlCenter();
-		if (control == null)
-			return;
-		GroundPlot ground = control.getGroundPlot();
-		addGroundToScene(ground);
-		for (String id : binder.getUnits().keySet()) {
-			BufferdUnit unit = binder.getUnits().get(id);
-			addControlUnitToScene(unit);
-		}
+	public void addMediaServer(BeanMediaServer ms) {
+		GLFigure glServer = createGLMediaServer(ms.getDescription());
+		glServer.mPosition[0] = ms.getX();
+		glServer.mPosition[1] = ms.getZ() + 5;
+		glServer.mPosition[2] = -ms.getY();
+		glServer.setOnClickListener(new GLUnitClickListener(ms));
+		glServer.setOnLongClickListener(new GLUnitLongClickListener(ms));
+		addFigure(glServer);
+		mGLMediaServers.put(ms.getID(), glServer);
+		putUnitFigure(ms, glServer);
 	}
 
-	public void addControlUnitToScene(BufferdUnit unit) {
-		if (unit.mObject instanceof IMediaServer) {
-			GLFigure glServer = createGLMediaServer(unit.mDescription);
-			glServer.mPosition[0] = unit.mPosition[0];
-			glServer.mPosition[1] = unit.mPosition[2] + 5;
-			glServer.mPosition[2] = -unit.mPosition[1];
-			glServer.setOnClickListener(new GLUnitClickListener(unit));
-			glServer.setOnLongClickListener(new GLUnitLongClickListener(unit));
-			addFigure(glServer);
-			mGLMediaServers.put(unit.mID, glServer);
-			putUnitFigure(unit, glServer);
-		}
-		if (unit.mObject instanceof IInternetSwitch) {
-			IInternetSwitch internet = (IInternetSwitch) unit.mObject;
-			String type = unit.mSwitchType;
-			GLFigure light = loadGLSwitchByType(type);
-			((IGLSwitch) light).setSwitch(unit.mSwitchState == State.ON);
-			light.mPosition[0] = unit.mPosition[0];
-			light.mPosition[1] = unit.mPosition[2] + 5;
-			light.mPosition[2] = -unit.mPosition[1];
-			InternetSwitchListener listener = new InternetSwitchListener((IGLSwitch) light, internet);
-			light.setOnClickListener(listener);
-			addFigure(light);
-			mGLSwitches.put(unit.mID, (IGLSwitch) light);
-			putUnitFigure(unit, light);
-		}
-		if (unit.mObject instanceof ICommandAction) {
-			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
-			if (unit.mThumbnail != null) {
-				Bitmap bm = Bitmap.createBitmap(unit.mThumbnailWidth, unit.mThumbnailHeight, Bitmap.Config.RGB_565);
-				IntBuffer buf = IntBuffer.wrap(unit.mThumbnail); // data is my
-																	// array
-				bm.copyPixelsFromBuffer(buf);
-				cube.setTexture(bm);
-				cube.setColor(1, 1, 1);
-			} else
-				cube.setColor(0.2f, 0.2f, 0.2f);
-			cube.mSize[0] = cube.mSize[1] = cube.mSize[2] = 0.5f;
-			cube.mPosition[0] = unit.mPosition[0];
-			cube.mPosition[1] = unit.mPosition[2] + 5;
-			cube.mPosition[2] = -unit.mPosition[1];
-			addFigure(cube);
-			cube.setOnClickListener(new GLUnitClickListener(unit));
-			cube.setOnLongClickListener(new GLUnitLongClickListener(unit));
-			putUnitFigure(unit, cube);
-		}
-		if (unit.mObject instanceof IRCColor) {
-			GLTorus color = new GLTorus(0.5f, 0.1f, GLFigure.STYLE_PLANE);
-			color.mColor[0] = 0.1f;
-			color.mColor[1] = color.mColor[2] = 0.8f;
-			color.mSize[0] = color.mSize[1] = color.mSize[2] = 1f;
-			color.mPosition[0] = unit.mPosition[0];
-			color.mPosition[1] = unit.mPosition[2] + 5;
-			color.mPosition[2] = -unit.mPosition[1];
-			addFigure(color);
-			color.setOnClickListener(new GLUnitClickListener(unit));
-			color.setOnLongClickListener(new GLUnitLongClickListener(unit));
-			putUnitFigure(unit, color);
-		}
+	public void addSwitch(BeanSwitch bs) {
+		GLFigure light = loadGLSwitchByType(bs.getType());
+		((IGLSwitch) light).setSwitch(bs.getState() == State.ON);
+		light.mPosition[0] = bs.getX();
+		light.mPosition[1] = bs.getZ() + 5;
+		light.mPosition[2] = -bs.getY();
+		InternetSwitchListener listener = new InternetSwitchListener((IGLSwitch) light, bs);
+		light.setOnClickListener(listener);
+		addFigure(light);
+		mGLSwitches.put(bs.getID(), (IGLSwitch) light);
+		putUnitFigure(bs, light);
+	}
+
+	public void addLEDStrip(BeanLEDStrips led) {
+		GLTorus color = new GLTorus(0.5f, 0.1f, GLFigure.STYLE_PLANE);
+		color.mColor[0] = 0.1f;
+		color.mColor[1] = color.mColor[2] = 0.8f;
+		color.mSize[0] = color.mSize[1] = color.mSize[2] = 1f;
+		color.mPosition[0] = led.getX();
+		color.mPosition[1] = led.getZ() + 5;
+		color.mPosition[2] = -led.getY();
+		addFigure(color);
+		color.setOnClickListener(new GLUnitClickListener(led));
+		color.setOnLongClickListener(new GLUnitLongClickListener(led));
+		putUnitFigure(led, color);
+	}
+
+	public void addAction(BeanAction action) {
+		GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
+		if (action.getIconBase64() != null && action.getIconBase64().length() > 0) {
+			byte[] data = Base64.decode(action.getIconBase64(), Base64.DEFAULT);
+			Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
+			cube.setTexture(bm);
+			cube.setColor(1, 1, 1);
+		} else
+			cube.setColor(0.2f, 0.2f, 0.2f);
+		cube.mSize[0] = cube.mSize[1] = cube.mSize[2] = 0.5f;
+		cube.mPosition[0] = action.getX();
+		cube.mPosition[1] = action.getZ() + 5;
+		cube.mPosition[2] = -action.getY();
+		addFigure(cube);
+		cube.setOnClickListener(new GLUnitClickListener(action));
+		cube.setOnLongClickListener(new GLUnitLongClickListener(action));
+		putUnitFigure(action, cube);
 	}
 
 	private GLFigure createGLMediaServer(String description) {
@@ -277,10 +262,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	@Override
 	public synchronized void onDrawFrame(GL10 gl) {
-		for (BufferdUnit unit : mGLBufferdUnits.keySet()) {
-			GLFigure figure = mGLBufferdUnits.get(unit);
+		for (BeanWeb bean : mGLBeanFigureMap.keySet()) {
+			GLFigure figure = mGLBeanFigureMap.get(bean);
 			if (figure != null) {
-				figure.mPosition[1] = (figure.mPosition[1] + unit.mPosition[2]) / 2;
+				figure.mPosition[1] = (figure.mPosition[1] + bean.getZ()) / 2;
 			}
 		}
 		super.onDrawFrame(gl);
@@ -290,12 +275,12 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mRoom.addFigure(figure);
 	}
 
-	private synchronized void putUnitFigure(BufferdUnit unit, GLFigure figure) {
-		mGLBufferdUnits.put(unit, figure);
+	private synchronized void putUnitFigure(BeanWeb unit, GLFigure figure) {
+		mGLBeanFigureMap.put(unit, figure);
 	}
 
 	public synchronized void clearControlCenter() {
-		mGLBufferdUnits.clear();
+		mGLBeanFigureMap.clear();
 		mGLMediaServers.clear();
 		mGLSwitches.clear();
 		mRoom.clear();
@@ -303,41 +288,41 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 	class GLUnitClickListener implements GLClickListener {
 
-		private BufferdUnit mUnit;
+		private BeanWeb mBean;
 
-		public GLUnitClickListener(BufferdUnit unit) {
-			mUnit = unit;
+		public GLUnitClickListener(BeanWeb bean) {
+			mBean = bean;
 		}
 
 		@Override
 		public void onGLClick() {
-			mControlUnitListener.selectUnit(mUnit);
+			mControlUnitListener.selectBean(mBean);
 		}
 
 	}
 
 	class GLUnitLongClickListener implements GLClickListener {
 
-		private BufferdUnit mUnit;
+		private BeanWeb mBean;
 
-		public GLUnitLongClickListener(BufferdUnit unit) {
-			mUnit = unit;
+		public GLUnitLongClickListener(BeanWeb bean) {
+			mBean = bean;
 		}
 
 		@Override
 		public void onGLClick() {
-			mControlUnitListener.selectLongClickUnit(mUnit);
+			mControlUnitListener.selectLongClickUnit(mBean);
 		}
 	}
 
 	class InternetSwitchListener implements GLClickListener {
 
 		private IGLSwitch ligthtObject;
-		private IInternetSwitch internet;
+		private BeanSwitch mSwitch;
 
-		public InternetSwitchListener(IGLSwitch ligthtObject, IInternetSwitch internet) {
+		public InternetSwitchListener(IGLSwitch ligthtObject, BeanSwitch bs) {
 			this.ligthtObject = ligthtObject;
-			this.internet = internet;
+			mSwitch = bs;
 		}
 
 		@Override
@@ -346,10 +331,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			new Thread() {
 				public void run() {
 					try {
-						de.neo.remote.api.IWebSwitch.State state = de.neo.remote.api.IWebSwitch.State.OFF;
+						IWebSwitch.State state = IWebSwitch.State.OFF;
 						if (lightOn)
-							state = de.neo.remote.api.IWebSwitch.State.ON;
-						internet.setState(state);
+							state = IWebSwitch.State.ON;
+						mWebSwitch.setSwitchState(mSwitch.getID(), state.toString());
 					} catch (RemoteException e) {
 					}
 				};
@@ -425,8 +410,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 	}
 
-	public synchronized Set<BufferdUnit> getUnits() {
-		return mGLBufferdUnits.keySet();
+	public synchronized Set<BeanWeb> getUnits() {
+		return mGLBeanFigureMap.keySet();
 	}
 
 	public void setConnections(boolean connected) {

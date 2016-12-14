@@ -208,7 +208,7 @@ public class PlaylistFragment extends BrowserFragment {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
-		if (activity.mBinder != null && keyCode == KeyEvent.KEYCODE_BACK && mViewerState == ViewerState.PLS_ITEMS) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && mViewerState == ViewerState.PLS_ITEMS) {
 			mViewerState = ViewerState.PLAYLISTS;
 			refreshContent(activity);
 			return true;

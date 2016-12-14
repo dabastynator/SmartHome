@@ -2,34 +2,29 @@ package de.neo.remote.mobile.activities;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ListView;
-import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class SelectSwitchActivity extends Activity {
+public class SelectSwitchActivity extends AbstractConnectionActivity {
 
 	private int appWidgetId;
 
 	private SelectSwitchListener listener;
 	protected ListView switchList;
 
-	private IWebSwitch mWebSwitch;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		mWebSwitch = AbstractConnectionActivity.createWebSwitch();
 
 		setContentView(R.layout.switch_main);
 
@@ -39,29 +34,30 @@ public class SelectSwitchActivity extends Activity {
 		appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		listener = new SelectSwitchListener();
 
-		new AsyncTask<Integer, Integer, Void>() {
+		new AsyncTask<Integer, Integer, Exception>() {
 
-			ArrayList<BeanSwitch> switches;
-			String[] ids;
+			ArrayList<BeanSwitch> switches = new ArrayList<>();
+			String[] ids = {};
 
 			@Override
-			protected Void doInBackground(Integer... params) {
+			protected Exception doInBackground(Integer... params) {
 				try {
 					switches = mWebSwitch.getSwitches();
 					ids = new String[switches.size()];
 					for (int i = 0; i < switches.size(); i++)
 						ids[i] = switches.get(i).getID();
 				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return e;
 				}
 				return null;
 
 			}
 
 			@Override
-			protected void onPostExecute(Void result) {
+			protected void onPostExecute(Exception result) {
 				switchList.setAdapter(new SwitchAdapter(getApplicationContext(), switches, ids, listener));
+				if (result != null)
+					new AbstractTask.ErrorDialog(getApplicationContext(), result).show();
 			}
 		}.execute();
 

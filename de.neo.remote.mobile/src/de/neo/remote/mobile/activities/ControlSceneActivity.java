@@ -1,7 +1,6 @@
 package de.neo.remote.mobile.activities;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -23,17 +22,16 @@ import colorpickerview.dialog.ColorPickerDialogFragment;
 import colorpickerview.dialog.ColorPickerDialogFragment.ColorPickerDialogListener;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.GroundPlot;
-import de.neo.remote.api.ICommandAction;
-import de.neo.remote.api.IMediaServer;
-import de.neo.remote.api.IRCColor;
-import de.neo.remote.api.IWebSwitch.State;
-import de.neo.remote.api.PlayingBean;
+import de.neo.remote.api.IControlCenter.BeanWeb;
+import de.neo.remote.api.IWebAction.BeanAction;
+import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
+import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
+import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
 public class ControlSceneActivity extends AbstractConnectionActivity implements ColorPickerDialogListener {
@@ -63,8 +61,59 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 		params.height = LayoutParams.MATCH_PARENT;
 		params.width = LayoutParams.MATCH_PARENT;
 		mLayout.addView(mGLView, 0, params);
+		loadControlCenter();
+	}
 
-		setTitle(getResources().getString(R.string.connecting));
+	private void loadControlCenter() {
+		new AsyncTask<Integer, Object, Exception>() {
+
+			protected void onPreExecute() {
+				setTitle(getResources().getString(R.string.connecting));
+				mProgress.setVisibility(View.VISIBLE);
+			};
+
+			@Override
+			protected void onProgressUpdate(Object... values) {
+				if (values != null && values.length > 0) {
+					Object o = values[0];
+					if (o instanceof GroundPlot)
+						mRenderer.addGroundToScene((GroundPlot) o);
+					else if (o instanceof List<?>) {
+						for (Object web : (List<?>) o) {
+							if (web instanceof BeanMediaServer) {
+								mRenderer.addMediaServer((BeanMediaServer) web);
+							}
+						}
+					}
+				}
+			};
+
+			@Override
+			protected Exception doInBackground(Integer... params) {
+				try {
+					publishProgress(mWebControlCenter.getGroundPlot());
+					publishProgress(mWebMediaServer.getMediaServer(""));
+					publishProgress(mWebLEDStrip.getLEDStrips());
+					publishProgress(mWebAction.getActions());
+					publishProgress(mWebSwitch.getSwitches());
+				} catch (RemoteException e) {
+					return e;
+				}
+				return null;
+			}
+
+			protected void onPostExecute(Exception result) {
+				mProgress.setVisibility(View.GONE);
+			};
+
+		}.execute();
+	}
+
+	@Override
+	protected void loadWebApi(RemoteServer server) {
+		super.loadWebApi(server);
+		if (mRenderer != null)
+			loadControlCenter();
 	}
 
 	private void findComponents() {
@@ -85,27 +134,11 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 	}
 
 	@Override
-	public void onServerConnectionChanged(RemoteServer server) {
-		mRenderer.setConnections(mBinder.isConnected());
-		if (mBinder.getControlCenter() == null) {
-			setTitle(getResources().getString(R.string.no_controlcenter));
-			mProgress.setVisibility(View.GONE);
-		} else {
-			new UpdateGLViewTask(this).execute();
-		}
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.opt_control_refresh:
-			mRenderer.clearControlCenter();
-			setTitle(getResources().getString(R.string.refresh));
-			mProgress.setVisibility(View.VISIBLE);
-			RemoteServer server = mBinder.getServer();
-			if (server == null)
-				server = getFavoriteServer();
-			mBinder.connectToServer(server, this);
+			mCurrentServer = getFavoriteServer();
+			loadWebApi(mCurrentServer);
 			break;
 		case R.id.opt_settings:
 			Intent intent = new Intent(this, SettingsActivity.class);
@@ -116,11 +149,6 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 	}
 
 	@Override
-	public void onPlayingBeanChanged(String mediaserver, PlayingBean bean) {
-		mRenderer.setPlayingBean(mediaserver, bean);
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater mi = new MenuInflater(getApplication());
@@ -128,95 +156,30 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 		return true;
 	}
 
-	@Override
-	public void onPowerSwitchChange(String _switch, State state) {
-		mRenderer.powerSwitchChanged(_switch, state);
-
-	}
-
-	@Override
-	protected void onStartConnecting() {
-		setTitle(getResources().getString(R.string.connecting));
-		mProgress.setVisibility(View.VISIBLE);
-	}
-
-	@Override
-	public void onControlUnitCreated(BufferdUnit controlUnit) {
-		mRenderer.addControlUnitToScene(controlUnit);
-	}
-
-	@Override
-	public void onGroundPlotCreated(GroundPlot plot) {
-		mRenderer.addGroundToScene(plot);
-	}
-
-	public class UpdateGLViewTask extends SimpleTask {
-
-		public UpdateGLViewTask(AbstractConnectionActivity activity) {
-			super(activity);
-			// setSuccess(getString(R.string.loaded_controlcenter));
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			setTitle(getResources().getString(R.string.load_controlcenter));
-			mProgress.setVisibility(View.VISIBLE);
-		}
-
-		@Override
-		protected Exception doInBackground(String... params) {
-			try {
-				Set<BufferdUnit> renderUnits = mRenderer.getUnits();
-				Collection<BufferdUnit> remoteUnits = mBinder.getUnits().values();
-				boolean isDirty = renderUnits.size() != remoteUnits.size();
-				for (BufferdUnit unit : remoteUnits)
-					isDirty |= !renderUnits.contains(unit);
-				if (isDirty)
-					mRenderer.reloadControlCenter(mBinder);
-			} catch (Exception e) {
-				return e;
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Exception result) {
-			super.onPostExecute(result);
-			if (result == null && mBinder.getServer() != null)
-				setTitle("Controlcenter@" + mBinder.getServer().getName());
-			else
-				setTitle(getResources().getString(R.string.no_conneciton));
-			mRenderer.setConnections(mBinder.isConnected());
-			mProgress.setVisibility(View.GONE);
-		}
-
-	}
-
 	public class SelectControlUnit implements OnClickListener {
-		private BufferdUnit mUnit;
+		private BeanWeb mBean;
 
-		public void selectUnit(final BufferdUnit unit) {
-			mUnit = unit;
-			if (unit.mObject instanceof IMediaServer) {
+		public void selectBean(final BeanWeb bean) {
+			mBean = bean;
+			if (mBean instanceof BeanMediaServer) {
 				mHandler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						Intent intent = new Intent(ControlSceneActivity.this, MediaServerActivity.class);
-						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, unit.mID);
+						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, mBean.getID());
 						ControlSceneActivity.this.startActivity(intent);
 					}
 				});
 			}
-			if (unit.mObject instanceof ICommandAction) {
-				AsyncTask<BufferdUnit, Integer, Exception> task = new AsyncTask<BufferdUnit, Integer, Exception>() {
+			if (mBean instanceof BeanAction) {
+				AsyncTask<BeanWeb, Integer, Exception> task = new AsyncTask<BeanWeb, Integer, Exception>() {
 
 					@Override
-					protected Exception doInBackground(BufferdUnit... params) {
+					protected Exception doInBackground(BeanWeb... params) {
 						try {
-							ICommandAction action = (ICommandAction) unit.mObject;
-							action.startAction();
+							BeanAction action = (BeanAction) mBean;
+							mWebAction.startAction(action.getID());
 						} catch (Exception e) {
 							return e;
 						}
@@ -225,57 +188,59 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 
 					@Override
 					protected void onPostExecute(Exception result) {
+						BeanAction action = (BeanAction) mBean;
 						if (result != null)
 							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
 						else {
-							Toast.makeText(getApplicationContext(), "Execute: " + unit.mDescription, Toast.LENGTH_SHORT)
-									.show();
+							Toast.makeText(getApplicationContext(), "Execute: " + action.getDescription(),
+									Toast.LENGTH_SHORT).show();
 						}
-						if (unit.mClientAction != null && unit.mClientAction.length() > 0) {
-							Uri uri = Uri.parse(unit.mClientAction);
+						if (action.getClientAction() != null && action.getClientAction().length() > 0) {
+							Uri uri = Uri.parse(action.getClientAction());
 							Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 							startActivity(intent);
 
 						}
 					}
 				};
-				task.execute(unit);
+				task.execute(mBean);
 			}
 
-			if (unit.mObject instanceof IRCColor) {
-				ColorPickerDialogFragment dialog = ColorPickerDialogFragment.newInstance(unit.mID.hashCode(),
-						"Pick color for " + mSelecter.mUnit.mName, getString(android.R.string.ok),
-						unit.mColor | 0xFF000000, false);
+			if (mBean instanceof BeanLEDStrips) {
+				BeanLEDStrips led = (BeanLEDStrips) mBean;
+				ColorPickerDialogFragment dialog = ColorPickerDialogFragment.newInstance(led.getID().hashCode(),
+						"Pick color for " + led.getName(), getString(android.R.string.ok), led.getColor() | 0xFF000000,
+						false);
 				dialog.show(getFragmentManager(), "colorpicker");
 			}
 		}
 
-		public void selectLongClickUnit(final BufferdUnit unit) {
-			mUnit = unit;
+		public void selectLongClickUnit(final BeanWeb bean) {
+			mBean = bean;
 			mHandler.post(new Runnable() {
 
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
-
 					new AlertDialog.Builder(ControlSceneActivity.this)
 							.setTitle(getResources().getString(R.string.command_stop))
-							.setMessage(getResources().getString(R.string.command_stop_long) + " " + unit.mName + "?")
+							.setMessage(
+									getResources().getString(R.string.command_stop_long) + " " + mBean.getName() + "?")
 							.setPositiveButton(getResources().getString(android.R.string.yes), SelectControlUnit.this)
 							.setNegativeButton(getResources().getString(android.R.string.no), null).create().show();
 				}
 			});
 		}
 
-		public void stopCommand(final BufferdUnit unit) {
-			if (unit.mObject instanceof ICommandAction) {
-				AsyncTask<BufferdUnit, Integer, Exception> task = new AsyncTask<BufferdUnit, Integer, Exception>() {
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			if (mBean instanceof BeanAction) {
+				AsyncTask<BeanWeb, Integer, Exception> task = new AsyncTask<BeanWeb, Integer, Exception>() {
 
 					@Override
-					protected Exception doInBackground(BufferdUnit... params) {
+					protected Exception doInBackground(BeanWeb... params) {
 						try {
-							ICommandAction action = (ICommandAction) unit.mObject;
-							action.stopAction();
+							BeanAction action = (BeanAction) mBean;
+							mWebAction.stopAction(action.getID());
 						} catch (Exception e) {
 							return e;
 						}
@@ -287,34 +252,29 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 						if (result != null)
 							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
 						else {
-							Toast.makeText(getApplicationContext(), "Stop: " + unit.mDescription, Toast.LENGTH_SHORT)
-									.show();
+							Toast.makeText(getApplicationContext(), "Stop: " + mBean.getDescription(),
+									Toast.LENGTH_SHORT).show();
 						}
 					}
 				};
-				task.execute(unit);
+				task.execute(mBean);
 			}
-
-		}
-
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			stopCommand(mUnit);
 		}
 	}
 
 	@Override
 	public void onColorSelected(int dialogId, final int color) {
-		if (mSelecter.mUnit.mObject instanceof IRCColor) {
-			mSelecter.mUnit.mColor = color & 0xFFFFFF;
+		if (mSelecter.mBean instanceof BeanLEDStrips) {
 			new SimpleTask(this).setSuccess("Color set")
-					.setDialogMessage("Set color for " + mSelecter.mUnit.mName + " to " + color)
+					.setDialogMessage("Set color for " + mSelecter.mBean.getName() + " to " + color)
 					.setDialogtitle("Set color...").setAction(new BackgroundAction() {
 
 						@Override
 						public void run() throws Exception {
-							IRCColor rccolor = (IRCColor) mSelecter.mUnit.mObject;
-							rccolor.setColor(mSelecter.mUnit.mColor);
+							int red = color & 0x0000FF;
+							int green = (color & 0x00FF00) >> 8;
+							int blue = (color & 0xFF0000) >> 16;
+							mWebLEDStrip.setColor(mSelecter.mBean.getID(), red, green, blue);
 						}
 					}).execute();
 		}

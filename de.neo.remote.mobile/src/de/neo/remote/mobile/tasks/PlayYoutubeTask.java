@@ -1,24 +1,22 @@
 package de.neo.remote.mobile.tasks;
 
-import de.neo.remote.api.IPlayer;
 import de.neo.remote.mobile.activities.AbstractConnectionActivity;
-import de.neo.remote.mobile.services.RemoteBinder;
+import de.neo.remote.mobile.persistence.MediaServerState;
 
 public class PlayYoutubeTask extends AbstractTask {
 
-	private String youtubeURL;
-	private RemoteBinder binder;
+	private String mYoutubeURL;
+	private MediaServerState mMediaServer;
 
-	public PlayYoutubeTask(AbstractConnectionActivity activity,
-			String youtubeURL, RemoteBinder binder) {
+	public PlayYoutubeTask(AbstractConnectionActivity activity, String youtubeURL, MediaServerState mediaServer) {
 		super(activity, TaskMode.DialogTask);
-		this.youtubeURL = youtubeURL;
-		this.binder = binder;
+		mYoutubeURL = youtubeURL;
+		mMediaServer = mediaServer;
 	}
 
 	@Override
 	protected String getDialogMsg() {
-		return youtubeURL;
+		return mYoutubeURL;
 	}
 
 	@Override
@@ -28,14 +26,6 @@ public class PlayYoutubeTask extends AbstractTask {
 
 	@Override
 	protected void onExecute() throws Exception {
-		if (binder == null)
-			throw new Exception("not bindet");
-		if (binder.getLatestMediaServer() == null)
-			throw new Exception("no mediaserver selected");
-		IPlayer player = binder.getLatestMediaServer().player;
-		if (player != null) {
-			player.playFromYoutube(youtubeURL);
-		} else
-			throw new Exception("no player selected");
+		mMediaServer.playYoutube(mYoutubeURL);
 	}
 }
