@@ -22,8 +22,10 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import de.neo.rmi.api.JSONUtils;
+import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.WebGet;
 import de.neo.rmi.api.WebRequest;
+import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.dynamics.WebProxy;
 import de.neo.rmi.protokol.RemoteAble;
 
@@ -59,8 +61,8 @@ public class WebServerHandler implements HttpHandler {
 				try {
 					result.put(pair[0], URLDecoder.decode(pair[1], "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					result.put(pair[0], "");
-					e.printStackTrace();
+					RMILogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+							"WebProxy");
 				}
 			} else {
 				result.put(pair[0], "");
