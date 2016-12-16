@@ -113,7 +113,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-		mShowDuration = 1000 * 3;
+		mShowDuration = 1000 * 4;
 		new Thread() {
 			@Override
 			public void run() {

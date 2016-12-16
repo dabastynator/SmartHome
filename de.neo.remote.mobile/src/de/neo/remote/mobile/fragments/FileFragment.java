@@ -2,6 +2,7 @@ package de.neo.remote.mobile.fragments;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -81,6 +82,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 				try {
 					if (mMediaServer != null) {
 						mFileBeans = mMediaServer.getFiles();
+						Collections.sort(mFileBeans);
 						mFileList = new String[mFileBeans.size()];
 						for (int i = 0; i < mFileBeans.size(); i++)
 							mFileList[i] = mFileBeans.get(i).getName();

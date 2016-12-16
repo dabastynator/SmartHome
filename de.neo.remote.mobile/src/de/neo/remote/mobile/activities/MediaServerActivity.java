@@ -27,6 +27,7 @@ import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
+import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
@@ -227,15 +228,15 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	private void updatePlayerButtons() {
-		if ("mplayer".equals(mMediaServer.getPlayer()))
+		if (IWebMediaServer.MPlayer.equals(mMediaServer.getPlayer()))
 			mMplayerButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mMplayerButton.setBackgroundResource(0);
-		if ("omxplayer".equals(mMediaServer.getPlayer()))
+		if (IWebMediaServer.OMXPlayer.equals(mMediaServer.getPlayer()))
 			mOmxButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mOmxButton.setBackgroundResource(0);
-		if ("totem".equals(mMediaServer.getPlayer()))
+		if (IWebMediaServer.TOTEM.equals(mMediaServer.getPlayer()))
 			mTotemButton.setBackgroundResource(R.drawable.image_border);
 		else
 			mTotemButton.setBackgroundResource(0);
@@ -373,7 +374,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setTotem(View view) {
-		mMediaServer.setPlayer("totem");
+		mMediaServer.setPlayer(IWebMediaServer.TOTEM);
 		saveMediaServer(mMediaServer);
 		mMplayerButton.setBackgroundResource(0);
 		mOmxButton.setBackgroundResource(0);
@@ -401,7 +402,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setMPlayer(View view) {
-		mMediaServer.setPlayer("mplayer");
+		mMediaServer.setPlayer(IWebMediaServer.MPlayer);
 		saveMediaServer(mMediaServer);
 		mMplayerButton.setBackgroundResource(R.drawable.image_border);
 		mTotemButton.setBackgroundResource(0);
@@ -409,7 +410,7 @@ public class MediaServerActivity extends AbstractConnectionActivity {
 	}
 
 	public void setOMXPlayer(View view) {
-		mMediaServer.setPlayer("mplayer");
+		mMediaServer.setPlayer(IWebMediaServer.OMXPlayer);
 		saveMediaServer(mMediaServer);
 		mMplayerButton.setBackgroundResource(0);
 		mOmxButton.setBackgroundResource(R.drawable.image_border);

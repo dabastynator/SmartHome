@@ -26,6 +26,7 @@ import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.remote.api.IWebAction.BeanAction;
 import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
+import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
@@ -55,6 +56,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 		findComponents();
 
 		mRenderer = new ControlSceneRenderer(this, mSelecter);
+		mRenderer.setSwitchApi(mWebSwitch);
 		mGLView = new AbstractSceneSurfaceView(this, savedInstanceState, mRenderer);
 
 		LayoutParams params = new LayoutParams();
@@ -70,6 +72,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 			protected void onPreExecute() {
 				setTitle(getResources().getString(R.string.connecting));
 				mProgress.setVisibility(View.VISIBLE);
+				mRenderer.clearControlCenter();
 			};
 
 			@Override
@@ -80,9 +83,14 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 						mRenderer.addGroundToScene((GroundPlot) o);
 					else if (o instanceof List<?>) {
 						for (Object web : (List<?>) o) {
-							if (web instanceof BeanMediaServer) {
+							if (web instanceof BeanMediaServer)
 								mRenderer.addMediaServer((BeanMediaServer) web);
-							}
+							if (web instanceof BeanSwitch)
+								mRenderer.addSwitch((BeanSwitch) web);
+							if (web instanceof BeanAction)
+								mRenderer.addAction((BeanAction) web);
+							if (web instanceof BeanLEDStrips)
+								mRenderer.addLEDStrip((BeanLEDStrips) web);
 						}
 					}
 				}
@@ -103,6 +111,7 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 			}
 
 			protected void onPostExecute(Exception result) {
+				setTitle(getResources().getString(R.string.loaded_controlcenter));
 				mProgress.setVisibility(View.GONE);
 			};
 
@@ -112,8 +121,10 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 	@Override
 	protected void loadWebApi(RemoteServer server) {
 		super.loadWebApi(server);
-		if (mRenderer != null)
+		if (mRenderer != null) {
 			loadControlCenter();
+			mRenderer.setSwitchApi(mWebSwitch);
+		}
 	}
 
 	private void findComponents() {

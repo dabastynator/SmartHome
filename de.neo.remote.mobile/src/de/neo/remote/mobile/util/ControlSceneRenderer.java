@@ -91,6 +91,10 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		mGLBeanFigureMap = new HashMap<BeanWeb, GLFigure>();
 	}
 
+	public void setSwitchApi(IWebSwitch webSwitch) {
+		mWebSwitch = webSwitch;
+	}
+
 	@Override
 	protected GLFigure createScene() {
 		mRoom = new GLGroup();
