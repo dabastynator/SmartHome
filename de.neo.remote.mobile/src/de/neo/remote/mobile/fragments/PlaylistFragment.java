@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
 import de.neo.remote.mobile.persistence.MediaServerState;
@@ -192,7 +192,7 @@ public class PlaylistFragment extends BrowserFragment {
 	public class ListClickListener implements OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
-			AbstractConnectionActivity activity = (AbstractConnectionActivity) getActivity();
+			WebAPIActivity activity = (WebAPIActivity) getActivity();
 			PlayItemTask task = null;
 			if (mViewerState == ViewerState.PLS_ITEMS) {
 				mSelectedItem = mPlsItems.get(position);

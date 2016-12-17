@@ -3,17 +3,17 @@ package de.neo.remote.mobile.tasks;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.widget.Toast;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 
 public class SimpleTask extends AsyncTask<String, Integer, Exception> {
 
-	private AbstractConnectionActivity mActivity;
+	private WebAPIActivity mActivity;
 	private String mSuccess;
 	private BackgroundAction mAction;
 	private String mMessage;
 	private String mMessageTitle;
 
-	public SimpleTask(AbstractConnectionActivity activity) {
+	public SimpleTask(WebAPIActivity activity) {
 		mActivity = activity;
 	}
 

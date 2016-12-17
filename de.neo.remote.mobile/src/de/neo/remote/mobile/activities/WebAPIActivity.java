@@ -27,7 +27,7 @@ import de.remote.mobile.R;
  * @author sebastian
  * 
  */
-public class AbstractConnectionActivity extends ActionBarActivity {
+public class WebAPIActivity extends ActionBarActivity {
 
 	public static final String EXTRA_SERVER_ID = "server_id";
 
@@ -53,6 +53,11 @@ public class AbstractConnectionActivity extends ActionBarActivity {
 
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		mCurrentServer = getFavoriteServer();
+		if (mCurrentServer == null) {
+			intent = new Intent(this, SelectServerActivity.class);
+			startActivityForResult(intent, SelectServerActivity.RESULT_CODE);
+		}
+
 		loadWebApi(mCurrentServer);
 	}
 

@@ -15,7 +15,7 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.api.IInternetSwitch;
 import de.neo.remote.api.IMediaServer;
 import de.neo.remote.api.PlayingBean;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService.BufferdUnit;
 import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
@@ -114,7 +114,7 @@ public class RemoteBinder extends Binder {
 	 * 
 	 * @param file
 	 */
-	public void downloadFile(AbstractConnectionActivity activity, IBrowser browser, String file) {
+	public void downloadFile(WebAPIActivity activity, IBrowser browser, String file) {
 		new DownloadTask(activity, browser, file, null, mService.mCurrentServer.getName(), this).execute();
 		mService.mNotificationHandler.setFile(file);
 	}
@@ -124,7 +124,7 @@ public class RemoteBinder extends Binder {
 	 * 
 	 * @param directory
 	 */
-	public void downloadDirectory(AbstractConnectionActivity activity, IBrowser browser, String directory) {
+	public void downloadDirectory(WebAPIActivity activity, IBrowser browser, String directory) {
 		new DownloadTask(activity, browser, null, directory, mService.mCurrentServer.getName(), this).execute();
 		mService.mNotificationHandler.setFile(directory);
 	}

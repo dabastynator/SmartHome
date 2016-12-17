@@ -48,7 +48,7 @@ import de.remote.mobile.R;
  * 
  * @author sebastian
  */
-public class MediaServerActivity extends AbstractConnectionActivity {
+public class MediaServerActivity extends WebAPIActivity {
 
 	public static final String EXTRA_MEDIA_ID = "media_server_id";
 	public static final int FILE_REQUEST = 3;

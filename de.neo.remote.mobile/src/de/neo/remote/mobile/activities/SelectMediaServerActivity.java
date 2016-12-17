@@ -15,7 +15,7 @@ import de.neo.remote.mobile.util.MediaServerAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class SelectMediaServerActivity extends AbstractConnectionActivity {
+public class SelectMediaServerActivity extends WebAPIActivity {
 
 	public static final String MS_NUMBER = "ms_number";
 

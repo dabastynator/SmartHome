@@ -9,7 +9,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.widget.EditText;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
@@ -17,11 +17,11 @@ import de.remote.mobile.R;
 
 public class PlayListTask {
 
-	private AbstractConnectionActivity mActivity;
+	private WebAPIActivity mActivity;
 	private MediaServerState mMedia;
 	private String mItem;
 
-	public PlayListTask(AbstractConnectionActivity activity, MediaServerState mediaserver) {
+	public PlayListTask(WebAPIActivity activity, MediaServerState mediaserver) {
 		mActivity = activity;
 		mMedia = mediaserver;
 	}
@@ -128,7 +128,7 @@ public class PlayListTask {
 
 		private String[] mPlayLists;
 
-		public SelectPlayListTask(AbstractConnectionActivity activity) {
+		public SelectPlayListTask(WebAPIActivity activity) {
 			super(activity);
 			setAction(new BackgroundAction() {
 

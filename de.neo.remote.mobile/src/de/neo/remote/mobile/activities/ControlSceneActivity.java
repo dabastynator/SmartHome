@@ -32,10 +32,9 @@ import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
-import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class ControlSceneActivity extends AbstractConnectionActivity implements ColorPickerDialogListener {
+public class ControlSceneActivity extends WebAPIActivity implements ColorPickerDialogListener {
 
 	private AbstractSceneSurfaceView mGLView;
 	private ControlSceneRenderer mRenderer;
@@ -99,20 +98,30 @@ public class ControlSceneActivity extends AbstractConnectionActivity implements 
 			@Override
 			protected Exception doInBackground(Integer... params) {
 				try {
+					if (mWebControlCenter == null || mWebMediaServer == null || mWebLEDStrip == null
+							|| mWebAction == null || mWebSwitch == null)
+						throw new IllegalStateException(getString(R.string.no_controlcenter));
 					publishProgress(mWebControlCenter.getGroundPlot());
 					publishProgress(mWebMediaServer.getMediaServer(""));
 					publishProgress(mWebLEDStrip.getLEDStrips());
 					publishProgress(mWebAction.getActions());
 					publishProgress(mWebSwitch.getSwitches());
-				} catch (RemoteException e) {
+				} catch (Exception e) {
 					return e;
 				}
 				return null;
 			}
 
 			protected void onPostExecute(Exception result) {
-				setTitle(getResources().getString(R.string.loaded_controlcenter));
 				mProgress.setVisibility(View.GONE);
+				if (result == null) {
+					setTitle(getResources().getString(R.string.loaded_controlcenter));
+					mRenderer.setConnectionState(true);
+				} else {
+					setTitle(getResources().getString(R.string.no_controlcenter));
+					mRenderer.setConnectionState(false);
+					new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
+				}
 			};
 
 		}.execute();

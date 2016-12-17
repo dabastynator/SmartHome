@@ -4,7 +4,7 @@ import java.io.File;
 
 import android.os.Environment;
 import de.neo.remote.api.IBrowser;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectoryReceiver;
@@ -12,7 +12,7 @@ import de.neo.rmi.transceiver.FileReceiver;
 
 public class DownloadTask extends AbstractTask {
 
-	public DownloadTask(AbstractConnectionActivity activity, IBrowser browser,
+	public DownloadTask(WebAPIActivity activity, IBrowser browser,
 			String file, String directory, String serverName,
 			RemoteBinder binder) {
 		super(activity, TaskMode.ToastTask);

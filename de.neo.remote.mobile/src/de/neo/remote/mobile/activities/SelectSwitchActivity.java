@@ -15,7 +15,7 @@ import de.neo.remote.mobile.util.SwitchAdapter;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
-public class SelectSwitchActivity extends AbstractConnectionActivity {
+public class SelectSwitchActivity extends WebAPIActivity {
 
 	private int appWidgetId;
 

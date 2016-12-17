@@ -10,7 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.widget.Toast;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 
 public abstract class AbstractTask extends
 		AsyncTask<String, Integer, Exception> {
@@ -19,12 +19,12 @@ public abstract class AbstractTask extends
 		DialogTask, ToastTask
 	};
 
-	protected AbstractConnectionActivity mActivity;
+	protected WebAPIActivity mActivity;
 	protected boolean mCanceld = false;
 	protected TaskMode mMode;
 	protected Exception mException;
 
-	public AbstractTask(AbstractConnectionActivity activity, TaskMode mode) {
+	public AbstractTask(WebAPIActivity activity, TaskMode mode) {
 		mActivity = activity;
 		mMode = mode;
 		mCanceld = false;

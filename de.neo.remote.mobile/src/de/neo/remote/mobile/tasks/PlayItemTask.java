@@ -4,7 +4,7 @@ import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
-import de.neo.remote.mobile.activities.AbstractConnectionActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 
 public class PlayItemTask extends AbstractTask {
@@ -14,19 +14,19 @@ public class PlayItemTask extends AbstractTask {
 	private BeanPlaylist mPlaylist;
 	private BeanPlaylistItem mItem;
 
-	public PlayItemTask(AbstractConnectionActivity activity, MediaServerState server, BeanFileSystem file) {
+	public PlayItemTask(WebAPIActivity activity, MediaServerState server, BeanFileSystem file) {
 		super(activity, TaskMode.DialogTask);
 		mFile = file;
 		mServer = server;
 	}
 
-	public PlayItemTask(AbstractConnectionActivity activity, MediaServerState server, BeanPlaylist playlist) {
+	public PlayItemTask(WebAPIActivity activity, MediaServerState server, BeanPlaylist playlist) {
 		super(activity, TaskMode.DialogTask);
 		mPlaylist = playlist;
 		mServer = server;
 	}
 
-	public PlayItemTask(AbstractConnectionActivity activity, MediaServerState server, BeanPlaylistItem item) {
+	public PlayItemTask(WebAPIActivity activity, MediaServerState server, BeanPlaylistItem item) {
 		super(activity, TaskMode.DialogTask);
 		mItem = item;
 		mServer = server;

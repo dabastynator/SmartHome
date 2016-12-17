@@ -418,8 +418,8 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		return mGLBeanFigureMap.keySet();
 	}
 
-	public void setConnections(boolean connected) {
-		if (connected)
+	public void setConnectionState(boolean available) {
+		if (available)
 			setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1, 1, 1 });
 		else
 			setGradient(new float[] { 1, 0.3f, 0.3f, 1 }, new float[] { 1, 1, 1, 1 });
