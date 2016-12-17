@@ -45,6 +45,7 @@ public class WebProxy implements InvocationHandler {
 		String result = doWebGetRequest(url);
 		Object json = new JSONParser().parse(result);
 		WebRequest request = method.getAnnotation(WebRequest.class);
+		JSONUtils.checkForException(json);
 		return JSONUtils.jsonToObject(method.getReturnType(), json, request, null);
 	}
 

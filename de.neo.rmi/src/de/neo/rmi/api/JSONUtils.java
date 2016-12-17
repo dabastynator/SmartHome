@@ -1,6 +1,8 @@
 package de.neo.rmi.api;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +11,8 @@ import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import de.neo.rmi.protokol.RemoteException;
 
 public class JSONUtils {
 
@@ -163,7 +167,7 @@ public class JSONUtils {
 							Class cls = field.getType();
 							field.set(result, Enum.valueOf(cls, jsonValue.toString()));
 						} else {
-							if (jsonValue instanceof JSONObject) {
+							if (jsonValue instanceof JSONObject || jsonValue instanceof JSONArray) {
 								Object child = jsonToObject(field.getType(), jsonValue, null, webField);
 								if (child != null)
 									field.set(result, child);
@@ -175,4 +179,41 @@ public class JSONUtils {
 		}
 		return result;
 	}
+
+	public static void checkForException(Object json) throws Throwable {
+		if (!(json instanceof JSONObject))
+			return;
+		JSONObject obj = (JSONObject) json;
+		Object error = obj.get("error");
+		Object success = obj.get("success");
+		if (!(error instanceof JSONObject))
+			return;
+		if (success == null || !new Boolean(false).equals(success))
+			return;
+		JSONObject e = (JSONObject) error;
+		Object cl = e.get("class");
+		String msg = (String) e.get("message");
+		if (cl == null)
+			return;
+		Object exception = null;
+		try {
+			Class<?> class1 = Class.forName(cl.toString());
+			Constructor<?> constructor = null;
+			try {
+				constructor = class1.getConstructor();
+			} catch (NoSuchMethodException ex) {
+
+			}
+			if (constructor == null)
+				constructor = class1.getConstructor(String.class);
+			exception = constructor.newInstance(msg);
+		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+				| IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
+			throw new RemoteException(msg + " (" + cl + ")", "");
+		}
+		if (exception instanceof Throwable)
+			throw (Throwable) exception;
+
+	}
+
 }
