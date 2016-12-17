@@ -16,6 +16,9 @@ public interface IWebMediaServer extends RemoteAble {
 	}
 
 	public static final String FileSeparator = "<->";
+	public static final String MPlayer = "mplayer";
+	public static final String OMXPlayer = "omxplayer";
+	public static final String TOTEM = "totem";
 
 	/**
 	 * List all registered media-server with current playing state. Optional
@@ -255,7 +258,7 @@ public interface IWebMediaServer extends RemoteAble {
 	public PlayingBean setVolume(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
 			@WebGet(name = "volume") int volume) throws RemoteException, PlayerException;
 
-	public static class BeanFileSystem {
+	public static class BeanFileSystem implements Comparable<BeanFileSystem> {
 
 		@WebField(name = "filetype")
 		private FileType mFileType;
@@ -277,6 +280,17 @@ public interface IWebMediaServer extends RemoteAble {
 
 		public void setName(String name) {
 			mName = name;
+		}
+
+		@Override
+		public int compareTo(BeanFileSystem another) {
+			if (another == null)
+				return 0;
+			if (getFileType() == another.getFileType())
+				return mName.compareTo(another.getName());
+			if (getFileType() == FileType.Directory)
+				return 1;
+			return -1;
 		}
 	}
 

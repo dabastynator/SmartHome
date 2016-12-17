@@ -1,5 +1,6 @@
 package de.neo.remote.api;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +123,9 @@ public interface IControlCenter extends RemoteAble {
 	 */
 	public Map<String, IControlUnit> getControlUnits();
 
-	public static class BeanWeb {
+	public static class BeanWeb implements Serializable {
+
+		private static final long serialVersionUID = -4066506544238955935L;
 
 		@WebField(name = "name")
 		private String mName;

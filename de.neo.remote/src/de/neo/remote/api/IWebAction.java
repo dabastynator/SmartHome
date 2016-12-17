@@ -17,7 +17,7 @@ public interface IWebAction extends RemoteAble {
 	 * 
 	 * @return action list
 	 */
-	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.")
+	@WebRequest(path = "list", description = "List all actions with id, running-info and client-action.", genericClass = BeanAction.class)
 	public ArrayList<BeanAction> getActions();
 
 	/**
