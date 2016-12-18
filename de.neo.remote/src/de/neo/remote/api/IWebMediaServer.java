@@ -287,7 +287,7 @@ public interface IWebMediaServer extends RemoteAble {
 			if (another == null)
 				return 0;
 			if (getFileType() == another.getFileType())
-				return mName.compareTo(another.getName());
+				return mName.compareToIgnoreCase(another.getName());
 			if (getFileType() == FileType.Directory)
 				return -1;
 			return 1;
@@ -320,7 +320,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 		@Override
 		public int compareTo(BeanPlaylist another) {
-			return mName.compareTo(another.mName);
+			return mName.compareToIgnoreCase(another.mName);
 		}
 
 	}
