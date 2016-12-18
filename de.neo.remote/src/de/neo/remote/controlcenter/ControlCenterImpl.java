@@ -3,6 +3,7 @@ package de.neo.remote.controlcenter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +108,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		while (true) {
 			checkControlUnits();
 			try {
-				Thread.sleep(100 * 10);
+				Thread.sleep(1000 * 30);
 			} catch (InterruptedException e) {
 			}
 		}
@@ -118,7 +119,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	 */
 	private void checkControlUnits() {
 		int removed = 0;
-		for (String id : mControlUnits.keySet()) {
+		for (String id : new HashSet<>(mControlUnits.keySet())) {
 			try {
 				IControlUnit unit = mControlUnits.get(id);
 				unit.getID();
