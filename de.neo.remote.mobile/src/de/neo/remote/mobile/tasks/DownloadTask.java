@@ -5,22 +5,18 @@ import java.io.File;
 import android.os.Environment;
 import de.neo.remote.api.IBrowser;
 import de.neo.remote.mobile.activities.WebAPIActivity;
-import de.neo.remote.mobile.services.RemoteBinder;
 import de.neo.rmi.protokol.ServerPort;
 import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
 
 public class DownloadTask extends AbstractTask {
 
-	public DownloadTask(WebAPIActivity activity, IBrowser browser,
-			String file, String directory, String serverName,
-			RemoteBinder binder) {
+	public DownloadTask(WebAPIActivity activity, IBrowser browser, String file, String directory, String serverName) {
 		super(activity, TaskMode.ToastTask);
 		this.browser = browser;
 		this.file = file;
 		this.directory = directory;
 		this.serverName = serverName;
-		this.binder = binder;
 	}
 
 	public static final int BUFFER_SIZE = 1024 * 512;
@@ -30,35 +26,29 @@ public class DownloadTask extends AbstractTask {
 	private String file;
 	private String directory;
 	private String serverName;
-	private RemoteBinder binder;
 
 	@Override
 	protected void onExecute() throws Exception {
 		FileReceiver receiver = null;
 		if (file != null) {
 			ServerPort serverport = browser.publishFile(file);
-			String folder = Environment.getExternalStorageDirectory()
-					.toString() + File.separator + serverName.trim();
+			String folder = Environment.getExternalStorageDirectory().toString() + File.separator + serverName.trim();
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
 			File newFile = new File(folder + File.separator + file.trim());
-			receiver = new FileReceiver(serverport.getIp(),
-					serverport.getPort(), PROGRESS_STEP, newFile);
+			receiver = new FileReceiver(serverport.getIp(), serverport.getPort(), PROGRESS_STEP, newFile);
 		}
 		if (directory != null) {
 			ServerPort serverport = browser.publishDirectory(directory);
-			String folder = Environment.getExternalStorageDirectory()
-					.toString() + File.separator + serverName.trim();
+			String folder = Environment.getExternalStorageDirectory().toString() + File.separator + serverName.trim();
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
-			receiver = new DirectoryReceiver(serverport.getIp(),
-					serverport.getPort(), dir);
+			receiver = new DirectoryReceiver(serverport.getIp(), serverport.getPort(), dir);
 		}
-		binder.mReceiver = receiver;
 		receiver.setBufferSize(BUFFER_SIZE);
-		receiver.getProgressListener().add(binder.mService.mDownloadListener);
+		// receiver.getProgressListener().add(binder.mService.mDownloadListener);
 		receiver.receiveSync();
 	}
 

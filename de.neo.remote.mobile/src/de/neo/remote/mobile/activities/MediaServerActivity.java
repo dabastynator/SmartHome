@@ -2,6 +2,7 @@ package de.neo.remote.mobile.activities;
 
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -32,7 +33,6 @@ import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.MediaServerState;
-import de.neo.remote.mobile.services.RemoteService.IRemoteActionListener;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
@@ -68,7 +68,6 @@ public class MediaServerActivity extends WebAPIActivity {
 		DIRECTORIES, PLAYLISTS, PLS_ITEMS
 	}
 
-	protected IRemoteActionListener mRemoteListener;
 	public ImageView mMplayerButton;
 	public ImageView mTotemButton;
 	public ImageView mFilesystemButton;
@@ -95,8 +94,13 @@ public class MediaServerActivity extends WebAPIActivity {
 		findComponents();
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-		if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(EXTRA_MEDIA_ID)) {
-			mMediaServer = createMediaServerForId(getIntent().getExtras().getString(EXTRA_MEDIA_ID));
+		loadServerByIntent(getIntent());
+	}
+
+	private void loadServerByIntent(Intent intent) {
+		setTitle(getString(R.string.connecting));
+		if (intent.getExtras() != null && intent.getExtras().containsKey(EXTRA_MEDIA_ID)) {
+			mMediaServer = createMediaServerForId(this, intent.getExtras().getString(EXTRA_MEDIA_ID));
 			mMediaServer.initialize(mWebMediaServer);
 			updatePlayerButtons();
 			mBrowserPageAdapter.setMediaServer(mMediaServer);
@@ -111,7 +115,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		return mMediaServer;
 	}
 
-	public static MediaServerState createMediaServerForId(String remoteID) {
+	public static MediaServerState createMediaServerForId(Context context, String remoteID) {
 		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
 		try {
 			for (MediaServerState ms : dao.loadAll())
@@ -125,8 +129,8 @@ public class MediaServerActivity extends WebAPIActivity {
 			dao.save(ms);
 			return ms;
 		} catch (DaoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (context != null)
+				new AbstractTask.ErrorDialog(context, e).show();
 		}
 		return null;
 	}
@@ -362,7 +366,7 @@ public class MediaServerActivity extends WebAPIActivity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		setIntent(intent);
-		// now getIntent() should always return the last received intent
+		loadServerByIntent(getIntent());
 	}
 
 	public void showFileSystem(View view) {

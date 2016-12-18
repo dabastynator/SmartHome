@@ -1,9 +1,11 @@
 package de.neo.remote.mobile.tasks;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +17,15 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import de.neo.remote.api.Trigger;
+import de.neo.android.persistence.Dao;
+import de.neo.android.persistence.DaoException;
+import de.neo.android.persistence.DaoFactory;
+import de.neo.remote.api.IControlCenter;
 import de.neo.remote.mobile.activities.SettingsActivity;
-import de.neo.remote.mobile.services.RemoteService;
+import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
+import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.services.WidgetService;
+import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
 
 public class WifiSignalTask extends Thread {
@@ -26,7 +34,7 @@ public class WifiSignalTask extends Thread {
 
 	private final BlockingQueue<Runnable> mActions;
 	private final AtomicBoolean mRunning = new AtomicBoolean(true);
-	private RemoteService mService;
+	private Service mService;
 	private long mLastClientRefreshTime = 0;
 	private boolean mLastClientRefeshed;
 	private long mLastClientTriggerTime = 0;
@@ -34,7 +42,7 @@ public class WifiSignalTask extends Thread {
 	public String mCurrentSSID;
 	private NetworkListener mListener;
 
-	public WifiSignalTask(RemoteService service) {
+	public WifiSignalTask(Service service) {
 		mActions = new LinkedBlockingDeque<>();
 		mService = service;
 		mListener = new NetworkListener();
@@ -62,22 +70,15 @@ public class WifiSignalTask extends Thread {
 
 	private class RefreshJob implements Runnable {
 		public void run() {
-			try {
-				String ssid = currentSSID(mService);
-				if (mCurrentSSID.equals(ssid) && mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap
-						&& !mLastClientRefeshed) {
-					mService.refreshListener();
-					mLastClientRefreshTime = System.currentTimeMillis();
-					mLastClientRefeshed = true;
-					Log.e("wifi signal task", "success on refresh");
-				}
-			} catch (RemoteException e) {
-				Log.e("wifi signal task", "failure on refresh");
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e1) {
-					// Ignore
-				}
+			String ssid = currentSSID(mService);
+			if (mCurrentSSID.equals(ssid) && mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap
+					&& !mLastClientRefeshed) {
+				mLastClientRefreshTime = System.currentTimeMillis();
+				mLastClientRefeshed = true;
+				Intent serviceIntent = new Intent(mService, WidgetService.class);
+				serviceIntent.setAction(WidgetService.ACTION_UPDATE);
+				mService.startService(serviceIntent);
+				Log.e("wifi signal task", "success on refresh");
 			}
 		}
 
@@ -90,11 +91,9 @@ public class WifiSignalTask extends Thread {
 			String ssid = currentSSID(mService);
 			if (triggerID != null && triggerID.length() > 0 && mCurrentSSID.equals(ssid)
 					&& mLastClientTriggerTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientTriggered) {
-				Trigger trigger = new Trigger();
-				trigger.setTriggerID(triggerID);
 				try {
-
-					mService.getControlCenter().trigger(trigger);
+					IControlCenter cc = loadControlCenter();
+					cc.performTrigger(triggerID);
 					mLastClientTriggerTime = System.currentTimeMillis();
 					mLastClientTriggered = true;
 					Log.e("wifi signal task", "success on trigger");
@@ -110,6 +109,26 @@ public class WifiSignalTask extends Thread {
 			}
 		}
 
+	}
+
+	private IControlCenter loadControlCenter() {
+		DaoFactory.initiate(new RemoteDaoBuilder(mService));
+		try {
+			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			List<RemoteServer> serverList = dao.loadAll();
+			RemoteServer favorite = null;
+			for (RemoteServer server : serverList) {
+				if (server.isFavorite())
+					favorite = server;
+			}
+			if (favorite != null) {
+				return new WebProxyBuilder().setEndPoint(favorite.getEndPoint() + "/controlcenter")
+						.setSecurityToken(favorite.getApiToken()).setInterface(IControlCenter.class).create();
+			}
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public void setConnection(boolean connected) {
@@ -134,7 +153,7 @@ public class WifiSignalTask extends Thread {
 				if (ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI) {
 					if (ni.isConnected()) {
 						Log.e("wifi signal task", "wifi connected");
-						if (!mLastClientRefeshed && mService.getControlCenter() != null && mActions.size() < 50) {
+						if (!mLastClientRefeshed && mActions.size() < 50) {
 							for (int i = 0; i < 10; i++) {
 								mActions.add(new RefreshJob());
 								mActions.add(new TriggerJob());

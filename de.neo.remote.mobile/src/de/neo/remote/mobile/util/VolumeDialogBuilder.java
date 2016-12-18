@@ -142,7 +142,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 	public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			mVolume.setOnSeekBarChangeListener(null);
-			mShowDuration = 1000 * 3;
+			mShowDuration = 1000 * 4;
 			changeVolume(-1);
 			new Thread() {
 				public void run() {
@@ -153,7 +153,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 		}
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			mVolume.setOnSeekBarChangeListener(null);
-			mShowDuration = 1000 * 3;
+			mShowDuration = 1000 * 4;
 			changeVolume(1);
 			new Thread() {
 				public void run() {
