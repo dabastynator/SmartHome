@@ -94,12 +94,14 @@ public abstract class AbstractControlUnit implements IControlUnit {
 	}
 
 	@Override
-	public void config(BeanWeb bean) {
+	public BeanWeb getWebBean() {
+		BeanWeb bean = new BeanWeb();
 		bean.setID(mID);
 		bean.setName(mName);
 		bean.setDescription(mDescription);
 		bean.setX(mPosition[0]);
 		bean.setY(mPosition[1]);
 		bean.setZ(mPosition[2]);
+		return bean;
 	}
 }

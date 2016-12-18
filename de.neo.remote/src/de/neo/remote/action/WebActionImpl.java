@@ -27,10 +27,11 @@ public class WebActionImpl extends AbstractUnitHandler implements IWebAction {
 				if (unit.getRemoteableControlObject() instanceof ICommandAction) {
 					ICommandAction action = (ICommandAction) unit.getRemoteableControlObject();
 					BeanAction webAction = new BeanAction();
-					unit.config(webAction);
+					webAction.merge(unit.getWebBean());
 					webAction.setClientAction(action.getClientAction());
 					webAction.setID(unit.getID());
 					webAction.setRunning(action.isRunning());
+					webAction.setIconBase64(action.getIconBase64());
 					result.add(webAction);
 				}
 			} catch (RemoteException e) {

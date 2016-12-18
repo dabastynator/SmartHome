@@ -28,7 +28,7 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 				if (unit.getRemoteableControlObject() instanceof IInternetSwitch) {
 					IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
 					BeanSwitch webSwitch = new BeanSwitch();
-					unit.config(webSwitch);
+					webSwitch.merge(unit.getWebBean());
 					webSwitch.setID(unit.getID());
 					webSwitch.setName(unit.getName());
 					webSwitch.setState(switchObject.getState());
@@ -69,7 +69,7 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 			IInternetSwitch switchObject = (IInternetSwitch) unit.getRemoteableControlObject();
 			switchObject.setState(switchState);
 			BeanSwitch webSwitch = new BeanSwitch();
-			unit.config(webSwitch);
+			webSwitch.merge(unit.getWebBean());
 			webSwitch.setID(unit.getID());
 			webSwitch.setName(unit.getName());
 			webSwitch.setState(switchObject.getState());

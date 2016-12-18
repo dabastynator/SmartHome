@@ -193,5 +193,14 @@ public interface IControlCenter extends RemoteAble {
 			mID = iD;
 		}
 
+		public void merge(BeanWeb webBean) {
+			mID = webBean.getID();
+			mName = webBean.getName();
+			mDescription = webBean.getDescription();
+			mX = webBean.getX();
+			mY = webBean.getY();
+			mZ = webBean.getZ();
+		}
+
 	}
 }

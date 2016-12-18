@@ -30,28 +30,12 @@ public interface ICommandAction extends RemoteAble {
 	public void stopAction() throws RemoteException;
 
 	/**
-	 * Get thumbnail for the action.
+	 * Get icon for the action. The image is a base64 encoded png image.
 	 * 
-	 * @return action thumbnail
+	 * @return action icon
 	 * @throws RemoteException
 	 */
-	public int[] getThumbnail() throws RemoteException;
-
-	/**
-	 * Get thumbnail width for the action.
-	 * 
-	 * @return image width
-	 * @throws RemoteException
-	 */
-	public int getThumbnailWidth() throws RemoteException;
-
-	/**
-	 * Get thumbnail height for the action.
-	 * 
-	 * @return image height
-	 * @throws RemoteException
-	 */
-	public int getThumbnailHeight() throws RemoteException;
+	public String getIconBase64() throws RemoteException;
 
 	/**
 	 * @return true if action is running, false otherwise.

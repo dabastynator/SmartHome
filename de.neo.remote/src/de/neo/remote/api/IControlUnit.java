@@ -69,6 +69,14 @@ public interface IControlUnit extends RemoteAble {
 	public boolean performEvent(Event event) throws RemoteException, EventException;
 
 	/**
+	 * Return beanweb for this control unit.
+	 * 
+	 * @return beanweb
+	 * @throws RemoteException
+	 */
+	public BeanWeb getWebBean() throws RemoteException;
+
+	/**
 	 * The EventException specifies occurring exceptions during executing an
 	 * event.
 	 * 
@@ -88,5 +96,4 @@ public interface IControlUnit extends RemoteAble {
 
 	}
 
-	public void config(BeanWeb bean);
 }

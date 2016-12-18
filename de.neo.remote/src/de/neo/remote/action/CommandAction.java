@@ -1,11 +1,9 @@
 package de.neo.remote.action;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,14 +11,14 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.AbstractControlUnit;
+import de.neo.remote.RemoteLogger;
 import de.neo.remote.api.ICommandAction;
-import de.neo.remote.mediaserver.ThumbnailHandler;
 import de.neo.rmi.api.RMILogger;
 import de.neo.rmi.api.RMILogger.LogPriority;
 import de.neo.rmi.protokol.RemoteException;
@@ -32,9 +30,7 @@ public class CommandAction implements ICommandAction {
 	private String[] mParameter;
 	private OutputListener mOutListener;
 	private OutputListener mErrListener;
-	private int[] mThumbnail;
-	private int mWidth;
-	private int mHeight;
+	private String mIconBase64;
 	private String mClientAction = "";
 	private File mLogfile;
 	private AbstractControlUnit mUnit;
@@ -53,24 +49,43 @@ public class CommandAction implements ICommandAction {
 			mClientAction = element.getAttribute("clientAction");
 		if (element.hasAttribute("thumbnail")) {
 			String thumbnail = element.getAttribute("thumbnail");
-			BufferedImage src = ImageIO.read(new File(thumbnail));
-			// Create a buffered image with transparency
-			mWidth = src.getWidth(null);
-			mHeight = src.getHeight(null);
-			BufferedImage bimage = new BufferedImage(mWidth, mHeight,
-					BufferedImage.TYPE_INT_ARGB);
-
-			// Draw the image on to the buffered image
-			Graphics2D bGr = bimage.createGraphics();
-			bGr.drawImage(src, 0, 0, null);
-			bGr.dispose();
-			int[] rgb = ((DataBufferInt) bimage.getData().getDataBuffer())
-					.getData();
-			mThumbnail = ThumbnailHandler.compressRGB565(rgb, mWidth, mHeight);
+			try {
+				byte[] bytes = loadFile(new File(thumbnail));
+				mIconBase64 = DatatypeConverter.printBase64Binary(bytes);
+			} catch (IOException e) {
+				try {
+					RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+							mUnit.getID());
+				} catch (RemoteException e1) {
+					// ignore
+				}
+			}
 		}
 		if (element.hasAttribute("logFile")) {
 			mLogfile = new File(element.getAttribute("logFile"));
 		}
+	}
+
+	private static byte[] loadFile(File file) throws IOException {
+		InputStream is = new FileInputStream(file);
+
+		long length = file.length();
+		if (length > Integer.MAX_VALUE) {
+			is.close();
+			throw new IOException("Thumbnail image is too large");
+		}
+		byte[] bytes = new byte[(int) length];
+
+		int offset = 0;
+		int numRead = 0;
+		while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+			offset += numRead;
+		}
+		is.close();
+		if (offset < bytes.length)
+			throw new IOException("Could not completely read file " + file.getName());
+
+		return bytes;
 	}
 
 	@Override
@@ -112,8 +127,8 @@ public class CommandAction implements ICommandAction {
 	}
 
 	@Override
-	public int[] getThumbnail() {
-		return mThumbnail;
+	public String getIconBase64() throws RemoteException {
+		return mIconBase64;
 	}
 
 	@Override
@@ -145,15 +160,13 @@ public class CommandAction implements ICommandAction {
 				if (mLogfile != null)
 					mLogStream = new BufferedWriter(new FileWriter(mLogfile));
 			} catch (IOException e) {
-				RMILogger.performLog(LogPriority.ERROR, "Cant create logfile: "
-						+ e.getMessage(), "CommandAction");
+				RMILogger.performLog(LogPriority.ERROR, "Cant create logfile: " + e.getMessage(), "CommandAction");
 			}
 		}
 
 		@Override
 		public void run() {
-			BufferedReader mReader = new BufferedReader(new InputStreamReader(
-					mStream));
+			BufferedReader mReader = new BufferedReader(new InputStreamReader(mStream));
 			mRunning = true;
 			String line = null;
 			try {
@@ -166,24 +179,12 @@ public class CommandAction implements ICommandAction {
 			} catch (IOException e) {
 				try {
 					if (mLogStream != null)
-						mLogStream.write("ERROR: "
-								+ e.getClass().getSimpleName() + ": "
-								+ e.getMessage());
+						mLogStream.write("ERROR: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 				} catch (IOException ignore) {
 				}
 			}
 			mProcess = null;
 		}
-	}
-
-	@Override
-	public int getThumbnailWidth() throws RemoteException {
-		return mWidth;
-	}
-
-	@Override
-	public int getThumbnailHeight() throws RemoteException {
-		return mHeight;
 	}
 
 	@Override

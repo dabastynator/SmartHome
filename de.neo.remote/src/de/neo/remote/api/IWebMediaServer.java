@@ -289,8 +289,8 @@ public interface IWebMediaServer extends RemoteAble {
 			if (getFileType() == another.getFileType())
 				return mName.compareTo(another.getName());
 			if (getFileType() == FileType.Directory)
-				return 1;
-			return -1;
+				return -1;
+			return 1;
 		}
 	}
 

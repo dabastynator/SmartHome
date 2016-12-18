@@ -32,7 +32,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 				if (unit.getRemoteableControlObject() instanceof IMediaServer) {
 					IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
 					BeanMediaServer webMedia = new BeanMediaServer();
-					unit.config(webMedia);
+					webMedia.merge(unit.getWebBean());
 					if (id.equals(unit.getID()) || id.length() == 0) {
 						webMedia.setID(unit.getID());
 						if (mediaServer.getMPlayer().getPlayingBean() != null

@@ -26,12 +26,11 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 				if (unit.getRemoteableControlObject() instanceof IRCColor) {
 					IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
 					BeanLEDStrips webLed = new BeanLEDStrips();
-					unit.config(webLed);
+					webLed.merge(unit.getWebBean());
 					int color = ledStrip.getColor();
 					webLed.setRed((color & 0xFF0000) >> 16);
 					webLed.setGreen((color & 0x00FF00) >> 8);
 					webLed.setBlue((color & 0x0000FF));
-					unit.config(webLed);
 					result.add(webLed);
 				}
 			} catch (RemoteException e) {
@@ -56,13 +55,12 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 			if (unit.getRemoteableControlObject() instanceof IRCColor) {
 				IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
-				unit.config(webLed);
+				webLed.merge(unit.getWebBean());
 				ledStrip.setColor(color);
 				color = ledStrip.getColor();
 				webLed.setRed((color & 0xFF0000) >> 16);
 				webLed.setGreen((color & 0x00FF00) >> 8);
 				webLed.setBlue((color & 0x0000FF));
-				unit.config(webLed);
 				return webLed;
 			}
 		} catch (RemoteException e) {
