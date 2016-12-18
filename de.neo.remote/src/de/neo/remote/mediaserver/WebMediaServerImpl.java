@@ -25,32 +25,44 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	@Override
 	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", genericClass = BeanMediaServer.class)
 	public ArrayList<BeanMediaServer> getMediaServer(
-			@WebGet(name = "id", required = false, defaultvalue = "") String id) {
+			@WebGet(name = "id", required = false, defaultvalue = "") String id) throws RemoteException {
 		ArrayList<BeanMediaServer> result = new ArrayList<>();
-		for (IControlUnit unit : mCenter.getControlUnits().values()) {
-			try {
-				if (unit.getRemoteableControlObject() instanceof IMediaServer) {
-					IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
-					BeanMediaServer webMedia = new BeanMediaServer();
-					webMedia.merge(unit.getWebBean());
-					if (id.equals(unit.getID()) || id.length() == 0) {
-						webMedia.setID(unit.getID());
-						if (mediaServer.getMPlayer().getPlayingBean() != null
-								&& mediaServer.getMPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getMPlayer().getPlayingBean());
-						if (mediaServer.getOMXPlayer().getPlayingBean() != null
-								&& mediaServer.getOMXPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getOMXPlayer().getPlayingBean());
-						if (mediaServer.getTotemPlayer().getPlayingBean() != null
-								&& mediaServer.getTotemPlayer().getPlayingBean().getState() != STATE.DOWN)
-							webMedia.setCurrentPlaying(mediaServer.getTotemPlayer().getPlayingBean());
+		if (id != null && id.length() > 0) {
+			IControlUnit unit = mCenter.getControlUnits().get(id);
+			if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+				IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+				BeanMediaServer webMedia = getBeanFor(unit, mediaServer);
+				result.add(webMedia);
+			}
+		} else {
+			for (IControlUnit unit : mCenter.getControlUnits().values()) {
+				try {
+					if (unit.getRemoteableControlObject() instanceof IMediaServer) {
+						IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+						BeanMediaServer webMedia = getBeanFor(unit, mediaServer);
 						result.add(webMedia);
 					}
+				} catch (RemoteException e) {
 				}
-			} catch (RemoteException e) {
 			}
 		}
 		return result;
+	}
+
+	private BeanMediaServer getBeanFor(IControlUnit unit, IMediaServer mediaServer) throws RemoteException {
+		BeanMediaServer webMedia = new BeanMediaServer();
+		webMedia.merge(unit.getWebBean());
+		webMedia.setID(unit.getID());
+		if (mediaServer.getMPlayer().getPlayingBean() != null
+				&& mediaServer.getMPlayer().getPlayingBean().getState() != STATE.DOWN)
+			webMedia.setCurrentPlaying(mediaServer.getMPlayer().getPlayingBean());
+		if (mediaServer.getOMXPlayer().getPlayingBean() != null
+				&& mediaServer.getOMXPlayer().getPlayingBean().getState() != STATE.DOWN)
+			webMedia.setCurrentPlaying(mediaServer.getOMXPlayer().getPlayingBean());
+		if (mediaServer.getTotemPlayer().getPlayingBean() != null
+				&& mediaServer.getTotemPlayer().getPlayingBean().getState() != STATE.DOWN)
+			webMedia.setCurrentPlaying(mediaServer.getTotemPlayer().getPlayingBean());
+		return webMedia;
 	}
 
 	@Override

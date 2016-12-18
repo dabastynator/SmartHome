@@ -141,7 +141,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 					"Add " + mControlUnits.size() + ". control unit: " + controlUnit.getName() + " (" + id + ")",
 					"Controlcenter");
 		} catch (RemoteException e) {
-
+			RemoteLogger.performLog(LogPriority.ERROR, "Could not add control unit: " + e.getMessage(), "");
 		}
 	}
 

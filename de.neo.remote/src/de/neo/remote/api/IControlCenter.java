@@ -102,18 +102,20 @@ public interface IControlCenter extends RemoteAble {
 	/**
 	 * @param triggerID
 	 * @return map contains result
+	 * @throws RemoteException
 	 */
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID);
+	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) throws RemoteException;
 
 	/**
 	 * List all event-rules of the controlcenter. A rule can be triggered by the
 	 * speicified trigger.
 	 * 
 	 * @return list of rules
+	 * @throws RemoteException
 	 */
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<IEventRule> getEvents();
+	public List<IEventRule> getEvents() throws RemoteException;
 
 	/**
 	 * Get all controlunits of the controlcenter. The map maps the control-unit
