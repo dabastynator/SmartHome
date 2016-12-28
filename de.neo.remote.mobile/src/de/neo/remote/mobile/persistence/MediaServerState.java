@@ -1,10 +1,12 @@
 package de.neo.remote.mobile.persistence;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import de.neo.android.persistence.DomainBase;
 import de.neo.android.persistence.Persistent;
 import de.neo.remote.api.IWebMediaServer;
+import de.neo.remote.api.IWebMediaServer.BeanDownload;
 import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
@@ -23,6 +25,8 @@ public class MediaServerState extends DomainBase {
 
 	@Persistent
 	private String mBrowserLocation;
+
+	private String mName = "Unknown";
 
 	private IWebMediaServer mWebMediaServer;
 
@@ -163,6 +167,18 @@ public class MediaServerState extends DomainBase {
 
 	public void playYoutube(String youtubeURL) throws RemoteException, PlayerException {
 		mWebMediaServer.playYoutube(mMediaServerID, mPlayer, youtubeURL);
+	}
+
+	public BeanDownload publishForDownload(String file) throws RemoteException, IOException {
+		return mWebMediaServer.publishForDownload(mMediaServerID, file);
+	}
+
+	public String getName() {
+		return mName;
+	}
+
+	public void setName(String name) {
+		mName = name;
 	}
 
 }

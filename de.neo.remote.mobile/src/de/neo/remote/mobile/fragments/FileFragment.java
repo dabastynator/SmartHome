@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,12 +28,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.remote.api.IThumbnailListener;
+import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
 import de.neo.remote.api.IWebMediaServer.FileType;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
+import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
@@ -136,13 +139,17 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 			new PlayListTask(activity, mMediaServer).addItem(mSelectedItem.getName());
 			return true;
 		case R.id.opt_item_download:
-			/*
-			 * if (mSelectedItem.getFileType() == FileType.Directory)
-			 * activity.mBinder.downloadDirectory(activity,
-			 * mStationStuff.browser, mSelectedItem); else
-			 * activity.mBinder.downloadFile(activity, mStationStuff.browser,
-			 * mSelectedItem); return true;
-			 */
+			Intent intent = new Intent(getContext(), WidgetService.class);
+			intent.setAction(WidgetService.ACTION_DOWNLOAD);
+			intent.getExtras().putString(WidgetService.EXTRA_ID, mMediaServer.getMediaServerID());
+			String file = mMediaServer.getBrowserLocation();
+			if (!file.endsWith(IWebMediaServer.FileSeparator))
+				file += IWebMediaServer.FileSeparator;
+			file += mSelectedItem.getName();
+			intent.getExtras().putString(WidgetService.EXTRA_DOWNLOAD, file);
+			getContext().startService(intent);
+			return true;
+
 		}
 		return super.onOptionsItemSelected(item);
 	}

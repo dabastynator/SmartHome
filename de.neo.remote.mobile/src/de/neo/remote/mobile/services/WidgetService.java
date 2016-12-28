@@ -33,6 +33,7 @@ import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.MusicWidgetProvider;
 import de.neo.remote.mobile.receivers.SwitchWidgetProvider;
+import de.neo.remote.mobile.tasks.DownloadQueue;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
@@ -54,8 +55,11 @@ public class WidgetService extends Service {
 	public static final String ACTION_VOLUP = "de.remote.mobile.ACTION_VOL_UP";
 	public static final String ACTION_VOLDOWN = "de.remote.mobile.ACTION_VOL_DOWN";
 	public static final String ACTION_VOLUME = "de.remote.mobile.ACTION_VOLUME";
+	public static final String ACTION_DOWNLOAD = "de.remote.mobile.DOWNLOAD";
 
 	public static final String EXTRA_WIDGET = "widget_id";
+	public static final String EXTRA_DOWNLOAD = "download_file";
+	public static final String EXTRA_ID = "remote_id";
 	public static final String PREFERENCES = "preferences.widget";
 
 	public static boolean DEBUGGING = false;
@@ -63,14 +67,22 @@ public class WidgetService extends Service {
 	private Handler mHandler = new Handler();
 	private IWebSwitch mWebSwitch;
 	private IWebMediaServer mWebMediaServer;
+	private DownloadQueue mDownloader;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		mDownloader = new DownloadQueue(getApplicationContext());
 		refreshWebApi();
 		updateMusicWidget();
 		updateSwitchWidget();
 	};
+
+	@Override
+	public void onDestroy() {
+		mDownloader.setRunning(false);
+		super.onDestroy();
+	}
 
 	private void refreshWebApi() {
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
@@ -100,8 +112,14 @@ public class WidgetService extends Service {
 			if (ACTION_UPDATE.equals(intent.getAction())) {
 				updateMusicWidget();
 				updateSwitchWidget();
+			} else if (ACTION_DOWNLOAD.equals(intent.getAction())) {
+				if (intent.hasExtra(EXTRA_DOWNLOAD) && intent.hasExtra(EXTRA_ID)) {
+					String file = intent.getStringExtra(EXTRA_DOWNLOAD);
+					String id = intent.getStringExtra(EXTRA_ID);
+					mDownloader.download(mWebMediaServer, id, file);
+				}
 			} else
-				executeCommand(intent.getAction(), intent);
+				executeRemoteCommand(intent.getAction(), intent);
 		} else {
 			updateMusicWidget();
 			updateSwitchWidget();
@@ -115,7 +133,7 @@ public class WidgetService extends Service {
 	 * @param action
 	 * @return true if action is known
 	 */
-	private void executeCommand(final String action, final Intent intent) {
+	private void executeRemoteCommand(final String action, final Intent intent) {
 		new Thread() {
 			public void run() {
 				try {

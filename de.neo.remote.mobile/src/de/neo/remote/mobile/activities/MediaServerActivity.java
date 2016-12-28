@@ -339,6 +339,8 @@ public class MediaServerActivity extends WebAPIActivity {
 
 			protected void onPostExecute(String result) {
 				setTitle(result);
+				if (mMediaServer != null)
+					mMediaServer.setName(result);
 				setProgressBarVisibility(false);
 			};
 
