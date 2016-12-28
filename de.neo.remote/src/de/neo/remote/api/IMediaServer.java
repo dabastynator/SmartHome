@@ -1,5 +1,8 @@
 package de.neo.remote.api;
 
+import java.io.IOException;
+
+import de.neo.remote.api.IWebMediaServer.BeanDownload;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -14,14 +17,6 @@ public interface IMediaServer extends RemoteAble {
 	 * standard port for the server
 	 */
 	public static final int STATION_PORT = 5006;
-
-	/**
-	 * create new browser for the file system
-	 * 
-	 * @return browser
-	 * @throws RemoteException
-	 */
-	public IBrowser createBrowser() throws RemoteException;
 
 	/**
 	 * get totem player
@@ -68,5 +63,7 @@ public interface IMediaServer extends RemoteAble {
 	public String[] listFiles(String path) throws RemoteException;
 
 	public String getBrowserPath();
+
+	public BeanDownload publishForDownload(String file) throws RemoteException, IOException;
 
 }

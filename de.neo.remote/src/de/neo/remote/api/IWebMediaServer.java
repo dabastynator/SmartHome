@@ -1,5 +1,6 @@
 package de.neo.remote.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
@@ -258,6 +259,19 @@ public interface IWebMediaServer extends RemoteAble {
 	public PlayingBean setVolume(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
 			@WebGet(name = "volume") int volume) throws RemoteException, PlayerException;
 
+	/**
+	 * Publish specified file or directory for one download.
+	 * 
+	 * @param id
+	 * @param path
+	 * @return BeanDownload
+	 * @throws RemoteException
+	 * @throws IOException
+	 */
+	@WebRequest(path = "publish_for_download", description = "Publish specified file or directory for one download.")
+	public BeanDownload publishForDownload(@WebGet(name = "id") String id, @WebGet(name = "path") String path)
+			throws RemoteException, IOException;
+
 	public static class BeanFileSystem implements Comparable<BeanFileSystem> {
 
 		@WebField(name = "filetype")
@@ -349,6 +363,43 @@ public interface IWebMediaServer extends RemoteAble {
 			mPath = path;
 		}
 
+	}
+
+	public class BeanDownload {
+		public enum DownloadType {
+			File, Directory
+		};
+
+		@WebField(name = "ip")
+		private String mIP;
+		@WebField(name = "port")
+		private int mPort;
+		@WebField(name = "type")
+		private DownloadType mType;
+
+		public String getIP() {
+			return mIP;
+		}
+
+		public void setIP(String iP) {
+			mIP = iP;
+		}
+
+		public int getPort() {
+			return mPort;
+		}
+
+		public void setPort(int port) {
+			mPort = port;
+		}
+
+		public DownloadType getType() {
+			return mType;
+		}
+
+		public void setType(DownloadType type) {
+			mType = type;
+		}
 	}
 
 	public class BeanMediaServer extends BeanWeb {
