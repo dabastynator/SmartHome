@@ -141,12 +141,12 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 		case R.id.opt_item_download:
 			Intent intent = new Intent(getContext(), WidgetService.class);
 			intent.setAction(WidgetService.ACTION_DOWNLOAD);
-			intent.getExtras().putString(WidgetService.EXTRA_ID, mMediaServer.getMediaServerID());
+			intent.putExtra(WidgetService.EXTRA_ID, mMediaServer.getMediaServerID());
 			String file = mMediaServer.getBrowserLocation();
 			if (!file.endsWith(IWebMediaServer.FileSeparator))
 				file += IWebMediaServer.FileSeparator;
 			file += mSelectedItem.getName();
-			intent.getExtras().putString(WidgetService.EXTRA_DOWNLOAD, file);
+			intent.putExtra(WidgetService.EXTRA_DOWNLOAD, file);
 			getContext().startService(intent);
 			return true;
 

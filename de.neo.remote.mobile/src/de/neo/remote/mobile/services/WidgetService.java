@@ -72,7 +72,7 @@ public class WidgetService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mDownloader = new DownloadQueue(getApplicationContext());
+		mDownloader = new DownloadQueue(getApplicationContext(), mHandler);
 		refreshWebApi();
 		updateMusicWidget();
 		updateSwitchWidget();

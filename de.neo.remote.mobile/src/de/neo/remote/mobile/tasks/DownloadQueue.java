@@ -10,8 +10,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.widget.Toast;
 import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanDownload;
 import de.neo.remote.api.IWebMediaServer.BeanDownload.DownloadType;
@@ -28,26 +30,28 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 	public static final int PROGRESS_STEP = 1024 * 1024;
 	public static final int DOWNLOAD_NOTIFICATION_ID = 2;
 
-	private BlockingQueue<DownloadJob> mJobs;
+	private BlockingQueue<Runnable> mJobs;
 	private boolean mRunning;
 	private Context mContext;
 	private long mFullDownloadSize;
 	private String mID;
+	private Handler mHandler;
 
-	public DownloadQueue(Context context) {
+	public DownloadQueue(Context context, Handler handler) {
 		mRunning = true;
 		mJobs = new LinkedBlockingQueue<>();
 		mContext = context;
+		mHandler = handler;
 		start();
 	}
 
 	public void setRunning(boolean running) {
 		mRunning = running;
+		mJobs.add(new EmptyJob());
 	}
 
 	public void download(IWebMediaServer webMediaServer, String id, String file) {
 		DownloadJob job = new DownloadJob(webMediaServer, id, file);
-		mID = id;
 		mJobs.add(job);
 	}
 
@@ -55,11 +59,17 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 	public void run() {
 		while (mRunning) {
 			try {
-				DownloadJob job = mJobs.take();
+				Runnable job = mJobs.take();
 				job.run();
 			} catch (InterruptedException e) {
 				// ignore
 			}
+		}
+	}
+
+	class EmptyJob implements Runnable {
+		@Override
+		public void run() {
 		}
 	}
 
@@ -79,13 +89,19 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 		public void run() {
 			try {
 				doDownload();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (final Exception e) {
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						Toast.makeText(mContext, "Error occurred while downloading: " + e.getMessage(),
+								Toast.LENGTH_SHORT).show();
+					}
+				});
 			}
 		}
 
 		protected void doDownload() throws Exception {
+			DownloadQueue.this.mID = mID;
 			String name = "Unknown";
 			ArrayList<BeanMediaServer> list = mWebServer.getMediaServer(mID);
 			if (list.size() > 0)
@@ -96,8 +112,12 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();
+			String localFile = mFile.trim();
+			if (localFile.contains(IWebMediaServer.FileSeparator))
+				localFile = localFile.substring(
+						localFile.lastIndexOf(IWebMediaServer.FileSeparator) + IWebMediaServer.FileSeparator.length());
 			if (download.getType() == DownloadType.File) {
-				File newFile = new File(folder + File.separator + mFile.trim());
+				File newFile = new File(folder + File.separator + localFile);
 				receiver = new FileReceiver(download.getIP(), download.getPort(), PROGRESS_STEP, newFile);
 			}
 			if (download.getType() == DownloadType.Directory) {
@@ -125,12 +145,25 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 
 	@Override
 	public void endReceive(long size) {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(mContext, "Download finished", Toast.LENGTH_SHORT).show();
+			}
+		});
 		NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}
 
 	@Override
-	public void exceptionOccurred(Exception e) {
+	public void exceptionOccurred(final Exception e) {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(mContext, "Error occurred while downloading: " + e.getMessage(), Toast.LENGTH_SHORT)
+						.show();
+			}
+		});
 		NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.cancel(DOWNLOAD_NOTIFICATION_ID);
 	}
