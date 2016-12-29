@@ -1,6 +1,7 @@
 package de.neo.remote.api;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import de.neo.remote.api.IControlCenter.BeanWeb;
@@ -365,7 +366,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	}
 
-	public class BeanDownload {
+	public class BeanDownload implements Serializable {
 		public enum DownloadType {
 			File, Directory
 		};
