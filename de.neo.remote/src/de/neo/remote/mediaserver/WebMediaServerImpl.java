@@ -105,6 +105,8 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	public void playlistExtend(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
 			@WebGet(name = "item") String item) throws RemoteException, PlayerException {
 		IMediaServer mediaServer = getMediaServerById(id);
+		item = item.replace(IWebMediaServer.FileSeparator, File.separator);
+		item = mediaServer.getBrowserPath() + item;
 		mediaServer.getPlayList().extendPlayList(playlist, item);
 	}
 
