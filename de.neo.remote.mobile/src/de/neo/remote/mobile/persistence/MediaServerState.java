@@ -26,6 +26,7 @@ public class MediaServerState extends DomainBase {
 	@Persistent
 	private String mBrowserLocation;
 
+	@Persistent
 	private String mName = "Unknown";
 
 	private IWebMediaServer mWebMediaServer;

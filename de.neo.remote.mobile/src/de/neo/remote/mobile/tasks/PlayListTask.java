@@ -1,5 +1,6 @@
 package de.neo.remote.mobile.tasks;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,11 +8,15 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.widget.EditText;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.mobile.activities.WebAPIActivity;
+import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.mobile.activities.MediaServerActivity;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
+import de.neo.remote.mobile.services.WidgetService;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.remote.mobile.R;
 
@@ -160,5 +165,39 @@ public class PlayListTask {
 				builder.show();
 			}
 		}
+	}
+
+	public void download(final String name) {
+		new AsyncTask<String, Void, List<BeanPlaylistItem>>() {
+
+			private Exception mError;
+
+			@Override
+			protected List<BeanPlaylistItem> doInBackground(String... name) {
+				try {
+					return mMedia.getPlayListContent(name[0]);
+				} catch (Exception e) {
+					mError = e;
+				}
+				return null;
+			}
+
+			protected void onPostExecute(List<BeanPlaylistItem> result) {
+				if (mError != null)
+					new AbstractTask.ErrorDialog(mActivity, mError).show();
+				else if (result != null && result.size() > 0) {
+					String[] items = new String[result.size()];
+					for (int i = 0; i < result.size(); i++)
+						items[i] = result.get(i).getPath();
+					Intent intent = new Intent(mActivity, WidgetService.class);
+					intent.setAction(WidgetService.ACTION_DOWNLOAD);
+					intent.putExtra(WidgetService.EXTRA_ID, mMedia.getMediaServerID());
+					intent.putExtra(WidgetService.EXTRA_DOWNLOAD, items);
+					intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY, mMedia.getName() + File.separator + name);
+					mActivity.startService(intent);
+				}
+			};
+
+		}.execute(name);
 	}
 }

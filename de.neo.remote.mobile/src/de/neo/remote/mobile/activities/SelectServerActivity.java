@@ -170,13 +170,11 @@ public class SelectServerActivity extends ActionBarActivity {
 		View dialogView = inflater.inflate(R.layout.server_edit, null);
 		builder.setView(dialogView);
 		final TextView name = (TextView) dialogView.findViewById(R.id.server_edit_name);
-		final TextView ip = (TextView) dialogView.findViewById(R.id.server_edit_ip);
 		final TextView endpoint = (TextView) dialogView.findViewById(R.id.server_endpoint);
 		final TextView apitoken = (TextView) dialogView.findViewById(R.id.server_apitoken);
 		if (server != null) {
 			builder.setTitle(getString(R.string.server_edit));
 			name.setText(server.getName());
-			ip.setText(server.getIP());
 			endpoint.setText(server.getEndPoint());
 			apitoken.setText(server.getApiToken());
 		} else
@@ -189,7 +187,6 @@ public class SelectServerActivity extends ActionBarActivity {
 				if (newServer == null)
 					newServer = new RemoteServer();
 				newServer.setName(name.getText().toString());
-				newServer.setIP(ip.getText().toString());
 				newServer.setApiToken(apitoken.getText().toString());
 				newServer.setEndPoint(endpoint.getText().toString());
 				saveServer(newServer, server == null);

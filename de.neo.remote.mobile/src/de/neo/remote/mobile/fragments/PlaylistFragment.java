@@ -21,9 +21,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
 import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
-import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
+import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
@@ -128,6 +128,7 @@ public class PlaylistFragment extends BrowserFragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		MediaServerActivity activity = (MediaServerActivity) getActivity();
+		PlayListTask task = new PlayListTask(activity, mMediaServer);
 		switch (item.getItemId()) {
 		case R.id.opt_item_play:
 			new PlayItemTask(activity, mMediaServer, mSelectedItem).execute();
@@ -135,23 +136,20 @@ public class PlaylistFragment extends BrowserFragment {
 					Toast.LENGTH_SHORT).show();
 			return true;
 		case R.id.opt_item_addplaylist:
-			new PlayListTask(activity, mMediaServer).addItem(mCurrentPlayList.getName());
+			task.addItem(mCurrentPlayList.getName());
 			return true;
 		case R.id.opt_item_download:
-			// TODO
-			// activity.mBinder.downloadPlaylist(mediaServer.browser,
-			// mPlsFileMap.values().toArray(new String[mPlsFileMap.size()]),
-			// mSelectedItem);
+			task.download(mCurrentPlayList.getName());
 			return true;
 		case R.id.opt_pls_delete:
-			new PlayListTask(activity, mMediaServer).deletePlaylist(mCurrentPlayList.getName());
+			task.deletePlaylist(mCurrentPlayList.getName());
 			return true;
 		case R.id.opt_pls_show:
 			mViewerState = ViewerState.PLS_ITEMS;
 			refreshContent(getActivity());
 			return true;
 		case R.id.opt_pls_item_delete:
-			new PlayListTask(activity, mMediaServer).deleteItemFromPlaylist(mCurrentPlayList.getName(),
+			task.deleteItemFromPlaylist(mCurrentPlayList.getName(),
 					mSelectedItem.getName());
 			return true;
 		}

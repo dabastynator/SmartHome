@@ -59,6 +59,7 @@ public class WidgetService extends Service {
 
 	public static final String EXTRA_WIDGET = "widget_id";
 	public static final String EXTRA_DOWNLOAD = "download_file";
+	public static final String EXTRA_DOWNLOAD_DESTINY = "download_destiny";
 	public static final String EXTRA_ID = "remote_id";
 	public static final String PREFERENCES = "preferences.widget";
 
@@ -114,9 +115,10 @@ public class WidgetService extends Service {
 				updateSwitchWidget();
 			} else if (ACTION_DOWNLOAD.equals(intent.getAction())) {
 				if (intent.hasExtra(EXTRA_DOWNLOAD) && intent.hasExtra(EXTRA_ID)) {
-					String file = intent.getStringExtra(EXTRA_DOWNLOAD);
+					Object download = intent.getExtras().get(EXTRA_DOWNLOAD);
 					String id = intent.getStringExtra(EXTRA_ID);
-					mDownloader.download(mWebMediaServer, id, file);
+					String destiny = intent.getStringExtra(EXTRA_DOWNLOAD_DESTINY);
+					mDownloader.download(mWebMediaServer, id, destiny, download);
 				}
 			} else
 				executeRemoteCommand(intent.getAction(), intent);

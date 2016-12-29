@@ -29,7 +29,7 @@ public class ServerAdapter extends ArrayAdapter<RemoteServer> {
 		ImageView image = (ImageView) v.findViewById(R.id.server_row_img);
 		TextView ip = (TextView) v.findViewById(R.id.server_row_ip);
 
-		ip.setText(server.getIP());
+		ip.setText(server.getEndPoint());
 		if (server.isFavorite()) {
 			image.setVisibility(View.VISIBLE);
 		} else {

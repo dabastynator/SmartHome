@@ -1,7 +1,6 @@
 package de.neo.remote.mobile.tasks;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -17,7 +16,6 @@ import android.widget.Toast;
 import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebMediaServer.BeanDownload;
 import de.neo.remote.api.IWebMediaServer.BeanDownload.DownloadType;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.rmi.transceiver.DirectoryReceiver;
 import de.neo.rmi.transceiver.FileReceiver;
@@ -50,9 +48,18 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 		mJobs.add(new EmptyJob());
 	}
 
-	public void download(IWebMediaServer webMediaServer, String id, String file) {
-		DownloadJob job = new DownloadJob(webMediaServer, id, file);
-		mJobs.add(job);
+	public void download(IWebMediaServer webMediaServer, String id, String destiny, Object download) {
+		if (download instanceof String) {
+			DownloadJob job = new DownloadJob(webMediaServer, id, destiny, (String) download);
+			mJobs.add(job);
+		} else if (download instanceof String[]) {
+			String[] files = (String[]) download;
+			for (String file : files) {
+				DownloadJob job = new DownloadJob(webMediaServer, id, destiny, file);
+				mJobs.add(job);
+			}
+		} else
+			throw new IllegalArgumentException("Expect String or String[] to download. Can't donwload: " + download);
 	}
 
 	@Override
@@ -78,11 +85,13 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 		private String mFile;
 		private IWebMediaServer mWebServer;
 		private String mID;
+		private String mDestiny;
 
-		public DownloadJob(IWebMediaServer webMediaServer, String id, String file) {
+		public DownloadJob(IWebMediaServer webMediaServer, String id, String destiny, String file) {
 			mWebServer = webMediaServer;
 			mID = id;
 			mFile = file;
+			mDestiny = destiny;
 		}
 
 		@Override
@@ -102,13 +111,9 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 
 		protected void doDownload() throws Exception {
 			DownloadQueue.this.mID = mID;
-			String name = "Unknown";
-			ArrayList<BeanMediaServer> list = mWebServer.getMediaServer(mID);
-			if (list.size() > 0)
-				name = list.get(0).getName().trim();
 			BeanDownload download = mWebServer.publishForDownload(mID, mFile);
 			FileReceiver receiver = null;
-			String folder = Environment.getExternalStorageDirectory().toString() + File.separator + name;
+			String folder = Environment.getExternalStorageDirectory().toString() + File.separator + mDestiny;
 			File dir = new File(folder);
 			if (!dir.exists())
 				dir.mkdir();

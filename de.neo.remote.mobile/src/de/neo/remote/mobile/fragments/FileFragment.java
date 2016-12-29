@@ -147,6 +147,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 				file += IWebMediaServer.FileSeparator;
 			file += mSelectedItem.getName();
 			intent.putExtra(WidgetService.EXTRA_DOWNLOAD, file);
+			intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY, mMediaServer.getName());
 			getContext().startService(intent);
 			return true;
 
