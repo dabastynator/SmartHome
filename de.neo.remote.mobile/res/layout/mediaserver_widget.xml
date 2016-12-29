@@ -27,6 +27,15 @@
             android:layout_margin="2dip"
             android:orientation="vertical" >
 
+            <Button
+                android:id="@+id/button_widget_refresh"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="end"
+                android:layout_margin="2dp"
+                android:background="@drawable/refresh_32" />
+
             <TextView
                 android:id="@+id/lbl_widget_big"
                 style="@android:style/TextAppearance.Medium"

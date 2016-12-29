@@ -238,13 +238,21 @@ public class WidgetService extends Service {
 			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, browserIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.lbl_widget_big, pendingIntent);
 
-			// set play functionality
+			// set update functionality
 			Intent playIntent = new Intent(context, WidgetService.class);
-			playIntent.setAction(ACTION_PLAY);
+			playIntent.setAction(ACTION_UPDATE);
 			playIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
 			playIntent.putExtra(EXTRA_WIDGET, widgetID);
 			PendingIntent playPending = PendingIntent.getService(context, 0, playIntent,
 					PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.button_widget_refresh, playPending);
+
+			// set play functionality
+			playIntent = new Intent(context, WidgetService.class);
+			playIntent.setAction(ACTION_PLAY);
+			playIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+			playIntent.putExtra(EXTRA_WIDGET, widgetID);
+			playPending = PendingIntent.getService(context, 0, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.button_widget_play, playPending);
 
 			// set stop functionality
