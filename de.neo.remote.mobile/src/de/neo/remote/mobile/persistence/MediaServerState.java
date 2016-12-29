@@ -133,7 +133,11 @@ public class MediaServerState extends DomainBase {
 	}
 
 	public void extendPlayList(String playlist, String item) throws RemoteException, PlayerException {
-		mWebMediaServer.playlistExtend(mMediaServerID, playlist, item);
+		String file = mBrowserLocation;
+		if (file.length() > 0 && !file.endsWith(IWebMediaServer.FileSeparator))
+			file += IWebMediaServer.FileSeparator;
+		file += item;
+		mWebMediaServer.playlistExtend(mMediaServerID, playlist, file);
 	}
 
 	public void playlistDelete(String playlist) throws RemoteException, PlayerException {
