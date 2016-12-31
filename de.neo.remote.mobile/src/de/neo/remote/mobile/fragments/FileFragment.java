@@ -4,6 +4,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -13,6 +14,8 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -46,10 +49,12 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 
 	public static final int PREVIEW_SIZE = 128;
 
+	public static final String BEANS = "save_beans";
+
 	private MediaServerState mMediaServer;
 	private BeanFileSystem mSelectedItem;
 	private PlayingBean mPlayingBean;
-	private ArrayList<BeanFileSystem> mFileBeans;
+	private List<BeanFileSystem> mFileBeans;
 	private Map<String, Bitmap> mThumbnails;
 	private Handler mHandler;
 
@@ -71,7 +76,7 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 	public void refreshContent(final Context context) {
 		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
 
-			private String[] mFileList;
+			private List<BeanFileSystem> mBeans;
 
 			@Override
 			protected void onPreExecute() {
@@ -80,15 +85,11 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 
 			@Override
 			protected Exception doInBackground(String... params) {
-				mFileList = new String[] {};
 				mFileBeans = new ArrayList<>();
 				try {
 					if (mMediaServer != null) {
-						mFileBeans = mMediaServer.getFiles();
-						Collections.sort(mFileBeans);
-						mFileList = new String[mFileBeans.size()];
-						for (int i = 0; i < mFileBeans.size(); i++)
-							mFileList[i] = mFileBeans.get(i).getName();
+						mBeans = mMediaServer.getFiles();
+						Collections.sort(mBeans);
 					}
 				} catch (Exception e) {
 					return e;
@@ -105,19 +106,46 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 						setListShown(true);
 						setEmptyText(result.getClass().getSimpleName());
 					} else {
-						if (getListAdapter() != null)
-							setListShown(true);
-						setListAdapter(new FileAdapter(context, mFileList, mFileBeans));
-						if (mListPosition != null) {
-							getListView().onRestoreInstanceState(mListPosition);
-							mListPosition = null;
-						}
+						setContent(mBeans);
 					}
 				}
 			}
 		};
 		task.execute();
 
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		ArrayList<ParcelBeans> copy = new ArrayList<>();
+		for (BeanFileSystem bean : mFileBeans)
+			copy.add(new ParcelBeans(bean));
+		outState.putParcelableArrayList(BEANS, copy);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		if (savedInstanceState != null && savedInstanceState.containsKey(BEANS)) {
+			List<?> list = savedInstanceState.getParcelableArrayList(BEANS);
+			setContent((List<BeanFileSystem>) list);
+		}
+	}
+
+	protected void setContent(List<BeanFileSystem> beans) {
+		mFileBeans = beans;
+		String[] fileList;
+		fileList = new String[mFileBeans.size()];
+		for (int i = 0; i < mFileBeans.size(); i++)
+			fileList[i] = mFileBeans.get(i).getName();
+		if (getListAdapter() != null)
+			setListShown(true);
+		setListAdapter(new FileAdapter(getContext(), fileList, mFileBeans));
+		if (mListPosition != null) {
+			getListView().onRestoreInstanceState(mListPosition);
+			mListPosition = null;
+		}
 	}
 
 	@Override
@@ -155,11 +183,50 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 		return super.onOptionsItemSelected(item);
 	}
 
+	public static class ParcelBeans extends BeanFileSystem implements Parcelable {
+
+		public ParcelBeans(Parcel source) {
+			setName(source.readString());
+			setFileType(FileType.values()[source.readInt()]);
+		}
+
+		public ParcelBeans(BeanFileSystem bean) {
+			setName(bean.getName());
+			setFileType(bean.getFileType());
+		}
+
+		@Override
+		public int describeContents() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeString(getName());
+			dest.writeInt(getFileType().ordinal());
+		}
+
+		public static final Parcelable.Creator<ParcelBeans> CREATOR = new Parcelable.Creator<ParcelBeans>() {
+
+			@Override
+			public ParcelBeans createFromParcel(Parcel source) {
+				return new ParcelBeans(source);
+			}
+
+			@Override
+			public ParcelBeans[] newArray(int size) {
+				return new ParcelBeans[size];
+			}
+		};
+
+	}
+
 	public class FileAdapter extends ArrayAdapter<String> {
 
-		private ArrayList<BeanFileSystem> mFiles;
+		private List<BeanFileSystem> mFiles;
 
-		public FileAdapter(Context context, String[] files, ArrayList<BeanFileSystem> fileBeans) {
+		public FileAdapter(Context context, String[] files, List<BeanFileSystem> fileBeans) {
 			super(context, R.layout.mediaserver_browser_row, R.id.lbl_item_name, files);
 			mFiles = fileBeans;
 		}
@@ -253,14 +320,14 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		if (mMediaServer != null)
+		if (mMediaServer != null && mFileBeans == null)
 			refreshContent(getActivity());
 	}
 
 	@Override
 	public void setMediaServer(MediaServerState mediaServer) {
 		mMediaServer = mediaServer;
-		if (getView() != null)
+		if (getView() != null && mFileBeans == null)
 			refreshContent(getActivity());
 	}
 
