@@ -2,6 +2,8 @@ package de.neo.rmi.protokol;
 
 import java.io.Serializable;
 
+import de.neo.rmi.api.WebField;
+
 /**
  * server port holds connection and streams
  * 
@@ -17,17 +19,23 @@ public class ServerPort implements Serializable {
 	/**
 	 * ip of server
 	 */
+	@WebField(name = "ip")
 	private String ip;
 
 	/**
 	 * port of server
 	 */
+	@WebField(name = "port")
 	private int port;
 
 	/**
 	 * counter for parameter ids
 	 */
 	private int counter = 0;
+
+	public ServerPort() {
+		// Empty constructor for web result
+	}
 
 	/**
 	 * allocate new server port
@@ -84,8 +92,7 @@ public class ServerPort implements Serializable {
 	 * @return id
 	 */
 	public String getNextId() {
-		String id = "newsystem.parameter(" + ip + ":" + port + "/"
-				+ (counter++) + ")";
+		String id = "newsystem.parameter(" + ip + ":" + port + "/" + (counter++) + ")";
 		return id;
 	}
 

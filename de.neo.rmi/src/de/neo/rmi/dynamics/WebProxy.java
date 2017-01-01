@@ -97,7 +97,10 @@ public class WebProxy implements InvocationHandler {
 				sb.append("=");
 				if (parameter[i] != null) {
 					try {
-						sb.append(URLEncoder.encode(parameter[i].toString(), "UTF-8"));
+						// Encode parameter two times to avoid this signs to be
+						// interpreted as query parts
+						String p = URLEncoder.encode(parameter[i].toString(), "UTF-8");
+						sb.append(URLEncoder.encode(p, "UTF-8"));
 					} catch (UnsupportedEncodingException e) {
 						RMILogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
 								"WebProxy");
