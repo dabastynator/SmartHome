@@ -2,10 +2,13 @@ package de.neo.remote.mobile.fragments;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -33,15 +36,21 @@ import de.remote.mobile.R;
 
 public class PlaylistFragment extends BrowserFragment {
 
+	public static final String BEAN_PLS = "bean_pls";
+	public static final String BEAN_ITEMS = "bean_items";
+	public static final String VIEWER_STATE = "viewer_state";
+
 	private BeanPlaylistItem mSelectedItem;
 	private BeanPlaylist mCurrentPlayList;
 	private ArrayList<BeanPlaylist> mPlaylists;
 	private ArrayList<BeanPlaylistItem> mPlsItems;
 	private ViewerState mViewerState;
 	private MediaServerState mMediaServer;
+	private boolean mHasContent;
 
 	public PlaylistFragment() {
 		mViewerState = ViewerState.PLAYLISTS;
+		mHasContent = false;
 	}
 
 	@Override
@@ -57,7 +66,8 @@ public class PlaylistFragment extends BrowserFragment {
 	public void refreshContent(final Context context) {
 		AsyncTask<String, Integer, Exception> task = new AsyncTask<String, Integer, Exception>() {
 
-			private String[] mItems;
+			private ArrayList<BeanPlaylist> mPls = mPlaylists;
+			private ArrayList<BeanPlaylistItem> mItems = mPlsItems;
 
 			@Override
 			protected void onPreExecute() {
@@ -68,23 +78,16 @@ public class PlaylistFragment extends BrowserFragment {
 			@Override
 			protected Exception doInBackground(String... params) {
 				try {
-					if (mMediaServer == null)
-						mItems = new String[] {};
-					else if (mViewerState == ViewerState.PLAYLISTS) {
-						ArrayList<String> items = new ArrayList<>();
-						mPlaylists = mMediaServer.getPlayLists();
-						Collections.sort(mPlaylists);
-						for (BeanPlaylist pls : mPlaylists) {
-							items.add(pls.getName());
-						}
-						mItems = items.toArray(new String[items.size()]);
+					if (mMediaServer == null) {
+						if (mPls != null)
+							mPls.clear();
+						if (mItems != null)
+							mItems.clear();
+					} else if (mViewerState == ViewerState.PLAYLISTS) {
+						mPls = mMediaServer.getPlayLists();
+						Collections.sort(mPls);
 					} else {
-						mPlsItems = mMediaServer.getPlayListContent(mCurrentPlayList.getName());
-						ArrayList<String> items = new ArrayList<>();
-						for (BeanPlaylistItem item : mPlsItems) {
-							items.add(item.getName());
-						}
-						mItems = items.toArray(new String[items.size()]);
+						mItems = mMediaServer.getPlayListContent(mCurrentPlayList.getName());
 					}
 				} catch (Exception e) {
 					return e;
@@ -101,19 +104,73 @@ public class PlaylistFragment extends BrowserFragment {
 						setListShown(true);
 						setEmptyText(result.getClass().getSimpleName());
 					} else {
-						if (getListAdapter() != null)
-							setListShown(true);
-						setListAdapter(new PlaylistAdapter(context, mItems));
-						if (mListPosition != null) {
-							getListView().onRestoreInstanceState(mListPosition);
-							mListPosition = null;
-						}
+						setContent(mPls, mItems);
 					}
 				}
 			}
 		};
 		task.execute();
 
+	}
+
+	protected void setContent(ArrayList<BeanPlaylist> pls, ArrayList<BeanPlaylistItem> plsItems) {
+		mPlaylists = pls;
+		mPlsItems = plsItems;
+		mHasContent = true;
+		ArrayList<String> items = new ArrayList<>();
+		if (mViewerState == ViewerState.PLAYLISTS)
+			for (BeanPlaylist p : pls)
+				items.add(p.getName());
+		else
+			for (BeanPlaylistItem i : plsItems)
+				items.add(i.getName());
+		String[] itemArray = items.toArray(new String[items.size()]);
+
+		if (getListAdapter() != null)
+			setListShown(true);
+		setListAdapter(new PlaylistAdapter(getContext(), itemArray));
+		if (mListPosition != null) {
+			getListView().onRestoreInstanceState(mListPosition);
+			mListPosition = null;
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mPlaylists != null) {
+			ArrayList<ParcelPls> copy = new ArrayList<>();
+			for (BeanPlaylist bean : mPlaylists)
+				copy.add(new ParcelPls(bean));
+			outState.putParcelableArrayList(BEAN_PLS, copy);
+		}
+		if (mPlsItems != null) {
+			ArrayList<ParcelPlsItem> copy = new ArrayList<>();
+			for (BeanPlaylistItem bean : mPlsItems)
+				copy.add(new ParcelPlsItem(bean));
+			outState.putParcelableArrayList(BEAN_ITEMS, copy);
+		}
+		outState.putInt(VIEWER_STATE, mViewerState.ordinal());
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle bundle) {
+		super.onViewCreated(view, bundle);
+		if (bundle != null) {
+			if (bundle.containsKey(VIEWER_STATE))
+				mViewerState = ViewerState.values()[bundle.getInt(VIEWER_STATE)];
+			if (bundle.containsKey(BEAN_PLS)) {
+				List<?> list = bundle.getParcelableArrayList(BEAN_PLS);
+				mPlaylists = (ArrayList<BeanPlaylist>) list;
+			}
+			if (bundle.containsKey(BEAN_ITEMS)) {
+				List<?> list = bundle.getParcelableArrayList(BEAN_ITEMS);
+				mPlsItems = (ArrayList<BeanPlaylistItem>) list;
+			}
+			if ((mViewerState == ViewerState.PLAYLISTS && mPlaylists != null)
+					|| (mViewerState == ViewerState.PLS_ITEMS && mPlsItems != null))
+				setContent(mPlaylists, mPlsItems);
+		}
 	}
 
 	@Override
@@ -149,8 +206,7 @@ public class PlaylistFragment extends BrowserFragment {
 			refreshContent(getActivity());
 			return true;
 		case R.id.opt_pls_item_delete:
-			task.deleteItemFromPlaylist(mCurrentPlayList.getName(),
-					mSelectedItem.getName());
+			task.deleteItemFromPlaylist(mCurrentPlayList.getName(), mSelectedItem.getName());
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -217,14 +273,92 @@ public class PlaylistFragment extends BrowserFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		if (mMediaServer != null)
+		if (mMediaServer != null && !mHasContent)
 			refreshContent(getActivity());
 	}
 
 	@Override
 	public void setMediaServer(MediaServerState mediaServer) {
 		mMediaServer = mediaServer;
-		if (getView() != null)
+		if (getView() != null && !mHasContent)
 			refreshContent(getActivity());
+	}
+
+	static class ParcelPls extends BeanPlaylist implements Parcelable {
+
+		public ParcelPls(Parcel source) {
+			setName(source.readString());
+			setItemCount(source.readInt());
+		}
+
+		public ParcelPls(BeanPlaylist bean) {
+			setName(bean.getName());
+			setItemCount(bean.getItemCount());
+		}
+
+		@Override
+		public int describeContents() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeString(getName());
+			dest.writeInt(getItemCount());
+		}
+
+		public static final Parcelable.Creator<ParcelPls> CREATOR = new Parcelable.Creator<ParcelPls>() {
+
+			@Override
+			public ParcelPls createFromParcel(Parcel source) {
+				return new ParcelPls(source);
+			}
+
+			@Override
+			public ParcelPls[] newArray(int size) {
+				return new ParcelPls[size];
+			}
+		};
+
+	}
+
+	static class ParcelPlsItem extends BeanPlaylistItem implements Parcelable {
+
+		public ParcelPlsItem(Parcel source) {
+			setName(source.readString());
+			setPath(source.readString());
+		}
+
+		public ParcelPlsItem(BeanPlaylistItem bean) {
+			setName(bean.getName());
+			setPath(bean.getPath());
+		}
+
+		@Override
+		public int describeContents() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeString(getName());
+			dest.writeString(getPath());
+		}
+
+		public static final Parcelable.Creator<ParcelPlsItem> CREATOR = new Parcelable.Creator<ParcelPlsItem>() {
+
+			@Override
+			public ParcelPlsItem createFromParcel(Parcel source) {
+				return new ParcelPlsItem(source);
+			}
+
+			@Override
+			public ParcelPlsItem[] newArray(int size) {
+				return new ParcelPlsItem[size];
+			}
+		};
+
 	}
 }

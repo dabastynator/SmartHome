@@ -53,12 +53,6 @@ public class MediaServerActivity extends WebAPIActivity {
 	public static final String EXTRA_MEDIA_ID = "media_server_id";
 	public static final int FILE_REQUEST = 3;
 
-	public static final String LISTVIEW_POSITION = "listviewPosition";
-	public static final String SPINNER_POSITION = "spinnerPosition";
-	public static final String VIEWER_STATE = "viewerstate";
-	public static final String MEDIA_STATE = "mediastate";
-	public static final String PLAYLIST = "playlist";
-
 	/**
 	 * viewer states of the browser
 	 * 
@@ -97,6 +91,13 @@ public class MediaServerActivity extends WebAPIActivity {
 		loadServerByIntent(getIntent());
 	}
 
+	@Override
+	protected void onResumeFragments() {
+		super.onResumeFragments();
+		updatePlayerButtons();
+		updateFilePlsButtons();
+	}
+	
 	private void loadServerByIntent(Intent intent) {
 		setTitle(getString(R.string.connecting));
 		updateFilePlsButtons();
