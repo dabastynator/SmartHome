@@ -26,13 +26,17 @@ public class MediaServerState extends DomainBase {
 	@Persistent
 	private String mBrowserLocation;
 
-	@Persistent
-	private String mName = "Unknown";
-
 	private IWebMediaServer mWebMediaServer;
 
-	public void initialize(IWebMediaServer webMediaServer) {
+	private RemoteServer mRemoteServer;
+
+	public void initialize(IWebMediaServer webMediaServer, RemoteServer remoteServer) {
 		mWebMediaServer = webMediaServer;
+		mRemoteServer = remoteServer;
+	}
+
+	public RemoteServer getRemoteServer() {
+		return mRemoteServer;
 	}
 
 	public String getPlayer() {
@@ -176,14 +180,6 @@ public class MediaServerState extends DomainBase {
 
 	public BeanDownload publishForDownload(String file) throws RemoteException, IOException {
 		return mWebMediaServer.publishForDownload(mMediaServerID, file);
-	}
-
-	public String getName() {
-		return mName;
-	}
-
-	public void setName(String name) {
-		mName = name;
 	}
 
 }

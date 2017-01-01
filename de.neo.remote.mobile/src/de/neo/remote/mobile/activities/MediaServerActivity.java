@@ -97,13 +97,13 @@ public class MediaServerActivity extends WebAPIActivity {
 		updatePlayerButtons();
 		updateFilePlsButtons();
 	}
-	
+
 	private void loadServerByIntent(Intent intent) {
 		setTitle(getString(R.string.connecting));
 		updateFilePlsButtons();
 		if (intent.getExtras() != null && intent.getExtras().containsKey(EXTRA_MEDIA_ID)) {
 			mMediaServer = createMediaServerForId(this, intent.getExtras().getString(EXTRA_MEDIA_ID));
-			mMediaServer.initialize(mWebMediaServer);
+			mMediaServer.initialize(mWebMediaServer, mCurrentServer);
 			updatePlayerButtons();
 			mBrowserPageAdapter.setMediaServer(mMediaServer);
 			refreshTitle();
@@ -341,8 +341,6 @@ public class MediaServerActivity extends WebAPIActivity {
 
 			protected void onPostExecute(String result) {
 				setTitle(result);
-				if (mMediaServer != null)
-					mMediaServer.setName(result);
 				saveMediaServer(mMediaServer);
 				setProgressBarVisibility(false);
 			};

@@ -193,7 +193,8 @@ public class PlayListTask {
 					intent.setAction(WidgetService.ACTION_DOWNLOAD);
 					intent.putExtra(WidgetService.EXTRA_ID, mMedia.getMediaServerID());
 					intent.putExtra(WidgetService.EXTRA_DOWNLOAD, items);
-					intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY, mMedia.getName() + File.separator + name);
+					intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY,
+							mMedia.getRemoteServer().getName() + File.separator + name);
 					mActivity.startService(intent);
 				}
 			};
