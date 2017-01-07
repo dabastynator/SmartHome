@@ -254,11 +254,11 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) {
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) {
 		Trigger trigger = new Trigger();
 		trigger.setTriggerID(triggerID);
 		int eventcount = trigger(trigger);
-		Map<String, Integer> result = new HashMap<>();
+		HashMap<String, Integer> result = new HashMap<>();
 		result.put("triggered_rules", eventcount);
 		return result;
 	}

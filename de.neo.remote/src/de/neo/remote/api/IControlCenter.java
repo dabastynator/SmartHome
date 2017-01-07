@@ -1,6 +1,7 @@
 package de.neo.remote.api;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +106,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public Map<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) throws RemoteException;
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) throws RemoteException;
 
 	/**
 	 * List all event-rules of the controlcenter. A rule can be triggered by the
