@@ -16,7 +16,7 @@ import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.remote.mobile.R;
 
@@ -189,11 +189,11 @@ public class PlayListTask {
 					String[] items = new String[result.size()];
 					for (int i = 0; i < result.size(); i++)
 						items[i] = result.get(i).getPath();
-					Intent intent = new Intent(mActivity, WidgetService.class);
-					intent.setAction(WidgetService.ACTION_DOWNLOAD);
-					intent.putExtra(WidgetService.EXTRA_ID, mMedia.getMediaServerID());
-					intent.putExtra(WidgetService.EXTRA_DOWNLOAD, items);
-					intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY,
+					Intent intent = new Intent(mActivity, RemoteService.class);
+					intent.setAction(RemoteService.ACTION_DOWNLOAD);
+					intent.putExtra(RemoteService.EXTRA_ID, mMedia.getMediaServerID());
+					intent.putExtra(RemoteService.EXTRA_DOWNLOAD, items);
+					intent.putExtra(RemoteService.EXTRA_DOWNLOAD_DESTINY,
 							mMedia.getRemoteServer().getName() + File.separator + name);
 					mActivity.startService(intent);
 				}

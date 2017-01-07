@@ -9,9 +9,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ListView;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.MediaServerAdapter;
+import de.neo.remote.mobile.util.WidgetUpdater;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -73,12 +74,13 @@ public class SelectMediaServerActivity extends WebAPIActivity {
 
 		public boolean onSelectSwitch(BeanMediaServer mediaserver) {
 			// Store selection
-			SharedPreferences prefs = SelectMediaServerActivity.this.getSharedPreferences(WidgetService.PREFERENCES, 0);
+			SharedPreferences prefs = SelectMediaServerActivity.this.getSharedPreferences(RemoteService.PREFERENCES, 0);
 			SharedPreferences.Editor edit = prefs.edit();
 			edit.putString("" + appWidgetId, mediaserver.getID());
 			edit.commit();
 
-			WidgetService.updateMusicWidget(getApplicationContext(), appWidgetId, mediaserver);
+			WidgetUpdater updater = new WidgetUpdater(getApplicationContext());
+			updater.updateMusicWidget(appWidgetId, mediaserver);
 
 			Intent resultValue = new Intent();
 			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);

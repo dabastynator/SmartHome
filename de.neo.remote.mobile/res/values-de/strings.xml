@@ -15,7 +15,8 @@
     <string name="exit">Beenden</string>
     <string name="settings">Einstellungen</string>
     <string name="appearance">Darstellung</string>
-    <string name="music_notify">Wiedergabe als Notification darstellen</string>
+    <string name="stay_foreground">Im Vordergrund</string>
+    <string name="stay_foreground_long">Remote Service beibt im Vordergrund. Sichtbar durch Notification</string>
     <string name="use_playing_session">Wiedergabe an Android senden</string>
     <string name="background">Hintergrund</string>
     <string name="connection_trigger">Aktion bei WLAN Verbindung</string>

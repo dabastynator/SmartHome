@@ -4,7 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 
 /**
  * the remote widget provider starts the widget service.
@@ -15,8 +15,8 @@ public class MusicWidgetProvider extends AppWidgetProvider {
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-		Intent serviceIntent = new Intent(context, WidgetService.class);
-		serviceIntent.setAction(WidgetService.ACTION_UPDATE);
+		Intent serviceIntent = new Intent(context, RemoteService.class);
+		serviceIntent.setAction(RemoteService.ACTION_UPDATE);
 		context.startService(serviceIntent);
 	}
 

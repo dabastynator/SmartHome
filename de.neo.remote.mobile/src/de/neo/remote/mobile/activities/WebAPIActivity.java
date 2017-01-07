@@ -17,7 +17,7 @@ import de.neo.remote.api.IWebMediaServer;
 import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.remote.mobile.R;
 
@@ -48,7 +48,7 @@ public class WebAPIActivity extends ActionBarActivity {
 		getSupportActionBar().setLogo(R.drawable.ic_launcher);
 
 		// start widget service
-		Intent intent = new Intent(this, WidgetService.class);
+		Intent intent = new Intent(this, RemoteService.class);
 		startService(intent);
 
 		DaoFactory.initiate(new RemoteDaoBuilder(this));

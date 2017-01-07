@@ -38,7 +38,7 @@ import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
@@ -167,15 +167,15 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 			new PlayListTask(activity, mMediaServer).addItem(mSelectedItem.getName());
 			return true;
 		case R.id.opt_item_download:
-			Intent intent = new Intent(getContext(), WidgetService.class);
-			intent.setAction(WidgetService.ACTION_DOWNLOAD);
-			intent.putExtra(WidgetService.EXTRA_ID, mMediaServer.getMediaServerID());
+			Intent intent = new Intent(getContext(), RemoteService.class);
+			intent.setAction(RemoteService.ACTION_DOWNLOAD);
+			intent.putExtra(RemoteService.EXTRA_ID, mMediaServer.getMediaServerID());
 			String file = mMediaServer.getBrowserLocation();
 			if (!file.endsWith(IWebMediaServer.FileSeparator))
 				file += IWebMediaServer.FileSeparator;
 			file += mSelectedItem.getName();
-			intent.putExtra(WidgetService.EXTRA_DOWNLOAD, file);
-			intent.putExtra(WidgetService.EXTRA_DOWNLOAD_DESTINY, mMediaServer.getRemoteServer().getName());
+			intent.putExtra(RemoteService.EXTRA_DOWNLOAD, file);
+			intent.putExtra(RemoteService.EXTRA_DOWNLOAD_DESTINY, mMediaServer.getRemoteServer().getName());
 			getContext().startService(intent);
 			return true;
 

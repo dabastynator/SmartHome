@@ -81,7 +81,7 @@
             -->
         </service>
         <service
-            android:name="de.neo.remote.mobile.services.WidgetService"
+            android:name="de.neo.remote.mobile.services.RemoteService"
             android:enabled="true" >
         </service>
 

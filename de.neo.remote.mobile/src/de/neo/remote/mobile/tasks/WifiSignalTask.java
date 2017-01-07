@@ -1,5 +1,6 @@
 package de.neo.remote.mobile.tasks;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -24,7 +25,7 @@ import de.neo.remote.api.IControlCenter;
 import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.services.WidgetService;
+import de.neo.remote.mobile.services.RemoteService;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -63,22 +64,35 @@ public class WifiSignalTask extends Thread {
 		}
 	}
 
-	public void end() {
+	public void setRunning(boolean running) {
 		mService.unregisterReceiver(mListener);
-		mRunning.set(false);
+		mRunning.set(running);
+		mActions.add(new DownloadQueue.EmptyJob());
 	}
 
 	private class RefreshJob implements Runnable {
 		public void run() {
 			String ssid = currentSSID(mService);
-			if (mCurrentSSID.equals(ssid) && mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap
-					&& !mLastClientRefeshed) {
-				mLastClientRefreshTime = System.currentTimeMillis();
-				mLastClientRefeshed = true;
-				Intent serviceIntent = new Intent(mService, WidgetService.class);
-				serviceIntent.setAction(WidgetService.ACTION_UPDATE);
-				mService.startService(serviceIntent);
-				Log.e("wifi signal task", "success on refresh");
+			if (mCurrentSSID != null && mCurrentSSID.equals(ssid)
+					&& mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed) {
+				IControlCenter cc = loadControlCenter();
+				try {
+					cc.getGroundPlot();
+					mLastClientRefreshTime = System.currentTimeMillis();
+					mLastClientRefeshed = true;
+					Intent serviceIntent = new Intent(mService, RemoteService.class);
+					serviceIntent.setAction(RemoteService.ACTION_UPDATE);
+					mService.startService(serviceIntent);
+					Log.e("wifi signal task", "success on refresh");
+				} catch (RemoteException e) {
+					Log.e("wifi signal task", "failure on refresh");
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 			}
 		}
 
@@ -89,16 +103,17 @@ public class WifiSignalTask extends Thread {
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mService);
 			String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
 			String ssid = currentSSID(mService);
-			if (triggerID != null && triggerID.length() > 0 && mCurrentSSID.equals(ssid)
+			if (triggerID != null && triggerID.length() > 0 && mCurrentSSID != null && mCurrentSSID.equals(ssid)
 					&& mLastClientTriggerTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientTriggered) {
 				try {
 					IControlCenter cc = loadControlCenter();
-					cc.performTrigger(triggerID);
+					HashMap<String, Integer> result = cc.performTrigger(triggerID);
 					mLastClientTriggerTime = System.currentTimeMillis();
 					mLastClientTriggered = true;
-					Log.e("wifi signal task", "success on trigger");
+					Log.e("wifi signal task",
+							"success on trigger with " + result.values().iterator().next() + " events");
 				} catch (RemoteException e) {
-					Log.e("wifi signal task", "failure on refresh");
+					Log.e("wifi signal task", "failure on trigger");
 					try {
 						Thread.sleep(3000);
 					} catch (InterruptedException e1) {
@@ -134,7 +149,9 @@ public class WifiSignalTask extends Thread {
 	public void setConnection(boolean connected) {
 		mLastClientRefeshed = connected;
 		mLastClientTriggered = connected;
-		mCurrentSSID = currentSSID(mService);
+		if (mCurrentSSID == null && connected) {
+			mCurrentSSID = currentSSID(mService);
+		}
 	}
 
 	public static String currentSSID(Context context) {

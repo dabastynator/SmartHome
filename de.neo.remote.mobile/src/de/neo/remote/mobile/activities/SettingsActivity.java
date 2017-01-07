@@ -1,17 +1,22 @@
 package de.neo.remote.mobile.activities;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import de.neo.remote.mobile.services.RemoteService;
 import de.remote.mobile.R;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-	public static final String NOTIFY = "de.neo.remote.playing_notify";
 	public static final String TRIGGER = "de.neo.remote.connection_trigger";
+	public static final String FOREGROUND = "de.neo.remote.stay_foreground";
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -19,6 +24,9 @@ public class SettingsActivity extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		// Use deprecated method to support older devices
 		addPreferencesFromResource(R.xml.preferences);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		settings.registerOnSharedPreferenceChangeListener(this);
 	}
 
 	@Override
@@ -34,6 +42,13 @@ public class SettingsActivity extends PreferenceActivity {
 				finish();
 			}
 		});
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Intent serviceIntent = new Intent(this, RemoteService.class);
+		serviceIntent.setAction(RemoteService.ACTION_FOREGROUND);
+		startService(serviceIntent);
 	}
 
 }

@@ -40,7 +40,6 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 		mJobs = new LinkedBlockingQueue<>();
 		mContext = context;
 		mHandler = handler;
-		start();
 	}
 
 	public void setRunning(boolean running) {
@@ -74,7 +73,7 @@ public class DownloadQueue extends Thread implements ReceiverProgress {
 		}
 	}
 
-	class EmptyJob implements Runnable {
+	public static class EmptyJob implements Runnable {
 		@Override
 		public void run() {
 		}

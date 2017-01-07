@@ -24,6 +24,7 @@ import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.ServerAdapter;
 import de.remote.mobile.R;
 
@@ -57,10 +58,15 @@ public class SelectServerActivity extends ActionBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View view, int position, long arg3) {
 				mCurrentServer = (RemoteServer) adapter.getItemAtPosition(position);
-				Intent i = new Intent();
-				i.putExtra(SERVER_ID, (int) mCurrentServer.getId());
-				setResult(RESULT_CODE, i);
-				finish();
+				try {
+					setAsFavorite(mCurrentServer);
+					Intent i = new Intent();
+					i.putExtra(SERVER_ID, (int) mCurrentServer.getId());
+					setResult(RESULT_CODE, i);
+					finish();
+				} catch (DaoException e) {
+					new AbstractTask.ErrorDialog(getApplicationContext(), e).show();
+				}
 			}
 
 		});
@@ -78,6 +84,15 @@ public class SelectServerActivity extends ActionBarActivity {
 		} catch (DaoException e) {
 			e.printStackTrace();
 		}
+	}
+
+	protected void setAsFavorite(RemoteServer currentServer) throws DaoException {
+		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+		for (RemoteServer server : dao.loadAll()) {
+			server.setFavorite(mCurrentServer.getId() == server.getId());
+			dao.update(server);
+		}
+
 	}
 
 	@Override
@@ -111,15 +126,12 @@ public class SelectServerActivity extends ActionBarActivity {
 				editServer(mCurrentServer);
 				break;
 			case R.id.opt_server_favorite:
-				for (RemoteServer server : dao.loadAll()) {
-					server.setFavorite(mCurrentServer.getId() == server.getId());
-					dao.update(server);
-				}
+				setAsFavorite(mCurrentServer);
 				updateList();
 				break;
 			}
 		} catch (DaoException e) {
-			e.printStackTrace();
+			new AbstractTask.ErrorDialog(getApplicationContext(), e).show();
 		}
 		return super.onContextItemSelected(item);
 	}
