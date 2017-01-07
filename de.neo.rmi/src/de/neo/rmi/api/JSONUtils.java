@@ -116,8 +116,16 @@ public class JSONUtils {
 	@SuppressWarnings("unchecked")
 	public static Object jsonToObject(Class<?> resultClass, Object json, WebRequest request, WebField webfield)
 			throws InstantiationException, IllegalAccessException {
-		if (json == null)
+		if (json == null || void.class.equals(resultClass) || Void.class.equals(resultClass))
 			return null;
+		if (Integer.class.equals(resultClass) && json instanceof Long)
+			return ((Long) json).intValue();
+		if (Long.class.equals(resultClass) && json instanceof Long)
+			return ((Long) json).longValue();
+		if (Double.class.equals(resultClass) && json instanceof Double)
+			return ((Long) json).doubleValue();
+		if (Float.class.equals(resultClass) && json instanceof Long)
+			return ((Long) json).floatValue();
 		Object result = resultClass.newInstance();
 		if (result instanceof Collection<?>) {
 			Collection<? super Object> resultList = (Collection<? super Object>) result;
@@ -134,7 +142,7 @@ public class JSONUtils {
 		} else if (result instanceof Map<?, ?>) {
 			Map<String, ? super Object> resultList = (Map<String, ? super Object>) result;
 			if (!(json instanceof JSONObject))
-				throw new IllegalArgumentException("Json should be array for object");
+				throw new IllegalArgumentException("Json should be map for object");
 			JSONObject jsonObject = (JSONObject) json;
 			Class<?> genericClass = null;
 			if (request != null)
