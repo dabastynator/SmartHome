@@ -64,6 +64,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 				result = mMediaServer.getPlaying();
 			if (result != null)
 				mVolumeValue = result.getVolume();
+			mChangeVolume = 0;
 		} catch (RemoteException | PlayerException e) {
 			mError = e;
 		}
