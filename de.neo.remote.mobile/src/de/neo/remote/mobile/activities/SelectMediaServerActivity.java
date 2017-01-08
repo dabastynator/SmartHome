@@ -59,7 +59,7 @@ public class SelectMediaServerActivity extends WebAPIActivity {
 			@Override
 			protected void onPostExecute(Exception result) {
 				if (result != null)
-					new AbstractTask.ErrorDialog(getApplicationContext(), result).show();
+					showException(result);
 				msList.setAdapter(new MediaServerAdapter(getApplicationContext(), mediaserver, ids, listener));
 			}
 		}.execute();

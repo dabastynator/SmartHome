@@ -2,7 +2,6 @@ package de.neo.remote.mobile.activities;
 
 import java.util.ArrayList;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -102,7 +101,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		setTitle(getString(R.string.connecting));
 		updateFilePlsButtons();
 		if (intent.getExtras() != null && intent.getExtras().containsKey(EXTRA_MEDIA_ID)) {
-			mMediaServer = createMediaServerForId(this, intent.getExtras().getString(EXTRA_MEDIA_ID));
+			mMediaServer = createMediaServerForId(intent.getExtras().getString(EXTRA_MEDIA_ID));
 			mMediaServer.initialize(mWebMediaServer, mCurrentServer);
 			updatePlayerButtons();
 			mBrowserPageAdapter.setMediaServer(mMediaServer);
@@ -117,7 +116,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		return mMediaServer;
 	}
 
-	public static MediaServerState createMediaServerForId(Context context, String remoteID) {
+	public MediaServerState createMediaServerForId(String remoteID) {
 		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
 		try {
 			for (MediaServerState ms : dao.loadAll())
@@ -131,8 +130,7 @@ public class MediaServerActivity extends WebAPIActivity {
 			dao.save(ms);
 			return ms;
 		} catch (DaoException e) {
-			if (context != null)
-				new AbstractTask.ErrorDialog(context, e).show();
+			showException(e);
 		}
 		return null;
 	}
@@ -393,7 +391,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		try {
 			dao.update(mediaServer);
 		} catch (DaoException e) {
-			new AbstractTask.ErrorDialog(getApplicationContext(), e).show();
+			showException(e);
 		}
 	}
 

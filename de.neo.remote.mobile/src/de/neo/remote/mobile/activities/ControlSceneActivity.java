@@ -120,7 +120,7 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 				} else {
 					setTitle(getResources().getString(R.string.no_controlcenter));
 					mRenderer.setConnectionState(false);
-					new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
+					showException(result);
 				}
 			};
 
@@ -210,7 +210,7 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 					protected void onPostExecute(Exception result) {
 						BeanAction action = (BeanAction) mBean;
 						if (result != null)
-							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
+							showException(result);
 						else {
 							Toast.makeText(getApplicationContext(), "Execute: " + action.getDescription(),
 									Toast.LENGTH_SHORT).show();
@@ -270,7 +270,7 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 					@Override
 					protected void onPostExecute(Exception result) {
 						if (result != null)
-							new AbstractTask.ErrorDialog(ControlSceneActivity.this, result).show();
+							showException(result);
 						else {
 							Toast.makeText(getApplicationContext(), "Stop: " + mBean.getDescription(),
 									Toast.LENGTH_SHORT).show();

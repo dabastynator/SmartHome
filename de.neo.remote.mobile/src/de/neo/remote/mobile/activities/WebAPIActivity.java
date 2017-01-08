@@ -2,7 +2,10 @@ package de.neo.remote.mobile.activities;
 
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -18,6 +21,7 @@ import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService;
+import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.remote.mobile.R;
 
@@ -31,7 +35,8 @@ public class WebAPIActivity extends ActionBarActivity {
 
 	public static final String EXTRA_SERVER_ID = "server_id";
 
-	protected ProgressDialog mProgress;
+	protected ProgressDialog mProgressDialog;
+	protected AlertDialog mErrorDialog;
 	protected RemoteServer mCurrentServer;
 	protected boolean mIsActive;
 
@@ -134,30 +139,44 @@ public class WebAPIActivity extends ActionBarActivity {
 	@Override
 	protected void onPause() {
 		dismissProgress();
+		dismissErrorDialog();
 		mIsActive = false;
 		super.onPause();
 	}
 
 	public ProgressDialog createProgress() {
 		dismissProgress();
-		mProgress = new ProgressDialog(this);
-		return mProgress;
+		mProgressDialog = new ProgressDialog(this);
+		return mProgressDialog;
 	}
 
 	public void dismissProgress() {
-		if (mProgress != null)
-			mProgress.dismiss();
-		mProgress = null;
+		if (mProgressDialog != null)
+			mProgressDialog.dismiss();
+		mProgressDialog = null;
+	}
+
+	public void showException(Exception e) {
+		dismissErrorDialog();
+		mErrorDialog = new AbstractTask.ErrorDialog(this, e).show();
+		mErrorDialog.setOnDismissListener(new OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				mErrorDialog = null;
+			}
+		});
+	}
+
+	public void dismissErrorDialog() {
+		if (mErrorDialog != null)
+			mErrorDialog.dismiss();
+		mErrorDialog = null;
 	}
 
 	@Override
 	protected void onDestroy() {
 		DaoFactory.finilize();
 		super.onDestroy();
-	}
-
-	public void progressFinished(Object result) {
-
 	}
 
 }

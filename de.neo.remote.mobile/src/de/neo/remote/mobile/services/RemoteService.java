@@ -33,6 +33,7 @@ import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.receivers.MusicWidgetProvider;
 import de.neo.remote.mobile.receivers.SwitchWidgetProvider;
 import de.neo.remote.mobile.tasks.DownloadQueue;
+import de.neo.remote.mobile.tasks.WidgetUpdateTask;
 import de.neo.remote.mobile.tasks.WifiSignalTask;
 import de.neo.remote.mobile.util.WidgetUpdater;
 import de.neo.rmi.api.WebProxyBuilder;
@@ -75,6 +76,7 @@ public class RemoteService extends Service {
 	private WidgetUpdater mWidgedUpdater;
 	private WifiSignalTask mWifiSignalTask;
 	private RemoteServer mFavorite;
+	private WidgetUpdateTask mWidgetUpdateTask;
 
 	@Override
 	public void onCreate() {
@@ -84,6 +86,8 @@ public class RemoteService extends Service {
 		mWidgedUpdater = new WidgetUpdater(getApplicationContext());
 		mWifiSignalTask = new WifiSignalTask(this);
 		mWifiSignalTask.start();
+		mWidgetUpdateTask = new WidgetUpdateTask(getApplicationContext());
+		mWidgetUpdateTask.start();
 		refreshWebApi();
 		updateMusicWidget();
 		updateSwitchWidget();
@@ -94,6 +98,7 @@ public class RemoteService extends Service {
 	public void onDestroy() {
 		mDownloader.setRunning(false);
 		mWifiSignalTask.setRunning(false);
+		mWidgetUpdateTask.setRunning(false);
 		super.onDestroy();
 	}
 

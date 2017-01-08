@@ -12,8 +12,7 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 import de.neo.remote.mobile.activities.WebAPIActivity;
 
-public abstract class AbstractTask extends
-		AsyncTask<String, Integer, Exception> {
+public abstract class AbstractTask extends AsyncTask<String, Integer, Exception> {
 
 	public enum TaskMode {
 		DialogTask, ToastTask
@@ -37,8 +36,7 @@ public abstract class AbstractTask extends
 			progress.setTitle(getDialogTitle());
 			progress.setMessage(getDialogMsg());
 			progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			progress.setButton(DialogInterface.BUTTON_NEGATIVE,
-					mActivity.getString(android.R.string.cancel),
+			progress.setButton(DialogInterface.BUTTON_NEGATIVE, mActivity.getString(android.R.string.cancel),
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
@@ -50,8 +48,7 @@ public abstract class AbstractTask extends
 			progress.show();
 		}
 		if (mMode == TaskMode.ToastTask) {
-			Toast.makeText(mActivity, getDialogTitle(), Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(mActivity, getDialogTitle(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -66,15 +63,13 @@ public abstract class AbstractTask extends
 				dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 				dialog.setTitle(getDialogTitle());
 				dialog.setMessage(getDialogMsg());
-				dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								dialog.dismiss();
-								mCanceld = true;
-							}
-						});
+				dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						mCanceld = true;
+					}
+				});
 				dialog.setMax(getProgressMaximum());
 				dialog.setCancelable(false);
 				dialog.show();
@@ -102,8 +97,6 @@ public abstract class AbstractTask extends
 		if (mMode == TaskMode.DialogTask) {
 			mActivity.dismissProgress();
 		}
-		if (result == null && !mCanceld)
-			mActivity.progressFinished(getResult());
 		if (result != null) {
 			if (!mActivity.isFinishing())
 				new ErrorDialog(mActivity, result).show();
@@ -139,18 +132,19 @@ public abstract class AbstractTask extends
 			mContext = context;
 		}
 
-		public void show() {
+		public AlertDialog show() {
 			Builder builder = new AlertDialog.Builder(mContext);
 			builder.setTitle(mError.getClass().getSimpleName());
-			if (mError.getMessage() == null
-					|| mError.getMessage().length() == 0) {
+			if (mError.getMessage() == null || mError.getMessage().length() == 0) {
 				StringWriter errors = new StringWriter();
 				mError.printStackTrace(new PrintWriter(errors));
 				builder.setMessage(errors.toString());
 			} else {
 				builder.setMessage(mError.getMessage());
 			}
-			builder.create().show();
+			AlertDialog dialog = builder.create();
+			dialog.show();
+			return dialog;
 		}
 	}
 
