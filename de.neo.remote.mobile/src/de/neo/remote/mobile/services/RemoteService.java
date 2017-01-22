@@ -35,6 +35,7 @@ import de.neo.remote.mobile.receivers.SwitchWidgetProvider;
 import de.neo.remote.mobile.tasks.DownloadQueue;
 import de.neo.remote.mobile.tasks.WidgetUpdateTask;
 import de.neo.remote.mobile.tasks.WifiSignalTask;
+import de.neo.remote.mobile.util.ExceptionHandler;
 import de.neo.remote.mobile.util.WidgetUpdater;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.neo.rmi.protokol.RemoteException;
@@ -77,9 +78,12 @@ public class RemoteService extends Service {
 	private WifiSignalTask mWifiSignalTask;
 	private RemoteServer mFavorite;
 	private WidgetUpdateTask mWidgetUpdateTask;
+	private ExceptionHandler mHandleAppCrash;
 
 	@Override
 	public void onCreate() {
+		mHandleAppCrash = new ExceptionHandler(this);
+		Thread.setDefaultUncaughtExceptionHandler(mHandleAppCrash);
 		super.onCreate();
 		mDownloader = new DownloadQueue(getApplicationContext(), mHandler);
 		mDownloader.start();

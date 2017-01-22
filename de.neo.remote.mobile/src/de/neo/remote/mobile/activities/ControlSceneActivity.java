@@ -28,7 +28,6 @@ import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.persistence.RemoteServer;
-import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.ControlSceneRenderer;

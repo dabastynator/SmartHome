@@ -22,6 +22,7 @@ import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.AbstractTask;
+import de.neo.remote.mobile.util.ExceptionHandler;
 import de.neo.rmi.api.WebProxyBuilder;
 import de.remote.mobile.R;
 
@@ -46,7 +47,11 @@ public class WebAPIActivity extends ActionBarActivity {
 	protected IWebMediaServer mWebMediaServer;
 	protected IControlCenter mWebControlCenter;
 
+	private ExceptionHandler mHandleAppCrash;
+
 	protected void onCreate(Bundle savedInstanceState) {
+		mHandleAppCrash = new ExceptionHandler(this);
+		Thread.setDefaultUncaughtExceptionHandler(mHandleAppCrash);
 		super.onCreate(savedInstanceState);
 
 		getSupportActionBar().setDisplayShowHomeEnabled(true);

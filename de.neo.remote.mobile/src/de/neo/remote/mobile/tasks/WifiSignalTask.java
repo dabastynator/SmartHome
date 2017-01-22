@@ -14,7 +14,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -40,7 +39,6 @@ public class WifiSignalTask extends Thread {
 	private boolean mLastClientRefeshed;
 	private long mLastClientTriggerTime = 0;
 	private boolean mLastClientTriggered;
-	public String mCurrentSSID;
 	private NetworkListener mListener;
 
 	public WifiSignalTask(Service service) {
@@ -72,9 +70,7 @@ public class WifiSignalTask extends Thread {
 
 	private class RefreshJob implements Runnable {
 		public void run() {
-			String ssid = currentSSID(mService);
-			if (mCurrentSSID != null && mCurrentSSID.equals(ssid)
-					&& mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed) {
+			if (mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed) {
 				IControlCenter cc = loadControlCenter();
 				try {
 					cc.getGroundPlot();
@@ -102,8 +98,7 @@ public class WifiSignalTask extends Thread {
 		public void run() {
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mService);
 			String triggerID = preferences.getString(SettingsActivity.TRIGGER, "");
-			String ssid = currentSSID(mService);
-			if (triggerID != null && triggerID.length() > 0 && mCurrentSSID != null && mCurrentSSID.equals(ssid)
+			if (triggerID != null && triggerID.length() > 0
 					&& mLastClientTriggerTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientTriggered) {
 				try {
 					IControlCenter cc = loadControlCenter();
@@ -149,15 +144,6 @@ public class WifiSignalTask extends Thread {
 	public void setConnection(boolean connected) {
 		mLastClientRefeshed = connected;
 		mLastClientTriggered = connected;
-		if (mCurrentSSID == null && connected) {
-			mCurrentSSID = currentSSID(mService);
-		}
-	}
-
-	public static String currentSSID(Context context) {
-		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		return wifiInfo.getSSID();
 	}
 
 	private class NetworkListener extends BroadcastReceiver {
