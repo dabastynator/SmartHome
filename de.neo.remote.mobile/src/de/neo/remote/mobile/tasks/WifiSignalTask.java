@@ -70,8 +70,9 @@ public class WifiSignalTask extends Thread {
 
 	private class RefreshJob implements Runnable {
 		public void run() {
-			if (mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed) {
-				IControlCenter cc = loadControlCenter();
+			IControlCenter cc = loadControlCenter();
+			if (mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed
+					&& cc != null) {
 				try {
 					cc.getGroundPlot();
 					mLastClientRefreshTime = System.currentTimeMillis();
