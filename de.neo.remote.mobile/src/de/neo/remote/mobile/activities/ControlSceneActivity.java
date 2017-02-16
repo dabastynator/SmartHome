@@ -290,9 +290,9 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 
 						@Override
 						public void run() throws Exception {
-							int red = color & 0x0000FF;
+							int blue = color & 0x0000FF;
 							int green = (color & 0x00FF00) >> 8;
-							int blue = (color & 0xFF0000) >> 16;
+							int red = (color & 0xFF0000) >> 16;
 							mWebLEDStrip.setColor(mSelecter.mBean.getID(), red, green, blue);
 						}
 					}).execute();
