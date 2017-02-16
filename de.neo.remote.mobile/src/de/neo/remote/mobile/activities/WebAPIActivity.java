@@ -103,6 +103,7 @@ public class WebAPIActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		mIsActive = true;
 	}
 
