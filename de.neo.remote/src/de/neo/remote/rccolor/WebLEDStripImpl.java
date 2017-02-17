@@ -74,7 +74,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 			throws RemoteException {
 		try {
 			IControlUnit unit = mCenter.getControlUnit(id);
-			if (unit.getRemoteableControlObject() instanceof IRCColor) {
+			if (unit != null && unit.getRemoteableControlObject() instanceof IRCColor) {
 				IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
 				webLed.merge(unit.getWebBean());
