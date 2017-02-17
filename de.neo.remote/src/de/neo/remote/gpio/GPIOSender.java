@@ -29,7 +29,7 @@ public class GPIOSender {
 	static {
 		LEDModes = new HashMap<>();
 		LEDModes.put(LEDMode.NormalMode, 184555377);
-		LEDModes.put(LEDMode.PartyMode, 185620337);
+		LEDModes.put(LEDMode.PartyMode,  185920337);
 	}
 
 	private GPIOSender() {
