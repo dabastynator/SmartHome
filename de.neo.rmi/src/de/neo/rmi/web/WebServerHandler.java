@@ -93,7 +93,10 @@ public class WebServerHandler implements HttpHandler {
 				resultParams.add(Double.valueOf(strValue));
 			else if (paramClass.equals(String.class))
 				resultParams.add(strValue);
-			else
+			else if (paramClass.isEnum()) {
+				Class cls = paramClass;
+				resultParams.add(Enum.valueOf(cls, strValue));
+			} else
 				throw new IllegalArgumentException(
 						"Parameter-type of method not supported: " + parameterTypes[i].getSimpleName());
 		}
