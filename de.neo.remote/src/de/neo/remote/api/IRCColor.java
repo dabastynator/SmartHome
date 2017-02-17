@@ -1,5 +1,6 @@
 package de.neo.remote.api;
 
+import de.neo.remote.api.IWebLEDStrip.LEDMode;
 import de.neo.rmi.protokol.RemoteAble;
 import de.neo.rmi.protokol.RemoteException;
 
@@ -38,5 +39,7 @@ public interface IRCColor extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	public int getColor() throws RemoteException;
+
+	public void setMode(LEDMode mode);
 
 }

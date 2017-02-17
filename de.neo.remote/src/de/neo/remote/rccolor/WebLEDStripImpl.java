@@ -69,6 +69,24 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	}
 
 	@Override
+	@WebRequest(path = "setmode", description = "Set mode for specified led strip. 'NormalMode' simply shows the color, 'PartyMode' shows the color elements with strobe effect.")
+	public BeanLEDStrips setMode(@WebGet(name = "id") String id, @WebGet(name = "mode") LEDMode mode)
+			throws RemoteException {
+		try {
+			IControlUnit unit = mCenter.getControlUnit(id);
+			if (unit.getRemoteableControlObject() instanceof IRCColor) {
+				IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
+				BeanLEDStrips webLed = new BeanLEDStrips();
+				webLed.merge(unit.getWebBean());
+				ledStrip.setMode(mode);
+				return webLed;
+			}
+		} catch (RemoteException e) {
+		}
+		return null;
+	}
+
+	@Override
 	public String getWebPath() {
 		return "ledstrip";
 	}

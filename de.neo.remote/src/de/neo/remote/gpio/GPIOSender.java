@@ -2,8 +2,11 @@ package de.neo.remote.gpio;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.neo.remote.RemoteLogger;
+import de.neo.remote.api.IWebLEDStrip.LEDMode;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.rmi.api.RMILogger.LogPriority;
 
@@ -20,6 +23,14 @@ public class GPIOSender {
 	private static final String COLOR_SENDER = "/usr/bin/sendInt";
 
 	private static GPIOSender mInstance;
+
+	private static Map<LEDMode, Integer> LEDModes;
+
+	static {
+		LEDModes = new HashMap<>();
+		LEDModes.put(LEDMode.NormalMode, 184555377);
+		LEDModes.put(LEDMode.PartyMode, 185620337);
+	}
 
 	private GPIOSender() {
 	}
@@ -63,6 +74,25 @@ public class GPIOSender {
 			}
 			if (success)
 				RemoteLogger.performLog(LogPriority.INFORMATION, "Set color " + color, "RCColor");
+			reader.close();
+		} catch (Exception e) {
+			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "SwitchPower");
+		}
+	}
+
+	public void setMode(LEDMode mode) {
+		try {
+			Process sender = Runtime.getRuntime()
+					.exec(new String[] { COLOR_SENDER, String.valueOf(LEDModes.get(mode)) });
+			BufferedReader reader = new BufferedReader(new InputStreamReader(sender.getErrorStream()));
+			String line = null;
+			boolean success = true;
+			while ((line = reader.readLine()) != null) {
+				RemoteLogger.performLog(LogPriority.ERROR, line, "Internetswitch");
+				success = false;
+			}
+			if (success)
+				RemoteLogger.performLog(LogPriority.INFORMATION, "Set led-mode " + mode, "RCColor");
 			reader.close();
 		} catch (Exception e) {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "SwitchPower");

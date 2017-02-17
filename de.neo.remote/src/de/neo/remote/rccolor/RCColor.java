@@ -1,6 +1,7 @@
 package de.neo.remote.rccolor;
 
 import de.neo.remote.api.IRCColor;
+import de.neo.remote.api.IWebLEDStrip.LEDMode;
 import de.neo.remote.gpio.GPIOSender;
 
 public class RCColor implements IRCColor {
@@ -27,6 +28,11 @@ public class RCColor implements IRCColor {
 	@Override
 	public int getColor() {
 		return mCurrentColor;
+	}
+
+	@Override
+	public void setMode(LEDMode mode) {
+		GPIOSender.getInstance().setMode(mode);		
 	}
 
 }
