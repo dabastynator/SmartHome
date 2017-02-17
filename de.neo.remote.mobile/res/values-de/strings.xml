@@ -68,6 +68,11 @@
     <string name="command_stop">Aktion stoppen</string>
     <string name="command_stop_long">Möchten Sie wirkling die Aktion stoppen: </string>
 
+    <!-- LED action strings -->
+    <string name="led_change_mode">Modus für das LED-Strip</string>
+    <string name="led_mode_party">Party</string>
+    <string name="led_mode_normal">Normal</string>
+
     <!-- Media server strings -->
     <string name="mediaserver_load">Lade Mediaserver...</string>
     <string name="mediaserver_no_server">Kein Mediaserver</string>

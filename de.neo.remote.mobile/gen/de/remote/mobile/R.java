@@ -2114,10 +2114,16 @@ containing a value of this type.
         public static final int connecting=0x7f09003f;
         public static final int connection_trigger=0x7f090022;
         public static final int control=0x7f09001a;
-        public static final int delete=0x7f090051;
+        public static final int delete=0x7f090054;
         public static final int error_load_server=0x7f090046;
         public static final int exit=0x7f09001b;
         public static final int hello=0x7f090011;
+        /**  LED action strings 
+ LED action strings 
+         */
+        public static final int led_change_mode=0x7f09004a;
+        public static final int led_mode_normal=0x7f09004c;
+        public static final int led_mode_party=0x7f09004b;
         /**  Options 
  Options 
          */
@@ -2130,9 +2136,9 @@ containing a value of this type.
         /**  Media server strings 
  Media server strings 
          */
-        public static final int mediaserver_load=0x7f09004a;
-        public static final int mediaserver_no_server=0x7f09004b;
-        public static final int mediaserver_no_server_selected_at=0x7f09004c;
+        public static final int mediaserver_load=0x7f09004d;
+        public static final int mediaserver_no_server=0x7f09004e;
+        public static final int mediaserver_no_server_selected_at=0x7f09004f;
         public static final int move_left=0x7f090018;
         public static final int move_right=0x7f090017;
         public static final int no_conneciton=0x7f090044;
@@ -2184,17 +2190,17 @@ containing a value of this type.
         /**  General 
  General 
          */
-        public static final int str_create=0x7f09004f;
-        public static final int str_download=0x7f090052;
-        public static final int str_entry_add=0x7f090055;
-        public static final int str_entry_deleted=0x7f090054;
-        public static final int str_name=0x7f090050;
-        public static final int str_upload=0x7f090053;
-        public static final int switch_has_no_switch=0x7f09004e;
+        public static final int str_create=0x7f090052;
+        public static final int str_download=0x7f090055;
+        public static final int str_entry_add=0x7f090058;
+        public static final int str_entry_deleted=0x7f090057;
+        public static final int str_name=0x7f090053;
+        public static final int str_upload=0x7f090056;
+        public static final int switch_has_no_switch=0x7f090051;
         /**  Power switch 
  Power switch 
          */
-        public static final int switch_power=0x7f09004d;
+        public static final int switch_power=0x7f090050;
         public static final int use_playing_session=0x7f090020;
         public static final int volume=0x7f090023;
     }

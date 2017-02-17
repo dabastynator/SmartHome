@@ -49,7 +49,6 @@ import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.api.PlayingBean;
 import de.neo.remote.api.PlayingBean.STATE;
-import de.neo.remote.mobile.activities.ControlSceneActivity.SelectControlUnit;
 import de.neo.rmi.protokol.RemoteException;
 import de.remote.mobile.R;
 
@@ -68,7 +67,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	}
 
 	private GLGroup mRoom;
-	private SelectControlUnit mControlUnitListener;
+	private BeanClickHandler mControlUnitListener;
 
 	private Map<String, GLFigure> mGLMediaServers;
 	private Map<String, IGLSwitch> mGLSwitches;
@@ -76,7 +75,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 	private TranslateSceneHandler mHandler;
 	private IWebSwitch mWebSwitch;
 
-	public ControlSceneRenderer(Context context, SelectControlUnit selecter) {
+	public ControlSceneRenderer(Context context, BeanClickHandler selecter) {
 		super(context);
 		this.mControlUnitListener = selecter;
 		setGradient(new float[] { 0.3f, 0.3f, 1, 1 }, new float[] { 1, 1, 1, 1 });
@@ -315,7 +314,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 
 		@Override
 		public void onGLClick() {
-			mControlUnitListener.selectLongClickUnit(mBean);
+			mControlUnitListener.selectLongClickBean(mBean);
 		}
 	}
 

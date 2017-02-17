@@ -2,11 +2,7 @@ package de.neo.remote.mobile.activities;
 
 import java.util.List;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,12 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-import colorpickerview.dialog.ColorPickerDialogFragment;
 import colorpickerview.dialog.ColorPickerDialogFragment.ColorPickerDialogListener;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
 import de.neo.remote.api.GroundPlot;
-import de.neo.remote.api.IControlCenter.BeanWeb;
 import de.neo.remote.api.IWebAction.BeanAction;
 import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
 import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
@@ -30,6 +23,7 @@ import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
+import de.neo.remote.mobile.util.BeanClickHandler;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
 import de.remote.mobile.R;
 
@@ -37,18 +31,15 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 
 	private AbstractSceneSurfaceView mGLView;
 	private ControlSceneRenderer mRenderer;
-	private Handler mHandler;
 	private FrameLayout mLayout;
 	private ProgressBar mProgress;
-	private SelectControlUnit mSelecter;
+	private BeanClickHandler mSelecter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mHandler = new Handler();
-
-		mSelecter = new SelectControlUnit();
+		mSelecter = new BeanClickHandler(this, new Handler());
 
 		setContentView(R.layout.controlscene);
 		findComponents();
@@ -175,117 +166,11 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 		return true;
 	}
 
-	public class SelectControlUnit implements OnClickListener {
-		private BeanWeb mBean;
-
-		public void selectBean(final BeanWeb bean) {
-			mBean = bean;
-			if (mBean instanceof BeanMediaServer) {
-				mHandler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						Intent intent = new Intent(ControlSceneActivity.this, MediaServerActivity.class);
-						intent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, mBean.getID());
-						ControlSceneActivity.this.startActivity(intent);
-					}
-				});
-			}
-			if (mBean instanceof BeanAction) {
-				AsyncTask<BeanWeb, Integer, Exception> task = new AsyncTask<BeanWeb, Integer, Exception>() {
-
-					@Override
-					protected Exception doInBackground(BeanWeb... params) {
-						try {
-							BeanAction action = (BeanAction) mBean;
-							mWebAction.startAction(action.getID());
-						} catch (Exception e) {
-							return e;
-						}
-						return null;
-					}
-
-					@Override
-					protected void onPostExecute(Exception result) {
-						BeanAction action = (BeanAction) mBean;
-						if (result != null)
-							showException(result);
-						else {
-							Toast.makeText(getApplicationContext(), "Execute: " + action.getDescription(),
-									Toast.LENGTH_SHORT).show();
-						}
-						if (action.getClientAction() != null && action.getClientAction().length() > 0) {
-							Uri uri = Uri.parse(action.getClientAction());
-							Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-							startActivity(intent);
-
-						}
-					}
-				};
-				task.execute(mBean);
-			}
-
-			if (mBean instanceof BeanLEDStrips) {
-				BeanLEDStrips led = (BeanLEDStrips) mBean;
-				ColorPickerDialogFragment dialog = ColorPickerDialogFragment.newInstance(led.getID().hashCode(),
-						"Pick color for " + led.getName(), getString(android.R.string.ok), led.getColor() | 0xFF000000,
-						false);
-				dialog.show(getFragmentManager(), "colorpicker");
-			}
-		}
-
-		public void selectLongClickUnit(final BeanWeb bean) {
-			mBean = bean;
-			mHandler.post(new Runnable() {
-
-				@Override
-				public void run() {
-					new AlertDialog.Builder(ControlSceneActivity.this)
-							.setTitle(getResources().getString(R.string.command_stop))
-							.setMessage(
-									getResources().getString(R.string.command_stop_long) + " " + mBean.getName() + "?")
-							.setPositiveButton(getResources().getString(android.R.string.yes), SelectControlUnit.this)
-							.setNegativeButton(getResources().getString(android.R.string.no), null).create().show();
-				}
-			});
-		}
-
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			if (mBean instanceof BeanAction) {
-				AsyncTask<BeanWeb, Integer, Exception> task = new AsyncTask<BeanWeb, Integer, Exception>() {
-
-					@Override
-					protected Exception doInBackground(BeanWeb... params) {
-						try {
-							BeanAction action = (BeanAction) mBean;
-							mWebAction.stopAction(action.getID());
-						} catch (Exception e) {
-							return e;
-						}
-						return null;
-					}
-
-					@Override
-					protected void onPostExecute(Exception result) {
-						if (result != null)
-							showException(result);
-						else {
-							Toast.makeText(getApplicationContext(), "Stop: " + mBean.getDescription(),
-									Toast.LENGTH_SHORT).show();
-						}
-					}
-				};
-				task.execute(mBean);
-			}
-		}
-	}
-
 	@Override
 	public void onColorSelected(int dialogId, final int color) {
-		if (mSelecter.mBean instanceof BeanLEDStrips) {
+		if (mSelecter.getBean() instanceof BeanLEDStrips) {
 			new SimpleTask(this).setSuccess("Color set")
-					.setDialogMessage("Set color for " + mSelecter.mBean.getName() + " to " + color)
+					.setDialogMessage("Set color for " + mSelecter.getBean().getName() + " to " + color)
 					.setDialogtitle("Set color...").setAction(new BackgroundAction() {
 
 						@Override
@@ -293,7 +178,7 @@ public class ControlSceneActivity extends WebAPIActivity implements ColorPickerD
 							int blue = color & 0x0000FF;
 							int green = (color & 0x00FF00) >> 8;
 							int red = (color & 0xFF0000) >> 16;
-							mWebLEDStrip.setColor(mSelecter.mBean.getID(), red, green, blue);
+							mWebLEDStrip.setColor(mSelecter.getBean().getID(), red, green, blue);
 						}
 					}).execute();
 		}

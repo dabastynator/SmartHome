@@ -185,4 +185,12 @@ public class WebAPIActivity extends ActionBarActivity {
 		super.onDestroy();
 	}
 
+	public IWebAction getWebAction() {
+		return mWebAction;
+	}
+
+	public IWebLEDStrip getWebLED() {
+		return mWebLEDStrip;
+	}
+
 }
