@@ -19,17 +19,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.rmi.IRegistryConnection;
 import de.neo.remote.rmi.RMILogger;
-import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.rmi.Server;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RMILogger.RMILogListener;
 import de.neo.remote.web.WebServer;
 import de.neo.smarthome.RemoteLogger.RemoteLogListener;
 import de.neo.smarthome.action.ActionUnitFactory;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.controlcenter.ControlCenterImpl;
 import de.neo.smarthome.gpio.GPIOUnitFactory;
@@ -38,8 +35,6 @@ import de.neo.smarthome.rccolor.RCColorUnitFactory;
 
 public class RemoteMain {
 
-	public static String REGISTRY_IP = "RegistryIp";
-	public static String SERVER_PORT = "ServerPort";
 	public static String WEBSERVER = "WebServer";
 	public static String WEBSERVER_PORT = "port";
 	public static String WEBSERVER_TOKEN = "token";
@@ -71,30 +66,15 @@ public class RemoteMain {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(config);
 			doc.getDocumentElement().normalize();
-			NodeList registryList = doc.getElementsByTagName(REGISTRY_IP);
-			if (registryList == null || registryList.getLength() == 0)
-				throw new SAXException("No registry ip in xml: " + REGISTRY_IP);
-			String registryIp = registryList.item(0).getTextContent();
 
-			NodeList serverPortNode = doc.getElementsByTagName(SERVER_PORT);
-			int serverPort = IControlCenter.PORT;
-			if (serverPortNode != null && serverPortNode.getLength() > 0)
-				serverPort = Integer.parseInt(serverPortNode.item(0).getTextContent());
+			ControlCenterImpl controlcenter = loadControlCenter(doc);
+			List<IControllUnit> units = loadControlUnits(doc, controlcenter);
 
-			IControlCenter controlcenter = loadControlCenter(doc);
-			List<IControlUnit> units = loadControlUnits(doc, controlcenter);
-
-			Server server = Server.getServer();
-			server.startServer(serverPort);
-
-			ControlCenterRegistryConnection connector = new ControlCenterRegistryConnection(controlcenter, units);
-			server.manageConnector(connector, registryIp);
+			for (IControllUnit unit : units)
+				controlcenter.addControlUnit(unit);
 
 			for (Trigger trigger : readStartupTrigger(doc.getElementsByTagName("StartTrigger"))) {
-				try {
-					controlcenter.trigger(trigger);
-				} catch (RemoteException e) {
-				}
+				controlcenter.trigger(trigger);
 			}
 		} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException e) {
 			System.err.println("Error parsing configuration: " + e.getMessage());
@@ -117,9 +97,9 @@ public class RemoteMain {
 		});
 	}
 
-	private static List<IControlUnit> loadControlUnits(Document doc, IControlCenter center)
+	private static List<IControllUnit> loadControlUnits(Document doc, IControlCenter center)
 			throws SAXException, IOException {
-		List<IControlUnit> units = new ArrayList<IControlUnit>();
+		List<IControllUnit> units = new ArrayList<IControllUnit>();
 		for (String unitName : mControlUnitFactory.keySet()) {
 			NodeList nodeList = doc.getElementsByTagName(unitName);
 			ControlUnitFactory factory = mControlUnitFactory.get(unitName);
@@ -133,43 +113,34 @@ public class RemoteMain {
 		return units;
 	}
 
-	private static IControlCenter loadControlCenter(Document doc) {
+	private static ControlCenterImpl loadControlCenter(Document doc) throws SAXException, IOException {
 		NodeList controlCenterRoot = doc.getElementsByTagName(ControlCenterImpl.ROOT);
 		NodeList webServerRoot = doc.getElementsByTagName(WEBSERVER);
-		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0) {
-			ControlCenterImpl center = new ControlCenterImpl(controlCenterRoot.item(0));
-			try {
-				center.initializeRules(doc.getElementsByTagName("EventRule"));
-				center.initializeTrigger(doc.getElementsByTagName("TimeTrigger"));
-				WebServer webServer = WebServer.getInstance();
-				if (webServerRoot != null && webServerRoot.getLength() > 0) {
-					Element webRoot = (Element) webServerRoot.item(0);
-					if (webRoot.hasAttribute(WEBSERVER_PORT) && webRoot.hasAttribute(WEBSERVER_TOKEN)) {
-						webServer.setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
-						for (ControlUnitFactory factory : mControlUnitFactory.values()) {
-							AbstractUnitHandler handler = factory.createUnitHandler(center);
-							webServer.handle(handler.getWebPath(), handler, webRoot.getAttribute(WEBSERVER_TOKEN));
-						}
-						webServer.handle(WEBSERVER_PATH, center, webRoot.getAttribute(WEBSERVER_TOKEN));
-						webServer.start();
-					}
+		ControlCenterImpl center = new ControlCenterImpl();
+		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0)
+			center.initializeGroundPlot(controlCenterRoot.item(0));
+		center.initializeRules(doc.getElementsByTagName("EventRule"));
+		center.initializeTrigger(doc.getElementsByTagName("TimeTrigger"));
+		WebServer webServer = WebServer.getInstance();
+		if (webServerRoot != null && webServerRoot.getLength() > 0) {
+			Element webRoot = (Element) webServerRoot.item(0);
+			if (webRoot.hasAttribute(WEBSERVER_PORT) && webRoot.hasAttribute(WEBSERVER_TOKEN)) {
+				webServer.setPort(Integer.valueOf(webRoot.getAttribute(WEBSERVER_PORT)));
+				for (ControlUnitFactory factory : mControlUnitFactory.values()) {
+					AbstractUnitHandler handler = factory.createUnitHandler(center);
+					webServer.handle(handler.getWebPath(), handler, webRoot.getAttribute(WEBSERVER_TOKEN));
 				}
-			} catch (SAXException | IOException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "Controlcenter");
+				webServer.handle(WEBSERVER_PATH, center, webRoot.getAttribute(WEBSERVER_TOKEN));
+				webServer.start();
 			}
-
-			return center;
 		}
-		return null;
+		return center;
 	}
 
 	private static void checkArgs(String[] args) {
 		for (String str : args) {
 			if (str.equals("--help") || str.equals("-h")) {
 				printUsage();
-				System.exit(1);
-			}
-			if (str.equals("--xmlhelp")) {
 				System.exit(1);
 			}
 		}
@@ -190,57 +161,7 @@ public class RemoteMain {
 	private static void printUsage() {
 		System.out.println("Usage:  ");
 		System.out.println("  --help     -h : print usage.");
-		System.out.println("  --registry    : ip of the registry.");
 		System.out.println("  --config      : configuration xml file.");
-		System.out.println("  --xmlhelp     : print xml schema.");
-	}
-
-	public static class ControlCenterRegistryConnection implements IRegistryConnection {
-
-		private IControlCenter m_controlcenter;
-		List<IControlUnit> m_units;
-
-		public ControlCenterRegistryConnection(IControlCenter controlcenter, List<IControlUnit> units) {
-			m_controlcenter = controlcenter;
-			if (controlcenter != null && units != null) {
-				try {
-					for (IControlUnit unit : units)
-						controlcenter.addControlUnit(unit);
-				} catch (RemoteException e) {
-				}
-			} else {
-				m_units = units;
-			}
-		}
-
-		@Override
-		public void onRegistryConnected(Server server) {
-			try {
-				IControlCenter controlcenter = m_controlcenter;
-				if (controlcenter == null) {
-					controlcenter = server.forceFind(IControlCenter.ID, IControlCenter.class);
-				} else {
-					server.register(IControlCenter.ID, m_controlcenter);
-				}
-				if (m_units != null)
-					for (IControlUnit unit : m_units)
-						controlcenter.addControlUnit(unit);
-			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "RemoteMain");
-			}
-		}
-
-		@Override
-		public void onRegistryLost() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public boolean isManaged() {
-			return true;
-		}
-
 	}
 
 	public static List<Trigger> readStartupTrigger(NodeList nodeList) throws SAXException {

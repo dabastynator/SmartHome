@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
@@ -18,7 +17,7 @@ import de.neo.remote.web.WebRequest;
  * @author sebastian
  * 
  */
-public interface IControlCenter extends RemoteAble {
+public interface IControlCenter {
 
 	/**
 	 * id of the music station handler object
@@ -44,7 +43,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @param controlUnit
 	 * @throws RemoteException
 	 */
-	public void addControlUnit(IControlUnit controlUnit) throws RemoteException;
+	public void addControlUnit(IControllUnit controlUnit) throws RemoteException;
 
 	/**
 	 * Get the ground plot of the control center area.
@@ -61,7 +60,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @param controlUnit
 	 * @throws RemoteException
 	 */
-	public void removeControlUnit(IControlUnit controlUnit) throws RemoteException;
+	public void removeControlUnit(IControllUnit controlUnit) throws RemoteException;
 
 	/**
 	 * Get control unit by specified unit-id.
@@ -70,7 +69,7 @@ public interface IControlCenter extends RemoteAble {
 	 * @return control unit by number
 	 * @throws RemoteException
 	 */
-	public IControlUnit getControlUnit(String id) throws RemoteException;
+	public IControllUnit getControlUnit(String id) throws RemoteException;
 
 	/**
 	 * Trigger a trigger. The trigger is specified by the parameter. EventRules
@@ -124,7 +123,7 @@ public interface IControlCenter extends RemoteAble {
 	 * 
 	 * @return map of controlunits
 	 */
-	public Map<String, IControlUnit> getControlUnits();
+	public Map<String, IControllUnit> getControlUnits();
 
 	public static class BeanWeb implements Serializable {
 

@@ -16,22 +16,15 @@ public class RCColorControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public Class getRemoteableControlInterface() throws RemoteException {
-		return IRCColor.class;
-	}
-
-	@Override
-	public IRCColor getRemoteableControlObject() throws RemoteException {
+	public IRCColor getControllObject() throws RemoteException {
 		return mColorUnit;
 	}
 
 	@Override
-	public boolean performEvent(Event event) throws RemoteException,
-			EventException {
+	public boolean performEvent(Event event) throws RemoteException, EventException {
 		String colorString = event.getParameter("color");
 		if (colorString == null)
-			throw new EventException(
-					"Parameter color missing to set the color!");
+			throw new EventException("Parameter color missing to set the color!");
 		int color = 0, duration = 0;
 		try {
 			color = Integer.parseInt(colorString);

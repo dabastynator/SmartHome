@@ -10,7 +10,6 @@ import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.ICommandAction;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit.EventException;
 
 public class ActionControlUnit extends AbstractControlUnit {
 
@@ -21,12 +20,7 @@ public class ActionControlUnit extends AbstractControlUnit {
 	private CommandAction mCommandAction;
 
 	@Override
-	public Class<?> getRemoteableControlInterface() throws RemoteException {
-		return ICommandAction.class;
-	}
-
-	@Override
-	public ICommandAction getRemoteableControlObject() throws RemoteException {
+	public ICommandAction getControllObject() throws RemoteException {
 		return mCommandAction;
 	}
 

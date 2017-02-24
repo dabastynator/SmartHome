@@ -9,7 +9,6 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit.EventException;
 import de.neo.smarthome.api.IInternetSwitch;
 import de.neo.smarthome.api.IWebSwitch.State;
 
@@ -24,12 +23,7 @@ public class GPIOControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public Class<?> getRemoteableControlInterface() throws RemoteException {
-		return IInternetSwitch.class;
-	}
-
-	@Override
-	public IInternetSwitch getRemoteableControlObject() throws RemoteException {
+	public IInternetSwitch getControllObject() throws RemoteException {
 		return mSwitch;
 	}
 

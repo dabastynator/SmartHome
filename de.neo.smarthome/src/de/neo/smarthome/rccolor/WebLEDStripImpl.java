@@ -7,7 +7,7 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IRCColor;
 import de.neo.smarthome.api.IWebLEDStrip;
 
@@ -21,10 +21,10 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	@WebRequest(path = "list", description = "List all led strips.", genericClass = BeanLEDStrips.class)
 	public ArrayList<BeanLEDStrips> getLEDStrips() {
 		ArrayList<BeanLEDStrips> result = new ArrayList<>();
-		for (IControlUnit unit : mCenter.getControlUnits().values()) {
+		for (IControllUnit unit : mCenter.getControlUnits().values()) {
 			try {
-				if (unit.getRemoteableControlObject() instanceof IRCColor) {
-					IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
+				if (unit.getControllObject() instanceof IRCColor) {
+					IRCColor ledStrip = (IRCColor) unit.getControllObject();
 					BeanLEDStrips webLed = new BeanLEDStrips();
 					webLed.merge(unit.getWebBean());
 					int color = ledStrip.getColor();
@@ -51,9 +51,9 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 			throw new IllegalArgumentException("Blue componentet must be in [0..255].");
 		int color = (red << 16) | (green << 8) | blue;
 		try {
-			IControlUnit unit = mCenter.getControlUnit(id);
-			if (unit.getRemoteableControlObject() instanceof IRCColor) {
-				IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
+			IControllUnit unit = mCenter.getControlUnit(id);
+			if (unit.getControllObject() instanceof IRCColor) {
+				IRCColor ledStrip = (IRCColor) unit.getControllObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
 				webLed.merge(unit.getWebBean());
 				ledStrip.setColor(color);
@@ -73,9 +73,9 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	public BeanLEDStrips setMode(@WebGet(name = "id") String id, @WebGet(name = "mode") LEDMode mode)
 			throws RemoteException {
 		try {
-			IControlUnit unit = mCenter.getControlUnit(id);
-			if (unit != null && unit.getRemoteableControlObject() instanceof IRCColor) {
-				IRCColor ledStrip = (IRCColor) unit.getRemoteableControlObject();
+			IControllUnit unit = mCenter.getControlUnit(id);
+			if (unit != null && unit.getControllObject() instanceof IRCColor) {
+				IRCColor ledStrip = (IRCColor) unit.getControllObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
 				webLed.merge(unit.getWebBean());
 				ledStrip.setMode(mode);

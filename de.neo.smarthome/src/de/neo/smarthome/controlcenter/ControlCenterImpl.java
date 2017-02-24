@@ -24,7 +24,7 @@ import de.neo.smarthome.api.GroundPlot.Feature;
 import de.neo.smarthome.api.GroundPlot.Point;
 import de.neo.smarthome.api.GroundPlot.Wall;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 
 /**
@@ -39,7 +39,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	/**
 	 * List of all control units
 	 */
-	private Map<String, IControlUnit> mControlUnits = Collections.synchronizedMap(new HashMap<String, IControlUnit>());
+	private Map<String, IControllUnit> mControlUnits = Collections.synchronizedMap(new HashMap<String, IControllUnit>());
 
 	/**
 	 * List of all event rules
@@ -60,11 +60,15 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 
 	private List<String> mStartUpTrigger;
 
-	public ControlCenterImpl(Node root) {
-		mGround = readGround((Element) root);
+	public ControlCenterImpl() {
+		mGround = new GroundPlot();
 		mEventWorker = new EventWorker(this);
 		mStartUpTrigger = new ArrayList<String>();
 		start();
+	}
+
+	public void initializeGroundPlot(Node root) {
+		mGround = readGround((Element) root);
 	}
 
 	private GroundPlot readGround(Element root) {
@@ -121,7 +125,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 		int removed = 0;
 		for (String id : new HashSet<>(mControlUnits.keySet())) {
 			try {
-				IControlUnit unit = mControlUnits.get(id);
+				IControllUnit unit = mControlUnits.get(id);
 				unit.getID();
 			} catch (RemoteException e) {
 				mControlUnits.remove(id);
@@ -134,7 +138,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public void addControlUnit(IControlUnit controlUnit) {
+	public void addControlUnit(IControllUnit controlUnit) {
 		try {
 			String id = controlUnit.getID();
 			mControlUnits.put(id, controlUnit);
@@ -147,7 +151,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public void removeControlUnit(IControlUnit controlUnit) {
+	public void removeControlUnit(IControllUnit controlUnit) {
 		mControlUnits.remove(controlUnit);
 	}
 
@@ -163,7 +167,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public IControlUnit getControlUnit(String id) {
+	public IControllUnit getControlUnit(String id) {
 		return mControlUnits.get(id);
 	}
 
@@ -269,7 +273,7 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public Map<String, IControlUnit> getControlUnits() {
+	public Map<String, IControllUnit> getControlUnits() {
 		return mControlUnits;
 	}
 

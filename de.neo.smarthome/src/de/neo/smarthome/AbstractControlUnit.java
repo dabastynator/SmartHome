@@ -13,10 +13,10 @@ import org.xml.sax.SAXException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
-import de.neo.smarthome.api.IControlUnit;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 
-public abstract class AbstractControlUnit implements IControlUnit {
+public abstract class AbstractControlUnit implements IControllUnit {
 
 	protected String mName;
 	protected String mDescription;

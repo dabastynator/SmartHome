@@ -9,16 +9,9 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit;
-import de.neo.smarthome.api.IMediaServer;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IWebMediaServer;
-import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
-import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
-import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
-import de.neo.smarthome.api.IWebMediaServer.BeanPlaylist;
-import de.neo.smarthome.api.IWebMediaServer.BeanPlaylistItem;
-import de.neo.smarthome.api.IWebMediaServer.FileType;
 import de.neo.smarthome.api.PlayerException;
 import de.neo.smarthome.api.PlayingBean;
 import de.neo.smarthome.api.PlayingBean.STATE;
@@ -35,18 +28,18 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebGet(name = "id", required = false, defaultvalue = "") String id) throws RemoteException {
 		ArrayList<BeanMediaServer> result = new ArrayList<>();
 		if (id != null && id.length() > 0) {
-			IControlUnit unit = mCenter.getControlUnits().get(id);
-			if (unit != null && unit.getRemoteableControlObject() instanceof IMediaServer) {
-				IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+			IControllUnit unit = mCenter.getControlUnits().get(id);
+			if (unit != null && unit.getControllObject() instanceof MediaServerImpl) {
+				MediaServerImpl mediaServer = (MediaServerImpl) unit.getControllObject();
 				BeanMediaServer webMedia = getBeanFor(unit, mediaServer);
 				result.add(webMedia);
 			} else
 				throw new RemoteException(id, "No such mediaserver found: " + id);
 		} else {
-			for (IControlUnit unit : mCenter.getControlUnits().values()) {
+			for (IControllUnit unit : mCenter.getControlUnits().values()) {
 				try {
-					if (unit.getRemoteableControlObject() instanceof IMediaServer) {
-						IMediaServer mediaServer = (IMediaServer) unit.getRemoteableControlObject();
+					if (unit.getControllObject() instanceof MediaServerImpl) {
+						MediaServerImpl mediaServer = (MediaServerImpl) unit.getControllObject();
 						BeanMediaServer webMedia = getBeanFor(unit, mediaServer);
 						result.add(webMedia);
 					}
@@ -57,7 +50,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return result;
 	}
 
-	private BeanMediaServer getBeanFor(IControlUnit unit, IMediaServer mediaServer) throws RemoteException {
+	private BeanMediaServer getBeanFor(IControllUnit unit, MediaServerImpl mediaServer) throws RemoteException {
 		BeanMediaServer webMedia = new BeanMediaServer();
 		webMedia.merge(unit.getWebBean());
 		webMedia.setID(unit.getID());
@@ -77,7 +70,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanPlaylist.class)
 	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) throws RemoteException {
 		ArrayList<BeanPlaylist> result = new ArrayList<>();
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		for (String str : mediaServer.getPlayList().getPlayLists()) {
 			BeanPlaylist pls = new BeanPlaylist();
 			pls.setName(str);
@@ -90,7 +83,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
 			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException {
 		ArrayList<BeanPlaylistItem> result = new ArrayList<>();
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		String path = mediaServer.getBrowserPath();
 		for (String str : mediaServer.getPlayList().listContent(playlist)) {
 			BeanPlaylistItem pls = new BeanPlaylistItem();
@@ -109,37 +102,37 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	@WebRequest(path = "playlist_extend", description = "Add item to specified playlist.")
 	public void playlistExtend(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
 			@WebGet(name = "item") String item) throws RemoteException, PlayerException {
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		item = item.replace(IWebMediaServer.FileSeparator, File.separator);
 		item = mediaServer.getBrowserPath() + item;
 		mediaServer.getPlayList().extendPlayList(playlist, item);
 	}
 
-	private IMediaServer getMediaServerById(String id) throws RemoteException {
-		IControlUnit unit = mCenter.getControlUnits().get(id);
-		if (unit != null && unit.getRemoteableControlObject() instanceof IMediaServer)
-			return (IMediaServer) unit.getRemoteableControlObject();
+	private MediaServerImpl getMediaServerById(String id) throws RemoteException {
+		IControllUnit unit = mCenter.getControlUnits().get(id);
+		if (unit != null && unit.getControllObject() instanceof MediaServerImpl)
+			return (MediaServerImpl) unit.getControllObject();
 		throw new RemoteException(id, "No such mediaserver found: " + id);
 	}
 
 	@WebRequest(path = "playlist_create", description = "Create new playlist.")
 	public void playlistCreate(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
 			throws RemoteException {
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		mediaServer.getPlayList().addPlayList(playlist);
 	}
 
 	@WebRequest(path = "playlist_delete", description = "Delete specified playlist.")
 	public void playlistDelete(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
 			throws RemoteException, PlayerException {
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		mediaServer.getPlayList().removePlayList(playlist);
 	}
 
 	@WebRequest(path = "playlist_delete_item", description = "Delete item from specified playlist.")
 	public void playlistDeleteItem(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
 			@WebGet(name = "item") String item) throws RemoteException, PlayerException {
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		mediaServer.getPlayList().removeItem(playlist, item);
 	}
 
@@ -153,7 +146,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebGet(name = "path", required = false, defaultvalue = "") String path) throws RemoteException {
 		ArrayList<BeanFileSystem> result = new ArrayList<>();
 		path = path.replace(IWebMediaServer.FileSeparator, File.separator);
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		for (String dir : mediaServer.listDirectories(path)) {
 			BeanFileSystem bean = new BeanFileSystem();
 			bean.setName(dir);
@@ -170,7 +163,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	}
 
 	private IPlayer getPlayer(String id, String player) throws PlayerException, RemoteException {
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		if ("mplayer".equals(player))
 			return mediaServer.getMPlayer();
 		else if ("omxplayer".equals(player))
@@ -186,7 +179,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebGet(name = "file") String file) throws PlayerException, RemoteException {
 		file = file.replace(IWebMediaServer.FileSeparator, File.separator);
 		IPlayer p = getPlayer(id, player);
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		file = mediaServer.getBrowserPath() + file;
 		p.play(file);
 		return p.getPlayingBean();
@@ -196,7 +189,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	public PlayingBean playPlaylist(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
 			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException {
 		IPlayer p = getPlayer(id, player);
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		String path = mediaServer.getPlayList().getPlaylistFullpath(playlist);
 		p.playPlayList(path);
 		return p.getPlayingBean();
@@ -305,7 +298,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	public BeanDownload publishForDownload(@WebGet(name = "id") String id, @WebGet(name = "path") String path)
 			throws RemoteException, IOException {
 		path = path.replace(IWebMediaServer.FileSeparator, File.separator);
-		IMediaServer mediaServer = getMediaServerById(id);
+		MediaServerImpl mediaServer = getMediaServerById(id);
 		return mediaServer.publishForDownload(path);
 	}
 

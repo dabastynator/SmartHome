@@ -10,8 +10,6 @@ import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IControl;
 import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlUnit.EventException;
-import de.neo.smarthome.api.IMediaServer;
 import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.PlayerException;
 
@@ -23,14 +21,8 @@ public class MediaControlUnit extends AbstractControlUnit {
 		super(center);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Class getRemoteableControlInterface() throws RemoteException {
-		return IMediaServer.class;
-	}
-
-	@Override
-	public IMediaServer getRemoteableControlObject() {
+	public MediaServerImpl getControllObject() {
 		return mMediaServer;
 	}
 
@@ -42,8 +34,7 @@ public class MediaControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public boolean performEvent(Event event) throws RemoteException,
-			EventException {
+	public boolean performEvent(Event event) throws RemoteException, EventException {
 		try {
 			String action = event.getParameter("action");
 			String value = event.getParameter("value");
@@ -91,8 +82,7 @@ public class MediaControlUnit extends AbstractControlUnit {
 			}
 
 		} catch (RemoteException | PlayerException e) {
-			throw new EventException(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
+			throw new EventException(e.getClass().getSimpleName() + ": " + e.getMessage());
 		}
 		return true;
 	}

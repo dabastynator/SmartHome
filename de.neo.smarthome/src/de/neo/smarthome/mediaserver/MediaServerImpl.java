@@ -14,54 +14,47 @@ import java.util.List;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.transceiver.DirectorySender;
 import de.neo.remote.transceiver.FileSender;
 import de.neo.remote.transceiver.SenderProgress;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IControl;
-import de.neo.smarthome.api.IDVDPlayer;
-import de.neo.smarthome.api.IMediaServer;
 import de.neo.smarthome.api.IPlayList;
 import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload.DownloadType;
 
-public class MediaServerImpl implements IMediaServer {
+public class MediaServerImpl {
 
 	public static final String ROOT = "MediaServer";
 
 	public static final int DOWNLOAD_PORT = 5033;
 
 	private TotemPlayer mTotem;
-	private MPlayerDVD mMplayer;
+	private MPlayer mMplayer;
 	private ControlImpl mControl;
 	private PlayListImpl mPlaylist;
 	private String mBrowserLocation;
 	private OMXPlayer mOmxplayer;
 
-	@Override
 	public IPlayer getTotemPlayer() throws RemoteException {
 		return mTotem;
 	}
 
-	@Override
-	public IDVDPlayer getMPlayer() throws RemoteException {
+	public IPlayer getMPlayer() throws RemoteException {
 		return mMplayer;
 	}
 
-	@Override
 	public IControl getControl() throws RemoteException {
 		return mControl;
 	}
 
-	@Override
 	public IPlayList getPlayList() throws RemoteException {
 		return mPlaylist;
 	}
 
-	@Override
 	public IPlayer getOMXPlayer() throws RemoteException {
 		return mOmxplayer;
 	}
@@ -84,7 +77,7 @@ public class MediaServerImpl implements IMediaServer {
 			throw new IOException("Playlist location does not exist: " + playlistLocation);
 		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
 		mTotem = new TotemPlayer();
-		mMplayer = new MPlayerDVD(playlistLocation);
+		mMplayer = new MPlayer(playlistLocation);
 		mBrowserLocation = browseLocation;
 		if (!mBrowserLocation.endsWith(File.separator))
 			mBrowserLocation += File.separator;
@@ -93,7 +86,6 @@ public class MediaServerImpl implements IMediaServer {
 		mOmxplayer = new OMXPlayer();
 	}
 
-	@Override
 	public String[] listDirectories(String path) throws RemoteException {
 		if (path.startsWith("..") || path.contains(File.separator + ".."))
 			throw new IllegalArgumentException("Path must not contain '..'");
@@ -108,7 +100,6 @@ public class MediaServerImpl implements IMediaServer {
 		return list.toArray(new String[] {});
 	}
 
-	@Override
 	public String[] listFiles(String path) throws RemoteException {
 		if (path.startsWith("..") || path.contains(File.separator + ".."))
 			throw new IllegalArgumentException("Path must not contain '..'");
@@ -123,12 +114,10 @@ public class MediaServerImpl implements IMediaServer {
 		return list.toArray(new String[] {});
 	}
 
-	@Override
 	public String getBrowserPath() {
 		return mBrowserLocation;
 	}
 
-	@Override
 	public BeanDownload publishForDownload(String file) throws RemoteException, IOException {
 		// Get next free port
 		int port = DOWNLOAD_PORT;

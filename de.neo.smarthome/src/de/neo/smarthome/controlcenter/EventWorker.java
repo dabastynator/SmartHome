@@ -7,8 +7,8 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControlUnit;
-import de.neo.smarthome.api.IControlUnit.EventException;
+import de.neo.smarthome.api.IControllUnit;
+import de.neo.smarthome.api.IControllUnit.EventException;
 
 public class EventWorker extends Thread {
 
@@ -38,7 +38,7 @@ public class EventWorker extends Thread {
 			try {
 				Event event = mEventQueue.take();
 				try {
-					IControlUnit unit = mCenter.getControlUnit(event.getUnitID());
+					IControllUnit unit = mCenter.getControlUnit(event.getUnitID());
 					if (unit == null)
 						throw new EventException("No control unit found: " + event.getUnitID());
 					unit.performEvent(event);
