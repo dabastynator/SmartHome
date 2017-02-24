@@ -9,7 +9,7 @@
         android:id="@+id/mediaserver_fragment_button"
         android:layout_width="64dp"
         android:layout_height="match_parent"
-        class="de.neo.remote.mobile.fragments.PlayerButtonFragment"
+        class="de.neo.smarthome.mobile.fragments.PlayerButtonFragment"
         tools:layout="@layout/mediaserver_buttons" />
 
     <LinearLayout
@@ -118,7 +118,7 @@
         android:id="@+id/mediaserver_fragment_button_right"
         android:layout_width="64dp"
         android:layout_height="match_parent"
-        class="de.neo.remote.mobile.fragments.PlayerButtonFragment"
+        class="de.neo.smarthome.mobile.fragments.PlayerButtonFragment"
         tools:layout="@layout/mediaserver_buttons_right" />
 
 </LinearLayout>

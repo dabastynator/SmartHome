@@ -31,6 +31,7 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 			Toast.makeText(mContext, "Can't send crash-log email, there are no email clients installed.",
 					Toast.LENGTH_SHORT).show();
 		}
+		Log.e("smarthome.mobile", createTextForCrash(thread, ex));
 	}
 
 	private String createTextForCrash(Thread thread, Throwable ex) {

@@ -39,7 +39,7 @@
 			<zipgroupfileset dir="${lib.remote}" includes="*.jar" excludes="" />
 			<zipgroupfileset dir="${lib.smarthome}" includes="*.jar" excludes="" />
 			<manifest>
-				<attribute name="Main-Class" value="de.neo.smarthome.RemoteMain" />
+				<attribute name="Main-Class" value="de.neo.smarthome.SmartHome" />
 			</manifest>
 		</jar>
 	</target>

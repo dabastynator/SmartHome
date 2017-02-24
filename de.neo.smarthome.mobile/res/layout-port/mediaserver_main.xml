@@ -108,7 +108,7 @@
         android:id="@+id/mediaserver_fragment_button"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        class="de.neo.remote.mobile.fragments.PlayerButtonFragment"
+        class="de.neo.smarthome.mobile.fragments.PlayerButtonFragment"
         tools:layout="@layout/mediaserver_buttons" />
 
 </LinearLayout>

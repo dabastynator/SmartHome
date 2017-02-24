@@ -33,7 +33,7 @@ import de.neo.smarthome.gpio.GPIOUnitFactory;
 import de.neo.smarthome.mediaserver.MediaUnitFactory;
 import de.neo.smarthome.rccolor.RCColorUnitFactory;
 
-public class RemoteMain {
+public class SmartHome {
 
 	public static String WEBSERVER = "WebServer";
 	public static String WEBSERVER_PORT = "port";
