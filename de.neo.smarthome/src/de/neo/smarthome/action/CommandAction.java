@@ -16,9 +16,9 @@ import javax.xml.bind.DatatypeConverter;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RMILogger;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.ICommandAction;

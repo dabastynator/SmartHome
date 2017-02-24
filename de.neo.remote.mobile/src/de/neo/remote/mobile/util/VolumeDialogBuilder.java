@@ -11,11 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import de.neo.remote.api.PlayerException;
-import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.AbstractTask;
-import de.neo.rmi.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.api.PlayerException;
+import de.neo.smarthome.api.PlayingBean;
 import de.remote.mobile.R;
 
 public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListener {

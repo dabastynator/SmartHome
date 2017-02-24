@@ -3,7 +3,7 @@ package de.neo.smarthome.api;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import de.neo.remote.api.WebField;
+import de.neo.remote.web.WebField;
 
 /**
  * The ground plot is a bean that holds information about the ground plot.

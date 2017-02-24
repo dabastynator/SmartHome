@@ -5,15 +5,15 @@ import java.util.ArrayList;
 
 import de.neo.android.persistence.DomainBase;
 import de.neo.android.persistence.Persistent;
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanDownload;
-import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
-import de.neo.remote.api.PlayerException;
-import de.neo.remote.api.PlayingBean;
-import de.neo.rmi.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
+import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylist;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylistItem;
+import de.neo.smarthome.api.PlayerException;
+import de.neo.smarthome.api.PlayingBean;
 
 public class MediaServerState extends DomainBase {
 

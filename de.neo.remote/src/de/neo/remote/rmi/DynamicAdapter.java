@@ -1,4 +1,4 @@
-package de.neo.remote.dynamics;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -7,13 +7,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.Server;
-import de.neo.remote.handler.ServerConnection;
-import de.neo.remote.protokol.RemoteException;
-import de.neo.remote.protokol.Reply;
-import de.neo.remote.protokol.Request;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 /**
  * adapter

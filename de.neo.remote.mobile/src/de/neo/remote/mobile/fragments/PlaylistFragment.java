@@ -22,8 +22,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.MediaServerActivity.ViewerState;
 import de.neo.remote.mobile.activities.WebAPIActivity;
@@ -32,6 +30,8 @@ import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylist;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylistItem;
 import de.remote.mobile.R;
 
 public class PlaylistFragment extends BrowserFragment {

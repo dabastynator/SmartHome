@@ -8,12 +8,12 @@ import android.net.Uri;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.api.IWebSwitch.BeanSwitch;
-import de.neo.remote.api.IWebSwitch.State;
-import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.services.RemoteService;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
+import de.neo.smarthome.api.IWebSwitch.BeanSwitch;
+import de.neo.smarthome.api.IWebSwitch.State;
+import de.neo.smarthome.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 
 public class WidgetUpdater {

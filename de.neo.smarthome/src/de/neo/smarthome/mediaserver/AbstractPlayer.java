@@ -13,8 +13,8 @@ import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
 import org.json.JSONException;
 
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IPlayerListener;

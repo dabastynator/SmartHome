@@ -1,6 +1,6 @@
 package de.neo.smarthome.api;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 
 /**
  * The DVD Player extends the Player functionality to play DVDs.

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.IInternetSwitch;
 import de.neo.smarthome.api.IInternetSwitchListener;
 import de.neo.smarthome.api.IWebSwitch.State;

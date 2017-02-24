@@ -21,24 +21,19 @@ import org.json.simple.JSONObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import de.neo.remote.api.JSONUtils;
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.dynamics.WebProxy;
-import de.neo.remote.protokol.RemoteAble;
+import de.neo.remote.rmi.RMILogger;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 public class WebServerHandler implements HttpHandler {
 
-	private RemoteAble mRemoteable;
+	private Object mRemoteable;
 	private Map<String, Method> mRemoteMethods;
 	private String mPath;
 	private String mToken;
 	private String mTokenParam;
 	private String mEncoding;
 
-	public WebServerHandler(RemoteAble remoteAble, String path) {
+	public WebServerHandler(Object remoteAble, String path) {
 		mRemoteable = remoteAble;
 		mPath = path;
 		mTokenParam = "token";

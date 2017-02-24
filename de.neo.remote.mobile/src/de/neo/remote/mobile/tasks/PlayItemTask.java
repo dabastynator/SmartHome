@@ -1,11 +1,11 @@
 package de.neo.remote.mobile.tasks;
 
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylist;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylistItem;
 
 public class PlayItemTask extends AbstractTask {
 

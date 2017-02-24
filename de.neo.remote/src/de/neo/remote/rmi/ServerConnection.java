@@ -1,4 +1,4 @@
-package de.neo.remote.handler;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,13 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.Server;
-import de.neo.remote.dynamics.DynamicProxy;
-import de.neo.remote.protokol.Request;
-import de.neo.remote.protokol.Request.Type;
-import de.neo.remote.protokol.ServerPort;
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.Request.Type;
 
 /**
  * the server connection handles the sockets with input and output to a server.

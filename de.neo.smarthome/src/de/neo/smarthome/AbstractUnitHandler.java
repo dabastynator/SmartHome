@@ -1,6 +1,6 @@
 package de.neo.smarthome;
 
-import de.neo.remote.protokol.RemoteAble;
+import de.neo.remote.rmi.RemoteAble;
 import de.neo.smarthome.api.IControlCenter;
 
 public abstract class AbstractUnitHandler implements RemoteAble {

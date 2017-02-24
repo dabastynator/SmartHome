@@ -1,8 +1,7 @@
-package de.neo.remote.api;
+package de.neo.remote.web;
 
 import java.lang.reflect.Proxy;
-
-import de.neo.remote.dynamics.WebProxy;
+import de.neo.remote.web.WebProxyBuilder;
 
 public class WebProxyBuilder {
 

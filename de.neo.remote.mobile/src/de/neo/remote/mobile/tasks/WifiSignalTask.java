@@ -20,13 +20,13 @@ import android.util.Log;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.api.IControlCenter;
 import de.neo.remote.mobile.activities.SettingsActivity;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService;
-import de.neo.rmi.api.WebProxyBuilder;
-import de.neo.rmi.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.web.WebProxyBuilder;
+import de.neo.smarthome.api.IControlCenter;
 
 public class WifiSignalTask extends Thread {
 

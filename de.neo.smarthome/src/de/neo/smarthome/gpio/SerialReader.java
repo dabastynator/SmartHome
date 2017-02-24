@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 
 /**

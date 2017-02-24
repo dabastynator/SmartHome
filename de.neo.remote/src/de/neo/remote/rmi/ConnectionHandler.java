@@ -1,4 +1,4 @@
-package de.neo.remote.handler;
+package de.neo.remote.rmi;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -9,17 +9,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.Server;
-import de.neo.remote.dynamics.DynamicAdapter;
-import de.neo.remote.dynamics.DynamicProxy;
-import de.neo.remote.protokol.RemoteAble;
-import de.neo.remote.protokol.RemoteException;
-import de.neo.remote.protokol.Reply;
-import de.neo.remote.protokol.Request;
-import de.neo.remote.protokol.Request.Type;
-import de.neo.remote.protokol.ServerPort;
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.Request.Type;
 
 /**
  * handles a client connection.

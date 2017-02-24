@@ -3,7 +3,7 @@ package de.neo.smarthome;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 /**
  * The logger gets log information and informs listener.

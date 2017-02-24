@@ -1,4 +1,4 @@
-package de.neo.remote.api;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,17 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.dynamics.DynamicAdapter;
-import de.neo.remote.handler.ConnectionHandler;
-import de.neo.remote.handler.ServerConnection;
-import de.neo.remote.handler.ShutdownHandler;
-import de.neo.remote.protokol.GlobalObject;
-import de.neo.remote.protokol.RegistryReply;
-import de.neo.remote.protokol.RegistryRequest;
-import de.neo.remote.protokol.RegistryRequest.Type;
-import de.neo.remote.protokol.RemoteException;
-import de.neo.remote.protokol.ServerPort;
+import de.neo.remote.rmi.ConnectorManager;
+import de.neo.remote.rmi.IRegistryConnection;
+import de.neo.remote.rmi.Registry;
+import de.neo.remote.rmi.Server;
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RegistryRequest.Type;
 
 /**
  * server api for all clients. to provide a remote object first initialize the

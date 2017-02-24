@@ -30,12 +30,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.neo.remote.api.IThumbnailListener;
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanFileSystem;
-import de.neo.remote.api.IWebMediaServer.FileType;
-import de.neo.remote.api.PlayingBean;
-import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.services.RemoteService;
@@ -43,6 +37,12 @@ import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayItemTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.smarthome.api.IThumbnailListener;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
+import de.neo.smarthome.api.IWebMediaServer.FileType;
+import de.neo.smarthome.api.PlayingBean;
+import de.neo.smarthome.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 
 public class FileFragment extends BrowserFragment implements IThumbnailListener {

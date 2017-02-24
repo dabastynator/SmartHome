@@ -13,17 +13,17 @@ import android.view.MenuItem;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.api.IControlCenter;
-import de.neo.remote.api.IWebAction;
-import de.neo.remote.api.IWebLEDStrip;
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebSwitch;
 import de.neo.remote.mobile.persistence.RemoteDaoBuilder;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.ExceptionHandler;
-import de.neo.rmi.api.WebProxyBuilder;
+import de.neo.remote.web.WebProxyBuilder;
+import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.api.IWebAction;
+import de.neo.smarthome.api.IWebLEDStrip;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebSwitch;
 import de.remote.mobile.R;
 
 /**

@@ -7,7 +7,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.cronjob.CronScheduler;

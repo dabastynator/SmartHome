@@ -1,4 +1,4 @@
-package de.neo.remote.api;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,10 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.RMILogger.RMILogListener;
-import de.neo.remote.handler.RegistryHandler;
-import de.neo.remote.protokol.GlobalObject;
+import de.neo.remote.rmi.Registry;
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.RMILogListener;
 
 /**
  * registry holds all global objects. To run the registry, it could be

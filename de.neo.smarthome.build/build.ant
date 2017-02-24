@@ -24,10 +24,10 @@
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
 		<javac srcdir="${src.remote}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
-		<jar destfile="${jar.dir}/registry.jar" basedir="${classes.dir}">
+		<jar destfile="${jar.dir}/remote.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.remote}" includes="*.jar" excludes="" />
 			<manifest>
-				<attribute name="Main-Class" value="de.neo.remote.api.Registry" />
+				<attribute name="Main-Class" value="de.neo.remote.rmi.Registry" />
 			</manifest>
 			<fileset dir="${src.remote}" includes="**/*.java" />
 		</jar>
@@ -45,7 +45,5 @@
 	</target>
 
 	<target name="build_remote" depends="jar_smarthome">
-		<copy file="${jar.dir}/registry.jar" tofile="${jar.destiny}/registry.jar" overwrite="true" />
-		<copy file="${jar.dir}/smarthome.jar" tofile="${jar.destiny}/smarthome.jar" overwrite="true" />
 	</target>
 </project>

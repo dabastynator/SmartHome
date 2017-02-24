@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.SelectMediaServerActivity.SelectMSListener;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
+import de.neo.smarthome.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 
 public class MediaServerAdapter extends ArrayAdapter<String> {

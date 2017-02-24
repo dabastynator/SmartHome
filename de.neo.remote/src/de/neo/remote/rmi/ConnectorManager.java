@@ -1,9 +1,10 @@
-package de.neo.remote.api;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.IRegistryConnection;
+import de.neo.remote.rmi.Server;
 
 public class ConnectorManager extends Thread {
 

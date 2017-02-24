@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IControl;

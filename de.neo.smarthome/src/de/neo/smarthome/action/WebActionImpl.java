@@ -3,9 +3,9 @@ package de.neo.smarthome.action;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.api.ICommandAction;
 import de.neo.smarthome.api.IControlCenter;

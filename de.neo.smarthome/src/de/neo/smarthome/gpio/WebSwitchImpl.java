@@ -3,10 +3,10 @@ package de.neo.smarthome.gpio;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebProxyBuilder;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebProxyBuilder;
+import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControlUnit;

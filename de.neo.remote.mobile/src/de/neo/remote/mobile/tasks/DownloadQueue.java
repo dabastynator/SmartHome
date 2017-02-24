@@ -13,13 +13,13 @@ import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.Toast;
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanDownload;
-import de.neo.remote.api.IWebMediaServer.BeanDownload.DownloadType;
 import de.neo.remote.mobile.activities.MediaServerActivity;
-import de.neo.rmi.transceiver.DirectoryReceiver;
-import de.neo.rmi.transceiver.FileReceiver;
-import de.neo.rmi.transceiver.ReceiverProgress;
+import de.neo.remote.transceiver.DirectoryReceiver;
+import de.neo.remote.transceiver.FileReceiver;
+import de.neo.remote.transceiver.ReceiverProgress;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
+import de.neo.smarthome.api.IWebMediaServer.BeanDownload.DownloadType;
 import de.remote.mobile.R;
 
 public class DownloadQueue extends Thread implements ReceiverProgress {

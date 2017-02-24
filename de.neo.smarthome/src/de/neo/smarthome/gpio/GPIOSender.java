@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IWebLEDStrip.LEDMode;
 import de.neo.smarthome.api.IWebSwitch.State;

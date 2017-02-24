@@ -2,7 +2,7 @@ package de.neo.smarthome.api;
 
 import java.io.Serializable;
 
-import de.neo.remote.api.WebField;
+import de.neo.remote.web.WebField;
 
 /**
  * contains playing information

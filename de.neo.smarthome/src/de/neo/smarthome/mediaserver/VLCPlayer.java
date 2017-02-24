@@ -1,6 +1,6 @@
 package de.neo.smarthome.mediaserver;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.PlayerException;
 
 public class VLCPlayer extends AbstractPlayer {

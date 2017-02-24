@@ -10,8 +10,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IPlayList;
 import de.neo.smarthome.api.PlayerException;

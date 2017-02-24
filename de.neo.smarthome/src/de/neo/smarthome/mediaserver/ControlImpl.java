@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import de.neo.remote.api.Server;
-import de.neo.remote.protokol.RemoteException;
-import de.neo.remote.protokol.ServerPort;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.Server;
+import de.neo.remote.rmi.ServerPort;
 import de.neo.smarthome.api.IControl;
 
 public class ControlImpl implements IControl {

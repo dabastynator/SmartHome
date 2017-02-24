@@ -1,8 +1,8 @@
-package de.neo.remote.protokol;
+package de.neo.remote.rmi;
 
 import java.io.Serializable;
 
-import de.neo.remote.api.WebField;
+import de.neo.remote.web.WebField;
 
 /**
  * server port holds connection and streams

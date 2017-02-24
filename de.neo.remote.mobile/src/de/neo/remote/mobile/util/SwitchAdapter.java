@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import de.neo.remote.api.IWebSwitch.BeanSwitch;
-import de.neo.remote.api.IWebSwitch.State;
 import de.neo.remote.mobile.activities.SelectSwitchActivity.SelectSwitchListener;
+import de.neo.smarthome.api.IWebSwitch.BeanSwitch;
+import de.neo.smarthome.api.IWebSwitch.State;
 import de.remote.mobile.R;
 
 public class SwitchAdapter extends ArrayAdapter<String> {

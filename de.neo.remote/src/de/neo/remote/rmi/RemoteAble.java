@@ -1,4 +1,4 @@
-package de.neo.remote.protokol;
+package de.neo.remote.rmi;
 
 /**
  * remoteable marker interface

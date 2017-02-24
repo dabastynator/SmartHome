@@ -1,20 +1,12 @@
-package de.neo.remote.dynamics;
+package de.neo.remote.rmi;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import de.neo.remote.api.Oneway;
-import de.neo.remote.api.Server;
-import de.neo.remote.handler.ServerConnection;
-import de.neo.remote.handler.ServerConnection.ConnectionSocket;
-import de.neo.remote.protokol.RemoteAble;
-import de.neo.remote.protokol.RemoteException;
-import de.neo.remote.protokol.Reply;
-import de.neo.remote.protokol.Request;
-import de.neo.remote.protokol.Request.Type;
-import de.neo.remote.protokol.ServerPort;
+import de.neo.remote.rmi.Request.Type;
+import de.neo.remote.rmi.ServerConnection.ConnectionSocket;
 
 /**
  * proxy

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="de/neo/remote/RemoteMain.java|de/neo/remote/controlcenter/|de/neo/remote/gpio/|de/neo/remote/mediaserver/" including="de/neo/remote/api/" kind="src" path="src_api"/>
-	<classpathentry excluding="de/neo/rmi/web" including="de/neo/rmi/api/|de/neo/rmi/dynamics/|de/neo/rmi/handler/|de/neo/rmi/protokol/|de/neo/rmi/transceiver/" kind="src" path="src_rmi"/>
+	<classpathentry excluding="de/neo/smarthome/RemoteMain.java|de/neo/smarthome/controlcenter/|de/neo/smarthome/gpio/|de/neo/smarthome/mediaserver/" including="de/neo/smarthome/api/" kind="src" path="src_api"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="/de.neo.remote"/>
 	<classpathentry kind="lib" path="libs/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="libs/remote.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -27,18 +27,17 @@ import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
-import de.neo.remote.api.IWebMediaServer;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.PlayerButtonFragment;
 import de.neo.remote.mobile.persistence.MediaServerState;
-import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.tasks.PlayListTask;
 import de.neo.remote.mobile.tasks.PlayYoutubeTask;
 import de.neo.remote.mobile.util.BrowserPageAdapter;
 import de.neo.remote.mobile.util.BrowserPageAdapter.BrowserFragment;
 import de.neo.remote.mobile.util.VolumeDialogBuilder;
-import de.neo.rmi.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.api.IWebMediaServer;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
+import de.neo.smarthome.api.PlayingBean;
 import de.remote.mobile.R;
 
 /**

@@ -1,6 +1,6 @@
 package de.neo.smarthome.rccolor;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IControlCenter;

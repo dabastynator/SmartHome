@@ -19,7 +19,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 
 public class ThumbnailHandler {

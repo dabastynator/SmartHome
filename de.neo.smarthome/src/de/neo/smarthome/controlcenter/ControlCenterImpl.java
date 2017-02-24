@@ -12,11 +12,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.WebField;
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.web.WebField;
+import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.GroundPlot;

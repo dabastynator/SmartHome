@@ -34,7 +34,7 @@
 		<link>
 			<name>src_api</name>
 			<type>2</type>
-			<location>/home/sebastian/Workspace/remote/de.neo.remote/src</location>
+			<location>/home/sebastian/Workspace/remote/de.neo.smarthome/src</location>
 		</link>
 		<link>
 			<name>src_glcommon</name>

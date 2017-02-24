@@ -3,7 +3,7 @@ package de.neo.smarthome.mediaserver;
 import java.io.File;
 import java.io.IOException;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.PlayerException;
 
 public class TotemPlayer extends AbstractPlayer {

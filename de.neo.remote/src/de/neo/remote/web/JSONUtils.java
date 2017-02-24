@@ -1,4 +1,4 @@
-package de.neo.remote.api;
+package de.neo.remote.web;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 
 public class JSONUtils {
 

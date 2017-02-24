@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.api.IControlUnit;

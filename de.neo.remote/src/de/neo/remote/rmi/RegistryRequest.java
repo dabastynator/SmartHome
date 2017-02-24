@@ -1,4 +1,4 @@
-package de.neo.remote.protokol;
+package de.neo.remote.rmi;
 
 import java.io.Serializable;
 

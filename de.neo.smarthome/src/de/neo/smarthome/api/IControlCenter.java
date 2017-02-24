@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.neo.remote.api.WebField;
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.protokol.RemoteAble;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteAble;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.web.WebField;
+import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebRequest;
 
 /**
  * The control center handles all control units and information about the

@@ -2,8 +2,8 @@ package de.neo.smarthome.api;
 
 import java.io.IOException;
 
-import de.neo.remote.protokol.RemoteAble;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteAble;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
 
 /**

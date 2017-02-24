@@ -11,10 +11,10 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import de.neo.remote.api.PlayingBean;
 import de.neo.remote.mobile.fragments.FileFragment;
 import de.neo.remote.mobile.fragments.PlaylistFragment;
 import de.neo.remote.mobile.persistence.MediaServerState;
+import de.neo.smarthome.api.PlayingBean;
 
 public class BrowserPageAdapter extends FragmentStatePagerAdapter {
 

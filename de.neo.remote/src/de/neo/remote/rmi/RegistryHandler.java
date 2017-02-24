@@ -1,4 +1,4 @@
-package de.neo.remote.handler;
+package de.neo.remote.rmi;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -7,11 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.Registry;
-import de.neo.remote.protokol.RegistryReply;
-import de.neo.remote.protokol.RegistryRequest;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 /**
  * handle a registry connection

@@ -7,11 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import de.neo.remote.api.PlayingBean;
-import de.neo.remote.api.PlayingBean.STATE;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.tasks.AbstractTask;
+import de.neo.smarthome.api.PlayingBean;
+import de.neo.smarthome.api.PlayingBean.STATE;
 import de.remote.mobile.R;
 
 public class PlayerButtonFragment extends Fragment {

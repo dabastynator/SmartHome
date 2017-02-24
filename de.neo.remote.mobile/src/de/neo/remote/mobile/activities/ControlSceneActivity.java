@@ -15,16 +15,16 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import colorpickerview.dialog.ColorPickerDialogFragment.ColorPickerDialogListener;
 import de.neo.android.opengl.AbstractSceneSurfaceView;
-import de.neo.remote.api.GroundPlot;
-import de.neo.remote.api.IWebAction.BeanAction;
-import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
-import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.persistence.RemoteServer;
 import de.neo.remote.mobile.tasks.SimpleTask;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
 import de.neo.remote.mobile.util.BeanClickHandler;
 import de.neo.remote.mobile.util.ControlSceneRenderer;
+import de.neo.smarthome.api.GroundPlot;
+import de.neo.smarthome.api.IWebAction.BeanAction;
+import de.neo.smarthome.api.IWebLEDStrip.BeanLEDStrips;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
+import de.neo.smarthome.api.IWebSwitch.BeanSwitch;
 import de.remote.mobile.R;
 
 public class ControlSceneActivity extends WebAPIActivity implements ColorPickerDialogListener {

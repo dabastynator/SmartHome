@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import de.neo.remote.api.RMILogger.LogPriority;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 
 public class CronScheduler extends Thread {

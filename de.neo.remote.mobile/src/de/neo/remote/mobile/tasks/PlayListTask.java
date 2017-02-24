@@ -11,13 +11,13 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.widget.EditText;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylist;
-import de.neo.remote.api.IWebMediaServer.BeanPlaylistItem;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.WebAPIActivity;
 import de.neo.remote.mobile.persistence.MediaServerState;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.SimpleTask.BackgroundAction;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylist;
+import de.neo.smarthome.api.IWebMediaServer.BeanPlaylistItem;
 import de.remote.mobile.R;
 
 public class PlayListTask {

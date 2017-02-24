@@ -8,12 +8,12 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ListView;
-import de.neo.remote.api.IWebSwitch.BeanSwitch;
 import de.neo.remote.mobile.services.RemoteService;
 import de.neo.remote.mobile.tasks.AbstractTask;
 import de.neo.remote.mobile.util.SwitchAdapter;
 import de.neo.remote.mobile.util.WidgetUpdater;
-import de.neo.rmi.protokol.RemoteException;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.api.IWebSwitch.BeanSwitch;
 import de.remote.mobile.R;
 
 public class SelectSwitchActivity extends WebAPIActivity {

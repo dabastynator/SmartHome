@@ -7,9 +7,8 @@ import java.util.List;
 
 import com.sun.net.httpserver.HttpServer;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.protokol.RemoteAble;
+import de.neo.remote.rmi.RMILogger;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 public class WebServer {
 
@@ -40,7 +39,7 @@ public class WebServer {
 	 * @param remoteAble
 	 * @throws IOException
 	 */
-	public void handle(String path, RemoteAble remoteAble) throws IOException {
+	public void handle(String path, Object remoteAble) throws IOException {
 		handle(path, remoteAble, null);
 	}
 
@@ -51,7 +50,7 @@ public class WebServer {
 	 * @param token
 	 * @throws IOException
 	 */
-	public void handle(String path, RemoteAble remoteAble, String token) throws IOException {
+	public void handle(String path, Object remoteAble, String token) throws IOException {
 
 		if (!path.startsWith("/"))
 			path = "/" + path;

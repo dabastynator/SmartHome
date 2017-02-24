@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.neo.remote.api.WebField;
+import de.neo.remote.web.WebField;
 
 public class Event implements Serializable {
 

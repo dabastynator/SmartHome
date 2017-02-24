@@ -9,13 +9,13 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.Toast;
 import colorpickerview.dialog.ColorPickerDialogFragment;
-import de.neo.remote.api.IControlCenter.BeanWeb;
-import de.neo.remote.api.IWebAction.BeanAction;
-import de.neo.remote.api.IWebLEDStrip.BeanLEDStrips;
-import de.neo.remote.api.IWebLEDStrip.LEDMode;
-import de.neo.remote.api.IWebMediaServer.BeanMediaServer;
 import de.neo.remote.mobile.activities.MediaServerActivity;
 import de.neo.remote.mobile.activities.WebAPIActivity;
+import de.neo.smarthome.api.IControlCenter.BeanWeb;
+import de.neo.smarthome.api.IWebAction.BeanAction;
+import de.neo.smarthome.api.IWebLEDStrip.BeanLEDStrips;
+import de.neo.smarthome.api.IWebLEDStrip.LEDMode;
+import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
 import de.remote.mobile.R;
 
 public class BeanClickHandler {

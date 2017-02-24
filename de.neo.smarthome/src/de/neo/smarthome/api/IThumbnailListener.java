@@ -1,8 +1,8 @@
 package de.neo.smarthome.api;
 
-import de.neo.remote.api.Oneway;
-import de.neo.remote.protokol.RemoteAble;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.Oneway;
+import de.neo.remote.rmi.RemoteAble;
+import de.neo.remote.rmi.RemoteException;
 
 /**
  * The thumbnail listener gets thumbnail for entities.

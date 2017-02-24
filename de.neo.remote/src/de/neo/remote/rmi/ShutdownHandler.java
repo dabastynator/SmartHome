@@ -1,8 +1,6 @@
-package de.neo.remote.handler;
+package de.neo.remote.rmi;
 
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.Server;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 /**
  * The shutdown handler performs shutdown of the server. In unregisters

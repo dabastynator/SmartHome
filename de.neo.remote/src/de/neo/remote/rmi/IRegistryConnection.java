@@ -1,4 +1,6 @@
-package de.neo.remote.api;
+package de.neo.remote.rmi;
+
+import de.neo.remote.rmi.Server;
 
 public interface IRegistryConnection {
 

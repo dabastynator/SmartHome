@@ -1,4 +1,4 @@
-package de.neo.remote.dynamics;
+package de.neo.remote.web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,12 +13,9 @@ import java.net.URLEncoder;
 
 import org.json.simple.parser.JSONParser;
 
-import de.neo.remote.api.JSONUtils;
-import de.neo.remote.api.RMILogger;
-import de.neo.remote.api.RMILogger.LogPriority;
-import de.neo.remote.api.WebGet;
-import de.neo.remote.api.WebRequest;
-import de.neo.remote.protokol.RemoteException;
+import de.neo.remote.rmi.RMILogger;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 
 public class WebProxy implements InvocationHandler {
 

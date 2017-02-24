@@ -1,7 +1,9 @@
-package de.neo.remote.api;
+package de.neo.remote.rmi;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.neo.remote.rmi.RMILogger;
 
 /**
  * The logger gets log information and informs listener.
