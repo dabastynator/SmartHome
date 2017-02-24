@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="de.neo.remote.mobile.activities.SelectMediaServerActivity"
+    android:configure="de.neo.smarthome.mobile.activities.SelectMediaServerActivity"
     android:initialLayout="@layout/mediaserver_widget"
     android:minHeight="50dp"
     android:minWidth="150dp"

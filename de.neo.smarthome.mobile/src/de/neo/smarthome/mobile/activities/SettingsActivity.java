@@ -15,8 +15,8 @@ import de.remote.mobile.R;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-	public static final String TRIGGER = "de.neo.remote.connection_trigger";
-	public static final String FOREGROUND = "de.neo.remote.stay_foreground";
+	public static final String TRIGGER = "de.neo.smarthome.connection_trigger";
+	public static final String FOREGROUND = "de.neo.smarthome.stay_foreground";
 
 	@SuppressWarnings("deprecation")
 	@Override

@@ -6,7 +6,7 @@
         android:title="@string/appearance" >
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="de.neo.remote.stay_foreground"
+            android:key="de.neo.smarthome.stay_foreground"
             android:summary="@string/stay_foreground_long"
             android:title="@string/stay_foreground" />
     </PreferenceCategory>
@@ -14,7 +14,7 @@
         android:key="de.neo.remove.background"
         android:title="@string/background" >
         <EditTextPreference
-            android:key="de.neo.remote.connection_trigger"
+            android:key="de.neo.smarthome.connection_trigger"
             android:summary="@string/connection_trigger"
             android:title="@string/connection_trigger" />
     </PreferenceCategory>
