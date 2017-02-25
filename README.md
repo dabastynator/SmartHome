@@ -93,5 +93,5 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 
 The android client visualizes and controlls the SmartHome application. The example-configuration looks like the following screenshot.
 
-<img src="de.neo.smarthome.mobile/demo.png" alt="Drawing" style="height: 500px;"/>
-<img src="de.neo.smarthome.mobile/demo2.png" alt="Drawing" style="height: 500px;"/>
+<img src="de.neo.smarthome.mobile/demo.png" alt="Drawing" style="width: 500px;"/>
+<img src="de.neo.smarthome.mobile/demo2.png" alt="Drawing" style="width: 500px;"/>
