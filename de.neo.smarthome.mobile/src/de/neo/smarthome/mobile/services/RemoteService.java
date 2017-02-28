@@ -22,6 +22,7 @@ import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebProxyBuilder;
+import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IWebMediaServer;
 import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
 import de.neo.smarthome.api.IWebSwitch;
@@ -79,12 +80,16 @@ public class RemoteService extends Service {
 	private RemoteServer mFavorite;
 	private WidgetUpdateTask mWidgetUpdateTask;
 	private ExceptionHandler mHandleAppCrash;
+	private DaoFactory mDaoFactory;
+	private IControlCenter mWebControlCenter;
 
 	@Override
 	public void onCreate() {
 		mHandleAppCrash = new ExceptionHandler(this);
 		Thread.setDefaultUncaughtExceptionHandler(mHandleAppCrash);
 		super.onCreate();
+		DaoFactory.initiate(new RemoteDaoBuilder(this));
+		mDaoFactory = DaoFactory.getInstance();
 		mDownloader = new DownloadQueue(getApplicationContext(), mHandler);
 		mDownloader.start();
 		mWidgedUpdater = new WidgetUpdater(getApplicationContext());
@@ -107,9 +112,8 @@ public class RemoteService extends Service {
 	}
 
 	private void refreshWebApi() {
-		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();
 			mFavorite = null;
 			for (RemoteServer server : serverList) {
@@ -121,6 +125,8 @@ public class RemoteService extends Service {
 						.setSecurityToken(mFavorite.getApiToken()).setInterface(IWebSwitch.class).create();
 				mWebMediaServer = new WebProxyBuilder().setEndPoint(mFavorite.getEndPoint() + "/mediaserver")
 						.setSecurityToken(mFavorite.getApiToken()).setInterface(IWebMediaServer.class).create();
+				mWebControlCenter = new WebProxyBuilder().setEndPoint(mFavorite.getEndPoint() + "/controlcenter")
+						.setSecurityToken(mFavorite.getApiToken()).setInterface(IControlCenter.class).create();
 			}
 		} catch (DaoException e) {
 			e.printStackTrace();
@@ -320,5 +326,9 @@ public class RemoteService extends Service {
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public IControlCenter getWebControlCenter() {
+		return mWebControlCenter;
 	}
 }

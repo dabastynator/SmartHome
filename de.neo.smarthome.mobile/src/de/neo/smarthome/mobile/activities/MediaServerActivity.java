@@ -116,7 +116,7 @@ public class MediaServerActivity extends WebAPIActivity {
 	}
 
 	public MediaServerState createMediaServerForId(String remoteID) {
-		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
+		Dao<MediaServerState> dao = mDaoFactory.getDao(MediaServerState.class);
 		try {
 			for (MediaServerState ms : dao.loadAll())
 				if (ms.getMediaServerID().equals(remoteID)) {
@@ -386,7 +386,7 @@ public class MediaServerActivity extends WebAPIActivity {
 	}
 
 	public void saveMediaServer(MediaServerState mediaServer) {
-		Dao<MediaServerState> dao = DaoFactory.getInstance().getDao(MediaServerState.class);
+		Dao<MediaServerState> dao = mDaoFactory.getDao(MediaServerState.class);
 		try {
 			dao.update(mediaServer);
 		} catch (DaoException e) {

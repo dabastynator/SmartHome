@@ -49,6 +49,8 @@ public class WebAPIActivity extends ActionBarActivity {
 
 	private ExceptionHandler mHandleAppCrash;
 
+	protected DaoFactory mDaoFactory;
+
 	protected void onCreate(Bundle savedInstanceState) {
 		mHandleAppCrash = new ExceptionHandler(this);
 		Thread.setDefaultUncaughtExceptionHandler(mHandleAppCrash);
@@ -62,6 +64,7 @@ public class WebAPIActivity extends ActionBarActivity {
 		startService(intent);
 
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
+		mDaoFactory = DaoFactory.getInstance();
 		mCurrentServer = getFavoriteServer();
 		if (mCurrentServer == null) {
 			intent = new Intent(this, SelectServerActivity.class);
@@ -86,9 +89,9 @@ public class WebAPIActivity extends ActionBarActivity {
 		}
 	}
 
-	public static RemoteServer getFavoriteServer() {
+	public RemoteServer getFavoriteServer() {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();
 			for (RemoteServer server : serverList) {
 				if (server.isFavorite())
@@ -103,7 +106,6 @@ public class WebAPIActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		DaoFactory.initiate(new RemoteDaoBuilder(this));
 		mIsActive = true;
 	}
 
@@ -117,7 +119,7 @@ public class WebAPIActivity extends ActionBarActivity {
 		if (requestCode == SelectServerActivity.RESULT_CODE) {
 			if (data == null || data.getExtras() == null)
 				return;
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			try {
 				mCurrentServer = dao.loadById(data.getExtras().getInt(SelectServerActivity.SERVER_ID));
 				loadWebApi(mCurrentServer);

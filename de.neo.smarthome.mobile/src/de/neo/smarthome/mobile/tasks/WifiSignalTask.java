@@ -1,12 +1,10 @@
 package de.neo.smarthome.mobile.tasks;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,15 +15,9 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import de.neo.android.persistence.Dao;
-import de.neo.android.persistence.DaoException;
-import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.web.WebProxyBuilder;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.mobile.activities.SettingsActivity;
-import de.neo.smarthome.mobile.persistence.RemoteDaoBuilder;
-import de.neo.smarthome.mobile.persistence.RemoteServer;
 import de.neo.smarthome.mobile.services.RemoteService;
 
 public class WifiSignalTask extends Thread {
@@ -34,14 +26,14 @@ public class WifiSignalTask extends Thread {
 
 	private final BlockingQueue<Runnable> mActions;
 	private final AtomicBoolean mRunning = new AtomicBoolean(true);
-	private Service mService;
+	private RemoteService mService;
 	private long mLastClientRefreshTime = 0;
 	private boolean mLastClientRefeshed;
 	private long mLastClientTriggerTime = 0;
 	private boolean mLastClientTriggered;
 	private NetworkListener mListener;
 
-	public WifiSignalTask(Service service) {
+	public WifiSignalTask(RemoteService service) {
 		mActions = new LinkedBlockingDeque<>();
 		mService = service;
 		mListener = new NetworkListener();
@@ -70,7 +62,7 @@ public class WifiSignalTask extends Thread {
 
 	private class RefreshJob implements Runnable {
 		public void run() {
-			IControlCenter cc = loadControlCenter();
+			IControlCenter cc = mService.getWebControlCenter();
 			if (mLastClientRefreshTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientRefeshed
 					&& cc != null) {
 				try {
@@ -102,7 +94,7 @@ public class WifiSignalTask extends Thread {
 			if (triggerID != null && triggerID.length() > 0
 					&& mLastClientTriggerTime <= System.currentTimeMillis() - MinimalTimeGap && !mLastClientTriggered) {
 				try {
-					IControlCenter cc = loadControlCenter();
+					IControlCenter cc = mService.getWebControlCenter();
 					HashMap<String, Integer> result = cc.performTrigger(triggerID);
 					mLastClientTriggerTime = System.currentTimeMillis();
 					mLastClientTriggered = true;
@@ -120,26 +112,6 @@ public class WifiSignalTask extends Thread {
 			}
 		}
 
-	}
-
-	private IControlCenter loadControlCenter() {
-		DaoFactory.initiate(new RemoteDaoBuilder(mService));
-		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
-			List<RemoteServer> serverList = dao.loadAll();
-			RemoteServer favorite = null;
-			for (RemoteServer server : serverList) {
-				if (server.isFavorite())
-					favorite = server;
-			}
-			if (favorite != null) {
-				return new WebProxyBuilder().setEndPoint(favorite.getEndPoint() + "/controlcenter")
-						.setSecurityToken(favorite.getApiToken()).setInterface(IControlCenter.class).create();
-			}
-		} catch (DaoException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public void setConnection(boolean connected) {

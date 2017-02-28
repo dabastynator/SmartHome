@@ -24,6 +24,7 @@ import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.smarthome.mobile.persistence.RemoteDaoBuilder;
 import de.neo.smarthome.mobile.persistence.RemoteServer;
+import de.neo.smarthome.mobile.services.RemoteService;
 import de.neo.smarthome.mobile.tasks.AbstractTask;
 import de.neo.smarthome.mobile.util.ServerAdapter;
 import de.remote.mobile.R;
@@ -41,6 +42,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	protected RemoteServer mCurrentServer;
 	private ListView mServerList;
 	private View mNoServerFound;
+	private DaoFactory mDaoFactory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,8 @@ public class SelectServerActivity extends ActionBarActivity {
 
 		setContentView(R.layout.server);
 		DaoFactory.initiate(new RemoteDaoBuilder(this));
-		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+		mDaoFactory = DaoFactory.getInstance();
+		Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 		findComponents();
 
 		mServerList.setOnItemClickListener(new OnItemClickListener() {
@@ -60,6 +63,11 @@ public class SelectServerActivity extends ActionBarActivity {
 				mCurrentServer = (RemoteServer) adapter.getItemAtPosition(position);
 				try {
 					setAsFavorite(mCurrentServer);
+
+					Intent intent = new Intent(getApplicationContext(), RemoteService.class);
+					intent.setAction(RemoteService.ACTION_UPDATE);
+					getApplicationContext().startService(intent);
+
 					Intent i = new Intent();
 					i.putExtra(SERVER_ID, (int) mCurrentServer.getId());
 					setResult(RESULT_CODE, i);
@@ -87,7 +95,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	}
 
 	protected void setAsFavorite(RemoteServer currentServer) throws DaoException {
-		Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+		Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 		for (RemoteServer server : dao.loadAll()) {
 			server.setFavorite(mCurrentServer.getId() == server.getId());
 			dao.update(server);
@@ -116,7 +124,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			switch (item.getItemId()) {
 			case R.id.opt_server_delete:
 				dao.delete(mCurrentServer.getId());
@@ -141,7 +149,7 @@ public class SelectServerActivity extends ActionBarActivity {
 	 */
 	private void updateList() {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			List<RemoteServer> serverList = dao.loadAll();
 			ServerAdapter adapter = new ServerAdapter(this, serverList);
 			mServerList.setAdapter(adapter);
@@ -209,7 +217,7 @@ public class SelectServerActivity extends ActionBarActivity {
 
 	protected void saveServer(RemoteServer newServer, boolean createNew) {
 		try {
-			Dao<RemoteServer> dao = DaoFactory.getInstance().getDao(RemoteServer.class);
+			Dao<RemoteServer> dao = mDaoFactory.getDao(RemoteServer.class);
 			if (createNew)
 				dao.save(newServer);
 			else
