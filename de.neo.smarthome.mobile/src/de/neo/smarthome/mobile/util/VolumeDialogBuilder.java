@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnKeyListener;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -19,6 +20,8 @@ import de.neo.smarthome.mobile.tasks.AbstractTask;
 import de.remote.mobile.R;
 
 public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListener {
+
+	public static int ShowDuration = 1000 * 6;
 
 	private Builder mBuilder;
 	private SeekBar mVolume;
@@ -43,7 +46,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 		mVolume = (SeekBar) dialogView.findViewById(R.id.volume_value);
 		mVolume.setMax(100);
 		mVolume.setOnSeekBarChangeListener(this);
-		mShowDuration = 1000 * 3;
+		mShowDuration = ShowDuration;
 		new Thread() {
 			public void run() {
 				getVolumeValue();
@@ -87,7 +90,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 		mVolume.setOnSeekBarChangeListener(this);
 	}
 
-	public void show() {
+	public AlertDialog show() {
 		mDialog = mBuilder.create();
 		mDialog.setOnKeyListener(this);
 		mDialog.show();
@@ -96,6 +99,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 				countDownCloser();
 			}
 		}.start();
+		return mDialog;
 	}
 
 	private void countDownCloser() {
@@ -114,7 +118,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-		mShowDuration = 1000 * 4;
+		mShowDuration = ShowDuration;
 		new Thread() {
 			@Override
 			public void run() {
@@ -143,7 +147,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 	public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			mVolume.setOnSeekBarChangeListener(null);
-			mShowDuration = 1000 * 4;
+			mShowDuration = ShowDuration;
 			changeVolume(-1);
 			new Thread() {
 				public void run() {
@@ -154,7 +158,7 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 		}
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			mVolume.setOnSeekBarChangeListener(null);
-			mShowDuration = 1000 * 4;
+			mShowDuration = ShowDuration;
 			changeVolume(1);
 			new Thread() {
 				public void run() {

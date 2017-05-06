@@ -121,12 +121,11 @@ public class RemoteService extends Service {
 					mFavorite = server;
 			}
 			if (mFavorite != null) {
-				mWebSwitch = new WebProxyBuilder().setEndPoint(mFavorite.getEndPoint() + "/switch")
-						.setSecurityToken(mFavorite.getApiToken()).setInterface(IWebSwitch.class).create();
-				mWebMediaServer = new WebProxyBuilder().setEndPoint(mFavorite.getEndPoint() + "/mediaserver")
-						.setSecurityToken(mFavorite.getApiToken()).setInterface(IWebMediaServer.class).create();
-				mWebControlCenter = new WebProxyBuilder().setEndPoint(mFavorite.getEndPoint() + "/controlcenter")
-						.setSecurityToken(mFavorite.getApiToken()).setInterface(IControlCenter.class).create();
+				WebProxyBuilder b = new WebProxyBuilder().setSecurityToken(mFavorite.getApiToken());
+				String url = mFavorite.getEndPoint();
+				mWebSwitch = b.setEndPoint(url + "/switch").setInterface(IWebSwitch.class).create();
+				mWebMediaServer = b.setEndPoint(url + "/mediaserver").setInterface(IWebMediaServer.class).create();
+				mWebControlCenter = b.setEndPoint(url + "/controlcenter").setInterface(IControlCenter.class).create();
 			}
 		} catch (DaoException e) {
 			e.printStackTrace();

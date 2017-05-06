@@ -155,7 +155,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mMediaServer);
 			dialog.changeVolume(-1);
-			dialog.show();
+			addDialog(dialog.show());
 			return true;
 		}
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {

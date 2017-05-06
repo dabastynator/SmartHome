@@ -1,5 +1,6 @@
 package de.neo.smarthome.mobile.activities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -37,7 +38,7 @@ public class WebAPIActivity extends ActionBarActivity {
 	public static final String EXTRA_SERVER_ID = "server_id";
 
 	protected ProgressDialog mProgressDialog;
-	protected AlertDialog mErrorDialog;
+	protected List<AlertDialog> mDialogs = new ArrayList<>();
 	protected RemoteServer mCurrentServer;
 	protected boolean mIsActive;
 
@@ -103,6 +104,10 @@ public class WebAPIActivity extends ActionBarActivity {
 		return null;
 	}
 
+	protected void addDialog(AlertDialog dialog) {
+		mDialogs.add(dialog);
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -166,19 +171,20 @@ public class WebAPIActivity extends ActionBarActivity {
 
 	public void showException(Exception e) {
 		dismissErrorDialog();
-		mErrorDialog = new AbstractTask.ErrorDialog(this, e).show();
-		mErrorDialog.setOnDismissListener(new OnDismissListener() {
+		AlertDialog dialog = new AbstractTask.ErrorDialog(this, e).show();
+		mDialogs.add(dialog);
+		dialog.setOnDismissListener(new OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				mErrorDialog = null;
+				mDialogs.remove(dialog);
 			}
 		});
 	}
 
 	public void dismissErrorDialog() {
-		if (mErrorDialog != null)
-			mErrorDialog.dismiss();
-		mErrorDialog = null;
+		for (AlertDialog d : mDialogs)
+			d.dismiss();
+		mDialogs.clear();
 	}
 
 	@Override
