@@ -61,8 +61,7 @@ public class ConnectionHandler {
 	 * @param socket
 	 * @throws IOException
 	 */
-	public ConnectionHandler(String ip, int port, Socket socket, Server server)
-			throws IOException {
+	public ConnectionHandler(String ip, int port, Socket socket, Server server) throws IOException {
 		this.ip = ip;
 		this.port = port;
 		out = new ObjectOutputStream(socket.getOutputStream());
@@ -75,8 +74,7 @@ public class ConnectionHandler {
 	 * handle the connection
 	 */
 	public void handle() {
-		RMILogger.performLog(LogPriority.INFORMATION,
-				"Incoming connection from client", null);
+		RMILogger.performLog(LogPriority.INFORMATION, "Incoming connection from client", null);
 		try {
 			while (true) {
 				Object object = in.readObject();
@@ -85,24 +83,22 @@ public class ConnectionHandler {
 					server.closeConnectionTo((ServerPort) request.getParams()[0]);
 					throw new EOFException();
 				}
-				DynamicAdapter adapter = server.getAdapterMap().get(
-						request.getObject());
+				DynamicAdapter adapter = server.getAdapterMap().get(request.getObject());
 				if (adapter != null) {
 					Reply reply = adapter.performRequest(request);
 					if (reply.getResult() instanceof RemoteAble)
 						configureReply(reply, reply.getResult());
 					// if (reply.getResult() instanceof Collection)
 					// configureReplyCollection(reply);
-					if (request.getType() == Type.NORMAL){
+					if (request.getType() == Type.NORMAL) {
 						out.writeObject(reply);
 						out.flush();
 						out.reset();
 					}
 				} else {
 					Reply r = new Reply();
-					r.setError(new RemoteException(request.getObject(),
-							"no such object found: " + request.getObject()
-									+ " at " + server.getServerPort()));
+					r.setError(new RemoteException(
+							"no such object found: " + request.getObject() + " at " + server.getServerPort()));
 					out.writeObject(r);
 					out.flush();
 					out.reset();
@@ -110,20 +106,14 @@ public class ConnectionHandler {
 			}
 		} catch (IOException e) {
 			if (e instanceof EOFException)
-				RMILogger.performLog(LogPriority.WARNING,
-						"Client connection closed by client", null);
+				RMILogger.performLog(LogPriority.WARNING, "Client connection closed by client", null);
 			else if (e instanceof SocketException)
-				RMILogger.performLog(LogPriority.WARNING,
-						"Client connection closed by server", null);
+				RMILogger.performLog(LogPriority.WARNING, "Client connection closed by server", null);
 			else
-				RMILogger.performLog(
-						LogPriority.ERROR,
-						"Unknown request error: "
-								+ e.getClass().getSimpleName() + ": "
-								+ e.getMessage(), null);
+				RMILogger.performLog(LogPriority.ERROR,
+						"Unknown request error: " + e.getClass().getSimpleName() + ": " + e.getMessage(), null);
 		} catch (ClassNotFoundException e) {
-			RMILogger.performLog(LogPriority.ERROR,
-					"Request-ClassNotFoundException: " + e.getMessage(), null);
+			RMILogger.performLog(LogPriority.ERROR, "Request-ClassNotFoundException: " + e.getMessage(), null);
 		} finally {
 			server.removeHandler(this);
 			try {
@@ -149,8 +139,7 @@ public class ConnectionHandler {
 	 */
 	private void configureReply(Reply reply, Object result) {
 		if (reply.getResult() instanceof Proxy) {
-			DynamicProxy dp = (DynamicProxy) Proxy.getInvocationHandler(reply
-					.getResult());
+			DynamicProxy dp = (DynamicProxy) Proxy.getInvocationHandler(reply.getResult());
 			reply.addNewId(dp.getId());
 			reply.setServerPort(dp.getServerPort());
 			reply.setResult(null);
@@ -160,8 +149,7 @@ public class ConnectionHandler {
 			reply.setServerPort(server.getServerPort());
 		} else {
 			String id = getNextId();
-			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result,
-					server);
+			DynamicAdapter dynamicAdapter = new DynamicAdapter(id, result, server);
 			server.getAdapterMap().put(id, dynamicAdapter);
 			server.getAdapterObjectIdMap().put(result, id);
 			reply.addNewId(id);
@@ -176,8 +164,7 @@ public class ConnectionHandler {
 	 * @return id
 	 */
 	public String getNextId() {
-		String id = "newsystem.result(" + ip + ":" + port + ":" + (++idCounter)
-				+ ")";
+		String id = "newsystem.result(" + ip + ":" + port + ":" + (++idCounter) + ")";
 		return id;
 	}
 

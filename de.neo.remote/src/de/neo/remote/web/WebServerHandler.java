@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,7 +139,7 @@ public class WebServerHandler implements HttpHandler {
 			Map<String, String> paramMap = queryToMap(exchange.getRequestURI().getQuery());
 			if (mToken != null && mToken.length() > 0)
 				if (!mToken.equals(paramMap.get(mTokenParam)))
-					throw new IllegalArgumentException("Access denied");
+					throw new RemoteException("Access denied");
 			if ("api".equals(methodPath)) {
 				resultString = createJSONApi().toString();
 			} else {

@@ -73,36 +73,24 @@ public class DynamicAdapter {
 		try {
 			Method method = findMethod(request);
 			if (method == null) {
-				reply.setError(new RemoteException(request.getObject(),
-						"no such method found: " + request.getMethod()));
+				reply.setError(new RemoteException("no such method found: " + request.getMethod()));
 				return reply;
 			}
 			Object result = method.invoke(object, request.getParams());
 			reply.setResult(result);
 			if (method.getReturnType() != void.class)
 				reply.setReturnType(method.getReturnType());
-		} catch (SecurityException | NoSuchMethodException | IOException
-				| IllegalAccessException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			RMILogger.performLog(LogPriority.ERROR, "Error requesing method '"
-					+ request.getMethod() + "': "
+		} catch (SecurityException | NoSuchMethodException | IOException | IllegalAccessException e) {
+			reply.setError(new RemoteException(e.getMessage()));
+			RMILogger.performLog(LogPriority.ERROR, "Error requesing method '" + request.getMethod() + "': "
 					+ e.getClass().getSimpleName() + ": " + e.getMessage(), id);
 		} catch (IllegalArgumentException e) {
-			reply.setError(new RemoteException(request.getObject(), e
-					.getMessage()));
-			System.err.println(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
-			if (request.getParams() != null
-					&& request.getParams().length > 0
+			reply.setError(new RemoteException(e.getMessage()));
+			System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+			if (request.getParams() != null && request.getParams().length > 0
 					&& request.getParams()[0].getClass().getInterfaces().length > 0)
-				System.err.println("  ->  "
-						+ object.getClass().getSimpleName()
-						+ "."
-						+ request.getMethod()
-						+ "("
-						+ request.getParams()[0].getClass().getInterfaces()[0]
-								.getSimpleName() + ")");
+				System.err.println("  ->  " + object.getClass().getSimpleName() + "." + request.getMethod() + "("
+						+ request.getParams()[0].getClass().getInterfaces()[0].getSimpleName() + ")");
 		} catch (InvocationTargetException e) {
 			reply.setError(e.getTargetException());
 		}
@@ -120,8 +108,8 @@ public class DynamicAdapter {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	private Method findMethod(Request request) throws SecurityException,
-			NoSuchMethodException, UnknownHostException, IOException {
+	private Method findMethod(Request request)
+			throws SecurityException, NoSuchMethodException, UnknownHostException, IOException {
 		Class[] types = new Class[] {};
 		if (request.getParams() != null)
 			types = new Class[request.getParams().length];
@@ -130,8 +118,7 @@ public class DynamicAdapter {
 				Reply r = ((Reply) request.getParams()[i]);
 				types[i] = r.getReturnType();
 				ServerConnection sc = server.connectToServer(r.getServerPort());
-				request.getParams()[i] = sc.createProxy(r.getNewId(),
-						r.getReturnType(), !r.isCreateNewAdapter());
+				request.getParams()[i] = sc.createProxy(r.getNewId(), r.getReturnType(), !r.isCreateNewAdapter());
 			} else if (request.getParams()[i] != null)
 				types[i] = request.getParams()[i].getClass();
 			else
@@ -148,8 +135,7 @@ public class DynamicAdapter {
 	 * @param paramTypes
 	 * @return method
 	 */
-	public static Method getCompatibleMethod(Class c, String methodName,
-			Class... paramTypes) {
+	public static Method getCompatibleMethod(Class c, String methodName, Class... paramTypes) {
 		Method[] methods = c.getMethods();
 		Method m = null;
 		for (int i = 0; i < methods.length; i++) {
@@ -168,11 +154,9 @@ public class DynamicAdapter {
 			for (int j = 0; j < actualTypes.length; j++) {
 				if (!actualTypes[j].isAssignableFrom(paramTypes[j])) {
 					if (actualTypes[j].isPrimitive()) {
-						found = primitiveMap.get(actualTypes[j]).equals(
-								paramTypes[j]);
+						found = primitiveMap.get(actualTypes[j]).equals(paramTypes[j]);
 					} else if (paramTypes[j].isPrimitive()) {
-						found = primitiveMap.get(paramTypes[j]).equals(
-								actualTypes[j]);
+						found = primitiveMap.get(paramTypes[j]).equals(actualTypes[j]);
 					}
 				}
 

@@ -80,7 +80,7 @@ public class DynamicProxy implements InvocationHandler {
 			try {
 				socket = serverConnection.getFreeConnectionSocket();
 			} catch (IOException e) {
-				throw new RemoteException(id, e.getMessage());
+				throw new RemoteException(e.getMessage());
 			}
 			try {
 				try {
@@ -91,7 +91,7 @@ public class DynamicProxy implements InvocationHandler {
 						return null;
 					reply = (Reply) socket.getInput().readObject();
 					if (reply == null)
-						resultException = new RemoteException(id, "null returned");
+						resultException = new RemoteException("null returned");
 					else if (reply.getError() != null)
 						resultException = reply.getError();
 					else if (reply.getReturnType() != null && reply.getNewId() != null) {
@@ -102,10 +102,10 @@ public class DynamicProxy implements InvocationHandler {
 					i = server.getConnectionSocketCount();
 				} catch (IOException e) {
 					socket.disconnect();
-					resultException = new RemoteException(id, e.getMessage());
+					resultException = new RemoteException(e.getMessage());
 				}
 			} catch (Exception e) {
-				resultException = new RemoteException(id, e.getMessage());
+				resultException = new RemoteException(e.getMessage());
 			} finally {
 				socket.free();
 			}

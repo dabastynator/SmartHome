@@ -2,27 +2,22 @@ package de.neo.remote.rmi;
 
 /**
  * exception for remote method invocation
+ * 
  * @author sebastian
  */
-public class RemoteException extends Exception{
+public class RemoteException extends Exception {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6803659830395623055L;
-	
-	/**
-	 * id of object 
-	 */
-	private String id;
 
-	public RemoteException(String id,String message) {
+	public RemoteException(String message) {
 		super(message);
-		this.id = id;
 	}
-	
-	public String getId(){
-		return id;
+
+	public RemoteException(String message, Exception cause) {
+		super(message, cause);
 	}
-	
+
 }

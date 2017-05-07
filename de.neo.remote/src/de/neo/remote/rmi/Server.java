@@ -293,12 +293,8 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject().getServerPort());
 			// create proxy
 			return (T) sc.createProxy(id, template, true);
-		} catch (UnknownHostException e) {
-			throw new RemoteException(id, e.getMessage());
-		} catch (IOException e) {
-			throw new RemoteException(id, e.getMessage());
-		} catch (ClassNotFoundException e) {
-			throw new RemoteException(id, e.getMessage());
+		} catch (IOException | ClassNotFoundException e) {
+			throw new RemoteException(e.getMessage(), e);
 		}
 	}
 
@@ -337,14 +333,8 @@ public class Server {
 			ServerConnection sc = connectToServer(reply.getObject().getServerPort());
 			// create proxy
 			return (T) sc.createProxy(id, template, true);
-		} catch (UnknownHostException e) {
-			throw new RemoteException(id, e.getMessage());
-		} catch (IOException e) {
-			throw new RemoteException(id, e.getMessage());
-		} catch (ClassNotFoundException e) {
-			throw new RemoteException(id, e.getMessage());
-		} catch (InterruptedException e) {
-			throw new RemoteException(id, e.getMessage());
+		} catch (IOException | ClassNotFoundException | InterruptedException e) {
+			throw new RemoteException(e.getMessage(), e);
 		}
 	}
 

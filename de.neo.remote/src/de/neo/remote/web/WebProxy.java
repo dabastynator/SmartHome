@@ -63,7 +63,7 @@ public class WebProxy implements InvocationHandler {
 			rd.close();
 			return result.toString();
 		} catch (IOException e) {
-			throw new RemoteException("", e.getClass().getSimpleName() + ": " + e.getMessage());
+			throw new RemoteException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 		}
 	}
 
@@ -71,7 +71,7 @@ public class WebProxy implements InvocationHandler {
 		StringBuilder sb = new StringBuilder(mEndPoint);
 		WebRequest annotation = method.getAnnotation(WebRequest.class);
 		if (annotation == null)
-			throw new RemoteException("WebRequest",
+			throw new RemoteException(
 					"WebRequest for method '" + method.getName() + "' not supported. Method not annotated.");
 		sb.append(annotation.path());
 		boolean firstParam = true;
@@ -84,7 +84,7 @@ public class WebProxy implements InvocationHandler {
 			for (int i = 0; i < parameter.length; i++) {
 				WebGet paramAnnoration = findWebGetAnnotation(method.getParameterAnnotations()[i]);
 				if (paramAnnoration == null)
-					throw new RemoteException("WebRequest", "WebRequest for method '" + method.getName()
+					throw new RemoteException("WebRequest for method '" + method.getName()
 							+ "' not supported. Parameter " + i + " not annotated.");
 				if (firstParam)
 					sb.append("?");

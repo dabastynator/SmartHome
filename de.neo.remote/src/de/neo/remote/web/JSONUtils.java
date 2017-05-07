@@ -208,16 +208,18 @@ public class JSONUtils {
 			Class<?> class1 = Class.forName(cl.toString());
 			Constructor<?> constructor = null;
 			try {
-				constructor = class1.getConstructor();
+				constructor = class1.getConstructor(String.class);
 			} catch (NoSuchMethodException ex) {
 
 			}
-			if (constructor == null)
-				constructor = class1.getConstructor(String.class);
+			if (constructor == null) {
+				constructor = class1.getConstructor();
+				exception = constructor.newInstance();
+			}
 			exception = constructor.newInstance(msg);
 		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
 				| IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
-			throw new RemoteException(msg + " (" + cl + ")", "");
+			throw new RemoteException(msg + " (" + cl + ")", e1);
 		}
 		if (exception instanceof Throwable)
 			throw (Throwable) exception;
