@@ -34,7 +34,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 				BeanMediaServer webMedia = getBeanFor(unit, mediaServer);
 				result.add(webMedia);
 			} else
-				throw new RemoteException(id, "No such mediaserver found: " + id);
+				throw new RemoteException("No such mediaserver found: " + id);
 		} else {
 			for (IControllUnit unit : mCenter.getControlUnits().values()) {
 				try {
@@ -112,7 +112,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		IControllUnit unit = mCenter.getControlUnits().get(id);
 		if (unit != null && unit.getControllObject() instanceof MediaServerImpl)
 			return (MediaServerImpl) unit.getControllObject();
-		throw new RemoteException(id, "No such mediaserver found: " + id);
+		throw new RemoteException("No such mediaserver found: " + id);
 	}
 
 	@WebRequest(path = "playlist_create", description = "Create new playlist.")

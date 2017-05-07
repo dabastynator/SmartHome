@@ -57,8 +57,7 @@ public class ControlImpl implements IControl {
 			try {
 				mRobot = new Robot();
 			} catch (AWTException e) {
-				throw new RemoteException("", "robot not available: "
-						+ e.getMessage());
+				throw new RemoteException("robot not available: " + e.getMessage());
 			}
 		return mRobot;
 	}
@@ -101,8 +100,7 @@ public class ControlImpl implements IControl {
 		ServerSocket server = new ServerSocket(MOUSE_MOVE_PORT);
 		MouseMoveStream stream = new MouseMoveStream(server);
 		stream.start();
-		ServerPort sp = new ServerPort(Server.getServer().getServerPort()
-				.getIp(), MOUSE_MOVE_PORT);
+		ServerPort sp = new ServerPort(Server.getServer().getServerPort().getIp(), MOUSE_MOVE_PORT);
 		return sp;
 	}
 
@@ -118,8 +116,7 @@ public class ControlImpl implements IControl {
 		public void run() {
 			try {
 				Socket socket = server.accept();
-				DataInputStream input = new DataInputStream(
-						socket.getInputStream());
+				DataInputStream input = new DataInputStream(socket.getInputStream());
 				while (true) {
 					int x = input.readInt();
 					int y = input.readInt();

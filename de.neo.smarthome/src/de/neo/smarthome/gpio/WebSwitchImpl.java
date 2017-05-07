@@ -42,8 +42,8 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 	}
 
 	public static void main(String[] args) {
-		IWebSwitch webSwitch = new WebProxyBuilder().setEndPoint("http://localhost:5061/switch")
-				.setSecurityToken("w4kzd4HQ").setInterface(IWebSwitch.class).create();
+		IWebSwitch webSwitch = new WebProxyBuilder().setEndPoint("http://192.168.2.11:5061/switch")
+				.setSecurityToken("w4kzd4HQx").setInterface(IWebSwitch.class).create();
 		List<BeanSwitch> switches;
 		try {
 			switches = webSwitch.getSwitches();
