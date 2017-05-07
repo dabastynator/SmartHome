@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import de.neo.remote.rmi.RMILogger;
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 
 public class WebServerHandler implements HttpHandler {
 
