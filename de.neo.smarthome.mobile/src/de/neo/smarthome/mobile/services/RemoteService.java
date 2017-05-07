@@ -251,16 +251,16 @@ public class RemoteService extends Service {
 	}
 
 	private void updateMusicWidget() {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-
-		ComponentName thisWidget = new ComponentName(getApplicationContext(), MusicWidgetProvider.class);
-		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 
 		// update each of the app widgets with the remote adapter
 		Thread thread = new Thread() {
 			public void run() {
+				AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplicationContext());
+				ComponentName thisWidget = new ComponentName(getApplicationContext(), MusicWidgetProvider.class);
+				int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+				SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
 				try {
-					SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
+
 					ArrayList<BeanMediaServer> server = mWebMediaServer.getMediaServer("");
 					Map<String, BeanMediaServer> serverMap = new HashMap<>();
 					for (BeanMediaServer s : server)
@@ -272,8 +272,10 @@ public class RemoteService extends Service {
 							mWidgedUpdater.updateMusicWidget(widgetID, s);
 					}
 					mWifiSignalTask.setConnection(true);
-				} catch (Exception e) {
-					System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+				} catch (RemoteException e) {
+					for (int widgetID : appWidgetIds) {
+						mWidgedUpdater.updateMusicWidget(widgetID, e);
+					}
 				}
 			};
 		};
@@ -281,14 +283,13 @@ public class RemoteService extends Service {
 	}
 
 	private void updateSwitchWidget() {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-
-		ComponentName thisWidget = new ComponentName(getApplicationContext(), SwitchWidgetProvider.class);
-		final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 
 		// update each of the app widgets with the remote adapter
 		Thread thread = new Thread() {
 			public void run() {
+				AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplicationContext());
+				ComponentName thisWidget = new ComponentName(getApplicationContext(), SwitchWidgetProvider.class);
+				int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 				try {
 					SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
 					ArrayList<BeanSwitch> switches = mWebSwitch.getSwitches();
@@ -302,7 +303,9 @@ public class RemoteService extends Service {
 							mWidgedUpdater.updateSwitchWidget(widgetID, s);
 					}
 				} catch (Exception e) {
-					System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+					for (int widgetID : appWidgetIds) {
+						mWidgedUpdater.updateSwitchWidget(widgetID, e);
+					}
 				}
 			};
 		};

@@ -21,8 +21,8 @@ public class SelectMediaServerActivity extends WebAPIActivity {
 
 	private int appWidgetId;
 
-	private SelectMSListener listener;
-	protected ListView msList;
+	private SelectMSListener mListener;
+	protected ListView mList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class SelectMediaServerActivity extends WebAPIActivity {
 
 		Bundle extras = getIntent().getExtras();
 		appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-		listener = new SelectMSListener();
+		mListener = new SelectMSListener();
 
 		new AsyncTask<Integer, Integer, Exception>() {
 
@@ -59,14 +59,16 @@ public class SelectMediaServerActivity extends WebAPIActivity {
 			protected void onPostExecute(Exception result) {
 				if (result != null)
 					showException(result);
-				msList.setAdapter(new MediaServerAdapter(getApplicationContext(), mediaserver, ids, listener));
+				if (mediaserver != null && ids != null)
+					mList.setAdapter(
+							new MediaServerAdapter(SelectMediaServerActivity.this, mediaserver, ids, mListener));
 			}
 		}.execute();
 
 	}
 
 	private void findComponents() {
-		msList = (ListView) findViewById(R.id.list_mediaserver);
+		mList = (ListView) findViewById(R.id.list_mediaserver);
 	}
 
 	public class SelectMSListener {

@@ -56,9 +56,10 @@ public class SelectSwitchActivity extends WebAPIActivity {
 
 			@Override
 			protected void onPostExecute(Exception result) {
-				switchList.setAdapter(new SwitchAdapter(getApplicationContext(), switches, ids, listener));
+				if (switches != null && ids != null)
+					switchList.setAdapter(new SwitchAdapter(SelectSwitchActivity.this, switches, ids, listener));
 				if (result != null)
-					new AbstractTask.ErrorDialog(getApplicationContext(), result).show();
+					new AbstractTask.ErrorDialog(SelectSwitchActivity.this, result).show();
 			}
 		}.execute();
 

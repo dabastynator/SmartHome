@@ -77,16 +77,13 @@ public class WebAPIActivity extends ActionBarActivity {
 
 	protected void loadWebApi(RemoteServer server) {
 		if (server != null) {
-			mWebSwitch = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/switch")
-					.setSecurityToken(server.getApiToken()).setInterface(IWebSwitch.class).create();
-			mWebLEDStrip = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/ledstrip")
-					.setSecurityToken(server.getApiToken()).setInterface(IWebLEDStrip.class).create();
-			mWebMediaServer = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/mediaserver")
-					.setSecurityToken(server.getApiToken()).setInterface(IWebMediaServer.class).create();
-			mWebAction = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/action")
-					.setSecurityToken(server.getApiToken()).setInterface(IWebAction.class).create();
-			mWebControlCenter = new WebProxyBuilder().setEndPoint(server.getEndPoint() + "/controlcenter")
-					.setSecurityToken(server.getApiToken()).setInterface(IControlCenter.class).create();
+			WebProxyBuilder b = new WebProxyBuilder().setSecurityToken(server.getApiToken());
+			String url = server.getEndPoint();
+			mWebSwitch = b.setEndPoint(url + "/switch").setInterface(IWebSwitch.class).create();
+			mWebLEDStrip = b.setEndPoint(url + "/ledstrip").setInterface(IWebLEDStrip.class).create();
+			mWebMediaServer = b.setEndPoint(url + "/mediaserver").setInterface(IWebMediaServer.class).create();
+			mWebAction = b.setEndPoint(url + "/action").setInterface(IWebAction.class).create();
+			mWebControlCenter = b.setEndPoint(url + "/controlcenter").setInterface(IControlCenter.class).create();
 		}
 	}
 
