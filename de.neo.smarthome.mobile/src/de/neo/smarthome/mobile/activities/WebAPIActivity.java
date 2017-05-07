@@ -152,7 +152,7 @@ public class WebAPIActivity extends ActionBarActivity {
 	@Override
 	protected void onPause() {
 		dismissProgress();
-		dismissErrorDialog();
+		dismissDialogs();
 		mIsActive = false;
 		super.onPause();
 	}
@@ -170,7 +170,7 @@ public class WebAPIActivity extends ActionBarActivity {
 	}
 
 	public void showException(Exception e) {
-		dismissErrorDialog();
+		dismissDialogs();
 		AlertDialog dialog = new AbstractTask.ErrorDialog(this, e).show();
 		mDialogs.add(dialog);
 		dialog.setOnDismissListener(new OnDismissListener() {
@@ -181,7 +181,7 @@ public class WebAPIActivity extends ActionBarActivity {
 		});
 	}
 
-	public void dismissErrorDialog() {
+	public void dismissDialogs() {
 		for (AlertDialog d : mDialogs)
 			d.dismiss();
 		mDialogs.clear();

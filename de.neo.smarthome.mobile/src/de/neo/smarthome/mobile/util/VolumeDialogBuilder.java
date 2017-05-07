@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnKeyListener;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -80,14 +79,15 @@ public class VolumeDialogBuilder implements OnSeekBarChangeListener, OnKeyListen
 	};
 
 	private void setVolumeValue() {
-		if (mError != null) {
-			if (mDialog != null && mDialog.isShowing())
+		if (mDialog != null && mDialog.isShowing()) {
+			if (mError != null) {
 				mDialog.dismiss();
-			new AbstractTask.ErrorDialog(mContext, mError).show();
-		} else {
-			mVolume.setProgress(mVolumeValue);
+				new AbstractTask.ErrorDialog(mContext, mError).show();
+			} else {
+				mVolume.setProgress(mVolumeValue);
+			}
+			mVolume.setOnSeekBarChangeListener(this);
 		}
-		mVolume.setOnSeekBarChangeListener(this);
 	}
 
 	public AlertDialog show() {

@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.neo.android.persistence.Dao;
 import de.neo.android.persistence.DaoException;
-import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.IWebMediaServer;
 import de.neo.smarthome.api.IWebMediaServer.BeanMediaServer;
@@ -74,7 +73,6 @@ public class MediaServerActivity extends WebAPIActivity {
 
 	protected LinearLayout mDownloadLayout;
 	protected ProgressBar mDownloadProgress;
-	private long mMaxDonwloadSize = 0;
 	private MediaServerState mMediaServer;
 
 	@Override
@@ -161,7 +159,7 @@ public class MediaServerActivity extends WebAPIActivity {
 		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			VolumeDialogBuilder dialog = new VolumeDialogBuilder(this, mMediaServer);
 			dialog.changeVolume(1);
-			dialog.show();
+			addDialog(dialog.show());
 			return true;
 		}
 
