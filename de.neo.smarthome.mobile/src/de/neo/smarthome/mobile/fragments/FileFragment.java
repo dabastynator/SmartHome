@@ -14,8 +14,6 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -43,6 +41,7 @@ import de.neo.smarthome.mobile.tasks.AbstractTask;
 import de.neo.smarthome.mobile.tasks.PlayItemTask;
 import de.neo.smarthome.mobile.tasks.PlayListTask;
 import de.neo.smarthome.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.smarthome.mobile.util.ParcelableWebBeans.ParcelFileSystemBean;
 import de.remote.mobile.R;
 
 public class FileFragment extends BrowserFragment implements IThumbnailListener {
@@ -118,9 +117,9 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		ArrayList<ParcelBeans> copy = new ArrayList<>();
+		ArrayList<ParcelFileSystemBean> copy = new ArrayList<>();
 		for (BeanFileSystem bean : mFileBeans)
-			copy.add(new ParcelBeans(bean));
+			copy.add(new ParcelFileSystemBean(bean));
 		outState.putParcelableArrayList(BEANS, copy);
 	}
 
@@ -181,45 +180,6 @@ public class FileFragment extends BrowserFragment implements IThumbnailListener 
 
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	public static class ParcelBeans extends BeanFileSystem implements Parcelable {
-
-		public ParcelBeans(Parcel source) {
-			setName(source.readString());
-			setFileType(FileType.values()[source.readInt()]);
-		}
-
-		public ParcelBeans(BeanFileSystem bean) {
-			setName(bean.getName());
-			setFileType(bean.getFileType());
-		}
-
-		@Override
-		public int describeContents() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public void writeToParcel(Parcel dest, int flags) {
-			dest.writeString(getName());
-			dest.writeInt(getFileType().ordinal());
-		}
-
-		public static final Parcelable.Creator<ParcelBeans> CREATOR = new Parcelable.Creator<ParcelBeans>() {
-
-			@Override
-			public ParcelBeans createFromParcel(Parcel source) {
-				return new ParcelBeans(source);
-			}
-
-			@Override
-			public ParcelBeans[] newArray(int size) {
-				return new ParcelBeans[size];
-			}
-		};
-
 	}
 
 	public class FileAdapter extends ArrayAdapter<String> {

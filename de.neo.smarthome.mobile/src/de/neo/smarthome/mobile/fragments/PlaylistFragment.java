@@ -7,8 +7,6 @@ import java.util.List;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -32,6 +30,8 @@ import de.neo.smarthome.mobile.tasks.AbstractTask;
 import de.neo.smarthome.mobile.tasks.PlayItemTask;
 import de.neo.smarthome.mobile.tasks.PlayListTask;
 import de.neo.smarthome.mobile.util.BrowserPageAdapter.BrowserFragment;
+import de.neo.smarthome.mobile.util.ParcelableWebBeans.ParcelBeanPlsItem;
+import de.neo.smarthome.mobile.util.ParcelableWebBeans.ParcelBeanPlsList;
 import de.remote.mobile.R;
 
 public class PlaylistFragment extends BrowserFragment {
@@ -139,15 +139,15 @@ public class PlaylistFragment extends BrowserFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (mPlaylists != null) {
-			ArrayList<ParcelPls> copy = new ArrayList<>();
+			ArrayList<ParcelBeanPlsList> copy = new ArrayList<>();
 			for (BeanPlaylist bean : mPlaylists)
-				copy.add(new ParcelPls(bean));
+				copy.add(new ParcelBeanPlsList(bean));
 			outState.putParcelableArrayList(BEAN_PLS, copy);
 		}
 		if (mPlsItems != null) {
-			ArrayList<ParcelPlsItem> copy = new ArrayList<>();
+			ArrayList<ParcelBeanPlsItem> copy = new ArrayList<>();
 			for (BeanPlaylistItem bean : mPlsItems)
-				copy.add(new ParcelPlsItem(bean));
+				copy.add(new ParcelBeanPlsItem(bean));
 			outState.putParcelableArrayList(BEAN_ITEMS, copy);
 		}
 		outState.putInt(VIEWER_STATE, mViewerState.ordinal());
@@ -284,81 +284,4 @@ public class PlaylistFragment extends BrowserFragment {
 			refreshContent(getActivity());
 	}
 
-	static class ParcelPls extends BeanPlaylist implements Parcelable {
-
-		public ParcelPls(Parcel source) {
-			setName(source.readString());
-			setItemCount(source.readInt());
-		}
-
-		public ParcelPls(BeanPlaylist bean) {
-			setName(bean.getName());
-			setItemCount(bean.getItemCount());
-		}
-
-		@Override
-		public int describeContents() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public void writeToParcel(Parcel dest, int flags) {
-			dest.writeString(getName());
-			dest.writeInt(getItemCount());
-		}
-
-		public static final Parcelable.Creator<ParcelPls> CREATOR = new Parcelable.Creator<ParcelPls>() {
-
-			@Override
-			public ParcelPls createFromParcel(Parcel source) {
-				return new ParcelPls(source);
-			}
-
-			@Override
-			public ParcelPls[] newArray(int size) {
-				return new ParcelPls[size];
-			}
-		};
-
-	}
-
-	static class ParcelPlsItem extends BeanPlaylistItem implements Parcelable {
-
-		public ParcelPlsItem(Parcel source) {
-			setName(source.readString());
-			setPath(source.readString());
-		}
-
-		public ParcelPlsItem(BeanPlaylistItem bean) {
-			setName(bean.getName());
-			setPath(bean.getPath());
-		}
-
-		@Override
-		public int describeContents() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public void writeToParcel(Parcel dest, int flags) {
-			dest.writeString(getName());
-			dest.writeString(getPath());
-		}
-
-		public static final Parcelable.Creator<ParcelPlsItem> CREATOR = new Parcelable.Creator<ParcelPlsItem>() {
-
-			@Override
-			public ParcelPlsItem createFromParcel(Parcel source) {
-				return new ParcelPlsItem(source);
-			}
-
-			@Override
-			public ParcelPlsItem[] newArray(int size) {
-				return new ParcelPlsItem[size];
-			}
-		};
-
-	}
 }
