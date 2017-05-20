@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -69,7 +70,9 @@ public class WebServer {
 		mServer = HttpServer.create(new InetSocketAddress(mPort), 0);
 		for (WebServerHandler handler : mHandlerList)
 			mServer.createContext(handler.getPath(), handler);
-		mServer.setExecutor(null); // creates a default executor
+		mServer.setExecutor(Executors.newCachedThreadPool()); // creates a
+																// default
+																// executor
 		mServer.start();
 	}
 

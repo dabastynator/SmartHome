@@ -93,7 +93,7 @@ public class CronScheduler extends Thread {
 			RemoteLogger.performLog(LogPriority.INFORMATION,
 					"Schedule cron job", job.toString());
 		} else
-			RemoteLogger.performLog(LogPriority.ERROR, "Job can't scheduled",
+			RemoteLogger.performLog(LogPriority.ERROR, "Job can't be scheduled",
 					job.toString());
 		notify();
 	}
