@@ -10,7 +10,6 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 
 ```xml
 <?xml version="1.0"?>
-<?xml version="1.0"?>
 <ControlCenter>
 	<!-- Define the port of the web-interface and the security-token required for every web call -->
 	<WebServer port="5061" token="security-token"/>
