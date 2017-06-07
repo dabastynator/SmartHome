@@ -13,8 +13,14 @@ import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
 import org.json.JSONException;
 
-import de.neo.remote.rmi.RemoteException;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
+
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IPlayerListener;
@@ -75,6 +81,14 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	protected PlayingBean readFileInformations(File file) throws IOException {
 		PlayingBean bean = new PlayingBean();
 		bean.setVolume(mVolume);
+		readFileTags(file, bean);
+		return bean;
+	}
+
+	public static void readFileTags(File file, PlayingBean bean) {
+		// First use jid3lib to read metadata
+		// jid3lib may fail reading some data
+		// so use mp3agic in second step
 		try {
 			MP3File mp3File = new MP3File(file);
 			bean.setFile(file.getName().trim());
@@ -88,10 +102,34 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 				if (id3v2Tag.getAlbumTitle() != null)
 					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
 			}
-		} catch (TagException e) {
+		} catch (TagException | IOException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, "Cant read file-information: " + e.getMessage(), "Mediaserver");
 		}
-		return bean;
+		try {
+			Mp3File mp3File = new Mp3File(file.getAbsolutePath());
+			bean.setFile(file.getName().trim());
+			bean.setPath(file.getPath());
+			if (mp3File.hasId3v1Tag()) {
+				ID3v1 tag = mp3File.getId3v1Tag();
+				if (tag.getArtist() != null)
+					bean.setArtist(tag.getArtist().trim());
+				if (tag.getTitle() != null)
+					bean.setTitle(tag.getTitle().trim());
+				if (tag.getAlbum() != null)
+					bean.setAlbum(tag.getAlbum().trim());
+			}
+			if (mp3File.hasId3v2Tag()) {
+				ID3v2 tag = mp3File.getId3v2Tag();
+				if (tag.getArtist() != null)
+					bean.setArtist(tag.getArtist().trim());
+				if (tag.getTitle() != null)
+					bean.setTitle(tag.getTitle().trim());
+				if (tag.getAlbum() != null)
+					bean.setAlbum(tag.getAlbum().trim());
+			}
+		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+			RemoteLogger.performLog(LogPriority.ERROR, "Cant read file-information: " + e.getMessage(), "Mediaserver");
+		}
 	}
 
 	/**
@@ -336,13 +374,12 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	public static void main(String[] args) {
-		try {
-			BufferedImage image = searchImageFromGoogle("hin", 100, 1000 * 600);
-			System.out.println("w=" + image.getWidth() + ", h=" + image.getHeight());
-		} catch (IOException | JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		PlayingBean bean = new PlayingBean();
+		readFileTags(new File("/home/sebastian/Musik/01 - Kryptic Minds - Intro.mp3"), bean);
+		System.out.println(bean.getArtist() + " - " + bean.getAlbum() + " - " + bean.getTitle());
+		bean = new PlayingBean();
+		readFileTags(new File("/home/sebastian/Musik/Pichl Michl - Track 2.mp3"), bean);
+		System.out.println(bean.getArtist() + " - " + bean.getAlbum() + " - " + bean.getTitle());
 	}
 
 	@Override
