@@ -20,16 +20,6 @@ import de.neo.remote.web.WebRequest;
 public interface IControlCenter {
 
 	/**
-	 * id of the music station handler object
-	 */
-	public static final String ID = "de.newsystem.controlcenter";
-
-	/**
-	 * Port of the server
-	 */
-	public static final int PORT = 5022;
-
-	/**
 	 * Get array of all unit-ids.
 	 * 
 	 * @return ids

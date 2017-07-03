@@ -30,6 +30,7 @@ import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.controlcenter.ControlCenterImpl;
 import de.neo.smarthome.gpio.GPIOUnitFactory;
+import de.neo.smarthome.informations.WebInformation;
 import de.neo.smarthome.mediaserver.MediaUnitFactory;
 import de.neo.smarthome.rccolor.RCColorUnitFactory;
 
@@ -39,6 +40,7 @@ public class SmartHome {
 	public static String WEBSERVER_PORT = "port";
 	public static String WEBSERVER_TOKEN = "token";
 	public static String WEBSERVER_PATH = "controlcenter";
+	public static String INFORMATION_PATH = "information";
 
 	public static final SimpleDateFormat LogFormat = new SimpleDateFormat("dd.MM-HH:mm");
 
@@ -117,6 +119,7 @@ public class SmartHome {
 		NodeList controlCenterRoot = doc.getElementsByTagName(ControlCenterImpl.ROOT);
 		NodeList webServerRoot = doc.getElementsByTagName(WEBSERVER);
 		ControlCenterImpl center = new ControlCenterImpl();
+		WebInformation info = new WebInformation();
 		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0)
 			center.initializeGroundPlot(controlCenterRoot.item(0));
 		center.initializeRules(doc.getElementsByTagName("EventRule"));
@@ -131,6 +134,7 @@ public class SmartHome {
 					webServer.handle(handler.getWebPath(), handler, webRoot.getAttribute(WEBSERVER_TOKEN));
 				}
 				webServer.handle(WEBSERVER_PATH, center, webRoot.getAttribute(WEBSERVER_TOKEN));
+				webServer.handle(INFORMATION_PATH, info, webRoot.getAttribute(WEBSERVER_TOKEN));
 				webServer.start();
 			}
 		}
