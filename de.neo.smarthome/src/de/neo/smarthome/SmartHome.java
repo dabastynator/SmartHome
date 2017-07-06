@@ -125,6 +125,7 @@ public class SmartHome {
 			center.initializeGroundPlot(controlCenterRoot.item(0));
 		center.initializeRules(doc.getElementsByTagName("EventRule"));
 		center.initializeTrigger(doc.getElementsByTagName("TimeTrigger"));
+		center.setInformationHandler(info);
 		WebServer webServer = WebServer.getInstance();
 		if (webServerRoot != null && webServerRoot.getLength() > 0) {
 			Element webRoot = (Element) webServerRoot.item(0);

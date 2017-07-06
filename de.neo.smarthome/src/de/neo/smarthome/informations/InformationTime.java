@@ -2,13 +2,10 @@ package de.neo.smarthome.informations;
 
 import java.util.Date;
 
-import org.w3c.dom.Element;
-
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryTime;
-import de.neo.smarthome.informations.WebInformation.IInformation;
 
-public class InformationTime implements IInformation {
+public class InformationTime extends InformationUnit {
 
 	@Override
 	public String getKey() {
@@ -26,12 +23,6 @@ public class InformationTime implements IInformation {
 		entry.mMilliseconds = System.currentTimeMillis();
 		entry.mExtended = new Date().toString();
 		return entry;
-	}
-
-	@Override
-	public void initialize(Element element) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

@@ -23,6 +23,9 @@ public class Event implements Serializable {
 	@WebField(name = "parameter")
 	private Map<String, String> mParameter = new HashMap<String, String>();
 
+	@WebField(name = "condition")
+	private String mCondition;
+
 	public Event(Event event) {
 		mUnitID = event.getUnitID();
 		mParameter.putAll(event.getParameter());
@@ -84,6 +87,12 @@ public class Event implements Serializable {
 				}
 			}
 		}
+		if (element.hasAttribute("condition"))
+			mCondition = element.getAttribute("condition");
+	}
+
+	public String getCondition() {
+		return mCondition;
 	}
 
 }

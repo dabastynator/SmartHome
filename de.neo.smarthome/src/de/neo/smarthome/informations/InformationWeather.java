@@ -21,10 +21,9 @@ import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather.WeatherSun;
 import de.neo.smarthome.cronjob.CronScheduler;
-import de.neo.smarthome.informations.WebInformation.IInformation;
 import de.neo.smarthome.informations.WebInformation.IInformationFactory;
 
-public class InformationWeather implements IInformation {
+public class InformationWeather extends InformationUnit {
 
 	public static String Key = "InformationWeather";
 	private static String TenMinutes = "0,10,20,30,40,50 * * * *";
@@ -79,7 +78,7 @@ public class InformationWeather implements IInformation {
 
 			long now = (long) Math.floor(System.currentTimeMillis() / 1000);
 			long sunset = json.getJSONObject("sys").getLong("sunset");
-			long sunrise = json.getJSONObject("sys").getLong("sunset");
+			long sunrise = json.getJSONObject("sys").getLong("sunrise");
 			weather.mDayNight = (now > sunrise && now < sunset) ? WeatherSun.Day : WeatherSun.Night;
 
 			weather.mClouds = json.getJSONObject("clouds").getInt("all");
@@ -115,6 +114,7 @@ public class InformationWeather implements IInformation {
 
 	@Override
 	public void initialize(Element element) throws SAXException, IOException {
+		super.initialize(element);
 		if (!element.hasAttribute("token"))
 			throw new SAXException("token missing for " + getClass().getSimpleName());
 		if (!element.hasAttribute("query"))
@@ -132,7 +132,7 @@ public class InformationWeather implements IInformation {
 		}
 
 		@Override
-		public IInformation createInformation() {
+		public InformationUnit createInformation() {
 			return new InformationWeather();
 		}
 
