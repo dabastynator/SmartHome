@@ -120,6 +120,7 @@ public class SmartHome {
 		NodeList webServerRoot = doc.getElementsByTagName(WEBSERVER);
 		ControlCenterImpl center = new ControlCenterImpl();
 		WebInformation info = new WebInformation();
+		info.initialize(doc);
 		if (controlCenterRoot != null && controlCenterRoot.getLength() > 0)
 			center.initializeGroundPlot(controlCenterRoot.item(0));
 		center.initializeRules(doc.getElementsByTagName("EventRule"));

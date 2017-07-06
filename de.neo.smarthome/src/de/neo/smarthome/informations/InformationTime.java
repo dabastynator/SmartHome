@@ -1,7 +1,8 @@
 package de.neo.smarthome.informations;
 
-import java.util.ArrayList;
 import java.util.Date;
+
+import org.w3c.dom.Element;
 
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryTime;
@@ -20,13 +21,17 @@ public class InformationTime implements IInformation {
 	}
 
 	@Override
-	public ArrayList<InformationEntryBean> getInformationEntries() {
+	public InformationEntryBean getInformationEntry() {
 		InformationEntryTime entry = new InformationEntryTime();
 		entry.mMilliseconds = System.currentTimeMillis();
 		entry.mExtended = new Date().toString();
-		ArrayList<InformationEntryBean> list = new ArrayList<>();
-		list.add(entry);
-		return list;
+		return entry;
+	}
+
+	@Override
+	public void initialize(Element element) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
