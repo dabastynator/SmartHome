@@ -86,6 +86,9 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	public static void readFileTags(File file, PlayingBean bean) {
+		// Just check
+		if (file.length() > 1000 * 1000 * 100)
+			return;
 		// First use jid3lib to read metadata
 		// jid3lib may fail reading some data
 		// so use mp3agic in second step
