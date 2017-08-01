@@ -1,8 +1,10 @@
-package de.neo.smarthome.api;
+package de.neo.smarthome.mediaserver;
 
 import de.neo.remote.rmi.Oneway;
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.api.PlayerException;
+import de.neo.smarthome.api.PlayingBean;
 
 /**
  * control a music and video player
@@ -143,24 +145,6 @@ public interface IPlayer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	PlayingBean getPlayingBean() throws RemoteException;
-
-	/**
-	 * add listener for player states
-	 * 
-	 * @param listener
-	 * @throws RemoteException
-	 */
-	@Oneway
-	void addPlayerMessageListener(IPlayerListener listener) throws RemoteException;
-
-	/**
-	 * remove listener for player states
-	 * 
-	 * @param listener
-	 * @throws RemoteException
-	 */
-	@Oneway
-	void removePlayerMessageListener(IPlayerListener listener) throws RemoteException;
 
 	/**
 	 * play the given playlist

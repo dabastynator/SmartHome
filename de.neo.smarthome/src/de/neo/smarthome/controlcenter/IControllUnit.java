@@ -1,8 +1,9 @@
-package de.neo.smarthome.api;
+package de.neo.smarthome.controlcenter;
 
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
+import de.neo.smarthome.api.Event;
+import de.neo.smarthome.controlcenter.IControlCenter.BeanWeb;
 
 /**
  * The control unit is a single remote able control unit.

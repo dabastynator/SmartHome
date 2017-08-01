@@ -5,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
@@ -22,14 +20,9 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IPlayer;
-import de.neo.smarthome.api.IPlayerListener;
 import de.neo.smarthome.api.PlayerException;
 import de.neo.smarthome.api.PlayingBean;
 import de.neo.smarthome.api.PlayingBean.STATE;
-import de.neo.smarthome.mediaserver.ThumbnailHandler.Thumbnail;
-import de.neo.smarthome.mediaserver.ThumbnailHandler.ThumbnailJob;
-import de.neo.smarthome.mediaserver.ThumbnailHandler.ThumbnailListener;
 
 /**
  * the abstract player implements basically functions of an player. this
@@ -37,16 +30,11 @@ import de.neo.smarthome.mediaserver.ThumbnailHandler.ThumbnailListener;
  * 
  * @author sebastian
  */
-public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
+public abstract class AbstractPlayer implements IPlayer {
 
 	public static final String YOUTUBE_DL_FILE = "/usr/bin/youtube-dl";
 
 	public static final int THUMBNAIL_SIZE = 128;
-
-	/**
-	 * list of all listeners
-	 */
-	private List<IPlayerListener> mListeners = new ArrayList<IPlayerListener>();
 
 	/**
 	 * current playing file
@@ -57,18 +45,7 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 	public AbstractPlayer() {
 		new PlayingTimeCounter().start();
-		ThumbnailHandler.instance().calculationListener().add(this);
-	}
-
-	@Override
-	public void addPlayerMessageListener(IPlayerListener listener) throws RemoteException {
-		if (!mListeners.contains(listener))
-			mListeners.add(listener);
-	}
-
-	@Override
-	public void removePlayerMessageListener(IPlayerListener listener) throws RemoteException {
-		mListeners.remove(listener);
+		// ThumbnailHandler.instance().calculationListener().add(this);
 	}
 
 	/**
@@ -149,22 +126,13 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	/**
-	 * inform all listeners about the current playing file. a new bean will be
-	 * created.
+	 * A new bean will be created.
 	 * 
 	 * @param bean
 	 */
 	protected void informPlayingBean(PlayingBean bean) {
 		mPlayingBean = new PlayingBean(bean);
 		mPlayingBean.setVolume(mVolume);
-		List<IPlayerListener> exceptionList = new ArrayList<IPlayerListener>();
-		for (IPlayerListener listener : mListeners)
-			try {
-				listener.playerMessage(mPlayingBean);
-			} catch (RemoteException e) {
-				exceptionList.add(listener);
-			}
-		mListeners.removeAll(exceptionList);
 	}
 
 	@Override
@@ -243,18 +211,19 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	}
 
 	protected void loadThumbnail(PlayingBean bean) {
-		if (bean.getArtist() != null && bean.getArtist().length() > 0) {
-			try {
-				bean.setThumbnailRGB(null);
-				bean.setThumbnailSize(0, 0);
-				PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
-				ThumbnailHandler.instance().queueThumbnailJob(job);
-			} catch (Exception e) {
-				RemoteLogger.performLog(LogPriority.ERROR,
-						"No thumbnail for " + bean.getArtist() + " (" + e.getClass().getSimpleName() + ")",
-						"Mediaserver");
-			}
-		}
+		// if (bean.getArtist() != null && bean.getArtist().length() > 0) {
+		// try {
+		// bean.setThumbnailRGB(null);
+		// bean.setThumbnailSize(0, 0);
+		// PlayerThumbnailJob job = new PlayerThumbnailJob(bean, this);
+		// ThumbnailHandler.instance().queueThumbnailJob(job);
+		// } catch (Exception e) {
+		// RemoteLogger.performLog(LogPriority.ERROR,
+		// "No thumbnail for " + bean.getArtist() + " (" +
+		// e.getClass().getSimpleName() + ")",
+		// "Mediaserver");
+		// }
+		// }
 	}
 
 	public static BufferedImage searchImageFromGoogle(String search, int minResolution, int maxResolution)
@@ -288,17 +257,19 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 	public void playFromYoutube(String url) throws RemoteException, PlayerException {
 	}
 
-	@Override
-	public void onThumbnailCalculation(ThumbnailJob job) {
-		if (job instanceof PlayerThumbnailJob) {
-			PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
-			if (playerJob.player == this && playerJob.bean != null && playerJob.thumbnail != null) {
-				playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
-				playerJob.bean.setThumbnailSize(playerJob.thumbnail.width, playerJob.thumbnail.height);
-				informPlayingBean(playerJob.bean);
-			}
-		}
-	}
+	// @Override
+	// public void onThumbnailCalculation(ThumbnailJob job) {
+	// if (job instanceof PlayerThumbnailJob) {
+	// PlayerThumbnailJob playerJob = (PlayerThumbnailJob) job;
+	// if (playerJob.player == this && playerJob.bean != null &&
+	// playerJob.thumbnail != null) {
+	// playerJob.bean.setThumbnailRGB(playerJob.thumbnail.rgb);
+	// playerJob.bean.setThumbnailSize(playerJob.thumbnail.width,
+	// playerJob.thumbnail.height);
+	// informPlayingBean(playerJob.bean);
+	// }
+	// }
+	// }
 
 	class PlayingTimeCounter extends Thread {
 
@@ -317,64 +288,73 @@ public abstract class AbstractPlayer implements IPlayer, ThumbnailListener {
 
 	}
 
-	class PlayerThumbnailJob extends ThumbnailJob {
-
-		private PlayingBean bean;
-		private AbstractPlayer player;
-
-		public PlayerThumbnailJob(PlayingBean bean, AbstractPlayer player) {
-			this.bean = bean;
-			this.player = player;
-		}
-
-		@Override
-		protected void calculateThumbnail() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
-			if (thumbnail == null) {
-				try {
-					BufferedImage image = searchImageFromGoogle(bean.getArtist(), 0, 1000 * 1000);
-					thumbnail = new Thumbnail();
-					File thumbnailFile = ThumbnailHandler.instance().getStringThumbnailFile(bean.getArtist());
-					BufferedImage thumbnailImage = ThumbnailHandler
-							.toBufferedImage(ThumbnailHandler.instance().createThumbnail(image, THUMBNAIL_SIZE));
-					int rgb[] = ThumbnailHandler.instance().readImageIntArray(thumbnailImage);
-					rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE, THUMBNAIL_SIZE);
-					thumbnail.width = THUMBNAIL_SIZE;
-					thumbnail.height = THUMBNAIL_SIZE;
-					thumbnail.rgb = rgb;
-					ThumbnailHandler.instance().writeThumbnail(thumbnailFile, thumbnail);
-				} catch (IOException | JSONException e) {
-					RemoteLogger.performLog(LogPriority.ERROR,
-							"Could not build thumbnail for '" + bean.getArtist() + "': " + e.getMessage(),
-							"Mediaserver");
-				}
-			}
-		}
-
-		@Override
-		protected Thumbnail readThumbnail() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
-			bean.setThumbnailSize(thumbnail.width, thumbnail.height);
-			bean.setThumbnailRGB(thumbnail.rgb);
-			return thumbnail;
-		}
-
-		@Override
-		protected boolean needsCalculation() {
-			thumbnail = ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
-			return thumbnail == null;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof PlayerThumbnailJob) {
-				PlayerThumbnailJob pJob = (PlayerThumbnailJob) obj;
-				return pJob.bean.getArtist().equals(bean.getArtist());
-			}
-			return super.equals(obj);
-		}
-
-	}
+	// class PlayerThumbnailJob extends ThumbnailJob {
+	//
+	// private PlayingBean bean;
+	// private AbstractPlayer player;
+	//
+	// public PlayerThumbnailJob(PlayingBean bean, AbstractPlayer player) {
+	// this.bean = bean;
+	// this.player = player;
+	// }
+	//
+	// @Override
+	// protected void calculateThumbnail() {
+	// thumbnail =
+	// ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
+	// if (thumbnail == null) {
+	// try {
+	// BufferedImage image = searchImageFromGoogle(bean.getArtist(), 0, 1000 *
+	// 1000);
+	// thumbnail = new Thumbnail();
+	// File thumbnailFile =
+	// ThumbnailHandler.instance().getStringThumbnailFile(bean.getArtist());
+	// BufferedImage thumbnailImage = ThumbnailHandler
+	// .toBufferedImage(ThumbnailHandler.instance().createThumbnail(image,
+	// THUMBNAIL_SIZE));
+	// int rgb[] =
+	// ThumbnailHandler.instance().readImageIntArray(thumbnailImage);
+	// rgb = ThumbnailHandler.compressRGB565(rgb, THUMBNAIL_SIZE,
+	// THUMBNAIL_SIZE);
+	// thumbnail.width = THUMBNAIL_SIZE;
+	// thumbnail.height = THUMBNAIL_SIZE;
+	// thumbnail.rgb = rgb;
+	// ThumbnailHandler.instance().writeThumbnail(thumbnailFile, thumbnail);
+	// } catch (IOException | JSONException e) {
+	// RemoteLogger.performLog(LogPriority.ERROR,
+	// "Could not build thumbnail for '" + bean.getArtist() + "': " +
+	// e.getMessage(),
+	// "Mediaserver");
+	// }
+	// }
+	// }
+	//
+	// @Override
+	// protected Thumbnail readThumbnail() {
+	// thumbnail =
+	// ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
+	// bean.setThumbnailSize(thumbnail.width, thumbnail.height);
+	// bean.setThumbnailRGB(thumbnail.rgb);
+	// return thumbnail;
+	// }
+	//
+	// @Override
+	// protected boolean needsCalculation() {
+	// thumbnail =
+	// ThumbnailHandler.instance().searchStringThumbnail(bean.getArtist());
+	// return thumbnail == null;
+	// }
+	//
+	// @Override
+	// public boolean equals(Object obj) {
+	// if (obj instanceof PlayerThumbnailJob) {
+	// PlayerThumbnailJob pJob = (PlayerThumbnailJob) obj;
+	// return pJob.bean.getArtist().equals(bean.getArtist());
+	// }
+	// return super.equals(obj);
+	// }
+	//
+	// }
 
 	public static void main(String[] args) {
 		PlayingBean bean = new PlayingBean();

@@ -7,8 +7,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.IControllUnit.EventException;
+import de.neo.smarthome.controlcenter.IControllUnit.EventException;
 
 public class EventWorker extends Thread {
 

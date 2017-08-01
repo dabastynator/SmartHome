@@ -11,10 +11,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
-import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
+import de.neo.smarthome.controlcenter.IControlCenter;
+import de.neo.smarthome.controlcenter.IControllUnit;
+import de.neo.smarthome.controlcenter.IControlCenter.BeanWeb;
 
 public abstract class AbstractControlUnit implements IControllUnit {
 

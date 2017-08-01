@@ -17,13 +17,12 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.rmi.RMILogger;
-import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.ICommandAction;
 
-public class CommandAction implements ICommandAction {
+public class CommandAction {
 
 	private Process mProcess;
 	private String mCommand;
@@ -88,7 +87,6 @@ public class CommandAction implements ICommandAction {
 		return bytes;
 	}
 
-	@Override
 	public void startAction() throws IOException {
 		if (isRunning()) {
 			throw new IOException("Process is already running");
@@ -111,7 +109,6 @@ public class CommandAction implements ICommandAction {
 		}
 	}
 
-	@Override
 	public void stopAction() {
 		mProcess.destroy();
 		mProcess = null;
@@ -126,12 +123,10 @@ public class CommandAction implements ICommandAction {
 		mUnit.fireTrigger(parameterExchange, "@action=stop");
 	}
 
-	@Override
 	public String getIconBase64() throws RemoteException {
 		return mIconBase64;
 	}
 
-	@Override
 	public boolean isRunning() {
 		if (mProcess == null)
 			return false;
@@ -187,7 +182,6 @@ public class CommandAction implements ICommandAction {
 		}
 	}
 
-	@Override
 	public String getClientAction() throws RemoteException {
 		return mClientAction;
 	}

@@ -8,13 +8,12 @@ import org.xml.sax.SAXException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IInternetSwitch;
 import de.neo.smarthome.api.IWebSwitch.State;
+import de.neo.smarthome.controlcenter.IControlCenter;
 
 public class GPIOControlUnit extends AbstractControlUnit {
 
-	private InternetSwitchImpl mSwitch;
+	private InternetSwitch mSwitch;
 	private GPIOSender mPower;
 
 	public GPIOControlUnit(GPIOSender power, IControlCenter center) {
@@ -23,14 +22,14 @@ public class GPIOControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public IInternetSwitch getControllObject() throws RemoteException {
+	public InternetSwitch getControllObject() throws RemoteException {
 		return mSwitch;
 	}
 
 	@Override
 	public void initialize(Element element) throws SAXException, IOException {
 		super.initialize(element);
-		mSwitch = new InternetSwitchImpl(mPower, this);
+		mSwitch = new InternetSwitch(mPower, this);
 		mSwitch.initialize(element);
 	}
 

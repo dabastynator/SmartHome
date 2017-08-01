@@ -20,9 +20,6 @@ import de.neo.remote.transceiver.DirectorySender;
 import de.neo.remote.transceiver.FileSender;
 import de.neo.remote.transceiver.SenderProgress;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IControl;
-import de.neo.smarthome.api.IPlayList;
-import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload.DownloadType;
 
@@ -34,8 +31,7 @@ public class MediaServerImpl {
 
 	private TotemPlayer mTotem;
 	private MPlayer mMplayer;
-	private ControlImpl mControl;
-	private PlayListImpl mPlaylist;
+	private PlayList mPlaylist;
 	private String mBrowserLocation;
 	private OMXPlayer mOmxplayer;
 
@@ -47,11 +43,7 @@ public class MediaServerImpl {
 		return mMplayer;
 	}
 
-	public IControl getControl() throws RemoteException {
-		return mControl;
-	}
-
-	public IPlayList getPlayList() throws RemoteException {
+	public PlayList getPlayList() throws RemoteException {
 		return mPlaylist;
 	}
 
@@ -81,8 +73,7 @@ public class MediaServerImpl {
 		mBrowserLocation = browseLocation;
 		if (!mBrowserLocation.endsWith(File.separator))
 			mBrowserLocation += File.separator;
-		mControl = new ControlImpl();
-		mPlaylist = new PlayListImpl(playlistLocation);
+		mPlaylist = new PlayList(playlistLocation);
 		mOmxplayer = new OMXPlayer();
 	}
 

@@ -8,10 +8,8 @@ import org.xml.sax.SAXException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControl;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.PlayerException;
+import de.neo.smarthome.controlcenter.IControlCenter;
 
 public class MediaControlUnit extends AbstractControlUnit {
 
@@ -50,8 +48,6 @@ public class MediaControlUnit extends AbstractControlUnit {
 			else if ("totem".equals(player))
 				remotePlayer = mMediaServer.getTotemPlayer();
 
-			IControl control = mMediaServer.getControl();
-
 			switch (action) {
 			case "play":
 				remotePlayer.play(value);
@@ -75,8 +71,6 @@ public class MediaControlUnit extends AbstractControlUnit {
 			case "quit":
 				remotePlayer.quit();
 				break;
-			case "shutdown":
-				control.shutdown();
 			default:
 				throw new EventException("Unknown player action: " + action);
 			}

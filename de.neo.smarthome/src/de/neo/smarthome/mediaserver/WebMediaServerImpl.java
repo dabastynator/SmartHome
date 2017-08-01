@@ -8,13 +8,12 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.IPlayer;
 import de.neo.smarthome.api.IWebMediaServer;
 import de.neo.smarthome.api.PlayerException;
 import de.neo.smarthome.api.PlayingBean;
 import de.neo.smarthome.api.PlayingBean.STATE;
+import de.neo.smarthome.controlcenter.IControlCenter;
+import de.neo.smarthome.controlcenter.IControllUnit;
 
 public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMediaServer {
 

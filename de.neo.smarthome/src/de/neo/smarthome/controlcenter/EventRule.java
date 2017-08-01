@@ -13,8 +13,8 @@ import org.xml.sax.SAXException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControlCenter.IEventRule;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
+import de.neo.smarthome.controlcenter.IControlCenter.IEventRule;
 import de.neo.smarthome.api.Trigger;
 
 public class EventRule implements IEventRule {

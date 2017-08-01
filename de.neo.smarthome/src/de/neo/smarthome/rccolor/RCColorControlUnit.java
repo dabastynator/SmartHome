@@ -3,8 +3,7 @@ package de.neo.smarthome.rccolor;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IRCColor;
+import de.neo.smarthome.controlcenter.IControlCenter;
 
 public class RCColorControlUnit extends AbstractControlUnit {
 
@@ -16,7 +15,7 @@ public class RCColorControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public IRCColor getControllObject() throws RemoteException {
+	public RCColor getControllObject() throws RemoteException {
 		return mColorUnit;
 	}
 

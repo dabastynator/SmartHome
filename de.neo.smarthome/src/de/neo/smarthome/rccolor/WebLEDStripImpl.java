@@ -6,10 +6,9 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.IRCColor;
 import de.neo.smarthome.api.IWebLEDStrip;
+import de.neo.smarthome.controlcenter.IControlCenter;
+import de.neo.smarthome.controlcenter.IControllUnit;
 
 public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip {
 
@@ -23,8 +22,8 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		ArrayList<BeanLEDStrips> result = new ArrayList<>();
 		for (IControllUnit unit : mCenter.getControlUnits().values()) {
 			try {
-				if (unit.getControllObject() instanceof IRCColor) {
-					IRCColor ledStrip = (IRCColor) unit.getControllObject();
+				if (unit.getControllObject() instanceof RCColor) {
+					RCColor ledStrip = (RCColor) unit.getControllObject();
 					BeanLEDStrips webLed = new BeanLEDStrips();
 					webLed.merge(unit.getWebBean());
 					int color = ledStrip.getColor();
@@ -52,8 +51,8 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		int color = (red << 16) | (green << 8) | blue;
 		try {
 			IControllUnit unit = mCenter.getControlUnit(id);
-			if (unit.getControllObject() instanceof IRCColor) {
-				IRCColor ledStrip = (IRCColor) unit.getControllObject();
+			if (unit.getControllObject() instanceof RCColor) {
+				RCColor ledStrip = (RCColor) unit.getControllObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
 				webLed.merge(unit.getWebBean());
 				ledStrip.setColor(color);
@@ -74,8 +73,8 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 			throws RemoteException {
 		try {
 			IControllUnit unit = mCenter.getControlUnit(id);
-			if (unit != null && unit.getControllObject() instanceof IRCColor) {
-				IRCColor ledStrip = (IRCColor) unit.getControllObject();
+			if (unit != null && unit.getControllObject() instanceof RCColor) {
+				RCColor ledStrip = (RCColor) unit.getControllObject();
 				BeanLEDStrips webLed = new BeanLEDStrips();
 				webLed.merge(unit.getWebBean());
 				ledStrip.setMode(mode);

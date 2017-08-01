@@ -22,8 +22,6 @@ import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.GroundPlot.Feature;
 import de.neo.smarthome.api.GroundPlot.Point;
 import de.neo.smarthome.api.GroundPlot.Wall;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.informations.WebInformation;
 

@@ -10,24 +10,21 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IPlayList;
 import de.neo.smarthome.api.PlayerException;
 
-public class PlayListImpl implements IPlayList {
+public class PlayList {
 
 	private String mPlaylistLocation;
 
-	public PlayListImpl(String playlistLocation) {
+	public PlayList(String playlistLocation) {
 		this.mPlaylistLocation = playlistLocation;
-		if (playlistLocation != null
-				&& !playlistLocation.endsWith(File.separator))
+		if (playlistLocation != null && !playlistLocation.endsWith(File.separator))
 			this.mPlaylistLocation += File.separator;
 	}
 
-	@Override
 	public String[] getPlayLists() throws RemoteException {
 		List<String> plsList = new ArrayList<String>();
 		File playlistFolder = new File(mPlaylistLocation);
@@ -39,29 +36,24 @@ public class PlayListImpl implements IPlayList {
 		return plsList.toArray(new String[plsList.size()]);
 	}
 
-	@Override
 	public void addPlayList(String name) throws RemoteException {
 		File pls = new File(mPlaylistLocation + name + ".pls");
 		try {
 			pls.createNewFile();
 		} catch (IOException e) {
-			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-					.getSimpleName() + ": " + e.getMessage(), "Mediaserver");
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+					"Mediaserver");
 		}
 	}
 
-	@Override
-	public void extendPlayList(String pls, String file) throws RemoteException,
-			PlayerException {
+	public void extendPlayList(String pls, String file) throws RemoteException, PlayerException {
 		try {
 			File plsF = new File(mPlaylistLocation + pls + ".pls");
-			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF,
-					true));
+			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF, true));
 			File fileF = new File(file);
 			if (!fileF.exists()) {
 				fileStream.close();
-				throw new PlayerException("the file '" + file
-						+ "' does not exist");
+				throw new PlayerException("the file '" + file + "' does not exist");
 			}
 			if (fileF.isDirectory()) {
 				for (File f : fileF.listFiles())
@@ -76,9 +68,7 @@ public class PlayListImpl implements IPlayList {
 		}
 	}
 
-	@Override
-	public String[] listContent(String pls) throws RemoteException,
-			PlayerException {
+	public String[] listContent(String pls) throws RemoteException, PlayerException {
 		File plsF = new File(mPlaylistLocation + pls + ".pls");
 		List<String> files = new ArrayList<String>();
 		try {
@@ -95,21 +85,15 @@ public class PlayListImpl implements IPlayList {
 		return files.toArray(new String[files.size()]);
 	}
 
-	@Override
 	public void removePlayList(String pls) throws RemoteException {
 		new File(mPlaylistLocation + pls + ".pls").delete();
 	}
 
-	@Override
-	public void renamePlayList(String oldPls, String newPls)
-			throws RemoteException {
-		new File(mPlaylistLocation + oldPls + ".pls").renameTo(new File(
-				mPlaylistLocation + newPls + ".pls"));
+	public void renamePlayList(String oldPls, String newPls) throws RemoteException {
+		new File(mPlaylistLocation + oldPls + ".pls").renameTo(new File(mPlaylistLocation + newPls + ".pls"));
 	}
 
-	@Override
-	public void removeItem(String pls, String item) throws RemoteException,
-			PlayerException {
+	public void removeItem(String pls, String item) throws RemoteException, PlayerException {
 		try {
 			File plsF = new File(mPlaylistLocation + pls + ".pls");
 			List<String> files = new ArrayList<String>();
@@ -120,8 +104,7 @@ public class PlayListImpl implements IPlayList {
 				if (!f.endsWith(item))
 					files.add(f);
 			reader.close();
-			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF,
-					false));
+			PrintStream fileStream = new PrintStream(new FileOutputStream(plsF, false));
 			for (String i : files)
 				fileStream.println(i);
 			fileStream.flush();
@@ -129,12 +112,11 @@ public class PlayListImpl implements IPlayList {
 		} catch (FileNotFoundException e) {
 			throw new PlayerException("Playlist '" + pls + "' does not exist");
 		} catch (IOException e) {
-			RemoteLogger.performLog(LogPriority.ERROR, e.getClass()
-					.getSimpleName() + ": " + e.getMessage(), "Mediaserver");
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
+					"Mediaserver");
 		}
 	}
 
-	@Override
 	public String getPlaylistFullpath(String pls) throws RemoteException {
 		return mPlaylistLocation + pls + ".pls";
 	}

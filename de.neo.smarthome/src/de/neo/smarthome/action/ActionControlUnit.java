@@ -8,8 +8,7 @@ import org.xml.sax.SAXException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.ICommandAction;
-import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.controlcenter.IControlCenter;
 
 public class ActionControlUnit extends AbstractControlUnit {
 
@@ -20,7 +19,7 @@ public class ActionControlUnit extends AbstractControlUnit {
 	private CommandAction mCommandAction;
 
 	@Override
-	public ICommandAction getControllObject() throws RemoteException {
+	public CommandAction getControllObject() throws RemoteException {
 		return mCommandAction;
 	}
 
@@ -32,23 +31,19 @@ public class ActionControlUnit extends AbstractControlUnit {
 	}
 
 	@Override
-	public boolean performEvent(Event event) throws RemoteException,
-			EventException {
+	public boolean performEvent(Event event) throws RemoteException, EventException {
 		try {
 			String action = event.getParameter("action");
 			if (action == null)
-				throw new EventException(
-						"Parameter action (start|stop) missing to execute command event!");
+				throw new EventException("Parameter action (start|stop) missing to execute command event!");
 			if (action.equalsIgnoreCase("start"))
 				mCommandAction.startAction();
 			else if (action.equalsIgnoreCase("stop"))
 				mCommandAction.stopAction();
 			else
-				throw new EventException(
-						"Unknown parameter value for action event! Excpected: start|stop");
+				throw new EventException("Unknown parameter value for action event! Excpected: start|stop");
 		} catch (IOException e) {
-			throw new EventException(e.getClass().getSimpleName() + ": "
-					+ e.getMessage());
+			throw new EventException(e.getClass().getSimpleName() + ": " + e.getMessage());
 		}
 		return true;
 	}

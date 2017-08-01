@@ -1,31 +1,21 @@
 package de.neo.smarthome.gpio;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IInternetSwitch;
-import de.neo.smarthome.api.IInternetSwitchListener;
 import de.neo.smarthome.api.IWebSwitch.State;
 import de.neo.smarthome.gpio.SerialReader.ISerialListener;
 
-public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
+public class InternetSwitch implements ISerialListener {
 
 	public static final String ROOT = "InternetSwitch";
 
 	public static final String FAMILY_REGEX = "[01]{5}";
 
-	/**
-	 * Listener for power switch change.
-	 */
-	private List<IInternetSwitchListener> mListeners = Collections
-			.synchronizedList(new ArrayList<IInternetSwitchListener>());
 	private GPIOSender mPower;
 	private String mType;
 	private String mFamilyCode;
@@ -35,7 +25,7 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 	private String mId;
 	private GPIOControlUnit mUnit;
 
-	public InternetSwitchImpl(GPIOSender power, GPIOControlUnit unit) {
+	public InternetSwitch(GPIOSender power, GPIOControlUnit unit) {
 		mPower = power;
 		mState = State.OFF;
 		mUnit = unit;
@@ -57,7 +47,6 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 
 	}
 
-	@Override
 	public void setState(final State state) throws RemoteException {
 		if (mState != state) {
 			mPower.setSwitchState(mFamilyCode, mSwitchNumber, state);
@@ -70,43 +59,20 @@ public class InternetSwitchImpl implements IInternetSwitch, ISerialListener {
 		}
 	}
 
-	@Override
 	public State getState() throws RemoteException {
 		return mState;
-	}
-
-	@Override
-	public void registerPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException {
-		if (!mListeners.contains(listener))
-			mListeners.add(listener);
-	}
-
-	@Override
-	public void unregisterPowerSwitchListener(IInternetSwitchListener listener) throws RemoteException {
-		mListeners.remove(listener);
 	}
 
 	private void informListener(State state) {
 		Map<String, String> parameterExchange = new HashMap<String, String>();
 		parameterExchange.put("@state", state.toString().toLowerCase());
 		mUnit.fireTrigger(parameterExchange, "@state=" + state.toString().toLowerCase());
-		List<IInternetSwitchListener> exceptionList = new ArrayList<IInternetSwitchListener>();
-		for (IInternetSwitchListener listener : mListeners) {
-			try {
-				listener.onPowerSwitchChange(mId, state);
-			} catch (RemoteException e) {
-				exceptionList.add(listener);
-			}
-		}
-		mListeners.removeAll(exceptionList);
 	}
 
-	@Override
 	public String getType() {
 		return mType;
 	}
 
-	@Override
 	public boolean isReadOnly() throws RemoteException {
 		return mReadOnly;
 	}

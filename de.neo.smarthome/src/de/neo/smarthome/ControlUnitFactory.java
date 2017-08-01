@@ -1,7 +1,7 @@
 package de.neo.smarthome;
 
 import de.neo.remote.rmi.RemoteAble;
-import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.controlcenter.IControlCenter;
 
 public interface ControlUnitFactory extends RemoteAble {
 

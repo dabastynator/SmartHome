@@ -8,10 +8,9 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebProxyBuilder;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.IInternetSwitch;
 import de.neo.smarthome.api.IWebSwitch;
+import de.neo.smarthome.controlcenter.IControlCenter;
+import de.neo.smarthome.controlcenter.IControllUnit;
 
 public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 
@@ -25,8 +24,8 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 		ArrayList<BeanSwitch> result = new ArrayList<>();
 		for (IControllUnit unit : mCenter.getControlUnits().values()) {
 			try {
-				if (unit.getControllObject() instanceof IInternetSwitch) {
-					IInternetSwitch switchObject = (IInternetSwitch) unit.getControllObject();
+				if (unit.getControllObject() instanceof InternetSwitch) {
+					InternetSwitch switchObject = (InternetSwitch) unit.getControllObject();
 					BeanSwitch webSwitch = new BeanSwitch();
 					webSwitch.merge(unit.getWebBean());
 					webSwitch.setID(unit.getID());
@@ -65,8 +64,8 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not read state value: " + state);
 		}
-		if (unit.getControllObject() instanceof IInternetSwitch) {
-			IInternetSwitch switchObject = (IInternetSwitch) unit.getControllObject();
+		if (unit.getControllObject() instanceof InternetSwitch) {
+			InternetSwitch switchObject = (InternetSwitch) unit.getControllObject();
 			switchObject.setState(switchState);
 			BeanSwitch webSwitch = new BeanSwitch();
 			webSwitch.merge(unit.getWebBean());
