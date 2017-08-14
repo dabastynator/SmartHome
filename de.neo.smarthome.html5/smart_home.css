@@ -1,0 +1,89 @@
+body {
+	background: black;
+	color: white;
+	font-family: 'Jura', sans-serif;
+	font-size: 120%;
+	height: 100%;
+	padding: 0px;
+}
+
+.card {
+	background: black;
+	border-radius: 2px;
+	padding: 0px;
+	/*box-shadow: 0px 0px 10px rgba(255,255,255,0.70);*/
+	border: 1px solid #444;
+	overflow: auto
+}
+
+.switch {
+	cursor:pointer;
+	padding: 7px;
+	margin: 8px;
+	float: left;
+	width: 120px;
+	text-align: center;
+}
+
+.on {
+	background: #222;
+	border: 2px solid #666;
+}
+
+.off {
+	background: black;
+	border: 2px solid #222;
+}
+
+.link {
+	cursor:pointer;
+}
+
+.container {
+	visibility: hidden;
+	position: fixed;
+	background: rgba(0, 0, 0, 0.7);
+	width: 100%;
+	height: 100%;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+}
+
+.headline {
+	font-weight: bold;
+}
+
+button, input{
+	background: black;
+	color: white;
+	font-family: 'Jura', sans-serif;
+	font-size: 100%;
+	margin: 3px;
+	padding: 5px;
+	border: 1px solid #444;
+}
+
+button{
+	width: 160px;
+	cursor:pointer;
+}
+
+.file{
+	padding: 5px;
+	cursor:pointer;
+	border-bottom: 1px solid #444;
+}
+
+.dir{
+	font-weight: bold;
+}
+
+.rotate {
+	-webkit-animation: rotation 1s infinite linear;
+}
+
+@-webkit-keyframes rotation {
+	from { -webkit-transform: rotate(0deg); }
+	to { -webkit-transform: rotate(359deg); }
+}

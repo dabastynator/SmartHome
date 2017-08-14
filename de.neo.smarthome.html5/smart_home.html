@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<header>
+	<meta charset="UTF-8">
+	<title>SmartHome console</title>
+	<script src="smart_home.js"></script>
+	<script src="utils.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Jura">
+	<link href="smart_home.css" rel="stylesheet">
+</header>
+
+<body onload="initialize()">
+
+<div id="north" class="card" align=right>
+	<table width=100%><tr>
+		<td width=90% align=center id="controlcenter">No controlcenter Ladida</td>
+		<td align=right><img width=48px style="margin: 7px" src="img/settings.png" class="link" onclick="initSettings();showDialog('settings');"/></td>
+	</tr></table>
+</div >
+
+<div id="south" class="card">No playing</div >
+
+<div id="east" class="card">No playlists</div>
+
+<div id="west" class="card">No switches</div>
+
+<div id="center" class="card">No files</div >
+
+<div id="settings" class="container">
+	<div id="content_settings" class="card">
+		<table style="margin: 7px">
+			<tr><td colspan="2" class="headline">Settings</td></tr>
+			<tr><td>Endpoint</td><td><input id="setting_endpoint"/></td></tr>
+			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
+			<tr><td colspan="2" align=right>	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+														<button type="button" onclick="hideDialog('settings')">Cancel</button></td></tr>
+		</table>
+	</div>
+</div>
+
+</body>
+</html> 
