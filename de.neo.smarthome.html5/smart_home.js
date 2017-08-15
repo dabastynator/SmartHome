@@ -3,6 +3,7 @@ var mEndpoint = '';
 var mToken = '';
 var mMediaCenter = '';
 var mPath = '';
+var mPlaylist = '';
 
 function initialize() {
 	readSetting();
@@ -62,6 +63,7 @@ function loop() {
 function refreshSwitches(){
 	if (mEndpoint != null && mEndpoint != ''){
 		var root = document.getElementById('west');
+		var east = document.getElementById('east');
 		var request = new XMLHttpRequest();
 		var url = mEndpoint + '/switch/list?token=' + mToken;
 		request.open("GET", url);
@@ -110,13 +112,53 @@ function mediaClick(id){
 	refreshPlaylist();
 }
 
-function refreshPlayer(){
-	var root = document.getElementById('south');
+function getPlaying(callback){
 	if (mMediaCenter != null && mMediaCenter != '' && mEndpoint != null && mEndpoint != ''){
-		root.innerHTML = 'TODO';
-	} else {
-		root.innerHTML = 'No player';
+		var url = mEndpoint + '/mediaserver/list?token=' + mToken;
+		var req = new XMLHttpRequest();  
+		req.open("GET", url);
+		req.addEventListener('load', function(event) {
+			var handled = false;
+			if (req.status >= 200 && req.status < 300) {
+				var response = JSON.parse(req.responseText);
+				if (response !== undefined && !response.error) {
+					if (response.length > 0 && response[0] !== undefined){
+						for (var i = 0; i < response.length; i++) {
+							var m = response[i];
+							if (m.id == mMediaCenter) {
+								callback(m.current_playing);
+								handled = true;
+							}
+						}
+					}
+				} else {
+					// Ignore error
+				}
+			} else if (req.status == 404 || req.status == 500) {
+				// Ignore error
+			}
+			if (!handled)
+				callback(null);
+		});	
+		req.timeout = 4000; // 4 seconds timeout
+		req.open("GET", url);
+		req.send();  
 	}
+}
+
+function refreshPlayer(){
+	getPlaying(function(playing){
+		var content = document.getElementById('player_content');
+		var console = document.getElementById('player_console');
+		var text = "";
+		if (playing != null){
+			text = '<table><tr><td>' + playing.artist + '</td></tr><tr><td>';
+			text += playing.title + '</td></tr></table>';
+		} else {
+			text = 'Nothing played';
+		}
+		content.innerHTML = text;
+	});
 }
 
 function refreshControlCenter(){
@@ -201,7 +243,100 @@ function refreshFiles(){
 	}
 }
 
-function refreshPlaylist(){
-
+function showMessage(title, msg){
+	var doc_title = document.getElementById("msg_title");
+	var doc_msg = document.getElementById("msg_content");
+	doc_title.innerHTML = title;
+	doc_msg.innerHTML = msg;
+	showDialog('message');
 }
 
+function plsClick(pls){
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/play_playlist?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&player=mplayer';
+		request.open("GET", url);
+		mPlaylist = pls;
+		request.addEventListener('load', function(event) {
+			if (request.status >= 200 && request.status < 300) {
+				var pls = JSON.parse(request.responseText);
+				showMessage(mPlaylist, 'Play playlist ' + mPlaylist);
+			}
+		});
+		request.send();
+	}
+}
+
+function refreshPlaylist(){
+	var root = document.getElementById('east');
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/playlists?token=' + mToken + '&id=' + mMediaCenter;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (request.status >= 200 && request.status < 300) {
+				var pls = JSON.parse(request.responseText);
+				var content = "";
+				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
+				for (var i = 0; i < pls.length; i++) {
+					var p = pls[i];
+					content += '<div onclick="plsClick(\'' + p.name + '\')" class="file">' + p.name + "</div>";
+				}
+				root.innerHTML = content;
+			} else {
+				root.innerHTML = 'No playlists';
+			}
+			align();
+		});
+		request.send();
+	} else {
+		root.innerHTML = 'No playlists';
+	}
+}
+
+function checkResult(request){
+	if (request.status >= 200 && request.status < 300) {
+		var pls = JSON.parse(request.responseText);
+		if (pls.success != null && pls.success == false){
+			if (pls.error != null)
+			showMessage("Error", pls.error.message);
+			return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function playerAction(action, parameter){
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/' + action + '?token=' + mToken + '&id=' + mMediaCenter + '&player=mplayer';
+		if (typeof parameter !== 'undefined') {
+			url = url + '&' + parameter;
+		}
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				refreshPlayer();
+			}
+		});
+		request.send();
+	}
+}
+
+function vol_up(){
+	getPlaying(function(playing){
+		if (playing != null){
+			playerAction('volume', 'volume=' + (playing.volume + 5));
+		}
+	});
+}
+
+function vol_down(){
+	getPlaying(function(playing){
+		if (playing != null){
+			playerAction('volume', 'volume=' + (playing.volume - 5));
+		}
+	});
+}

@@ -18,13 +18,25 @@
 	</tr></table>
 </div >
 
-<div id="south" class="card">No playing</div >
+<div id="south" class="card">
+	<div id="player_console" style="float: left">
+		<img class="player_btn" src="img/stop.png" onclick="playerAction('stop')"/>
+		<img class="player_btn" src="img/pause.png" onclick="playerAction('play_pause')"/>
+		<img class="player_btn" src="img/prev.png" onclick="playerAction('previous')"/>
+		<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
+		<img class="player_btn" src="img/vol_up.png" onclick="vol_up();"/>
+		<img class="player_btn" src="img/vol_down.png" onclick="vol_down();"/>
+	</div>
+	<div id="player_content" style="float: left">
+		Nothing played
+	</div>
+</div>
 
 <div id="east" class="card">No playlists</div>
 
 <div id="west" class="card">No switches</div>
 
-<div id="center" class="card">No files</div >
+<div id="center" class="card">No files</div>
 
 <div id="settings" class="container">
 	<div id="content_settings" class="card">
@@ -34,6 +46,16 @@
 			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
 			<tr><td colspan="2" align=right>	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 														<button type="button" onclick="hideDialog('settings')">Cancel</button></td></tr>
+		</table>
+	</div>
+</div>
+
+<div id="message" class="container">
+	<div id="content_message" class="card">
+		<table style="margin: 7px; width: 300px">
+			<tr><td class="headline" id="msg_title">Title</td></tr>
+			<tr><td id="msg_content">Message</td></tr>
+			<tr><td align=right>	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
 		</table>
 	</div>
 </div>

@@ -54,6 +54,12 @@ body {
 	font-weight: bold;
 }
 
+.player_btn{
+	padding: 2px;
+	width: 48px;
+	cursor:pointer;
+}
+
 button, input{
 	background: black;
 	color: white;
