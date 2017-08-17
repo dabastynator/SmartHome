@@ -76,13 +76,12 @@ button{
 }
 
 .file{
-	padding: 5px;
-	cursor:pointer;
+	padding: 2px;
 	border-bottom: 1px solid #444;
 }
 
 .dir{
-	font-weight: bold;
+	font-weight: bold;	
 }
 
 .rotate {

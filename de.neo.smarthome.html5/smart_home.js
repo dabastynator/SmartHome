@@ -150,13 +150,18 @@ function refreshPlayer(){
 	getPlaying(function(playing){
 		var content = document.getElementById('player_content');
 		var console = document.getElementById('player_console');
-		var text = "";
+		var text = "<table>";
 		if (playing != null){
-			text = '<table><tr><td>' + playing.artist + '</td></tr><tr><td>';
-			text += playing.title + '</td></tr></table>';
+			if (playing.artist != null)
+				text = '<tr><td>' + playing.artist + '</td></tr>';
+			if (playing.title != null)
+				text += '<tr><td>' + playing.title + '</td></tr>';
+			if (playing.artist == null && playing.title == null)
+				text += '<tr><td>' + playing.file + '</td></tr>';
 		} else {
-			text = 'Nothing played';
+			text += '<tr><td>Nothing played</td></tr>';
 		}
+		text += '</table>';
 		content.innerHTML = text;
 	});
 }
@@ -208,6 +213,23 @@ function directoryClick(dir){
 	refreshFiles();
 }
 
+function play(file){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		mFile = file;
+		if (mPath != '' && mPath != null)
+			file = mPath + '<->' + file; 
+		var url = mEndpoint + '/mediaserver/play_file?token=' + mToken + '&id=' + mMediaCenter + '&player=mplayer&file=' + file;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				showMessage(mFile, 'Start playing file');
+			}
+		});
+		request.send();
+	}
+}
+
 function refreshFiles(){
 	var root = document.getElementById('center');
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
@@ -219,17 +241,26 @@ function refreshFiles(){
 				var files = JSON.parse(request.responseText);
 				var content = "";
 				if (mPath != ''){
-					content = '<div onclick="directoryClick(\'<->\')" class="file dir"><img src="img/arrow.png" height="16px">' + mPath.replace(/<->/g, ' | ') + '</div>';
+					content = '<div onclick="directoryClick(\'<->\')" class="file dir link"><table width="100%"><tr>';
+					content += '<td><img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
+					content += '</tr></table></div>';
 				}
 				files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
 				for (var i = 0; i < files.length; i++) {
 					var f = files[i];
 					if (f.filetype == "Directory") {
-						content += '<div onclick="directoryClick(\'' + f.name + '\')" class="file dir">';
+						content += '<div class="file dir">';
 					} else {
-						content += '<div onclick="fileClick(\'' + f.name + '\')" class="file">';
+						content += '<div class="file">';
 					}
-					content += f.name + "</div>";
+					content += '<table width="100%"><tr>';
+					if (f.filetype == "Directory") {
+						content += '<td width="100%" class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
+					} else {
+						content += '<td width="100%" class="link" onclick="fileClick(\'' + f.name + '\')" >' + f.name + '</td>';
+					}
+					content += '<td align="right"><img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')"></td>';
+					content += '</tr></table></div>';
 				}
 				root.innerHTML = content;
 			} else {
