@@ -230,6 +230,49 @@ function play(file){
 	}
 }
 
+function extendPls(pls, file){
+	hideDialog('select_pls');
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/playlist_extend?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&item=' + file;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				showMessage('Playlist extended', 'Playlist <b>' + pls + '</b> was extended.');	
+			}
+		});
+		request.send();
+	}
+}
+
+function addFileToPls(file){
+	mFile = file;
+	if (mPath != null && mPath != '')
+		mFile = mPath + '<->' + file;
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/playlists?token=' + mToken + '&id=' + mMediaCenter;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var pls = JSON.parse(request.responseText);
+				var content = "";
+				var root = document.getElementById('select_pls_content');
+				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
+				for (var i = 0; i < pls.length; i++) {
+					var p = pls[i];
+					content += '<div onclick="extendPls(\'' + p.name + '\', \'' + mFile + '\')" class="file link">' + p.name + "</div>";
+				}
+				root.innerHTML = content;
+			} else {
+				root.innerHTML = 'No playlists';
+			}
+			showDialog('select_pls');
+		});
+		request.send();
+	}
+}
+
 function refreshFiles(){
 	var root = document.getElementById('center');
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
@@ -255,12 +298,14 @@ function refreshFiles(){
 					}
 					content += '<table width="100%"><tr>';
 					if (f.filetype == "Directory") {
-						content += '<td width="100%" class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
+						content += '<td width="90%" class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
 					} else {
-						content += '<td width="100%" class="link" onclick="fileClick(\'' + f.name + '\')" >' + f.name + '</td>';
+						content += '<td width="90%" class="link" onclick="fileClick(\'' + f.name + '\')" >' + f.name + '</td>';
 					}
-					content += '<td align="right"><img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')"></td>';
-					content += '</tr></table></div>';
+					content += '<td align="right" width="100px">';
+					content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
+					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(\'' + f.name + '\')">';
+					content += '</td></tr></table></div>';
 				}
 				root.innerHTML = content;
 			} else {
@@ -311,7 +356,7 @@ function refreshPlaylist(){
 				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
 				for (var i = 0; i < pls.length; i++) {
 					var p = pls[i];
-					content += '<div onclick="plsClick(\'' + p.name + '\')" class="file">' + p.name + "</div>";
+					content += '<div onclick="plsClick(\'' + p.name + '\')" class="file link">' + p.name + "</div>";
 				}
 				root.innerHTML = content;
 			} else {
@@ -328,7 +373,7 @@ function refreshPlaylist(){
 function checkResult(request){
 	if (request.status >= 200 && request.status < 300) {
 		var pls = JSON.parse(request.responseText);
-		if (pls.success != null && pls.success == false){
+		if (pls != null && pls.success != null && pls.success == false){
 			if (pls.error != null)
 			showMessage("Error", pls.error.message);
 			return false;

@@ -11,6 +11,7 @@
 
 <body onload="initialize()">
 
+<!-- Main border layout content -->
 <div id="north" class="card" align=right>
 	<table width=100%><tr>
 		<td width=90% align=center id="controlcenter">No controlcenter Ladida</td>
@@ -38,6 +39,7 @@
 
 <div id="center" class="card">No files</div>
 
+<!-- List of all Dialogs -->
 <div id="settings" class="container">
 	<div id="content_settings" class="card">
 		<table style="margin: 7px">
@@ -52,10 +54,20 @@
 
 <div id="message" class="container">
 	<div id="content_message" class="card">
-		<table style="margin: 7px; width: 300px">
+		<table style="margin: 7px; width: 400px">
 			<tr><td class="headline" id="msg_title">Title</td></tr>
 			<tr><td id="msg_content">Message</td></tr>
 			<tr><td align=right>	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
+		</table>
+	</div>
+</div>
+
+<div id="select_pls" class="container">
+	<div id="content_select_pls" class="card">
+		<table style="margin: 7px; width: 500px">
+			<tr><td class="headline" id="select_pls_title">Select Playlist</td></tr>
+			<tr><td><div id="select_pls_content" style="height: 300px; overflow: auto">Content</div></td></tr>
+			<tr><td align=right>	<button type="button" onclick="hideDialog('select_pls');">Cancel</button></td></tr>
 		</table>
 	</div>
 </div>
