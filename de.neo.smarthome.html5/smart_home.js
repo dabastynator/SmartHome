@@ -231,7 +231,7 @@ function play(file){
 }
 
 function extendPls(pls, file){
-	hideDialog('select_pls');
+	hideDialog('playlist');
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
 		var request = new XMLHttpRequest();
 		var url = mEndpoint + '/mediaserver/playlist_extend?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&item=' + file;
@@ -257,7 +257,9 @@ function addFileToPls(file){
 			if (checkResult(request)) {
 				var pls = JSON.parse(request.responseText);
 				var content = "";
-				var root = document.getElementById('select_pls_content');
+				var root = document.getElementById('playlist_content');
+				var title = document.getElementById('playlist_title');
+				title.innerHTML = "Select playlist";
 				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
 				for (var i = 0; i < pls.length; i++) {
 					var p = pls[i];
@@ -267,7 +269,7 @@ function addFileToPls(file){
 			} else {
 				root.innerHTML = 'No playlists';
 			}
-			showDialog('select_pls');
+			showDialog('playlist');
 		});
 		request.send();
 	}
@@ -343,6 +345,34 @@ function plsClick(pls){
 	}
 }
 
+function showPlsContent(pls){
+	mPls = pls;
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/playlist_content?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var pls = JSON.parse(request.responseText);
+				var content = "";
+				var root = document.getElementById('playlist_content');
+				var title = document.getElementById('playlist_title');
+				title.innerHTML = "Playlist content";
+				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
+				for (var i = 0; i < pls.length; i++) {
+					var p = pls[i];
+					content += '<div class="file">' + p.name + "</div>";
+				}
+				root.innerHTML = content;
+			} else {
+				root.innerHTML = 'No items';
+			}
+			showDialog('playlist');
+		});
+		request.send();
+	}
+}
+
 function refreshPlaylist(){
 	var root = document.getElementById('east');
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
@@ -356,7 +386,12 @@ function refreshPlaylist(){
 				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
 				for (var i = 0; i < pls.length; i++) {
 					var p = pls[i];
-					content += '<div onclick="plsClick(\'' + p.name + '\')" class="file link">' + p.name + "</div>";
+					content += '<div class="file"><table width="100%"><tr>';
+					content += '<td width="90%" onclick="plsClick(\'' + p.name + '\')" class="link">' + p.name + "</td>";
+					content += '<td align="right">';
+					//content += '<img src="img/play.png" height="32px"/ class="link" onclick="plsClick(\'' + p.name + '\')">';
+					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
+					content += '</td></tr></table></div>';
 				}
 				root.innerHTML = content;
 			} else {
