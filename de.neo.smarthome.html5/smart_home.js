@@ -155,18 +155,21 @@ function refreshPlayer(){
 	getPlaying(function(playing){
 		var content = document.getElementById('player_content');
 		var console = document.getElementById('player_console');
-		var text = "<table>";
+		var text = '';
 		if (playing != null){
+			if (playing.path != null && playing.path != '')
+				text = '<img class="player_btn" src="img/pls.png" onclick="addFileToPls(null, \'' + playing.path + '\')"/>';
+			text += '<div style="float: right">';
 			if (playing.artist != null && playing.artist != '')
-				text += '<tr><td>' + playing.artist + '</td></tr>';
+				text += playing.artist + '<br/>';
 			if (playing.title != null && playing.title != '')
-				text += '<tr><td>' + playing.title + '</td></tr>';
+				text += playing.title + '<br/>';
 			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
-				text += '<tr><td>' + playing.file + '</td></tr>';
+				text += playing.file + '<br/>';
+			text += '</div>';
 		} else {
-			text += '<tr><td>Nothing played</td></tr>';
+			text += 'Nothing played';
 		}
-		text += '</table>';
 		content.innerHTML = text;
 	});
 }
@@ -259,10 +262,10 @@ function extendPls(pls, file){
 	}
 }
 
-function addFileToPls(file){
+function addFileToPls(path, file){
 	mFile = file;
-	if (mPath != null && mPath != '')
-		mFile = mPath + '<->' + file;
+	if (path != null && path != '')
+		mFile = path + '<->' + file;
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
 		var request = new XMLHttpRequest();
 		var url = mEndpoint + '/mediaserver/playlists?token=' + mToken + '&id=' + mMediaCenter;
@@ -320,7 +323,7 @@ function refreshFiles(){
 					}
 					content += '<td align="right" width="100px">';
 					content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
-					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(\'' + f.name + '\')">';
+					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
 					content += '</td></tr></table></div>';
 				}
 				root.innerHTML = content;
@@ -480,5 +483,49 @@ function getVolume(){
 function setVolume(){
 	var input = document.getElementById('volume_input');
 	playerAction('volume', 'volume=' + (input.value));
+}
+
+function doTrigger(trigger){
+	mTrigger = trigger;
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/dotrigger?token=' + mToken + '&trigger=' + trigger;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + rules.triggered_rules + ' events.' );
+			}
+		});
+		request.send();
+	}
+}
+
+function showRules(){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/rules?token=' + mToken;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				var root = document.getElementById('rules_content');
+				var content = "";
+				rules.sort(function(a, b){return a.trigger.localeCompare(b.trigger);});
+				for (var i = 0; i < rules.length; i++) {
+					var rule = rules[i];
+					content += '<div class="file"><table width="100%"><tr>';
+					content += '<td width="90%">' + rule.trigger + "</td>";
+					content += '<td align="right">';
+					content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
+					//content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
+					content += '</td></tr></table></div>';
+				}
+				root.innerHTML = content;
+			}
+			showDialog('rules');
+		});
+		request.send();
+	}
 }
 

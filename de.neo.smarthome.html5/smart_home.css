@@ -52,6 +52,9 @@ body {
 
 .headline {
 	font-weight: bold;
+	color: #aaa;
+	font-size: 120%;
+	padding-bottom: 10px;
 }
 
 .player_btn{

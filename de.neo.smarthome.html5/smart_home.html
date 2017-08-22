@@ -15,7 +15,10 @@
 <div id="north" class="card" align=right>
 	<table width=100%><tr>
 		<td width=90% align=center id="controlcenter">No controlcenter Ladida</td>
-		<td align=right><img width=48px style="margin: 7px" src="img/settings.png" class="link" onclick="initSettings();showDialog('settings');"/></td>
+		<td align=right>
+			<img width=48px style="margin: 7px" src="img/code.png" class="link" onclick="showRules();"/>
+			<img width=48px style="margin: 7px" src="img/settings.png" class="link" onclick="initSettings();showDialog('settings');"/>
+		</td>
 	</tr></table>
 </div >
 
@@ -69,6 +72,16 @@
 				<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
 			</div></td></tr>
 			<tr><td align=right>	<button type="button" onclick="hideDialog('volume');">OK</button></td></tr>
+		</table>
+	</div>
+</div>
+
+<div id="rules" class="container">
+	<div id="content_rules" class="card">
+		<table style="margin: 7px; width: 500px">
+			<tr><td class="headline" id="rules_title">Rules</td></tr>
+			<tr><td><div id="rules_content" style="height: 300px; overflow: auto">Content</div></td></tr>
+			<tr><td align=right>	<button type="button" onclick="hideDialog('rules');">OK</button></td></tr>
 		</table>
 	</div>
 </div>
