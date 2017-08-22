@@ -25,8 +25,7 @@
 		<img class="player_btn" src="img/pause.png" onclick="playerAction('play_pause')"/>
 		<img class="player_btn" src="img/prev.png" onclick="playerAction('previous')"/>
 		<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
-		<img class="player_btn" src="img/vol_up.png" onclick="vol_up();"/>
-		<img class="player_btn" src="img/vol_down.png" onclick="vol_down();"/>
+		<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()"/>
 	</div>
 	<div id="player_content" style="float: left">
 		Nothing played
@@ -52,22 +51,34 @@
 	</div>
 </div>
 
+<div id="playlist" class="container">
+	<div id="content_playlist" class="card">
+		<table style="margin: 7px; width: 500px">
+			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
+			<tr><td><div id="playlist_content" style="height: 300px; overflow: auto">Content</div></td></tr>
+			<tr><td align=right>	<button type="button" onclick="hideDialog('playlist');">OK</button></td></tr>
+		</table>
+	</div>
+</div>
+
+<div id="volume" class="container">
+	<div id="content_volume" class="card">
+		<table style="margin: 7px">
+			<tr><td class="headline" id="volume_title">Volume</td></tr>
+			<tr><td><div id="volume_content">
+				<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
+			</div></td></tr>
+			<tr><td align=right>	<button type="button" onclick="hideDialog('volume');">OK</button></td></tr>
+		</table>
+	</div>
+</div>
+
 <div id="message" class="container">
 	<div id="content_message" class="card">
 		<table style="margin: 7px; width: 400px">
 			<tr><td class="headline" id="msg_title">Title</td></tr>
 			<tr><td id="msg_content">Message</td></tr>
 			<tr><td align=right>	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
-		</table>
-	</div>
-</div>
-
-<div id="playlist" class="container">
-	<div id="content_playlist" class="card">
-		<table style="margin: 7px; width: 500px">
-			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
-			<tr><td><div id="playlist_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td align=right>	<button type="button" onclick="hideDialog('playlist');">Cancel</button></td></tr>
 		</table>
 	</div>
 </div>

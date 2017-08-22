@@ -11,6 +11,11 @@ function initialize() {
 	align();
 	window.addEventListener('resize', align);
 
+
+	var volume_input = document.getElementById('volume_input');
+	volume_input.addEventListener('input', setVolume);
+
+
 	loop();
 	refreshControlCenter();
 	refreshFiles();
@@ -152,11 +157,11 @@ function refreshPlayer(){
 		var console = document.getElementById('player_console');
 		var text = "<table>";
 		if (playing != null){
-			if (playing.artist != null)
-				text = '<tr><td>' + playing.artist + '</td></tr>';
-			if (playing.title != null)
+			if (playing.artist != null && playing.artist != '')
+				text += '<tr><td>' + playing.artist + '</td></tr>';
+			if (playing.title != null && playing.title != '')
 				text += '<tr><td>' + playing.title + '</td></tr>';
-			if (playing.artist == null && playing.title == null)
+			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
 				text += '<tr><td>' + playing.file + '</td></tr>';
 		} else {
 			text += '<tr><td>Nothing played</td></tr>';
@@ -173,6 +178,7 @@ function refreshControlCenter(){
 		var url = mEndpoint + '/mediaserver/list?token=' + mToken;
 		request.open("GET", url);
 		request.addEventListener('load', function(event) {
+			title = 'Smart Home Console';
 			if (request.status >= 200 && request.status < 300) {
 				var media = JSON.parse(request.responseText);
 				media.sort(function(a, b){return a.name.localeCompare(b.name)});
@@ -181,6 +187,7 @@ function refreshControlCenter(){
 					var m = media[i];
 					if (m.id == mMediaCenter) {
 						content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
+						title = m.name + ' - Smart Home Console';
 					} else {
 						content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
 					}
@@ -192,6 +199,7 @@ function refreshControlCenter(){
 			} else {
 				root.innerHTML = 'No mediaserver';
 			}
+			document.title = title;
 			align();
 		});
 		request.send();
@@ -215,10 +223,16 @@ function directoryClick(dir){
 
 function play(file){
 	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
 		mFile = file;
 		if (mPath != '' && mPath != null)
 			file = mPath + '<->' + file; 
+		playPath(file);
+	}
+}
+
+function playPath(file){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
 		var url = mEndpoint + '/mediaserver/play_file?token=' + mToken + '&id=' + mMediaCenter + '&player=mplayer&file=' + file;
 		request.open("GET", url);
 		request.addEventListener('load', function(event) {
@@ -302,7 +316,7 @@ function refreshFiles(){
 					if (f.filetype == "Directory") {
 						content += '<td width="90%" class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
 					} else {
-						content += '<td width="90%" class="link" onclick="fileClick(\'' + f.name + '\')" >' + f.name + '</td>';
+						content += '<td width="90%" class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
 					}
 					content += '<td align="right" width="100px">';
 					content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
@@ -345,6 +359,21 @@ function plsClick(pls){
 	}
 }
 
+function deletePlsItem(pls, item){
+	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
+		mPls = pls;
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/mediaserver/playlist_delete_item?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&item=' + item;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				showPlsContent(mPls);
+			}
+		});
+		request.send();
+	}
+}
+
 function showPlsContent(pls){
 	mPls = pls;
 	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
@@ -358,10 +387,13 @@ function showPlsContent(pls){
 				var root = document.getElementById('playlist_content');
 				var title = document.getElementById('playlist_title');
 				title.innerHTML = "Playlist content";
-				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
 				for (var i = 0; i < pls.length; i++) {
 					var p = pls[i];
-					content += '<div class="file">' + p.name + "</div>";
+					content += '<div class="file"><table width="100%"><tr>';
+					content += '<td width="90%" onclick="mFile=\'' + p.name + '\';playPath(\'' + p.path + '\')" class="link">' + p.name + "</td>";
+					content += '<td align="right">';
+					content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
+					content += '</td></tr></table></div>';
 				}
 				root.innerHTML = content;
 			} else {
@@ -436,18 +468,17 @@ function playerAction(action, parameter){
 	}
 }
 
-function vol_up(){
+function getVolume(){
 	getPlaying(function(playing){
 		if (playing != null){
-			playerAction('volume', 'volume=' + (playing.volume + 5));
+			var input = document.getElementById('volume_input');
+			input.value = playing.volume;
 		}
 	});
 }
 
-function vol_down(){
-	getPlaying(function(playing){
-		if (playing != null){
-			playerAction('volume', 'volume=' + (playing.volume - 5));
-		}
-	});
+function setVolume(){
+	var input = document.getElementById('volume_input');
+	playerAction('volume', 'volume=' + (input.value));
 }
+
