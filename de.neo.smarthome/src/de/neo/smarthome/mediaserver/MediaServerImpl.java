@@ -57,17 +57,11 @@ public class MediaServerImpl {
 				throw new SAXException(attribute + " missing for mediaserver");
 		String browseLocation = element.getAttribute("location");
 		String playlistLocation = element.getAttribute("playlistLocation");
-		boolean thumbnailWorker = true;
-		if (element.hasAttribute("thumbnailWorker")) {
-			String worker = element.getAttribute("thumbnailWorker");
-			thumbnailWorker = worker.equals("true") || worker.equals("1");
-		}
 
 		if (!new File(browseLocation).exists())
 			throw new IOException("Browser location does not exist: " + browseLocation);
 		if (!new File(playlistLocation).exists())
 			throw new IOException("Playlist location does not exist: " + playlistLocation);
-		ThumbnailHandler.init(playlistLocation, thumbnailWorker);
 		mTotem = new TotemPlayer();
 		mMplayer = new MPlayer(playlistLocation);
 		mBrowserLocation = browseLocation;

@@ -23,14 +23,6 @@ import de.neo.smarthome.api.Trigger;
 public interface IControlCenter {
 
 	/**
-	 * Get array of all unit-ids.
-	 * 
-	 * @return ids
-	 * @throws RemoteException
-	 */
-	public String[] getControlUnitIDs() throws RemoteException;
-
-	/**
 	 * Add new remote control unit.
 	 * 
 	 * @param controlUnit

@@ -163,11 +163,6 @@ public class ControlCenterImpl extends Thread implements IControlCenter {
 	}
 
 	@Override
-	public String[] getControlUnitIDs() {
-		return mControlUnits.keySet().toArray(new String[mControlUnits.size()]);
-	}
-
-	@Override
 	public IControllUnit getControlUnit(String id) {
 		return mControlUnits.get(id);
 	}
