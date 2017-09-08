@@ -501,21 +501,64 @@ function doTrigger(trigger){
 	}
 }
 
+function applyTrigger(){
+}
+
+function showTrigger(index){
+	var trigger = mRules[index];
+	title = document.getElementById('trigger_title');
+	content = document.getElementById('trigger_content');
+	id = document.getElementById('trigger_id');
+	infos = document.getElementById('trigger_infos');
+	
+	title.innerHTML = 'Edit trigger';
+	id.value = trigger.trigger;
+	infoText = '';
+	for (var i = 0; i < trigger.information.length; i++)
+		infoText += trigger.information[i] + ', ';
+	infos.value = infoText;
+
+	contentText = '<table width="100%">';
+	for (var i = 0; i < trigger.events.length; i++){
+		var event = trigger.events[i];
+		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id + '</td></tr>';
+		condition = '';
+		if (event.condition != null)
+			condition = event.condition;
+		contentText += '<tr><td style="width: 195px">Condition</td><td><input class="fill" value="' + condition + '"/></td></tr>';
+		parameter = '';
+		for (var property in event.parameter) {
+			if (event.parameter.hasOwnProperty(property)) {
+				parameter += property + '=\'' + event.parameter[property] + '\', ';
+			}
+		}
+		contentText += '<tr><td>Parameter</td><td><input class="fill" value="' + parameter + '"/></td></tr>';
+
+	}
+	contentText += '</table>';
+	content.innerHTML = contentText;
+
+	showDialog('trigger');
+}
+
 function showRules(){
+	var root = document.getElementById('rules_content');
+	showDialog('rules');
+	root.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
 	if (mEndpoint != null && mEndpoint != ''){
 		var request = new XMLHttpRequest();
 		var url = mEndpoint + '/controlcenter/rules?token=' + mToken;
 		request.open("GET", url);
 		request.addEventListener('load', function(event) {
 			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
+				mRules = JSON.parse(request.responseText);
 				var root = document.getElementById('rules_content');
 				var content = "";
-				rules.sort(function(a, b){return a.trigger.localeCompare(b.trigger);});
-				for (var i = 0; i < rules.length; i++) {
-					var rule = rules[i];
+				mRules.sort(function(a, b){return a.trigger.localeCompare(b.trigger);});
+				for (var i = 0; i < mRules.length; i++) {
+					var rule = mRules[i];
 					content += '<div class="file"><table width="100%"><tr>';
-					content += '<td width="90%">' + rule.trigger + "</td>";
+					content += '<td width="90%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
 					content += '<td align="right">';
 					content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
 					//content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
@@ -523,7 +566,6 @@ function showRules(){
 				}
 				root.innerHTML = content;
 			}
-			showDialog('rules');
 		});
 		request.send();
 	}

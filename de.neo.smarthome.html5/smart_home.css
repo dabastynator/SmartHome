@@ -91,7 +91,17 @@ button{
 	-webkit-animation: rotation 1s infinite linear;
 }
 
+.highlight {
+	font-weight: bold;
+	color: #aaa;
+	border-bottom: 1px solid #aaa;
+}
+
 @-webkit-keyframes rotation {
 	from { -webkit-transform: rotate(0deg); }
 	to { -webkit-transform: rotate(359deg); }
+}
+
+.fill{
+	width: 95%;
 }

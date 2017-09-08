@@ -86,6 +86,21 @@
 	</div>
 </div>
 
+<div id="trigger" class="container">
+	<div id="content_trigger" class="card">
+		<table style="margin: 7px; width: 600px">
+			<tr><td colspan="2" class="headline" id="trigger_title">Trigger</td></tr>
+			<tr><td style="width: 200px">ID</td><td><input class="fill" id="trigger_id"/></td></tr>
+			<tr><td>Information</td><td><input class="fill" id="trigger_infos"/></td></tr>
+			<tr><td colspan="2"><div id="trigger_content" style="height: 200px; overflow: auto">Content</div></td></tr>
+			<tr><td colspan="2" align=right>
+				<button type="button" onclick="applyTrigger();hideDialog('trigger');">OK</button>
+				<button type="button" onclick="hideDialog('trigger');">Cancel</button>
+			</td></tr>
+		</table>
+	</div>
+</div>
+
 <div id="message" class="container">
 	<div id="content_message" class="card">
 		<table style="margin: 7px; width: 400px">
