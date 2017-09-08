@@ -57,7 +57,7 @@ public class XMLDao<T> implements Dao<T> {
 			mName = c.getSimpleName();
 
 		for (Method m : c.getDeclaredMethods()) {
-			if (m.getAnnotation(OnLoad.class) != null && m.getParameterCount() == 0)
+			if (m.getAnnotation(OnLoad.class) != null && m.getParameterTypes().length == 0)
 				mOnCreateMethod = m;
 		}
 
