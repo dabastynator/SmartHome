@@ -1,23 +1,18 @@
 package de.neo.smarthome.rccolor;
 
+import de.neo.persist.annotations.Domain;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.controlcenter.IControlCenter;
+import de.neo.smarthome.api.IWebLEDStrip.LEDMode;
+import de.neo.smarthome.gpio.GPIOSender;
 
+@Domain(name = "ColorSetter")
 public class RCColorControlUnit extends AbstractControlUnit {
 
-	private RCColor mColorUnit;
+	private int mCurrentColor;
 
-	public RCColorControlUnit(IControlCenter center) {
-		super(center);
-		mColorUnit = new RCColor();
-	}
-
-	@Override
-	public RCColor getControllObject() throws RemoteException {
-		return mColorUnit;
-	}
+	private GPIOSender mSender = GPIOSender.getInstance();
 
 	@Override
 	public boolean performEvent(Event event) throws RemoteException, EventException {
@@ -34,9 +29,32 @@ public class RCColorControlUnit extends AbstractControlUnit {
 			throw new EventException("Cannot parse color code or duration");
 		}
 		if (duration == 0)
-			mColorUnit.setColor(color);
+			setColor(color);
 		else
-			mColorUnit.setColor(color, duration);
+			setColor(color, duration);
 		return true;
+	}
+
+	public void setColor(int color) {
+		mCurrentColor = color;
+		mSender.setColor(mCurrentColor);
+	}
+
+	public void setColor(int color, int duration) {
+		mSender.setColor(color);
+		try {
+			Thread.sleep(duration);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		mSender.setColor(mCurrentColor);
+	}
+
+	public int getColor() {
+		return mCurrentColor;
+	}
+
+	public void setMode(LEDMode mode) {
+		mSender.setMode(mode);
 	}
 }

@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="lib/jdom-2.0.5.zip"/>
-	<classpathentry kind="lib" path="lib/java-json.jar"/>
 	<classpathentry kind="lib" path="lib/mp3agic-0.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/jid3lib-0.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/java-json.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/de.neo.remote"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/de.neo.persist"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

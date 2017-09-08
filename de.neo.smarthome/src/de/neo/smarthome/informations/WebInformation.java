@@ -1,30 +1,25 @@
 package de.neo.smarthome.informations;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.Dao;
+import de.neo.persist.DaoException;
+import de.neo.persist.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IWebInformationUnit;
-import de.neo.smarthome.informations.InformationWeather.InformationWeatherFactory;
 
 public class WebInformation implements IWebInformationUnit {
 
-	private Map<String, InformationUnit> mInformations;
-	private Map<String, IInformationFactory> mFactories;
+	private static final Class<?>[] InformationClasses = new Class<?>[] { InformationTime.class,
+			InformationWeather.class };
+
+	private Map<String, InformationUnit> mInformations = new HashMap<>();
 
 	public WebInformation() {
-		mInformations = new HashMap<>();
-		mFactories = new HashMap<>();
-		mFactories.put(InformationWeather.Key, new InformationWeatherFactory());
 		registerInformation(new InformationTime());
 	}
 
@@ -54,20 +49,13 @@ public class WebInformation implements IWebInformationUnit {
 		return information.getInformationEntry();
 	}
 
-	interface IInformationFactory {
-		public String getKey();
-
-		public InformationUnit createInformation();
-	}
-
-	public void initialize(Document doc) throws SAXException, IOException {
-		for (IInformationFactory factory : mFactories.values()) {
-			NodeList nodeList = doc.getElementsByTagName(factory.getKey());
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Element element = (Element) nodeList.item(i);
-				InformationUnit info = factory.createInformation();
-				info.initialize(element);
-				registerInformation(info);
+	public void initialize() throws DaoException {
+		for (Class<?> infoClass : InformationClasses) {
+			Dao<InformationUnit> dao = DaoFactory.getInstance().getDao(infoClass);
+			if (dao != null) {
+				for (InformationUnit info : dao.loadAll()) {
+					registerInformation(info);
+				}
 			}
 		}
 	}

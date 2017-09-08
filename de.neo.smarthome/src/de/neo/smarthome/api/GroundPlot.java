@@ -3,6 +3,10 @@ package de.neo.smarthome.api;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.Id;
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.web.WebField;
 
 /**
@@ -10,6 +14,7 @@ import de.neo.remote.web.WebField;
  * 
  * @author sebastian
  */
+@Domain
 public class GroundPlot implements Serializable {
 
 	/**
@@ -17,32 +22,22 @@ public class GroundPlot implements Serializable {
 	 */
 	private static final long serialVersionUID = -7902771836935978638L;
 
+	@Id
+	private long mId;
+
 	/**
 	 * List of walls of the ground plot
 	 */
 	@WebField(name = "walls", genericClass = Wall.class)
-	public ArrayList<Wall> walls;
-
-	/**
-	 * List of features of the ground plot
-	 */
-	@WebField(name = "features", genericClass = Feature.class)
-	public ArrayList<Feature> features;
-
-	/**
-	 * The ground plot is a bean that holds information about the ground plot.
-	 * The information is in the list of walls.
-	 */
-	public GroundPlot() {
-		walls = new ArrayList<GroundPlot.Wall>();
-		features = new ArrayList<GroundPlot.Feature>();
-	}
+	@OneToMany(domainClass = Wall.class, name = "Wall")
+	public ArrayList<Wall> mWalls = new ArrayList<>();
 
 	/**
 	 * The wall contains all information about one wall of the ground plot.
 	 * 
 	 * @author sebastian
 	 */
+	@Domain
 	public static class Wall implements Serializable {
 
 		/**
@@ -50,15 +45,15 @@ public class GroundPlot implements Serializable {
 		 */
 		private static final long serialVersionUID = 4963248372236235849L;
 
+		@Id
+		private long mId;
+
 		/**
 		 * all points of the wall
 		 */
 		@WebField(name = "points", genericClass = Point.class)
-		public ArrayList<Point> points;
-
-		public Wall() {
-			points = new ArrayList<Point>();
-		}
+		@OneToMany(domainClass = Point.class, name = "Point")
+		public ArrayList<Point> mPoints = new ArrayList<>();
 
 	}
 
@@ -67,6 +62,7 @@ public class GroundPlot implements Serializable {
 	 * 
 	 * @author sebastian
 	 */
+	@Domain
 	public static class Point implements Serializable {
 
 		/**
@@ -74,30 +70,18 @@ public class GroundPlot implements Serializable {
 		 */
 		private static final long serialVersionUID = 1045224009502795464L;
 
+		@Id
+		private long mId;
+
 		@WebField(name = "x")
-		public float x;
+		@Persist(name = "x")
+		public float mX;
 		@WebField(name = "y")
-		public float y;
+		@Persist(name = "y")
+		public float mY;
 		@WebField(name = "z")
-		public float z;
-
-	}
-
-	/**
-	 * The feature defines one feature in the ground plot.
-	 * 
-	 * @author sebastian
-	 */
-	public static class Feature implements Serializable {
-
-		/**
-		 * Generated uid
-		 */
-		private static final long serialVersionUID = 1529625875832161486L;
-
-		// properties of the feature
-		public float x, y, z, az;
-		public String type, extra;
+		@Persist(name = "z")
+		public float mZ;
 
 	}
 

@@ -8,7 +8,9 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebProxyBuilder;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
+import de.neo.smarthome.SmartHome.ControlUnitFactory;
 import de.neo.smarthome.api.IWebSwitch;
+import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.IControlCenter;
 import de.neo.smarthome.controlcenter.IControllUnit;
 
@@ -24,14 +26,14 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 		ArrayList<BeanSwitch> result = new ArrayList<>();
 		for (IControllUnit unit : mCenter.getControlUnits().values()) {
 			try {
-				if (unit.getControllObject() instanceof InternetSwitch) {
-					InternetSwitch switchObject = (InternetSwitch) unit.getControllObject();
+				if (unit instanceof GPIOControlUnit) {
+					GPIOControlUnit switchUnit = (GPIOControlUnit) unit;
 					BeanSwitch webSwitch = new BeanSwitch();
 					webSwitch.merge(unit.getWebBean());
 					webSwitch.setID(unit.getID());
 					webSwitch.setName(unit.getName());
-					webSwitch.setState(switchObject.getState());
-					webSwitch.setType(switchObject.getType());
+					webSwitch.setState(switchUnit.getState());
+					webSwitch.setType(switchUnit.getDescription());
 					result.add(webSwitch);
 				}
 			} catch (RemoteException e) {
@@ -64,15 +66,15 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not read state value: " + state);
 		}
-		if (unit.getControllObject() instanceof InternetSwitch) {
-			InternetSwitch switchObject = (InternetSwitch) unit.getControllObject();
-			switchObject.setState(switchState);
+		if (unit instanceof GPIOControlUnit) {
+			GPIOControlUnit switchUnit = (GPIOControlUnit) unit;
+			switchUnit.setState(switchState);
 			BeanSwitch webSwitch = new BeanSwitch();
 			webSwitch.merge(unit.getWebBean());
 			webSwitch.setID(unit.getID());
 			webSwitch.setName(unit.getName());
-			webSwitch.setState(switchObject.getState());
-			webSwitch.setType(switchObject.getType());
+			webSwitch.setState(switchUnit.getState());
+			webSwitch.setType(switchUnit.getDescription());
 			return webSwitch;
 		}
 		return null;
@@ -83,4 +85,17 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 		return "switch";
 	}
 
+	public static class SwitchFactory implements ControlUnitFactory {
+
+		@Override
+		public Class<?> getUnitClass() {
+			return GPIOControlUnit.class;
+		}
+
+		@Override
+		public AbstractUnitHandler createUnitHandler(ControlCenter center) {
+			return new WebSwitchImpl(center);
+		}
+
+	}
 }

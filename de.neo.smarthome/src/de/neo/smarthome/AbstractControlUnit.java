@@ -1,31 +1,40 @@
 package de.neo.smarthome;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.Trigger;
+import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.IControlCenter;
-import de.neo.smarthome.controlcenter.IControllUnit;
 import de.neo.smarthome.controlcenter.IControlCenter.BeanWeb;
+import de.neo.smarthome.controlcenter.IControllUnit;
 
 public abstract class AbstractControlUnit implements IControllUnit {
 
+	@Persist(name = "name")
 	protected String mName;
+
+	@Persist(name = "type")
 	protected String mDescription;
-	protected float[] mPosition;
+
+	@Persist
+	protected float x, y, z;
+
+	@Persist(name = "id")
 	protected String mID;
+
+	@OneToMany(domainClass = Trigger.class, name = "Trigger")
 	protected List<Trigger> mTrigger = new ArrayList<Trigger>();
+
 	private IControlCenter mCenter;
 
-	public AbstractControlUnit(IControlCenter center) {
+	@Override
+	public void setControlCenter(ControlCenter center) {
 		mCenter = center;
 	}
 
@@ -41,34 +50,12 @@ public abstract class AbstractControlUnit implements IControllUnit {
 
 	@Override
 	public float[] getPosition() throws RemoteException {
-		return mPosition;
+		return new float[] { x, y, z };
 	}
 
 	@Override
 	public String getID() throws RemoteException {
 		return mID;
-	}
-
-	public void initialize(Element element) throws SAXException, IOException {
-		for (String attribute : new String[] { "id", "name", "type", "x", "y", "z" })
-			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
-		mID = element.getAttribute("id");
-		mName = element.getAttribute("name");
-		mDescription = element.getAttribute("type");
-		mPosition = new float[] { Float.parseFloat(element.getAttribute("x")),
-				Float.parseFloat(element.getAttribute("y")), Float.parseFloat(element.getAttribute("z")) };
-		NodeList childNodes = element.getChildNodes();
-		for (int i = 0; i < childNodes.getLength(); i++) {
-			if (childNodes.item(i) instanceof Element) {
-				Element child = (Element) childNodes.item(i);
-				if (child.getNodeName().equals("Trigger")) {
-					Trigger trigger = new Trigger();
-					trigger.initialize(child);
-					mTrigger.add(trigger);
-				}
-			}
-		}
 	}
 
 	public void fireTrigger(Map<String, String> parameterExchange, String condition) {
@@ -99,9 +86,9 @@ public abstract class AbstractControlUnit implements IControllUnit {
 		bean.setID(mID);
 		bean.setName(mName);
 		bean.setDescription(mDescription);
-		bean.setX(mPosition[0]);
-		bean.setY(mPosition[1]);
-		bean.setZ(mPosition[2]);
+		bean.setX(x);
+		bean.setY(y);
+		bean.setZ(z);
 		return bean;
 	}
 }

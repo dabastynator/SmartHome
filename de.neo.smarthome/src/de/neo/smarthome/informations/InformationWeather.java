@@ -12,24 +12,29 @@ import java.text.ParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OnLoad;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather.WeatherSun;
 import de.neo.smarthome.cronjob.CronScheduler;
-import de.neo.smarthome.informations.WebInformation.IInformationFactory;
 
+@Domain()
 public class InformationWeather extends InformationUnit {
 
 	public static String Key = "InformationWeather";
 	private static String TenMinutes = "0,10,20,30,40,50 * * * *";
 
+	@Persist(name = "token")
 	private String mToken;
+
+	@Persist(name = "query")
 	private String mQuery;
+
 	private InformationEntryWeather mWeather;
 
 	public InformationWeather() {
@@ -67,6 +72,7 @@ public class InformationWeather extends InformationUnit {
 		}
 	}
 
+	@OnLoad
 	public void updateWeather() {
 		String url = "http://api.openweathermap.org/data/2.5/weather?q=" + mQuery + "&appid=" + mToken;
 		try {
@@ -110,32 +116,6 @@ public class InformationWeather extends InformationUnit {
 	@Override
 	public InformationEntryBean getInformationEntry() {
 		return mWeather;
-	}
-
-	@Override
-	public void initialize(Element element) throws SAXException, IOException {
-		super.initialize(element);
-		if (!element.hasAttribute("token"))
-			throw new SAXException("token missing for " + getClass().getSimpleName());
-		if (!element.hasAttribute("query"))
-			throw new SAXException("query missing for " + getClass().getSimpleName());
-		mToken = element.getAttribute("token");
-		mQuery = element.getAttribute("query");
-		updateWeather();
-	}
-
-	public static class InformationWeatherFactory implements IInformationFactory {
-
-		@Override
-		public String getKey() {
-			return Key;
-		}
-
-		@Override
-		public InformationUnit createInformation() {
-			return new InformationWeather();
-		}
-
 	}
 
 }

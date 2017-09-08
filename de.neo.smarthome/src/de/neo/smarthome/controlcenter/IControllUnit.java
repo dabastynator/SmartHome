@@ -44,12 +44,11 @@ public interface IControllUnit extends RemoteAble {
 	public String getID() throws RemoteException;
 
 	/**
-	 * Get the remote able control unit object
+	 * Set the current control center to the unit.
 	 * 
-	 * @return control unit object
-	 * @throws RemoteException
+	 * @param controlCenter
 	 */
-	public Object getControllObject() throws RemoteException;
+	public void setControlCenter(ControlCenter controlCenter);
 
 	/**
 	 * Perform specified event on this control unit

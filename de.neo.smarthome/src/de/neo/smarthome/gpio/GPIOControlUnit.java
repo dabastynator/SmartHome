@@ -1,37 +1,32 @@
 package de.neo.smarthome.gpio;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebSwitch.State;
-import de.neo.smarthome.controlcenter.IControlCenter;
 
+@Domain(name = "InternetSwitch")
 public class GPIOControlUnit extends AbstractControlUnit {
 
-	private InternetSwitch mSwitch;
-	private GPIOSender mPower;
+	public static final String FAMILY_REGEX = "[01]{5}";
 
-	public GPIOControlUnit(GPIOSender power, IControlCenter center) {
-		super(center);
-		mPower = power;
-	}
+	@Persist(name = "familyCode")
+	private String mFamilyCode;
 
-	@Override
-	public InternetSwitch getControllObject() throws RemoteException {
-		return mSwitch;
-	}
+	@Persist(name = "switchNumber")
+	private int mSwitchNumber;
 
-	@Override
-	public void initialize(Element element) throws SAXException, IOException {
-		super.initialize(element);
-		mSwitch = new InternetSwitch(mPower, this);
-		mSwitch.initialize(element);
-	}
+	private State mState = State.OFF;
+
+	@Persist(name = "readOnly")
+	private boolean mReadOnly;
+
+	private GPIOSender mPower = GPIOSender.getInstance();
 
 	@Override
 	public boolean performEvent(Event event) throws RemoteException, EventException {
@@ -39,12 +34,38 @@ public class GPIOControlUnit extends AbstractControlUnit {
 		if (state == null)
 			throw new EventException("Parameter state (on|off) missing to execute switch event!");
 		if (state.equalsIgnoreCase("on"))
-			mSwitch.setState(State.ON);
+			setState(State.ON);
 		else if (state.equalsIgnoreCase("off"))
-			mSwitch.setState(State.OFF);
+			setState(State.OFF);
 		else
 			throw new EventException("Unknown parameter-value for switch-event '" + state + "'! Excpected: on|off");
 		return true;
+	}
+
+	public void setState(final State state) throws RemoteException {
+		if (mState != state) {
+			mPower.setSwitchState(mFamilyCode, mSwitchNumber, state);
+			this.mState = state;
+			new Thread() {
+				public void run() {
+					informListener(state);
+				};
+			}.start();
+		}
+	}
+
+	public State getState() {
+		return mState;
+	}
+
+	private void informListener(State state) {
+		Map<String, String> parameterExchange = new HashMap<String, String>();
+		parameterExchange.put("@state", state.toString().toLowerCase());
+		fireTrigger(parameterExchange, "@state=" + state.toString().toLowerCase());
+	}
+
+	public boolean isReadOnly() throws RemoteException {
+		return mReadOnly;
 	}
 
 }

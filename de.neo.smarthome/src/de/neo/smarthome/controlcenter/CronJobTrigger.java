@@ -4,23 +4,26 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.cronjob.CronScheduler;
 
+@Domain
 public class CronJobTrigger implements Runnable {
 
-	private ControlCenterImpl mCenter;
+	private ControlCenter mCenter;
 
+	@Persist(name = "cronjob")
 	private String mCronDescription;
 
+	@OneToMany(domainClass = Trigger.class, name = "Trigger")
 	private List<Trigger> mTriggerList = new ArrayList<Trigger>();
 
-	protected CronJobTrigger(ControlCenterImpl center) {
+	public void setControlCenter(ControlCenter center) {
 		mCenter = center;
 	}
 
@@ -29,24 +32,8 @@ public class CronJobTrigger implements Runnable {
 			CronScheduler scheduler = CronScheduler.getInstance();
 			scheduler.scheduleJob(this, mCronDescription);
 		} catch (ParseException e) {
-			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(),
-					"CronJobTrigger");
+			RemoteLogger.performLog(LogPriority.ERROR, e.getMessage(), "CronJobTrigger");
 		}
-	}
-
-	public void initialize(Element element) throws SAXException {
-		for (String attribute : new String[] { "cronjob" })
-			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for "
-						+ getClass().getSimpleName());
-		mCronDescription = element.getAttribute("cronjob");
-		for (int i = 0; i < element.getChildNodes().getLength(); i++)
-			if (element.getChildNodes().item(i) instanceof Element) {
-				Element child = (Element) element.getChildNodes().item(i);
-				Trigger trigger = new Trigger();
-				trigger.initialize(child);
-				mTriggerList.add(trigger);
-			}
 	}
 
 	@Override

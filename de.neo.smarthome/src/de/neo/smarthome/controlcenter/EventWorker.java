@@ -15,9 +15,9 @@ public class EventWorker extends Thread {
 
 	private BlockingQueue<Event> mEventQueue = new LinkedBlockingQueue<>();
 
-	private ControlCenterImpl mCenter;
+	private ControlCenter mCenter;
 
-	protected EventWorker(ControlCenterImpl center) {
+	protected EventWorker(ControlCenter center) {
 		mCenter = center;
 		start();
 	}

@@ -1,13 +1,17 @@
 package de.neo.smarthome.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OnLoad;
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 
+@Domain
 public class Trigger implements Serializable {
 
 	public static final String CLIENT_ACTION = "trigger.client_action";
@@ -17,9 +21,13 @@ public class Trigger implements Serializable {
 	 */
 	private static final long serialVersionUID = -906066975333495388L;
 
+	@Persist(name = "triggerID")
 	private String mTriggerID;
 
-	private Map<String, String> mParameter = new HashMap<String, String>();
+	@OneToMany(domainClass = Parameter.class, name = "Parameter")
+	private List<Parameter> mParameterList = new ArrayList<>();
+
+	private Map<String, String> mParameter = new HashMap<>();
 
 	public Trigger(Trigger tigger) {
 		mTriggerID = tigger.getTriggerID();
@@ -27,6 +35,12 @@ public class Trigger implements Serializable {
 	}
 
 	public Trigger() {
+	}
+
+	@OnLoad
+	public void onLoad() {
+		for (Parameter p : mParameterList)
+			mParameter.put(p.mKey, p.mValue);
 	}
 
 	public String getTriggerID() {
@@ -65,29 +79,19 @@ public class Trigger implements Serializable {
 		return Double.parseDouble(mParameter.get(key));
 	}
 
-	public void initialize(Element element) throws SAXException {
-		for (String attribute : new String[] { "triggerID" })
-			if (!element.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
-		setTriggerID(element.getAttribute("triggerID"));
-		NodeList paramterNodes = element.getChildNodes();
-		for (int j = 0; j < paramterNodes.getLength(); j++) {
-			if (paramterNodes.item(j) instanceof Element) {
-				Element parameter = (Element) paramterNodes.item(j);
-				if (parameter.getNodeName().equals("Parameter")) {
-					for (String attribute : new String[] { "key", "value" })
-						if (!parameter.hasAttribute(attribute))
-							throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
-					putParameter(parameter.getAttribute("key").toLowerCase(),
-							parameter.getAttribute("value").toLowerCase());
-				}
-			}
-		}
-	}
-
 	@Override
 	public String toString() {
 		return mTriggerID;
+	}
+
+	@Domain
+	public static class Parameter {
+
+		@Persist(name = "key")
+		protected String mKey;
+
+		@Persist(name = "value")
+		protected String mValue;
 	}
 
 }

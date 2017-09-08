@@ -1,17 +1,16 @@
 package de.neo.smarthome.informations;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 
 public abstract class InformationUnit {
 
+	@OneToMany(domainClass = InformationTrigger.class, name = "Trigger")
 	protected List<InformationTrigger> mTrigger = new ArrayList<>();
 
 	public abstract String getKey();
@@ -20,24 +19,13 @@ public abstract class InformationUnit {
 
 	public abstract InformationEntryBean getInformationEntry();
 
-	public void initialize(Element element) throws SAXException, IOException {
-		NodeList nodeList = element.getElementsByTagName("Trigger");
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Element e = (Element) nodeList.item(i);
-			if (e.hasAttribute("triggerID") && e.hasAttribute("onChange")) {
-				InformationTrigger trigger = new InformationTrigger();
-				trigger.setTrigger(e.getAttribute("triggerID"));
-				trigger.setOnChange(e.getAttribute("onChange"));
-				mTrigger.add(trigger);
-			} else
-				throw new SAXException("Trigger node needs triggerID and onChange attribute!");
-		}
-	}
-
+	@Domain
 	public static class InformationTrigger {
 
+		@Persist(name = "triggerID")
 		private String mTrigger;
 
+		@Persist(name = "onChange")
 		private String mOnChange;
 
 		public String getTrigger() {

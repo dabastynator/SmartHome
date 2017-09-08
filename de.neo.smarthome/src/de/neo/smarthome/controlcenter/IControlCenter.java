@@ -9,7 +9,6 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
-import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.Trigger;
 
@@ -67,24 +66,6 @@ public interface IControlCenter {
 	public int trigger(Trigger trigger) throws RemoteException;
 
 	/**
-	 * The IEventRule maps one event to several control-units.
-	 * 
-	 * @author sebastian
-	 *
-	 */
-	interface IEventRule {
-
-		/**
-		 * Get control-unit-ids for the specified event
-		 * 
-		 * @param event
-		 * @return control unit ids
-		 */
-		public Event[] getEventsForTrigger(Trigger trigger) throws RemoteException;
-
-	}
-
-	/**
 	 * @param triggerID
 	 * @return map contains result
 	 * @throws RemoteException
@@ -100,7 +81,7 @@ public interface IControlCenter {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<IEventRule> getEvents() throws RemoteException;
+	public List<EventRule> getEvents() throws RemoteException;
 
 	/**
 	 * Get all controlunits of the controlcenter. The map maps the control-unit

@@ -6,68 +6,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OneToMany;
+import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
-import de.neo.smarthome.controlcenter.IControlCenter.IEventRule;
 import de.neo.smarthome.api.Trigger;
 
-public class EventRule implements IEventRule {
+@Domain
+public class EventRule {
 
 	@WebField(name = "events")
+	@OneToMany(domainClass = Event.class, name = "Event")
 	private List<Event> mEvents = new ArrayList<Event>();
 
 	@WebField(name = "trigger")
+	@Persist(name = "trigger")
 	private String mTrigger;
 
 	@WebField(name = "information")
-	private List<String> mInformation = new ArrayList<>();
+	@OneToMany(domainClass = Information.class, name = "Information")
+	private List<Information> mInformation = new ArrayList<>();
 
-	private ControlCenterImpl mCenter;
+	private ControlCenter mCenter;
 
-	public EventRule(ControlCenterImpl center) {
+	public void setControlcenter(ControlCenter center) {
 		mCenter = center;
 	}
 
-	public void initialize(Element xmlElement) throws SAXException {
-		for (String attribute : new String[] { "trigger" })
-			if (!xmlElement.hasAttribute(attribute))
-				throw new SAXException(attribute + " missing for " + getClass().getSimpleName());
-		mTrigger = xmlElement.getAttribute("trigger");
-		NodeList events = xmlElement.getElementsByTagName("Event");
-		for (int i = 0; i < events.getLength(); i++) {
-			if (events.item(i) instanceof Element) {
-				Element element = (Element) events.item(i);
-				Event event = new Event();
-				event.initialize(element);
-				mEvents.add(event);
-			}
-		}
-		NodeList infos = xmlElement.getElementsByTagName("Information");
-		for (int i = 0; i < infos.getLength(); i++) {
-			if (infos.item(i) instanceof Element) {
-				Element element = (Element) infos.item(i);
-				if (element.hasAttribute("key"))
-					mInformation.add(element.getAttribute("key"));
-				else
-					throw new SAXException("Informaiton-tag needs key attribute!");
-			}
-		}
-	}
-
-	@Override
 	public Event[] getEventsForTrigger(Trigger trigger) throws RemoteException {
 		boolean fireEvents = trigger.getTriggerID().equals(mTrigger);
 		if (fireEvents) {
 			Map<String, String> parameters = new HashMap<>();
 			parameters.putAll(trigger.getParameter());
-			for (String key : mInformation) {
-				fillMapByInformation(parameters, key);
+			for (Information info : mInformation) {
+				fillMapByInformation(parameters, info.mKey);
 			}
 			List<Event> events = new ArrayList<>();
 			for (Event e : mEvents) {
@@ -80,7 +55,7 @@ public class EventRule implements IEventRule {
 	}
 
 	private boolean evaluateCondition(Map<String, String> parameters, String condition) {
-		if (condition == null)
+		if (condition == null || condition.trim().length() == 0)
 			return true;
 		if (condition.contains(" and ")) {
 			for (String c : condition.split(" and "))
@@ -147,5 +122,12 @@ public class EventRule implements IEventRule {
 			}
 
 		}
+	}
+
+	@Domain
+	public static class Information {
+
+		@Persist(name = "key")
+		protected String mKey;
 	}
 }

@@ -62,9 +62,6 @@ public class CronScheduler extends Thread {
 			try {
 				long nextExecution = job.getNextExecution();
 				long now = System.currentTimeMillis();
-				RemoteLogger.performLog(LogPriority.INFORMATION, "Wait "
-						+ (nextExecution - now) + " ms for execution", job
-						.getRunnable().toString());
 				if (now < nextExecution)
 					wait(nextExecution - now);
 				if (System.currentTimeMillis() >= nextExecution) {
@@ -82,24 +79,20 @@ public class CronScheduler extends Thread {
 		}
 	}
 
-	public synchronized void scheduleJob(Runnable runnable,
-			String cronExpression, int repeat) throws ParseException {
+	public synchronized void scheduleJob(Runnable runnable, String cronExpression, int repeat) throws ParseException {
 		CronJob job = new CronJob(runnable);
 		job.parseExpression(cronExpression);
 		job.setRepeat(repeat);
 		job.calculateNextExecution();
 		if (job.getNextExecution() < Long.MAX_VALUE) {
 			mHeap.add(job);
-			RemoteLogger.performLog(LogPriority.INFORMATION,
-					"Schedule cron job", job.toString());
+			RemoteLogger.performLog(LogPriority.INFORMATION, "Schedule cron job", job.toString());
 		} else
-			RemoteLogger.performLog(LogPriority.ERROR, "Job can't be scheduled",
-					job.toString());
+			RemoteLogger.performLog(LogPriority.ERROR, "Job can't be scheduled", job.toString());
 		notify();
 	}
 
-	public void scheduleJob(Runnable runnable, String cronExpression)
-			throws ParseException {
+	public void scheduleJob(Runnable runnable, String cronExpression) throws ParseException {
 		scheduleJob(runnable, cronExpression, REPEAT_INFINIT);
 	}
 
