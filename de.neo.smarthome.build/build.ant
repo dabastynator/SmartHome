@@ -2,8 +2,10 @@
 
 	<property name="src.smarthome" value="./../de.neo.smarthome/src" />
 	<property name="src.remote" value="./../de.neo.remote/src" />
+	<property name="src.persist" value="./../de.neo.persist/src" />
 
 	<property name="lib.remote" value="./../de.neo.remote/lib" />
+	<property name="lib.persist" value="./../de.neo.persist/lib" />
 	<property name="lib.smarthome" value="./../de.neo.smarthome/lib" />
 
 	<property name="classes.dir" value="./build/classes" />
@@ -13,6 +15,7 @@
 
 	<path id="classpath">
 		<fileset dir="${lib.remote}" includes="**/*.jar" />
+		<fileset dir="${lib.persist}" includes="**/*.jar" />
 		<fileset dir="${lib.smarthome}" includes="**/*.jar" />
 	</path>
 
@@ -34,6 +37,7 @@
 	</target>
 
 	<target name="jar_smarthome" depends="jar_remote">
+		<javac srcdir="${src.persist}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<javac srcdir="${src.smarthome}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
 		<jar destfile="${jar.dir}/smarthome.jar" basedir="${classes.dir}">
 			<zipgroupfileset dir="${lib.remote}" includes="*.jar" excludes="" />
