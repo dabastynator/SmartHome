@@ -22,9 +22,6 @@ public class GroundPlot implements Serializable {
 	 */
 	private static final long serialVersionUID = -7902771836935978638L;
 
-	@Id
-	private long mId;
-
 	/**
 	 * List of walls of the ground plot
 	 */
@@ -44,9 +41,6 @@ public class GroundPlot implements Serializable {
 		 * Generated uid
 		 */
 		private static final long serialVersionUID = 4963248372236235849L;
-
-		@Id
-		private long mId;
 
 		/**
 		 * all points of the wall
@@ -69,9 +63,6 @@ public class GroundPlot implements Serializable {
 		 * Generated uid
 		 */
 		private static final long serialVersionUID = 1045224009502795464L;
-
-		@Id
-		private long mId;
 
 		@WebField(name = "x")
 		@Persist(name = "x")
