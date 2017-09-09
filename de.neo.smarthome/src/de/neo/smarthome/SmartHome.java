@@ -13,6 +13,7 @@ import de.neo.persist.DaoException;
 import de.neo.persist.DaoFactory;
 import de.neo.persist.xml.XMLDao;
 import de.neo.persist.xml.XMLDaoFactory;
+import de.neo.persist.xml.XMLDaoFactory.XMLFactoryBuilder;
 import de.neo.remote.rmi.RMILogger;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RMILogger.RMILogListener;
@@ -75,6 +76,7 @@ public class SmartHome {
 			for (Trigger trigger : controlcenter.getStartupTrigger()) {
 				controlcenter.trigger(trigger);
 			}
+			controlcenter.schedule();
 		} catch (IOException | IllegalArgumentException | DaoException e) {
 			System.err.println(
 					"Error parsing configuration: " + e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
@@ -83,27 +85,28 @@ public class SmartHome {
 	}
 
 	private static void setupXMLDao(File config) throws DaoException {
-		XMLDaoFactory f = (XMLDaoFactory) XMLDaoFactory.initiate(config);
-		f.registerDao(ControlCenter.class, new XMLDao<ControlCenter>(f, ControlCenter.class));
-		f.registerDao(CronJobTrigger.class, new XMLDao<CronJobTrigger>(f, CronJobTrigger.class));
-		f.registerDao(EventRule.class, new XMLDao<EventRule>(f, EventRule.class));
-		f.registerDao(Event.class, new XMLDao<Event>(f, Event.class));
-		f.registerDao(Information.class, new XMLDao<Information>(f, Information.class));
-		f.registerDao(Trigger.class, new XMLDao<Trigger>(f, Trigger.class));
-		f.registerDao(Parameter.class, new XMLDao<Parameter>(f, Parameter.class));
+		XMLFactoryBuilder builder = new XMLDaoFactory.XMLFactoryBuilder();
+		builder.setXmlFile(config);
+		builder.registerDao(new XMLDao<ControlCenter>(ControlCenter.class));
+		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
+		builder.registerDao(new XMLDao<EventRule>(EventRule.class));
+		builder.registerDao(new XMLDao<Event>(Event.class));
+		builder.registerDao(new XMLDao<Information>(Information.class));
+		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
+		builder.registerDao(new XMLDao<Parameter>(Parameter.class));
 
-		f.registerDao(GroundPlot.class, new XMLDao<GroundPlot>(f, GroundPlot.class));
-		f.registerDao(Wall.class, new XMLDao<Wall>(f, Wall.class));
-		f.registerDao(Point.class, new XMLDao<Point>(f, Point.class));
+		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
+		builder.registerDao(new XMLDao<Wall>(Wall.class));
+		builder.registerDao(new XMLDao<Point>(Point.class));
 
-		f.registerDao(MediaControlUnit.class, new XMLDao<MediaControlUnit>(f, MediaControlUnit.class));
-		f.registerDao(GPIOControlUnit.class, new XMLDao<GPIOControlUnit>(f, GPIOControlUnit.class));
-		f.registerDao(RCColorControlUnit.class, new XMLDao<RCColorControlUnit>(f, RCColorControlUnit.class));
-		f.registerDao(ActionControlUnit.class, new XMLDao<ActionControlUnit>(f, ActionControlUnit.class));
+		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
+		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
+		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
+		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
 
-		f.registerDao(InformationWeather.class, new XMLDao<InformationWeather>(f, InformationWeather.class));
-		
-		f.read();
+		builder.registerDao(new XMLDao<InformationWeather>(InformationWeather.class));
+
+		DaoFactory.initiate(builder);
 	}
 
 	private static void setupLoging(final PrintStream stream) {

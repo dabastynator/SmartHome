@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import de.neo.persist.annotations.Domain;
-import de.neo.persist.annotations.Id;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.web.WebField;

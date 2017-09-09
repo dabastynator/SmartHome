@@ -67,8 +67,7 @@ public class CronJob {
 				throw new ParseException(
 						"Cronexpression must have 5 blocks, seperated by whitespace. Just found " + tokens.length, 0);
 			mMinute = new CronToken(tokens[0], Calendar.MINUTE, new int[] {}, Calendar.HOUR);
-			mHour = new CronToken(tokens[1], Calendar.HOUR_OF_DAY, new int[] { Calendar.MINUTE },
-					Calendar.DATE);
+			mHour = new CronToken(tokens[1], Calendar.HOUR_OF_DAY, new int[] { Calendar.MINUTE }, Calendar.DATE);
 			mDayOfMonth = new CronToken(tokens[2], Calendar.DAY_OF_MONTH,
 					new int[] { Calendar.MINUTE, Calendar.HOUR_OF_DAY }, Calendar.MONTH);
 			mMonth = new CronToken(tokens[3], Calendar.MONTH,
@@ -223,5 +222,10 @@ public class CronJob {
 
 	public int getRepeat() {
 		return mRepeat;
+	}
+
+	@Override
+	public String toString() {
+		return "CronJob (" + mRunnable + ")";
 	}
 }

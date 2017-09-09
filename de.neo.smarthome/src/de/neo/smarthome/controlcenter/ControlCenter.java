@@ -156,4 +156,9 @@ public class ControlCenter implements IControlCenter {
 		return mStartUpTrigger;
 	}
 
+	public void schedule() {
+		for (CronJobTrigger job : mCronjobTrigger)
+			job.schedule();
+	}
+
 }
