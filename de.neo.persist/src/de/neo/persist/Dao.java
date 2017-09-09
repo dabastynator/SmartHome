@@ -69,4 +69,11 @@ public interface Dao<T> {
 	 * @throws DaoException
 	 */
 	public void deleteAll() throws DaoException;
+
+	/**
+	 * Get the domain class object.
+	 * 
+	 * @return domain class
+	 */
+	public Class<?> getDomainClass();
 }

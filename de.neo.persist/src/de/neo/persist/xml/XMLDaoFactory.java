@@ -2,6 +2,10 @@ package de.neo.persist.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,13 +30,10 @@ import de.neo.persist.DaoFactory;
 
 public class XMLDaoFactory extends DaoFactory {
 
-	public static DaoFactory initiate(File xmlFile) {
-		mSingelton = new XMLDaoFactory(xmlFile);
-		return mSingelton;
-	}
-
 	private File mXmlFile;
 	private boolean mFlushOnChange;
+	protected Map<Class<?>, XMLDao<?>> mXmlMapClassDao = new HashMap<>();
+	protected List<XMLDao<?>> mXmlDaoList = new ArrayList<>();
 	private String mRootName = "Root";
 
 	public String getRootName() {
@@ -46,18 +47,6 @@ public class XMLDaoFactory extends DaoFactory {
 	protected XMLDaoFactory(File xmlFile) {
 		super();
 		mXmlFile = xmlFile;
-	}
-
-	public static void flushToFile() throws DaoException {
-		if (!(mSingelton instanceof XMLDaoFactory))
-			throw new DaoException("DaoFactory must be type of XML");
-		((XMLDaoFactory) mSingelton).flush();
-	}
-
-	public static void readFromFile() throws DaoException {
-		if (!(mSingelton instanceof XMLDaoFactory))
-			throw new DaoException("DaoFactory must be type of XML");
-		((XMLDaoFactory) mSingelton).read();
 	}
 
 	public void flushOnChange(boolean flushOnChange) {
@@ -75,14 +64,12 @@ public class XMLDaoFactory extends DaoFactory {
 			Document doc = builder.newDocument();
 			Element root = doc.createElement(mRootName);
 
-			for (Dao<?> dao : mDaoList)
-				if (dao instanceof XMLDao<?>)
-					((XMLDao<?>) dao).initWriteXML();
+			for (XMLDao<?> dao : mXmlDaoList)
+				dao.initWriteXML();
 
 			doc.appendChild(root);
-			for (Dao<?> dao : mDaoList)
-				if (dao instanceof XMLDao<?>)
-					((XMLDao<?>) dao).writeXML(doc, root);
+			for (XMLDao<?> dao : mXmlDaoList)
+				dao.writeXML(doc, root);
 
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			Result output = new StreamResult(mXmlFile);
@@ -108,13 +95,11 @@ public class XMLDaoFactory extends DaoFactory {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(xmlFile);
 			doc.getDocumentElement().normalize();
-			for (Dao<?> dao : mMapClassDao.values())
-				if (dao instanceof XMLDao<?>)
-					((XMLDao<?>) dao).initeadXML(doc);
-			
-			for (Dao<?> dao : mMapClassDao.values())
-				if (dao instanceof XMLDao<?>)
-					((XMLDao<?>) dao).readXML(doc);
+			for (XMLDao<?> dao : mXmlDaoList)
+				dao.initeadXML(doc);
+
+			for (XMLDao<?> dao : mXmlDaoList)
+				dao.readXML(doc);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new DaoException(e.getClass().getSimpleName() + ": " + e.getMessage());
 		}
@@ -123,6 +108,38 @@ public class XMLDaoFactory extends DaoFactory {
 	public void notifyChange() throws DaoException {
 		if (mFlushOnChange)
 			flush();
+	}
+
+	public static class XMLFactoryBuilder extends FactoryBuilder {
+
+		private File mXmlFile;
+
+		public File getXmlFile() {
+			return mXmlFile;
+		}
+
+		public void setXmlFile(File xmlFile) {
+			mXmlFile = xmlFile;
+		}
+
+		@Override
+		public DaoFactory createDaoFactory() throws DaoException {
+			if (mXmlFile == null)
+				throw new DaoException("XML File missing for xml dao factory");
+			XMLDaoFactory factory = new XMLDaoFactory(mXmlFile);
+			for (Dao<?> dao : mDaoList) {
+				XMLDao<?> xmlDao = (XMLDao<?>) dao;
+				factory.mXmlDaoList.add(xmlDao);
+				factory.mXmlMapClassDao.put(xmlDao.getDomainClass(), xmlDao);
+				factory.mDaoList.add(xmlDao);
+				factory.mMapClassDao.put(xmlDao.getDomainClass(), xmlDao);
+				xmlDao.setFactory(factory);
+			}
+			if (mXmlFile.exists())
+				factory.read();
+			return factory;
+		}
+
 	}
 
 }

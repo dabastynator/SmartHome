@@ -9,23 +9,18 @@ import org.w3c.dom.NodeList;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
-import de.neo.persist.DaoFactory;
 import de.neo.persist.annotations.Persist;
 
 public class DomainField extends PersistentField {
 
-	private DaoFactory mFactory;
-
-	public DomainField(Field f, Persist p, DaoFactory factory) {
+	public DomainField(Field f, Persist p) {
 		super(f, p);
-		mFactory = factory;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void setValueToObject(Object object, Element element)
-			throws IllegalAccessException, DaoException, IllegalArgumentException, InstantiationException,
-			InvocationTargetException {
+	public void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
+			IllegalArgumentException, InstantiationException, InvocationTargetException {
 		Dao dao = mFactory.getDao(mField.getType());
 		if (element.hasAttribute(mName)) {
 			try {

@@ -46,9 +46,8 @@ public class XMLDao<T> implements Dao<T> {
 
 	private Map<T, Long> mIdMap = new HashMap<>();
 
-	public XMLDao(XMLDaoFactory factory, Class<? extends T> c) throws DaoException {
+	public XMLDao(Class<? extends T> c) throws DaoException {
 		mClass = c;
-		mFactory = factory;
 		Domain d = c.getAnnotation(Domain.class);
 		if (d == null)
 			throw new DaoException("Domain annotation missing for " + c.getSimpleName());
@@ -62,6 +61,12 @@ public class XMLDao<T> implements Dao<T> {
 		}
 
 		initializeFields();
+	}
+
+	public void setFactory(XMLDaoFactory factory) {
+		mFactory = factory;
+		for (PersistentField f : mPersistentFields)
+			f.setFactory(mFactory);
 	}
 
 	private void initializeFields() throws DaoException {
@@ -88,11 +93,11 @@ public class XMLDao<T> implements Dao<T> {
 				else if (f.getType().equals(String.class))
 					mPersistentFields.add(new StringField(f, p));
 				else if (f.getType().getAnnotation(Domain.class) != null)
-					mPersistentFields.add(new DomainField(f, p, mFactory));
+					mPersistentFields.add(new DomainField(f, p));
 				else if (oneToMany != null) {
 					if (oneToMany.domainClass().getAnnotation(Domain.class) == null)
 						throw new DaoException("OneToMany reference must reference to domain class.");
-					mPersistentFields.add(new DomainListField(f, p, mFactory, oneToMany));
+					mPersistentFields.add(new DomainListField(f, p, oneToMany));
 				} else
 					throw new DaoException("Not supported persistent field: " + f.getName() + " ("
 							+ f.getType().getSimpleName() + ")");
@@ -253,6 +258,11 @@ public class XMLDao<T> implements Dao<T> {
 
 	public void initeadXML(Document doc) {
 		mDomains.clear();
+	}
+
+	@Override
+	public Class<?> getDomainClass() {
+		return mClass;
 	}
 
 }

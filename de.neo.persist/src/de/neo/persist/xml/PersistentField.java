@@ -14,6 +14,7 @@ public abstract class PersistentField {
 
 	protected Field mField;
 	protected String mName;
+	protected XMLDaoFactory mFactory;
 
 	public PersistentField(Field f, Persist p) {
 		mField = f;
@@ -28,10 +29,13 @@ public abstract class PersistentField {
 			mName = f.getName();
 	}
 
-	public abstract void setValueToObject(Object object, Element element)
-			throws IllegalAccessException, DaoException, IllegalArgumentException, InstantiationException,
-			InvocationTargetException;
+	public abstract void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
+			IllegalArgumentException, InstantiationException, InvocationTargetException;
 
 	public abstract void setValueToXML(Document doc, Object object, Element element)
 			throws IllegalArgumentException, IllegalAccessException, DaoException;
+
+	public void setFactory(XMLDaoFactory factory) {
+		mFactory = factory;
+	}
 }

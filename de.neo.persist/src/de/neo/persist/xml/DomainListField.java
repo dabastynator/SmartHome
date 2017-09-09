@@ -10,18 +10,15 @@ import org.w3c.dom.NodeList;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
-import de.neo.persist.DaoFactory;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 
 public class DomainListField extends PersistentField {
 
-	private DaoFactory mFactory;
 	private OneToMany mOneToMany;
 
-	public DomainListField(Field f, Persist p, XMLDaoFactory factory, OneToMany oneToMany) {
+	public DomainListField(Field f, Persist p, OneToMany oneToMany) {
 		super(f, p);
-		mFactory = factory;
 		mOneToMany = oneToMany;
 		if (!oneToMany.name().equals(""))
 			mName = oneToMany.name();
@@ -29,9 +26,8 @@ public class DomainListField extends PersistentField {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void setValueToObject(Object object, Element element)
-			throws IllegalAccessException, DaoException, IllegalArgumentException, InstantiationException,
-			InvocationTargetException {
+	public void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
+			IllegalArgumentException, InstantiationException, InvocationTargetException {
 		Dao dao = mFactory.getDao(mOneToMany.domainClass());
 		Object field = mField.get(object);
 		if ((field instanceof List) && (dao instanceof XMLDao)) {

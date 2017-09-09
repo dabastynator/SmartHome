@@ -9,9 +9,9 @@ public class DaoFactory {
 
 	protected static DaoFactory mSingelton;
 
-	public static DaoFactory initiate() {
+	public static DaoFactory initiate(FactoryBuilder builder) throws DaoException {
 		if (mSingelton == null)
-			mSingelton = new DaoFactory();
+			mSingelton = builder.createDaoFactory();
 		return mSingelton;
 	}
 
@@ -21,17 +21,10 @@ public class DaoFactory {
 		return mSingelton;
 	}
 
-	protected Map<Class<?>, Dao<?>> mMapClassDao;
-	protected List<Dao<?>> mDaoList;
+	protected Map<Class<?>, Dao<?>> mMapClassDao = new HashMap<>();
+	protected List<Dao<?>> mDaoList = new ArrayList<>();
 
 	protected DaoFactory() {
-		mMapClassDao = new HashMap<>();
-		mDaoList = new ArrayList<>();
-	}
-
-	public void registerDao(Class<?> c, Dao<?> dao) {
-		mMapClassDao.put(c, dao);
-		mDaoList.add(dao);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -41,6 +34,18 @@ public class DaoFactory {
 
 	public Object getCustomDao(Class<?> domain) {
 		return mMapClassDao.get(domain);
+	}
+
+	public static abstract class FactoryBuilder {
+
+		protected List<Dao<?>> mDaoList = new ArrayList<>();
+
+		public void registerDao(Dao<?> dao) {
+			mDaoList.add(dao);
+		}
+
+		public abstract DaoFactory createDaoFactory() throws DaoException;
+
 	}
 
 }
