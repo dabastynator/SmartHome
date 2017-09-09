@@ -10,26 +10,42 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 
 ```xml
 <?xml version="1.0"?>
-<ControlCenter>
+<SmartHome>
 	<!-- Define the port of the web-interface and the security-token required for every web call -->
-	<WebServer port="5061" token="security-token"/>
+	<ControlCenter port="5061" token="security-token">
 
-	<!-- The optionally ground plot is used by the android-client -->
-	<!-- The client visualizes the SmartHome in an opengl-scene-->
-	<GroundPlot>
-		<Wall>
-			<Point x="0" y="0" z="0"/>
-			<Point x="0" y="0" z="5"/>
-			<Point x="5" y="0" z="5"/>
-			<Point x="5" y="0" z="0"/>
-		</Wall>
-		<Wall>
-			<Point x="0" y="0" z="0"/>
-			<Point x="0" y="0" z="5"/>
-			<Point x="0" y="5" z="5"/>
-			<Point x="0" y="5" z="0"/>
-		</Wall>
-	</GroundPlot>
+		<!-- The optionally ground plot is used by the android-client -->
+		<!-- The client visualizes the SmartHome in an opengl-scene-->
+		<GroundPlot>
+			<Wall>
+				<Point x="0" y="0" z="0"/>
+				<Point x="0" y="0" z="5"/>
+				<Point x="5" y="0" z="5"/>
+				<Point x="5" y="0" z="0"/>
+			</Wall>
+			<Wall>
+				<Point x="0" y="0" z="0"/>
+				<Point x="0" y="0" z="5"/>
+				<Point x="0" y="5" z="5"/>
+				<Point x="0" y="5" z="0"/>
+			</Wall>
+		</GroundPlot>
+
+		<!-- EventRules are used to define action-rules for any trigger -->
+		<EventRule trigger="trigger.light">
+			<Event unitID="switch.light1">
+				<Parameter key="state" value="on"/>
+			</Event>
+			<Event unitID="switch.light2">
+				<Parameter key="state" value="on"/>
+			</Event>
+		</EventRule>
+
+		<!-- Define jobs by the cron syntax. They can call any trigger -->
+		<TimeTrigger cronjob="30 6 * * *">
+			<Trigger triggerID="trigger.light"/>
+		</TimeTrigger>
+	</ControlCenter>
 
 	<!-- List of internet switches -->
 	<!-- The family-code and switch-number indicates a 433MHz rc switch -->
@@ -71,21 +87,7 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 			logFile="/home/pi/Logs/kodi.log"
 			x="0.5" y="0.5" z="1.5"/>
 
-	<!-- EventRules are used to define action-rules for any trigger -->
-	<EventRule trigger="trigger.light">
-		<Event unitID="switch.light1">
-			<Parameter key="state" value="on"/>
-		</Event>
-		<Event unitID="switch.light2">
-			<Parameter key="state" value="on"/>
-		</Event>
-	</EventRule>
-
-	<!-- Define jobs by the cron syntax. They can call any trigger -->
-	<TimeTrigger cronjob="30 6 * * *">
-		<Trigger triggerID="trigger.light"/>
-	</TimeTrigger>
-</ControlCenter>
+</SmartHome>
 ```
 
 ## Android client
