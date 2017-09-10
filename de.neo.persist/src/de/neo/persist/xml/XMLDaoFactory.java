@@ -96,7 +96,7 @@ public class XMLDaoFactory extends DaoFactory {
 			Document doc = builder.parse(xmlFile);
 			doc.getDocumentElement().normalize();
 			for (XMLDao<?> dao : mXmlDaoList)
-				dao.initeadXML(doc);
+				dao.initReadXML(doc);
 
 			for (XMLDao<?> dao : mXmlDaoList)
 				dao.readXML(doc);
@@ -113,13 +113,15 @@ public class XMLDaoFactory extends DaoFactory {
 	public static class XMLFactoryBuilder extends FactoryBuilder {
 
 		private File mXmlFile;
+		private boolean mFlushOnChange = false;
 
 		public File getXmlFile() {
 			return mXmlFile;
 		}
 
-		public void setXmlFile(File xmlFile) {
+		public XMLFactoryBuilder setXmlFile(File xmlFile) {
 			mXmlFile = xmlFile;
+			return this;
 		}
 
 		@Override
@@ -135,9 +137,15 @@ public class XMLDaoFactory extends DaoFactory {
 				factory.mMapClassDao.put(xmlDao.getDomainClass(), xmlDao);
 				xmlDao.setFactory(factory);
 			}
+			factory.mFlushOnChange = mFlushOnChange;
 			if (mXmlFile.exists())
 				factory.read();
 			return factory;
+		}
+
+		public XMLFactoryBuilder setFlushOnChange(boolean b) {
+			mFlushOnChange = b;
+			return this;
 		}
 
 	}

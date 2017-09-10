@@ -179,10 +179,10 @@ public class XMLDao<T> implements Dao<T> {
 	}
 
 	public void readXML(Document doc) throws DaoException {
-		NodeList list = doc.getElementsByTagName(mName);
+		NodeList list = doc.getFirstChild().getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			Node item = list.item(i);
-			if (item instanceof Element) {
+			if (item instanceof Element && ((Element) item).getTagName().equals(mName)) {
 				try {
 					readDomainXML((Element) item);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -256,13 +256,22 @@ public class XMLDao<T> implements Dao<T> {
 		mAlreadySaved.clear();
 	}
 
-	public void initeadXML(Document doc) {
+	public void initReadXML(Document doc) {
 		mDomains.clear();
 	}
 
 	@Override
 	public Class<?> getDomainClass() {
 		return mClass;
+	}
+
+	@Override
+	public void delete(T item) throws DaoException {
+		try {
+			delete(getId(item));
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new DaoException(e.getClass().getSimpleName() + ": " + e.getMessage());
+		}
 	}
 
 }

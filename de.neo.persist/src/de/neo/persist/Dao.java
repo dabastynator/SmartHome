@@ -64,6 +64,14 @@ public interface Dao<T> {
 	public void delete(long id) throws DaoException;
 
 	/**
+	 * Delete given object.
+	 * 
+	 * @param item
+	 * @throws DaoException
+	 */
+	public void delete(T item) throws DaoException;
+
+	/**
 	 * Delete all objects.
 	 * 
 	 * @throws DaoException

@@ -40,8 +40,9 @@ public class DaoFactory {
 
 		protected List<Dao<?>> mDaoList = new ArrayList<>();
 
-		public void registerDao(Dao<?> dao) {
+		public FactoryBuilder registerDao(Dao<?> dao) {
 			mDaoList.add(dao);
+			return this;
 		}
 
 		public abstract DaoFactory createDaoFactory() throws DaoException;
