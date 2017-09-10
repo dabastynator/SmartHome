@@ -88,10 +88,10 @@ public class Trigger implements Serializable {
 	public static class Parameter {
 
 		@Persist(name = "key")
-		protected String mKey;
+		public String mKey;
 
 		@Persist(name = "value")
-		protected String mValue;
+		public String mValue;
 	}
 
 }

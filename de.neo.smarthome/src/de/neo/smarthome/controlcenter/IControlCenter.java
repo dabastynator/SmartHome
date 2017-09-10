@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.neo.persist.DaoException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
@@ -82,6 +83,84 @@ public interface IControlCenter {
 	 */
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
 	public List<EventRule> getEvents() throws RemoteException;
+
+	/**
+	 * Create new event rule for given trigger id.
+	 * 
+	 * @param triggerID
+	 * @return new event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "create_event_rule", description = "Create new event rule for given trigger id.")
+	public EventRule createEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException;
+
+	/**
+	 * Delete event rule by given trigger id.
+	 * 
+	 * @param triggerID
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "delete_event_rule", description = "Delete event rule by given trigger id.")
+	public void deleteEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException;
+
+	/**
+	 * Create new event for given event rule. The event corresponds to a
+	 * specifig unit and can have an optional condition.
+	 * 
+	 * @param triggerID
+	 * @param unitID
+	 * @return extended event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "create_event_for_rule", description = "Create new event for given event rule. The event corresponds to a specifig unit and can have an optional condition.")
+	public EventRule createEventForRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "unit") String unitID, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException;
+
+	/**
+	 * Delete event int given event rule by event index.
+	 * 
+	 * @param triggerID
+	 * @param index
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "delete_event_in_rule", description = "Delete event in given event rule by event index.")
+	public void deleteEventInRule(@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index)
+			throws RemoteException, DaoException;
+
+	/**
+	 * Add parameter for event given event rule by event index.
+	 * 
+	 * @param triggerID
+	 * @param index
+	 * @param key
+	 * @param value
+	 * @return modified event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given event rule by event index.")
+	public EventRule addParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "index") int index, @WebGet(name = "key") String key, @WebGet(name = "value") String value)
+			throws RemoteException, DaoException;
+
+	/**
+	 * Set informations for event given event rule. Several information are
+	 * separated by comma.
+	 * 
+	 * @param triggerID
+	 * @param information
+	 * @return modified event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
+	public EventRule setInformationsforEventRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "informations") String informations) throws RemoteException, DaoException;
 
 	/**
 	 * Get all controlunits of the controlcenter. The map maps the control-unit

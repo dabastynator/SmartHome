@@ -81,4 +81,13 @@ public class Event implements Serializable {
 		return mCondition;
 	}
 
+	public void setCondition(String condition) {
+		mCondition = condition;
+	}
+
+	public void addParameter(Parameter param) {
+		mParameterList.add(param);
+		mParameter.put(param.mKey, param.mValue);
+	}
+
 }

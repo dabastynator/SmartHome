@@ -6,7 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.neo.persist.Dao;
+import de.neo.persist.DaoException;
+import de.neo.persist.DaoFactory;
 import de.neo.persist.annotations.Domain;
+import de.neo.persist.annotations.OnLoad;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
@@ -17,6 +21,8 @@ import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.Trigger;
+import de.neo.smarthome.api.Trigger.Parameter;
+import de.neo.smarthome.controlcenter.EventRule.Information;
 import de.neo.smarthome.informations.WebInformation;
 
 /**
@@ -29,6 +35,8 @@ public class ControlCenter implements IControlCenter {
 
 	@OneToMany(domainClass = EventRule.class, name = "EventRule")
 	private List<EventRule> mEventRules = Collections.synchronizedList(new ArrayList<EventRule>());
+
+	private Map<String, EventRule> mEventRuleMap = new HashMap<>();
 
 	@OneToMany(domainClass = CronJobTrigger.class, name = "TimeTrigger")
 	private List<CronJobTrigger> mCronjobTrigger = Collections.synchronizedList(new ArrayList<CronJobTrigger>());
@@ -54,6 +62,17 @@ public class ControlCenter implements IControlCenter {
 	private EventWorker mEventWorker = new EventWorker(this);
 
 	private WebInformation mInformation;
+
+	@OnLoad
+	public void onLoad() {
+		mEventRuleMap.clear();
+		for (EventRule rule : mEventRules) {
+			rule.setControlcenter(this);
+			mEventRuleMap.put(rule.getTriggerID(), rule);
+		}
+		for (CronJobTrigger trigger : mCronjobTrigger)
+			trigger.setControlCenter(this);
+	}
 
 	@Override
 	public void addControlUnit(IControllUnit controlUnit) {
@@ -88,15 +107,13 @@ public class ControlCenter implements IControlCenter {
 	@Override
 	public int trigger(Trigger trigger) {
 		int eventCount = 0;
-		for (EventRule rule : mEventRules) {
+		EventRule rule = mEventRuleMap.get(trigger.getTriggerID());
+		if (rule != null) {
 			try {
-				Event[] events = rule.getEventsForTrigger(trigger);
-				if (events != null) {
-					for (Event event : events) {
-						event.getParameter().putAll(trigger.getParameter());
-						mEventWorker.queueEvent(event);
-					}
-					eventCount += events.length;
+				for (Event event : rule.getEventsForTrigger(trigger)) {
+					event.getParameter().putAll(trigger.getParameter());
+					mEventWorker.queueEvent(event);
+					eventCount++;
 				}
 			} catch (Exception e) {
 				RemoteLogger.performLog(LogPriority.ERROR,
@@ -121,6 +138,132 @@ public class ControlCenter implements IControlCenter {
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
 	public List<EventRule> getEvents() {
 		return mEventRules;
+	}
+
+	@WebRequest(path = "create_event_rule", description = "Create new event rule for given trigger id.")
+	public EventRule createEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+		if (mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' already exists!");
+		EventRule rule = new EventRule();
+		rule.setTriggerID(triggerID);
+		rule.setControlcenter(this);
+		mEventRules.add(rule);
+		mEventRuleMap.put(triggerID, rule);
+
+		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
+		eventRuleDao.save(rule);
+
+		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
+		centerDao.update(this);
+		return rule;
+	}
+
+	@WebRequest(path = "delete_event_rule", description = "Delete event rule by given trigger id.")
+	public void deleteEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		mEventRules.remove(rule);
+		mEventRuleMap.remove(triggerID);
+
+		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
+		eventRuleDao.delete(rule);
+
+		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
+		centerDao.update(this);
+	}
+
+	@WebRequest(path = "create_event_for_rule", description = "Create new event for given event rule. The event corresponds to a specifig unit and can have an optional condition.")
+	public EventRule createEventForRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "unit") String unitID, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		Event event = new Event();
+		event.setUnitID(unitID);
+		event.setCondition(condition);
+		rule.getEvents().add(event);
+
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		eventDao.save(event);
+
+		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
+		eventRuleDao.update(rule);
+		return rule;
+	}
+
+	@WebRequest(path = "delete_event_in_rule", description = "Delete event in given event rule by event index.")
+	public void deleteEventInRule(@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index)
+			throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		if (rule.getEvents().size() < index)
+			throw new IllegalArgumentException(
+					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
+		Event event = rule.getEvents().get(index);
+		rule.getEvents().remove(index);
+
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		eventDao.delete(event);
+
+		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
+		eventRuleDao.update(rule);
+	}
+
+	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given event rule by event index.")
+	public EventRule addParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "index") int index, @WebGet(name = "key") String key, @WebGet(name = "value") String value)
+			throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		if (rule.getEvents().size() < index)
+			throw new IllegalArgumentException(
+					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
+		Event event = rule.getEvents().get(index);
+		Parameter param = new Parameter();
+		param.mKey = key;
+		param.mValue = value;
+		event.addParameter(param);
+
+		Dao<Parameter> paramDao = DaoFactory.getInstance().getDao(Parameter.class);
+		paramDao.save(param);
+
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		eventDao.update(event);
+		return rule;
+	}
+
+	@Override
+	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
+	public EventRule setInformationsforEventRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "informations") String informations) throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		List<Information> oldInfo = new ArrayList<>(rule.getInformations());
+		rule.getInformations().clear();
+		for (String key : informations.split(",")) {
+			key = key.trim();
+			if (key.length() > 0) {
+				Information info = new Information();
+				info.mKey = key;
+				rule.getInformations().add(info);
+			}
+		}
+
+		Dao<Information> infoDao = DaoFactory.getInstance().getDao(Information.class);
+		for (Information info : oldInfo)
+			infoDao.delete(info);
+		for (Information info : rule.getInformations())
+			infoDao.save(info);
+
+		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
+		eventRuleDao.update(rule);
+
+		return rule;
 	}
 
 	@Override

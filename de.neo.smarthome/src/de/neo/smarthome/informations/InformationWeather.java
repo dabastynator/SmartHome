@@ -45,6 +45,11 @@ public class InformationWeather extends InformationUnit {
 				public void run() {
 					updateWeather();
 				}
+
+				@Override
+				public String toString() {
+					return "WeatherUpdater";
+				}
 			}, TenMinutes);
 		} catch (ParseException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, "Cant schedule weather updater", this.toString());

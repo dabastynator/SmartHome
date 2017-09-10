@@ -32,6 +32,14 @@ public class EventRule {
 
 	private ControlCenter mCenter;
 
+	public String getTriggerID() {
+		return mTrigger;
+	}
+
+	public void setTriggerID(String triggerID) {
+		mTrigger = triggerID;
+	}
+
 	public void setControlcenter(ControlCenter center) {
 		mCenter = center;
 	}
@@ -51,7 +59,7 @@ public class EventRule {
 			}
 			return events.toArray(new Event[events.size()]);
 		}
-		return null;
+		return new Event[0];
 	}
 
 	private boolean evaluateCondition(Map<String, String> parameters, String condition) {
@@ -124,10 +132,24 @@ public class EventRule {
 		}
 	}
 
+	public List<Event> getEvents() {
+		return mEvents;
+	}
+
+	public List<Information> getInformations() {
+		return mInformation;
+	}
+
 	@Domain
 	public static class Information {
 
 		@Persist(name = "key")
-		protected String mKey;
+		@WebField(name = "key")
+		public String mKey;
+
+		@Override
+		public String toString() {
+			return mKey;
+		}
 	}
 }

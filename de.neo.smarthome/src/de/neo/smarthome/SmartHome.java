@@ -34,6 +34,7 @@ import de.neo.smarthome.controlcenter.EventRule.Information;
 import de.neo.smarthome.controlcenter.IControllUnit;
 import de.neo.smarthome.gpio.GPIOControlUnit;
 import de.neo.smarthome.gpio.WebSwitchImpl;
+import de.neo.smarthome.informations.InformationUnit.InformationTrigger;
 import de.neo.smarthome.informations.InformationWeather;
 import de.neo.smarthome.informations.WebInformation;
 import de.neo.smarthome.mediaserver.MediaControlUnit;
@@ -86,8 +87,10 @@ public class SmartHome {
 
 	private static void setupXMLDao(File config) throws DaoException {
 		XMLFactoryBuilder builder = new XMLDaoFactory.XMLFactoryBuilder();
-		builder.setXmlFile(config);
 		builder.registerDao(new XMLDao<ControlCenter>(ControlCenter.class));
+		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
+		builder.registerDao(new XMLDao<Wall>(Wall.class));
+		builder.registerDao(new XMLDao<Point>(Point.class));
 		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
 		builder.registerDao(new XMLDao<EventRule>(EventRule.class));
 		builder.registerDao(new XMLDao<Event>(Event.class));
@@ -95,18 +98,15 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
 		builder.registerDao(new XMLDao<Parameter>(Parameter.class));
 
-		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
-		builder.registerDao(new XMLDao<Wall>(Wall.class));
-		builder.registerDao(new XMLDao<Point>(Point.class));
-
 		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
 		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
 		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
 		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
 
 		builder.registerDao(new XMLDao<InformationWeather>(InformationWeather.class));
+		builder.registerDao(new XMLDao<InformationTrigger>(InformationTrigger.class));
 
-		DaoFactory.initiate(builder);
+		DaoFactory.initiate(builder.setXmlFile(config).setFlushOnChange(true));
 	}
 
 	private static void setupLoging(final PrintStream stream) {
