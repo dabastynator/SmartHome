@@ -501,11 +501,46 @@ function doTrigger(trigger){
 	}
 }
 
+function deleteEventRule(trigger){
+	mTrigger = trigger;
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/delete_event_rule?token=' + mToken + '&trigger=' + trigger;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
 function applyTrigger(){
+}
+
+function addInfo(){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var info = document.getElementById('trigger_infos');
+		var url = mEndpoint + '/controlcenter/set_information_for_event_rule?token=' + mToken + '&trigger=' + mRuleId + '&informations=' + info.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
 }
 
 function showTrigger(index){
 	var trigger = mRules[index];
+	mRuleIndex = index;
+	mRuleId = trigger.trigger;
 	title = document.getElementById('trigger_title');
 	content = document.getElementById('trigger_content');
 	id = document.getElementById('trigger_id');
@@ -515,7 +550,7 @@ function showTrigger(index){
 	id.value = trigger.trigger;
 	infoText = '';
 	for (var i = 0; i < trigger.information.length; i++)
-		infoText += trigger.information[i] + ', ';
+		infoText += trigger.information[i].key + ', ';
 	infos.value = infoText;
 
 	contentText = '<table width="100%">';
@@ -541,6 +576,22 @@ function showTrigger(index){
 	showDialog('trigger');
 }
 
+function createEventRule(){
+	var input = document.getElementById('new_event_rule');
+	if (mEndpoint != null && mEndpoint != '' && input != null){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/create_event_rule?token=' + mToken + '&trigger=' + input.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
 function showRules(){
 	var root = document.getElementById('rules_content');
 	showDialog('rules');
@@ -554,16 +605,20 @@ function showRules(){
 				mRules = JSON.parse(request.responseText);
 				var root = document.getElementById('rules_content');
 				var content = "";
-				mRules.sort(function(a, b){return a.trigger.localeCompare(b.trigger);});
 				for (var i = 0; i < mRules.length; i++) {
 					var rule = mRules[i];
 					content += '<div class="file"><table width="100%"><tr>';
-					content += '<td width="90%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
+					content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
 					content += '<td align="right">';
 					content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
-					//content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
+					content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteEventRule(\'' + rule.trigger + '\')">';
 					content += '</td></tr></table></div>';
 				}
+				content += '<div class="file"><table width="100%"><tr>';
+				content += '<td width="90%"><input value="new.event_rule" id="new_event_rule" class="fill"/></td>';
+				content += '<td align="right">';
+				content += '<img src="img/add.png" height="32px" class="link" onclick="createEventRule()">';
+				content += '</td></tr></table></div>';
 				root.innerHTML = content;
 			}
 		});
