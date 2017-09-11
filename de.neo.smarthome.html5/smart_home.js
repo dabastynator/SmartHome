@@ -7,14 +7,16 @@ var mPlaylist = '';
 
 function initialize() {
 	readSetting();
-
 	align();
 	window.addEventListener('resize', align);
 
+	if (mEndpoint == null || mEndpoint == ''){
+		mEndpoint = mDefaultEndpoint;
+		mToken = mDefaultToken;
+	}
 
 	var volume_input = document.getElementById('volume_input');
 	volume_input.addEventListener('input', setVolume);
-
 
 	loop();
 	refreshControlCenter();
@@ -33,6 +35,8 @@ function readSetting(){
 	mToken = window.localStorage.getItem("token");
 	mMediaCenter = window.localStorage.getItem("mediacenter");
 	mPath = window.localStorage.getItem("path");
+	var animate = window.localStorage.getItem("animation");
+	mAnimation = (animate != null) && (animate === "yes");
 	if (mPath == null)
 		mPath = '';
 }
@@ -40,6 +44,7 @@ function readSetting(){
 function initSettings(){
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
+	var animate = document.getElementById('setting_animation');
 	if (mEndpoint != null)
 		endpoint.value = mEndpoint;
 	else
@@ -48,13 +53,16 @@ function initSettings(){
 		token.value = mToken;
 	else
 		token.value = '';
+	animate.checked = mAnimation;
 }
 
 function saveSettings(){
 	mEndpoint = document.getElementById('setting_endpoint').value;
 	mToken = document.getElementById('setting_token').value;
+	mAnimation = document.getElementById('setting_animation').checked;
 	window.localStorage.setItem("endpoint", mEndpoint);
 	window.localStorage.setItem("token", mToken);
+	window.localStorage.setItem("animation", mAnimation ? "yes" : "no");
 	refreshControlCenter();
 	refreshFiles();
 	refreshPlaylist();
@@ -195,8 +203,6 @@ function refreshControlCenter(){
 						content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
 					}
 					content += m.name + "</div>";
-					if (i % 2 == 5)
-						content += "<br/>";
 				}
 				root.innerHTML = content;
 			} else {
@@ -317,11 +323,11 @@ function refreshFiles(){
 					}
 					content += '<table width="100%"><tr>';
 					if (f.filetype == "Directory") {
-						content += '<td width="90%" class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
+						content += '<td class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
 					} else {
-						content += '<td width="90%" class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
+						content += '<td class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
 					}
-					content += '<td align="right" width="100px">';
+					content += '<td align="right" width="70px">';
 					content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
 					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
 					content += '</td></tr></table></div>';
@@ -517,14 +523,27 @@ function deleteEventRule(trigger){
 	}
 }
 
-function applyTrigger(){
-}
-
 function addInfo(){
 	if (mEndpoint != null && mEndpoint != ''){
 		var request = new XMLHttpRequest();
 		var info = document.getElementById('trigger_infos');
 		var url = mEndpoint + '/controlcenter/set_information_for_event_rule?token=' + mToken + '&trigger=' + mRuleId + '&informations=' + info.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
+function deleteEvent(index){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/delete_event_in_rule?token=' + mToken + '&trigger=' + mRuleId + '&index=' + index;
 		request.open("GET", url);
 		request.addEventListener('load', function(event) {
 			if (checkResult(request)) {
@@ -556,7 +575,9 @@ function showTrigger(index){
 	contentText = '<table width="100%">';
 	for (var i = 0; i < trigger.events.length; i++){
 		var event = trigger.events[i];
-		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id + '</td></tr>';
+		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id + ''
+		contentText += '<img src="img/delete.png" height="32px"/ class="link right" onclick="deleteEvent(\'' + i + '\')">';
+		contentText += '</td></tr>';
 		condition = '';
 		if (event.condition != null)
 			condition = event.condition;

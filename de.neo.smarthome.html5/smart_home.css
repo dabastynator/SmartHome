@@ -39,6 +39,14 @@ body {
 	cursor:pointer;
 }
 
+.right {
+	float: right
+}
+
+.left {
+	float: left
+}
+
 .container {
 	visibility: hidden;
 	position: fixed;

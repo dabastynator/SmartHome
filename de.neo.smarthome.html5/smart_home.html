@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<title>SmartHome console</title>
 	<script src="smart_home.js"></script>
+	<script src="smart_home_credentials.js"></script>
 	<script src="utils.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Jura">
 	<link href="smart_home.css" rel="stylesheet">
@@ -13,13 +14,9 @@
 
 <!-- Main border layout content -->
 <div id="north" class="card" align=right>
-	<table width=100%><tr>
-		<td width=90% align=center id="controlcenter">No controlcenter Ladida</td>
-		<td align=right>
-			<img width=48px style="margin: 7px" src="img/code.png" class="link" onclick="showRules();"/>
-			<img width=48px style="margin: 7px" src="img/settings.png" class="link" onclick="initSettings();showDialog('settings');"/>
-		</td>
-	</tr></table>
+	<div id="controlcenter" style="float: left;">No controlcenter</div>
+	<img width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
+	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showRules();"/>
 </div >
 
 <div id="south" class="card">
@@ -41,6 +38,12 @@
 
 <div id="center" class="card">No files</div>
 
+<div id="border_navigation" class="card">
+	<div class="switch off" id="nav_switch" onclick="showArea('west')">Switches</div>
+	<div class="switch off" id="nav_files" onclick="showArea('center')">Files</div>
+	<div class="switch off" id="nav_pls" onclick="showArea('east')">Playlists</div>
+</div>
+
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
 	<div id="content_settings" class="card">
@@ -48,6 +51,7 @@
 			<tr><td colspan="2" class="headline">Settings</td></tr>
 			<tr><td>Endpoint</td><td><input id="setting_endpoint"/></td></tr>
 			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
+			<tr><td>Animations</td><td><input id="setting_animation" type="checkbox"></td></tr>
 			<tr><td colspan="2" align=right>	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 														<button type="button" onclick="hideDialog('settings')">Cancel</button></td></tr>
 		</table>
@@ -96,8 +100,7 @@
 				<td><img src="img/add.png" height="32px" class="link" onclick="addInfo()"></td></tr>
 			<tr><td colspan="3"><div id="trigger_content" style="height: 200px; overflow: auto">Content</div></td></tr>
 			<tr><td colspan="3" align=right>
-				<button type="button" onclick="applyTrigger();hideDialog('trigger');">OK</button>
-				<button type="button" onclick="hideDialog('trigger');">Cancel</button>
+				<button type="button" onclick="hideDialog('trigger');">OK</button>
 			</td></tr>
 		</table>
 	</div>
