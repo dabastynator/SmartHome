@@ -25,10 +25,10 @@ public class Event implements Serializable {
 	@Persist(name = "unitID")
 	private String mUnitID;
 
+	@WebField(name = "parameter")
 	@OneToMany(domainClass = Parameter.class, name = "Parameter")
 	private List<Parameter> mParameterList = new ArrayList<>();
 
-	@WebField(name = "parameter")
 	private Map<String, String> mParameter = new HashMap<String, String>();
 
 	@WebField(name = "condition")
@@ -88,6 +88,15 @@ public class Event implements Serializable {
 	public void addParameter(Parameter param) {
 		mParameterList.add(param);
 		mParameter.put(param.mKey, param.mValue);
+	}
+
+	public List<Parameter> getParameteList() {
+		return mParameterList;
+	}
+
+	public void deleteParameter(Parameter param) {
+		mParameterList.remove(param);
+		mParameter.remove(param.mKey);
 	}
 
 }

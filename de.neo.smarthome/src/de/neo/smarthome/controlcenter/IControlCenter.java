@@ -149,6 +149,22 @@ public interface IControlCenter {
 			throws RemoteException, DaoException;
 
 	/**
+	 * Delete parameter for event given event rule by event index and parameter
+	 * index.
+	 * 
+	 * @param triggerID
+	 * @param eventIndex
+	 * @param parameterIndex
+	 * @return modified event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given event rule by event index and parameter index.")
+	public EventRule deleteParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "parameter_index") int parameterIndex)
+			throws RemoteException, DaoException;
+
+	/**
 	 * Set informations for event given event rule. Several information are
 	 * separated by comma.
 	 * 
@@ -161,6 +177,21 @@ public interface IControlCenter {
 	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
 	public EventRule setInformationsforEventRule(@WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "informations") String informations) throws RemoteException, DaoException;
+
+	/**
+	 * Set condition for an event of an given event rule.
+	 * 
+	 * @param triggerID
+	 * @param eventIndex
+	 * @param constrains
+	 * @return modified event rule
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "set_condition_for_event_in_rule", description = "Set condition for an event of an given event rule.")
+	public EventRule setConditionforEvent(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException;
 
 	/**
 	 * Get all controlunits of the controlcenter. The map maps the control-unit

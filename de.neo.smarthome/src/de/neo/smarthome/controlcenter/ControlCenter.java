@@ -218,7 +218,7 @@ public class ControlCenter implements IControlCenter {
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
-		if (rule.getEvents().size() < index)
+		if (rule.getEvents().size() <= index)
 			throw new IllegalArgumentException(
 					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
 		Event event = rule.getEvents().get(index);
@@ -229,6 +229,31 @@ public class ControlCenter implements IControlCenter {
 
 		Dao<Parameter> paramDao = DaoFactory.getInstance().getDao(Parameter.class);
 		paramDao.save(param);
+
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		eventDao.update(event);
+		return rule;
+	}
+
+	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given event rule by event index and parameter index.")
+	public EventRule deleteParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "parameter_index") int parameterIndex)
+			throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		if (rule.getEvents().size() <= eventIndex)
+			throw new IllegalArgumentException(
+					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
+		Event event = rule.getEvents().get(eventIndex);
+		if (event.getParameter().size() <= parameterIndex)
+			throw new IllegalArgumentException(
+					"Parameter index out of range. Event has " + event.getParameter().size() + " parameter(s).");
+		Parameter param = event.getParameteList().get(parameterIndex);
+		event.deleteParameter(param);
+
+		Dao<Parameter> paramDao = DaoFactory.getInstance().getDao(Parameter.class);
+		paramDao.delete(param);
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.update(event);
@@ -247,6 +272,24 @@ public class ControlCenter implements IControlCenter {
 		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
 		eventRuleDao.update(rule);
 
+		return rule;
+	}
+
+	@WebRequest(path = "set_condition_for_event_in_rule", description = "Set condition for an event of an given event rule.")
+	public EventRule setConditionforEvent(@WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException {
+		if (!mEventRuleMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		EventRule rule = mEventRuleMap.get(triggerID);
+		if (rule.getEvents().size() <= eventIndex)
+			throw new IllegalArgumentException(
+					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
+		Event event = rule.getEvents().get(eventIndex);
+		event.setCondition(condition);
+
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		eventDao.update(event);
 		return rule;
 	}
 

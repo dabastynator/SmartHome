@@ -10,6 +10,7 @@ import de.neo.persist.annotations.Domain;
 import de.neo.persist.annotations.OnLoad;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
+import de.neo.remote.web.WebField;
 
 @Domain
 public class Trigger implements Serializable {
@@ -87,9 +88,11 @@ public class Trigger implements Serializable {
 	@Domain
 	public static class Parameter {
 
+		@WebField(name = "key")
 		@Persist(name = "key")
 		public String mKey;
 
+		@WebField(name = "value")
 		@Persist(name = "value")
 		public String mValue;
 	}
