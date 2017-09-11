@@ -18,10 +18,10 @@ function initialize() {
 	var volume_input = document.getElementById('volume_input');
 	volume_input.addEventListener('input', setVolume);
 
-	loop();
 	refreshControlCenter();
 	refreshFiles();
 	refreshPlaylist();
+	loop();
 	
 	// Setup refresh loop for 5 seconds
 	setInterval(loop, 1000 * 5);
@@ -60,6 +60,7 @@ function saveSettings(){
 	mEndpoint = document.getElementById('setting_endpoint').value;
 	mToken = document.getElementById('setting_token').value;
 	mAnimation = document.getElementById('setting_animation').checked;
+	mMediaCenter = '';
 	window.localStorage.setItem("endpoint", mEndpoint);
 	window.localStorage.setItem("token", mToken);
 	window.localStorage.setItem("animation", mAnimation ? "yes" : "no");
@@ -192,6 +193,8 @@ function refreshControlCenter(){
 				var media = JSON.parse(request.responseText);
 				media.sort(function(a, b){return a.name.localeCompare(b.name)});
 				var content = "";
+				if (media.length == 1)
+					mMediaCenter = media[0].id;
 				for (var i = 0; i < media.length; i++) {
 					var m = media[i];
 					if (m.id == mMediaCenter) {
