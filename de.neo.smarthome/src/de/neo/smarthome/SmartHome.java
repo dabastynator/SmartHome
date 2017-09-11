@@ -30,7 +30,6 @@ import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.CronJobTrigger;
 import de.neo.smarthome.controlcenter.EventRule;
-import de.neo.smarthome.controlcenter.EventRule.Information;
 import de.neo.smarthome.controlcenter.IControllUnit;
 import de.neo.smarthome.gpio.GPIOControlUnit;
 import de.neo.smarthome.gpio.WebSwitchImpl;
@@ -100,7 +99,6 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
 		builder.registerDao(new XMLDao<EventRule>(EventRule.class));
 		builder.registerDao(new XMLDao<Event>(Event.class));
-		builder.registerDao(new XMLDao<Information>(Information.class));
 		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
 		builder.registerDao(new XMLDao<Parameter>(Parameter.class));
 

@@ -27,8 +27,8 @@ public class EventRule {
 	private String mTrigger;
 
 	@WebField(name = "information")
-	@OneToMany(domainClass = Information.class, name = "Information")
-	private List<Information> mInformation = new ArrayList<>();
+	@Persist(name = "information")
+	private String mInformation;
 
 	private ControlCenter mCenter;
 
@@ -49,8 +49,10 @@ public class EventRule {
 		if (fireEvents) {
 			Map<String, String> parameters = new HashMap<>();
 			parameters.putAll(trigger.getParameter());
-			for (Information info : mInformation) {
-				fillMapByInformation(parameters, info.mKey);
+			for (String info : mInformation.split(",")) {
+				info = info.trim();
+				if (info.length() > 0)
+					fillMapByInformation(parameters, info);
 			}
 			List<Event> events = new ArrayList<>();
 			for (Event e : mEvents) {
@@ -136,20 +138,11 @@ public class EventRule {
 		return mEvents;
 	}
 
-	public List<Information> getInformations() {
+	public String getInformations() {
 		return mInformation;
 	}
 
-	@Domain
-	public static class Information {
-
-		@Persist(name = "key")
-		@WebField(name = "key")
-		public String mKey;
-
-		@Override
-		public String toString() {
-			return mKey;
-		}
+	public void setInformation(String informations) {
+		mInformation = informations;
 	}
 }

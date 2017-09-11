@@ -22,7 +22,6 @@ import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
-import de.neo.smarthome.controlcenter.EventRule.Information;
 import de.neo.smarthome.informations.WebInformation;
 
 /**
@@ -199,7 +198,7 @@ public class ControlCenter implements IControlCenter {
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
-		if (rule.getEvents().size() < index)
+		if (rule.getEvents().size() <= index)
 			throw new IllegalArgumentException(
 					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
 		Event event = rule.getEvents().get(index);
@@ -243,22 +242,7 @@ public class ControlCenter implements IControlCenter {
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
-		List<Information> oldInfo = new ArrayList<>(rule.getInformations());
-		rule.getInformations().clear();
-		for (String key : informations.split(",")) {
-			key = key.trim();
-			if (key.length() > 0) {
-				Information info = new Information();
-				info.mKey = key;
-				rule.getInformations().add(info);
-			}
-		}
-
-		Dao<Information> infoDao = DaoFactory.getInstance().getDao(Information.class);
-		for (Information info : oldInfo)
-			infoDao.delete(info);
-		for (Information info : rule.getInformations())
-			infoDao.save(info);
+		rule.setInformation(informations);
 
 		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
 		eventRuleDao.update(rule);
