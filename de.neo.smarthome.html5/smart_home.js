@@ -93,8 +93,6 @@ function refreshSwitches(){
 						content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
 					}
 					content += s.name + "</div>";
-					if (i % 2 == 1)
-						content += "<br/>";
 				}
 				root.innerHTML = content;
 			} else {
@@ -594,6 +592,41 @@ function createNewParameter(index){
 	}
 }
 
+function updateCondition(index){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var condition = document.getElementById("condition_" + index);
+		var url = mEndpoint + '/controlcenter/set_condition_for_event_in_rule?token=' + mToken + '&trigger=' + mRuleId + 
+			'&event_index=' + index + '&condition=' + condition.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
+function deleteParameter(index){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var url = mEndpoint + '/controlcenter/delete_parameter_for_event?token=' + mToken + '&trigger=' + mRuleId + 
+			'&event_index=' + index + '&parameter_index=' + (mRules[mRuleIndex].events[index].parameter.length - 1);
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
 function showTrigger(index){
 	var trigger = mRules[index];
 	mRuleIndex = index;
@@ -610,29 +643,28 @@ function showTrigger(index){
 	contentText = '<table width="100%">';
 	for (var i = 0; i < trigger.events.length; i++){
 		var event = trigger.events[i];
-		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id;
+		contentText += '<tr><td colspan="3" class="highlight">' + event.unit_id;
 		contentText += '<img src="img/delete.png" height="32px" class="link right" onclick="deleteEvent(' + i + ')">';
 		contentText += '</td></tr>';
 		condition = '';
 		if (event.condition != null)
 			condition = event.condition;
-		contentText += '<tr><td style="width: 195px">Condition</td><td><input class="fill" value="' + condition + '"/></td></tr>';
+		contentText += '<tr><td style="width: 195px">Condition</td><td><input class="fill" value="' + condition + '" id="condition_'+i+'"/></td>';
+		contentText += '<td style="width: 40px"><img src="img/add.png" height="32px" class="link right" onclick="updateCondition(' + i + ')"></td></tr>';
 		parameter = '';
-		for (var property in event.parameter) {
-			if (event.parameter.hasOwnProperty(property)) {
-				parameter += property + '=\'' + event.parameter[property] + '\', ';
-			}
+		for (var j = 0; j < event.parameter.length; j++){
+			parameter += event.parameter[j].key + '=\'' + event.parameter[j].value + '\', ';
 		}
-		contentText += '<tr><td>Parameter</td><td><input class="fill" value="' + parameter + '"/></td></tr>';
-		contentText += '<tr><td>New Parameter</td><td>';
-		contentText += '<input style="width: 150px" id="new_param_key" value="key"/><input style="width: 150px" id="new_param_value" value="value"/>';
-		contentText += '<img src="img/add.png" height="32px" class="link right" onclick="createNewParameter(' + i + ')"></td></tr>';
+		contentText += '<tr><td>Parameter</td><td><input class="fill" value="' + parameter + '"/></td>';
+		contentText += '<td><img src="img/delete.png" height="32px" class="link right" onclick="deleteParameter(' + i + ')"></td></tr>';
+		contentText += '<tr><td>New Parameter</td>';
+		contentText += '<td><input class="half" id="new_param_key" value="key"/><input class="half" id="new_param_value" value="value"/></td>';
+		contentText += '<td><img src="img/add.png" height="32px" class="link right" onclick="createNewParameter(' + i + ')"></td></tr>';
 	}
 	contentText += '<tr><td class="highlight" style="width: 195px">New event</td>';
-	contentText += '<td class="highlight"><input style="width: 150px" id="new_event" value="unit_id"/><input style="width: 150px" class="fill" id="new_event_condition"  value="condition"/>';
-	contentText += '<img src="img/add.png" height="32px" class="link right" onclick="createNewEvent()">';
-	contentText += '</td></tr>';
-	contentText += '</table>';
+	contentText += '<td class="highlight"><input class="half" id="new_event" value="unit_id"/><input class="half" id="new_event_condition"  value="condition"/></td>';
+	contentText += '<td><img src="img/add.png" height="32px" class="link right" onclick="createNewEvent()"></td>';
+	contentText += '</tr></table>';
 	content.innerHTML = contentText;
 
 	showDialog('trigger');
