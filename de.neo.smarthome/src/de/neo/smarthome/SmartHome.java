@@ -91,17 +91,18 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
 		builder.registerDao(new XMLDao<Wall>(Wall.class));
 		builder.registerDao(new XMLDao<Point>(Point.class));
+
+		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
+		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
+		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
+		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
+
 		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
 		builder.registerDao(new XMLDao<EventRule>(EventRule.class));
 		builder.registerDao(new XMLDao<Event>(Event.class));
 		builder.registerDao(new XMLDao<Information>(Information.class));
 		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
 		builder.registerDao(new XMLDao<Parameter>(Parameter.class));
-
-		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
-		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
-		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
-		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
 
 		builder.registerDao(new XMLDao<InformationWeather>(InformationWeather.class));
 		builder.registerDao(new XMLDao<InformationTrigger>(InformationTrigger.class));
