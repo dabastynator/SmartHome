@@ -556,6 +556,44 @@ function deleteEvent(index){
 	}
 }
 
+function createNewEvent(){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var unit = document.getElementById("new_event");
+		var condition = document.getElementById("new_event_condition");
+		var url = mEndpoint + '/controlcenter/create_event_for_rule?token=' + mToken + '&trigger=' + mRuleId + 
+			'&unit=' + unit.value + '&condition=' + condition.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
+function createNewParameter(index){
+	if (mEndpoint != null && mEndpoint != ''){
+		var request = new XMLHttpRequest();
+		var key = document.getElementById("new_param_key");
+		var value = document.getElementById("new_param_value");
+		var url = mEndpoint + '/controlcenter/add_parameter_for_event?token=' + mToken + '&trigger=' + mRuleId + 
+			'&index=' + index + '&key=' + key.value + '&value=' + value.value;
+		request.open("GET", url);
+		request.addEventListener('load', function(event) {
+			if (checkResult(request)) {
+				var rules = JSON.parse(request.responseText);
+				hideDialog('trigger');
+				showRules();
+			}
+		});
+		request.send();
+	}
+}
+
 function showTrigger(index){
 	var trigger = mRules[index];
 	mRuleIndex = index;
@@ -567,16 +605,13 @@ function showTrigger(index){
 	
 	title.innerHTML = 'Edit trigger';
 	id.value = trigger.trigger;
-	infoText = '';
-	for (var i = 0; i < trigger.information.length; i++)
-		infoText += trigger.information[i].key + ', ';
-	infos.value = infoText;
+	infos.value = trigger.information;
 
 	contentText = '<table width="100%">';
 	for (var i = 0; i < trigger.events.length; i++){
 		var event = trigger.events[i];
-		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id + ''
-		contentText += '<img src="img/delete.png" height="32px"/ class="link right" onclick="deleteEvent(\'' + i + '\')">';
+		contentText += '<tr><td colspan="2" class="highlight">' + event.unit_id;
+		contentText += '<img src="img/delete.png" height="32px" class="link right" onclick="deleteEvent(' + i + ')">';
 		contentText += '</td></tr>';
 		condition = '';
 		if (event.condition != null)
@@ -589,8 +624,14 @@ function showTrigger(index){
 			}
 		}
 		contentText += '<tr><td>Parameter</td><td><input class="fill" value="' + parameter + '"/></td></tr>';
-
+		contentText += '<tr><td>New Parameter</td><td>';
+		contentText += '<input style="width: 150px" id="new_param_key" value="key"/><input style="width: 150px" id="new_param_value" value="value"/>';
+		contentText += '<img src="img/add.png" height="32px" class="link right" onclick="createNewParameter(' + i + ')"></td></tr>';
 	}
+	contentText += '<tr><td class="highlight" style="width: 195px">New event</td>';
+	contentText += '<td class="highlight"><input style="width: 150px" id="new_event" value="unit_id"/><input style="width: 150px" class="fill" id="new_event_condition"  value="condition"/>';
+	contentText += '<img src="img/add.png" height="32px" class="link right" onclick="createNewEvent()">';
+	contentText += '</td></tr>';
 	contentText += '</table>';
 	content.innerHTML = contentText;
 
