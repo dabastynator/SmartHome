@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Options -->
+    <string name="left">Links</string>
+    <string name="right">Right</string>
+    <string name="player">Player</string>
+    <string name="make_bright">Bildschirm hell</string>
+    <string name="make_dark">Bildschirm dunkel</string>
+    <string name="audio_track">Nächste Audio Spur</string>
+    <string name="move_right">Nach rechts</string>
+    <string name="move_left">Nach links</string>
+    <string name="shutdown">Ausschalten</string>
+    <string name="control">Kontrolle</string>
+    <string name="exit">Beenden</string>
+    <string name="settings">Einstellungen</string>
+    <string name="appearance">Darstellung</string>
+    <string name="stay_foreground">Im Vordergrund</string>
+    <string name="stay_foreground_long">Remote Service beibt im Vordergrund. Sichtbar durch Notification</string>
+    <string name="use_playing_session">Wiedergabe an Android senden</string>
+    <string name="background">Hintergrund</string>
+    <string name="connection_trigger">Aktion bei WLAN Verbindung</string>
+    <string name="volume">Lautstärke</string>
+
+    <!-- Play control strings -->
+    <string name="player_play">Abspielen</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_vol_down">Leiser</string>
+    <string name="player_vol_up">Lauter</string>
+    <string name="player_no_file_playing">Keine Wiedergabe</string>
+    <string name="player_play_directory">Ordner abspielen</string>
+
+    <!-- Playlist strings -->
+    <string name="playlist_add_item">Zu Playlist hinzufügen</string>
+    <string name="playlist_select">Playlist auswählen</string>
+    <string name="playlist_remove_item">Von Playlist entfernen</string>
+    <string name="playlist_show">Zeige Playlist</string>
+    <string name="playlist_delete">Lösche Playlist</string>
+    <string name="playlist_deleted">Playlist gelöscht</string>
+    <string name="playlist_added">Playlist hinzugefügt</string>
+    <string name="playlist_add">Playlist hinzufügen</string>
+    <string name="playlist_enter_name">Gib den Namen der neuen Playlist ein</string>
+
+    <!-- Server strings -->
+    <string name="server_favorite">Als Favorit setzen</string>
+    <string name="server_edit">Bearbeiten</string>
+    <string name="server_name">Name</string>
+    <string name="server_endpoint">Adresse</string>
+    <string name="server_apitoken">API Sicherheitstoken</string>
+    <string name="server_add_new_server">Neuen Server anlegen</string>
+    <string name="server_ip">IP</string>
+    <string name="server_post">Senden</string>
+    <string name="server_added">Server hinzugefügt</string>
+    <string name="server_no_favorite">Kein bevorzuger Server vorhanden</string>
+
+    <!-- Remote connection strings -->
+    <string name="connecting">Verbinden...</string>
+    <string name="load_controlcenter">Lade Controlcenter</string>
+    <string name="loaded_controlcenter">Controlcenter geladen</string>
+    <string name="no_controlcenter">Kein Controlcenter gefunden</string>
+    <string name="loading">Lade...</string>
+    <string name="no_conneciton">Keine Verbindung</string>
+    <string name="no_conneciton_with_server">Kein Server verbunden</string>
+    <string name="error_load_server">Fehler beim Verbinungsaufbau</string>
+    <string name="refresh">Neu Laden</string>
+
+    <!-- Command action strings -->
+    <string name="command_stop">Aktion stoppen</string>
+    <string name="command_stop_long">Möchten Sie wirkling die Aktion stoppen: </string>
+
+    <!-- LED action strings -->
+    <string name="led_change_mode">Modus für das LED-Strip</string>
+    <string name="led_mode_party">Party</string>
+    <string name="led_mode_normal">Normal</string>
+
+    <!-- Media server strings -->
+    <string name="mediaserver_load">Lade Mediaserver...</string>
+    <string name="mediaserver_no_server">Kein Mediaserver</string>
+    <string name="mediaserver_no_server_selected_at">Kein Mediaserver festgelegt bei </string>
+
+    <!-- Power switch -->
+    <string name="switch_power">Internet Power Switch</string>
+    <string name="switch_has_no_switch"> hat keinen Schalter </string>
+
+    <!-- General -->
+    <string name="str_create">Erstellen</string>
+    <string name="str_name">Name</string>
+    <string name="delete">Löschen</string>
+    <string name="app_name">RemoteControl</string>
+    <string name="str_download">Herunterladen</string>
+    <string name="str_upload">Hochladen</string>
+
+</resources>

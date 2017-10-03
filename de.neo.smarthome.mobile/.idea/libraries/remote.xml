@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="remote">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/deneosmarthomemobile/libs/remote.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="color-picker-view-1.4.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/23e022464fa66953f5550787fe93b7c26944c380/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/23e022464fa66953f5550787fe93b7c26944c380/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.danielnilsson9/color-picker-view/1.4.0/fca1e10a9ab3e779d60e4f6f9b1d6857cd234140/color-picker-view-1.4.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

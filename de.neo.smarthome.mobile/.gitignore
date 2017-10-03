@@ -1,4 +1,2 @@
-/src_webcam
-/src_api
-/bin
-.gitignore
+build
+local.properties

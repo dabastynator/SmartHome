@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="@dimen/player_button_size"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical" >
+
+    <Button
+        android:id="@+id/button_quit"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:background="@drawable/player_stop" />
+
+    <Button
+        android:id="@+id/button_next"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_quit"
+        android:background="@drawable/player_next" />
+
+    <Button
+        android:id="@+id/button_seek_fwd"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_next"
+        android:background="@drawable/player_seek_fw" />
+
+    <Button
+        android:id="@+id/button_vol_up"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_below="@id/button_seek_fwd"
+        android:background="@drawable/player_vol_up" />
+
+</RelativeLayout>

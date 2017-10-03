@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="persist">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/deneosmarthomemobile/libs/persist.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

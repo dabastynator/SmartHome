@@ -1,7 +1,0 @@
-<resources>
-
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="player_button_size">64dp</dimen>
-    <dimen name="player_button_widget_size">55dp</dimen>
-
-</resources>

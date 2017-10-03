@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="de-neo-android-0.8.2">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/ab623a402c4bbc7b2dda39188e6bbc3906775c3a/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/ab623a402c4bbc7b2dda39188e6bbc3906775c3a/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/de.bastynator/de-neo-android/0.8.2/2f83d61bf6b749bb99166a658fa10ee1812165a6/de-neo-android-0.8.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

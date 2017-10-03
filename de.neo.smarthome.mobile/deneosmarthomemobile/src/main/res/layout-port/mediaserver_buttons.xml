@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout1"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/player_button_size"
+    android:gravity="center_horizontal" >
+
+    <Button
+        android:id="@+id/button_play"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:background="@drawable/player_pause" />
+
+    <Button
+        android:id="@+id/button_quit"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_toRightOf="@id/button_play"
+        android:background="@drawable/player_stop" />
+
+    <Button
+        android:id="@+id/button_pref"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_toRightOf="@id/button_quit"
+        android:background="@drawable/player_prev" />
+
+    <Button
+        android:id="@+id/button_next"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_toRightOf="@id/button_pref"
+        android:background="@drawable/player_next" />
+
+    <Button
+        android:id="@+id/button_full"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_toRightOf="@id/button_next"
+        android:background="@drawable/player_fullscreen" />
+
+</RelativeLayout>
