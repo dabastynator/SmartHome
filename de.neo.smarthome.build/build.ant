@@ -11,8 +11,6 @@
 	<property name="classes.dir" value="./build/classes" />
 	<property name="jar.dir" value="./build/jar" />
 
-	<property name="jar.destiny" value="/opt/neo/" />
-
 	<path id="classpath">
 		<fileset dir="${lib.remote}" includes="**/*.jar" />
 		<fileset dir="${lib.persist}" includes="**/*.jar" />
@@ -23,7 +21,17 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="jar_remote" depends="clean">
+	<target name="jar_persist" depends="clean">
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${jar.dir}" />
+		<javac srcdir="${src.persist}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />
+		<jar destfile="${jar.dir}/persist.jar" basedir="${classes.dir}">
+			<zipgroupfileset dir="${lib.persist}" includes="*.jar" excludes="" />
+			<fileset dir="${src.persist}" includes="**/*.java" />
+		</jar>
+	</target>
+	
+	<target name="jar_remote" depends="jar_persist">
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
 		<javac srcdir="${src.remote}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" />

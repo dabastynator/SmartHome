@@ -8,7 +8,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
-import de.neo.smarthome.controlcenter.IControlCenter.BeanWeb;
+import de.neo.smarthome.api.IControlCenter.BeanWeb;
 
 public interface IWebAction extends RemoteAble {
 

@@ -1,4 +1,4 @@
-package de.neo.smarthome.controlcenter;
+package de.neo.smarthome.api;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -10,8 +10,6 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
-import de.neo.smarthome.api.GroundPlot;
-import de.neo.smarthome.api.Trigger;
 
 /**
  * The control center handles all control units and information about the

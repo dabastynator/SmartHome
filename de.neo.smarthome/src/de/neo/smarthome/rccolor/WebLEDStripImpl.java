@@ -7,10 +7,10 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
+import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IWebLEDStrip;
 import de.neo.smarthome.controlcenter.ControlCenter;
-import de.neo.smarthome.controlcenter.IControlCenter;
-import de.neo.smarthome.controlcenter.IControllUnit;
 
 public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip {
 

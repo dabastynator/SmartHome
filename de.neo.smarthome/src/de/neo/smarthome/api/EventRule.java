@@ -1,4 +1,4 @@
-package de.neo.smarthome.controlcenter;
+package de.neo.smarthome.api;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,9 +11,8 @@ import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
-import de.neo.smarthome.api.Trigger;
+import de.neo.smarthome.controlcenter.ControlCenter;
 
 @Domain
 public class EventRule {
