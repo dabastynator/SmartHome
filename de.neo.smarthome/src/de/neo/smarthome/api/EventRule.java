@@ -48,10 +48,12 @@ public class EventRule {
 		if (fireEvents) {
 			Map<String, String> parameters = new HashMap<>();
 			parameters.putAll(trigger.getParameter());
-			for (String info : mInformation.split(",")) {
-				info = info.trim();
-				if (info.length() > 0)
-					fillMapByInformation(parameters, info);
+			if (mInformation != null) {
+				for (String info : mInformation.split(",")) {
+					info = info.trim();
+					if (info.length() > 0)
+						fillMapByInformation(parameters, info);
+				}
 			}
 			List<Event> events = new ArrayList<>();
 			for (Event e : mEvents) {
@@ -61,6 +63,7 @@ public class EventRule {
 			return events.toArray(new Event[events.size()]);
 		}
 		return new Event[0];
+
 	}
 
 	private boolean evaluateCondition(Map<String, String> parameters, String condition) {
