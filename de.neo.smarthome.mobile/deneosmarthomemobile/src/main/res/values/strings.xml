@@ -87,10 +87,10 @@
     <string name="str_create">Create</string>
     <string name="str_name">Name</string>
     <string name="delete">Delete</string>
-    <string name="app_name">RemoteControl</string>
+    <string name="app_name">Smart Home</string>
     <string name="str_download">Download</string>
     <string name="str_upload">Upload</string>
-    <string name="str_entry_deleted">Eintrag gelöscht</string>
-    <string name="str_entry_add">Eintrag hinzugefügt</string>
+    <string name="str_entry_deleted">Entry deleted</string>
+    <string name="str_entry_add">Entry added</string>
 
 </resources>

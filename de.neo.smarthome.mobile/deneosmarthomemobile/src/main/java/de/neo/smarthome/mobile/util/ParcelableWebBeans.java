@@ -65,7 +65,9 @@ public class ParcelableWebBeans {
 		bean.setStartTime(source.readLong());
 		bean.setTitle(source.readString());
 		bean.setVolume(source.readInt());
-		bean.setState(PlayingBean.STATE.values()[source.readInt()]);
+		int index = source.readInt();
+		if (index >= 0 && index < PlayingBean.STATE.values().length)
+			bean.setState(PlayingBean.STATE.values()[index]);
 		return bean;
 	}
 

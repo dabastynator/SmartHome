@@ -52,6 +52,7 @@
     <string name="server_post">Senden</string>
     <string name="server_added">Server hinzugefügt</string>
     <string name="server_no_favorite">Kein bevorzuger Server vorhanden</string>
+    <string name="server_no_server">Kein Server vorhanden</string>
 
     <!-- Remote connection strings -->
     <string name="connecting">Verbinden...</string>
@@ -86,8 +87,10 @@
     <string name="str_create">Erstellen</string>
     <string name="str_name">Name</string>
     <string name="delete">Löschen</string>
-    <string name="app_name">RemoteControl</string>
+    <string name="app_name">Smart Home</string>
     <string name="str_download">Herunterladen</string>
     <string name="str_upload">Hochladen</string>
+    <string name="str_entry_deleted">Eintrag gelöscht</string>
+    <string name="str_entry_add">Eintrag hinzugefügt</string>
 
 </resources>
