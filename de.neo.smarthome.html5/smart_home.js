@@ -11,8 +11,8 @@ function initialize() {
 	window.addEventListener('resize', align);
 
 	if (mEndpoint == null || mEndpoint == ''){
-		mEndpoint = mDefaultEndpoint;
-		mToken = mDefaultToken;
+		mEndpoint = findGetParameter('endpoint');
+		mToken = findGetParameter('token');
 	}
 
 	var volume_input = document.getElementById('volume_input');
@@ -28,6 +28,17 @@ function initialize() {
 
 	if (mEndpoint == null || mEndpoint == '')
 		showDialog('settings');
+}
+
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+    }
+    return result;
 }
 
 function readSetting(){
