@@ -41,11 +41,6 @@ public class WidgetUpdater {
 				remoteViews.setTextViewText(R.id.lbl_widget_big, mediaserver.getCurrentPlaying().getTitle());
 				remoteViews.setTextViewText(R.id.lbl_widget_small, mediaserver.getCurrentPlaying().getArtist());
 				remoteViews.setTextViewText(R.id.lbl_widget_small2, mediaserver.getCurrentPlaying().getAlbum());
-				Intent browserIntent = new Intent(mContext, MediaServerActivity.class);
-				browserIntent.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, mediaserver.getID());
-				PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, browserIntent, 0);
-
-				remoteViews.setOnClickPendingIntent(R.id.lbl_widget_big, pendingIntent);
 
 				if (mediaserver.getCurrentPlaying().getState() == PlayingBean.STATE.PLAY)
 					remoteViews.setInt(R.id.button_widget_play, "setBackgroundResource", R.drawable.player_pause);
@@ -116,6 +111,15 @@ public class WidgetUpdater {
 		PendingIntent prevPending = PendingIntent.getService(mContext, 0, prevIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		remoteViews.setOnClickPendingIntent(R.id.button_widget_vol_down, prevPending);
+
+		// set start activity functionality
+		Intent activityIntent = new Intent(mContext, RemoteService.class);
+		activityIntent.setAction(RemoteService.ACTION_MEDIA_ACTIVITY);
+		activityIntent.setData(Uri.withAppendedPath(Uri.parse("ABCD://widget/id/"), String.valueOf(widgetID)));
+		activityIntent.putExtra(RemoteService.EXTRA_WIDGET, widgetID);
+		PendingIntent activityPending = PendingIntent.getService(mContext, 0, activityIntent,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		remoteViews.setOnClickPendingIntent(R.id.lbl_widget_big, activityPending);
 	}
 
 	public void updateSwitchWidget(int widgetID, IWebSwitch.BeanSwitch s) {
@@ -139,7 +143,7 @@ public class WidgetUpdater {
 	}
 
 	public int getImageForSwitchType(String type, boolean on) {
-		if (ControlSceneRenderer.AUDO.equals(type)) {
+		if (ControlSceneRenderer.AUDIO.equals(type)) {
 			if (on)
 				return R.drawable.music_on;
 			else

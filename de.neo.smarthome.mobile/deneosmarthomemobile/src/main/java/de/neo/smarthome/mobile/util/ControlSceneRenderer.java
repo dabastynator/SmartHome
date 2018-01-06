@@ -54,7 +54,7 @@ import de.remote.mobile.R;
 
 public class ControlSceneRenderer extends AbstractSceneRenderer {
 
-	public static final String AUDO = "audio";
+	public static final String AUDIO = "audio";
 	public static final String VIDEO = "video";
 	public static final String LAMP_LAVA = "lavalamp";
 	public static final String LAMP_READ = "readinglamp";
@@ -167,7 +167,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 		}
 		if ("remote".equals(description)) {
 			GLCube cube = new GLCube(GLFigure.STYLE_PLANE);
-			cube.setTexture(loadBitmap(R.drawable.ic_launcher));
+			cube.setTexture(loadBitmap(R.mipmap.ic_launcher));
 			cube.mSize[0] = cube.mSize[1] = cube.mSize[2] = 0.5f;
 			cube.setColor(1, 1, 1);
 			return cube;
@@ -245,7 +245,7 @@ public class ControlSceneRenderer extends AbstractSceneRenderer {
 			video.setTexture(GLFlatScreen.BOTTOM, loadBitmap(R.drawable.textur_metal));
 			return video;
 		}
-		if (type.equalsIgnoreCase(AUDO)) {
+		if (type.equalsIgnoreCase(AUDIO)) {
 			GLMediaServer audio = new GLMediaServer(GLFigure.STYLE_PLANE, false);
 			audio.setTexture(GLBox.BOX, loadBitmap(R.drawable.textur_holz), 1);
 			return audio;
