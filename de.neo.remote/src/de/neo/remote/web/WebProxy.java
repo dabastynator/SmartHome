@@ -68,12 +68,12 @@ public class WebProxy implements InvocationHandler {
 	}
 
 	private String createUrl(Method method, Object[] parameter) throws RemoteException {
-		StringBuilder sb = new StringBuilder(mEndPoint);
+		StringBuilder sb = new StringBuilder();
 		WebRequest annotation = method.getAnnotation(WebRequest.class);
 		if (annotation == null)
 			throw new RemoteException(
 					"WebRequest for method '" + method.getName() + "' not supported. Method not annotated.");
-		sb.append(annotation.path());
+		String path = annotation.path();
 		boolean firstParam = true;
 		if (mSecurityToken != null && mSecurityToken.length() > 0) {
 			sb.append("?token=");
@@ -82,22 +82,32 @@ public class WebProxy implements InvocationHandler {
 		}
 		if (parameter != null) {
 			for (int i = 0; i < parameter.length; i++) {
-				WebGet paramAnnoration = findWebGetAnnotation(method.getParameterAnnotations()[i]);
-				if (paramAnnoration == null)
-					throw new RemoteException("WebRequest for method '" + method.getName()
-							+ "' not supported. Parameter " + i + " not annotated.");
-				if (firstParam)
-					sb.append("?");
-				else
-					sb.append("&");
-				sb.append(paramAnnoration.name());
-				sb.append("=");
 				if (parameter[i] != null) {
+					WebGet paramAnnoration = findWebGetAnnotation(method.getParameterAnnotations()[i]);
+					if (paramAnnoration == null)
+						throw new RemoteException("WebRequest for method '" + method.getName()
+								+ "' not supported. Parameter " + i + " not annotated.");
+
+					String name = paramAnnoration.name();
+
 					try {
 						// Encode parameter two times to avoid this signs to be
 						// interpreted as query parts
 						String p = URLEncoder.encode(parameter[i].toString(), "UTF-8");
-						sb.append(URLEncoder.encode(p, "UTF-8"));
+						String value = URLEncoder.encode(p, "UTF-8");
+
+						if (paramAnnoration.replaceUrl()) {
+							path = path.replace("${" + paramAnnoration.name() + "}", p);
+						} else {
+							if (firstParam)
+								sb.append("?");
+							else
+								sb.append("&");
+							sb.append(name);
+							sb.append("=");
+							sb.append(value);
+							firstParam = false;
+						}
 					} catch (UnsupportedEncodingException e) {
 						RMILogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
 								"WebProxy");
@@ -105,6 +115,8 @@ public class WebProxy implements InvocationHandler {
 				}
 			}
 		}
+		sb.insert(0, path);
+		sb.insert(0, mEndPoint);
 		return sb.toString();
 	}
 
