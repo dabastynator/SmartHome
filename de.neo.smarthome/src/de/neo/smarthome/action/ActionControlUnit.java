@@ -8,10 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
 
 import de.neo.persist.annotations.Domain;
 import de.neo.persist.annotations.OnLoad;
@@ -60,7 +59,7 @@ public class ActionControlUnit extends AbstractControlUnit {
 		if (mThumbnail != null && mThumbnail.length() > 0) {
 			try {
 				byte[] bytes = loadFile(new File(mThumbnail));
-				mIconBase64 = DatatypeConverter.printBase64Binary(bytes);
+				mIconBase64 = Base64.getEncoder().encodeToString(bytes);
 			} catch (IOException e) {
 				try {
 					RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
