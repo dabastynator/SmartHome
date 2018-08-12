@@ -22,6 +22,7 @@ import de.neo.android.persistence.DaoException;
 import de.neo.android.persistence.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebProxyBuilder;
+import de.neo.smarthome.mobile.activities.MediaServerActivity;
 import de.neo.smarthome.mobile.api.IControlCenter;
 import de.neo.smarthome.mobile.api.IWebMediaServer;
 import de.neo.smarthome.mobile.api.IWebMediaServer.BeanMediaServer;
@@ -60,6 +61,7 @@ public class RemoteService extends Service {
 	public static final String ACTION_VOLUME = "de.remote.mobile.ACTION_VOLUME";
 	public static final String ACTION_DOWNLOAD = "de.remote.mobile.DOWNLOAD";
 	public static final String ACTION_FOREGROUND = "de.remote.mobile.FOREGROUND";
+	public static final String ACTION_MEDIA_ACTIVITY = "de.remote.mobile.MEDIA_ACTIVITY";
 
 	public static final String EXTRA_WIDGET = "widget_id";
 	public static final String EXTRA_DOWNLOAD = "download_file";
@@ -148,6 +150,15 @@ public class RemoteService extends Service {
 				}
 			} else if (ACTION_FOREGROUND.equals(intent.getAction())) {
 				updateForegroundNotification();
+			} else if (ACTION_MEDIA_ACTIVITY.equals(intent.getAction())){
+				int widgetID = intent.getIntExtra(EXTRA_WIDGET, 0);
+				SharedPreferences prefs = getSharedPreferences(PREFERENCES, 0);
+				final String remoteID = prefs.getString(widgetID + "", null);
+				if (remoteID != null){
+					Intent i = new Intent(this, MediaServerActivity.class);
+					i.putExtra(MediaServerActivity.EXTRA_MEDIA_ID, remoteID);
+					startActivity(i);
+				}
 			} else {
 				new Thread() {
 					public void run() {
@@ -174,7 +185,7 @@ public class RemoteService extends Service {
 			builder.setContentText(getApplicationName());
 			if (mFavorite != null)
 				builder.setContentTitle(mFavorite.getName());
-			builder.setSmallIcon(R.drawable.remote_icon);
+			builder.setSmallIcon(R.drawable.smarthome_notify);
 			builder.setContentIntent(pInent);
 
 			startForeground(NOTIFICATION_ID, builder.build());

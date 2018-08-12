@@ -80,7 +80,7 @@
 
         <receiver
             android:name="de.neo.smarthome.mobile.receivers.MusicWidgetProvider"
-            android:icon="@drawable/ic_launcher"
+            android:icon="@mipmap/ic_launcher"
             android:label="Remote Music" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
