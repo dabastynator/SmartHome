@@ -334,4 +334,8 @@ public class ControlCenter implements IControlCenter {
 		for (CronJobTrigger job : mCronjobTrigger)
 			job.schedule();
 	}
+
+	public void onPostLoad() {
+		mAccessHandler.initialize();
+	}
 }

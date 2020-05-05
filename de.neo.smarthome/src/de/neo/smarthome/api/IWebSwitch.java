@@ -18,10 +18,11 @@ public interface IWebSwitch extends RemoteAble {
 	/**
 	 * Return list of all switches.
 	 * 
+	 * @param token
 	 * @return list of all switches
 	 */
 	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.", genericClass = BeanSwitch.class)
-	public ArrayList<BeanSwitch> getSwitches() throws RemoteException;
+	public ArrayList<BeanSwitch> getSwitches(@WebGet(name = "token") String token) throws RemoteException;
 
 	/**
 	 * Set the state of switch with specified id.

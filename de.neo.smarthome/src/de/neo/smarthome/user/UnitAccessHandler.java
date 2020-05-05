@@ -1,5 +1,6 @@
 package de.neo.smarthome.user;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,17 @@ public class UnitAccessHandler {
 		return access;
 	}
 
+	public ArrayList<IControllUnit> getUnitsFor(User user) {
+		ArrayList<IControllUnit> units = new ArrayList<>();
+		UserAccessList list = getAccessListByUser(user);
+		if (list != null) {
+			for (UnitAccess access : list.listAccess()) {
+				units.add(access.getUnit());
+			}
+		}
+		return units;
+	}
+
 	public static class UserAccessList {
 
 		protected User mUser;
@@ -86,4 +98,5 @@ public class UnitAccessHandler {
 			return mUnits.values();
 		}
 	}
+
 }
