@@ -7,18 +7,18 @@ import java.util.Map;
 
 public class DaoFactory {
 
-	protected static DaoFactory mSingelton;
+	protected static DaoFactory mSingleton;
 
 	public static DaoFactory initiate(FactoryBuilder builder) throws DaoException {
-		if (mSingelton == null)
-			mSingelton = builder.createDaoFactory();
-		return mSingelton;
+		if (mSingleton == null)
+			mSingleton = builder.createDaoFactory();
+		return mSingleton;
 	}
 
 	public static DaoFactory getInstance() {
-		if (mSingelton == null)
-			throw new IllegalStateException("factory has not been initiated. call initiate first");
-		return mSingelton;
+		if (mSingleton == null)
+			throw new IllegalStateException("Factory has not been initiated. Call initiate first");
+		return mSingleton;
 	}
 
 	protected Map<Class<?>, Dao<?>> mMapClassDao = new HashMap<>();
