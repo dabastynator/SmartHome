@@ -94,6 +94,8 @@ public class XMLDao<T> implements Dao<T> {
 					mPersistentFields.add(new StringField(f, p));
 				else if (f.getType().getAnnotation(Domain.class) != null)
 					mPersistentFields.add(new DomainField(f, p));
+				else if (f.getType() instanceof Class && ((Class<?>)f.getType()).isEnum())
+					mPersistentFields.add(new EnumField(f, p));
 				else if (oneToMany != null) {
 					if (oneToMany.domainClass().getAnnotation(Domain.class) == null)
 						throw new DaoException("OneToMany reference must reference to domain class.");
@@ -224,9 +226,9 @@ public class XMLDao<T> implements Dao<T> {
 	}
 
 	private void setId(T object, long id) throws IllegalArgumentException, IllegalAccessException {
-		if (mIDField != null)
+		if (mIDField != null) {
 			mIDField.setLong(object, id);
-		else
+		}else
 			mIdMap.put(object, id);
 	}
 
