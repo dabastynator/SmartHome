@@ -9,7 +9,7 @@ import de.neo.smarthome.api.IControllUnit;
 public class UnitAccess {
 
 	@Persist(name = "user")
-	private Long mUserId;
+	private long mUserId;
 
 	@Persist(name = "unit")
 	private String mUnitId;
@@ -18,7 +18,7 @@ public class UnitAccess {
 
 	private IControllUnit mUnit;
 
-	public Long getUserId() {
+	public long getUserId() {
 		return mUserId;
 	}
 

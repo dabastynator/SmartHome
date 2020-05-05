@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
+import de.neo.smarthome.RemoteLogger;
+
 public class UserSessionHandler {
 
 	// Default duration are 10 days
@@ -13,6 +17,15 @@ public class UserSessionHandler {
 	private Map<User, UserSession> mUserSessions = new HashMap<>();
 
 	private Random mRandom;
+
+	private static UserSessionHandler mInstance;
+
+	public static UserSessionHandler getSingleton() {
+		if (mInstance == null) {
+			mInstance = new UserSessionHandler();
+		}
+		return mInstance;
+	}
 
 	public UserSessionHandler() {
 		mRandom = new Random();
@@ -30,6 +43,13 @@ public class UserSessionHandler {
 		return session;
 	}
 
+	public User require(String token) throws RemoteException {
+		UserSession session = find(token);
+		if (session == null)
+			throw new RemoteException("Invalid user token");
+		return session.mUser;
+	}
+
 	public UserSession generate(User user, Long expiration) {
 		UserSession result = mUserSessions.get(user);
 		if (result != null) {
@@ -37,12 +57,14 @@ public class UserSessionHandler {
 		}
 		result = new UserSession();
 		result.mExpiration = expiration;
-		for (int i = 0; i < 8; i++) {
+		result.mToken = "";
+		for (int i = 0; i < 4; i++) {
 			result.mToken += Integer.toHexString(mRandom.nextInt());
 		}
 		result.mUser = user;
 		mSessions.put(result.mToken, result);
 		mUserSessions.put(user, result);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Generate token for " + user.getName(), "SessionHandler");
 		return result;
 	}
 
@@ -79,4 +101,5 @@ public class UserSessionHandler {
 		}
 
 	}
+
 }

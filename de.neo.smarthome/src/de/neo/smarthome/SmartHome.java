@@ -77,6 +77,8 @@ public class SmartHome {
 			for (IControllUnit unit : units)
 				controlcenter.addControlUnit(unit);
 
+			controlcenter.onPostLoad();
+			
 			for (Trigger trigger : controlcenter.getStartupTrigger()) {
 				controlcenter.trigger(trigger);
 			}
@@ -133,9 +135,11 @@ public class SmartHome {
 		List<IControllUnit> units = new ArrayList<IControllUnit>();
 		DaoFactory factory = DaoFactory.getInstance();
 		for (ControlUnitFactory f : mControlUnitFactory) {
-			Dao<AbstractControlUnit> dao = factory.getDao(f.getUnitClass());
-			for (AbstractControlUnit unit : dao.loadAll()) {
-				units.add(unit);
+			if (AbstractControlUnit.class.isAssignableFrom(f.getUnitClass())) {
+				Dao<AbstractControlUnit> dao = factory.getDao(f.getUnitClass());
+				for (AbstractControlUnit unit : dao.loadAll()) {
+					units.add(unit);
+				}
 			}
 		}
 		return units;

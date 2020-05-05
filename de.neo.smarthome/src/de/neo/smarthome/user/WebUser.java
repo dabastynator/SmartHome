@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
 import de.neo.persist.DaoFactory;
+import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
+import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IWebUser;
 import de.neo.smarthome.controlcenter.ControlCenter;
-import de.neo.smarthome.gpio.GPIOControlUnit;
-import de.neo.smarthome.gpio.WebSwitchImpl;
 import de.neo.smarthome.user.UnitAccessHandler.UserAccessList;
 import de.neo.smarthome.user.UserSessionHandler.UserSession;
 
@@ -25,7 +25,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 
 	public WebUser(ControlCenter center) {
 		super(center);
-		mSessionHandler = new UserSessionHandler();
+		mSessionHandler = UserSessionHandler.getSingleton();
 	}
 
 	private User adminByToken(String token) throws RemoteException {
@@ -55,7 +55,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "list", description = "List all users of the controlcenter", genericClass = BeanUser.class)
 	public ArrayList<BeanUser> getUsers(@WebGet(name = "admin_token") String adminToken)
 			throws RemoteException, DaoException {
-		//adminByToken(adminToken);
+		adminByToken(adminToken);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		ArrayList<BeanUser> result = new ArrayList<>();
 		for (User user : userDao.loadAll()) {
@@ -66,14 +66,15 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 
 	@WebRequest(path = "create", description = "Creat new user")
 	public BeanUser createUser(@WebGet(name = "admin_token") String adminToken,
-			@WebGet(name = "username") String userName, @WebGet(name = "password") String password)
+			@WebGet(name = "user_name") String userName, @WebGet(name = "password") String password)
 			throws RemoteException, DaoException {
-		//adminByToken(adminToken);
+		adminByToken(adminToken);
 		User user = new User();
 		user.setName(userName);
 		user.setPassword(password);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.save(user);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Create new user " + user.getName(), "UserHandler");
 		return toBean(user);
 	}
 
@@ -83,6 +84,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		adminByToken(adminToken);
 		User user = userById(userId);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Delete user " + user.getName(), "UserHandler");
 		userDao.delete(user);
 	}
 
@@ -103,6 +105,17 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		throw new RemoteException("Invalid username or password");
 	}
 
+	@WebRequest(description = "Change password", path = "change_password")
+	public void changePassword(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {
+		adminByToken(adminToken);
+		User user = userById(userId);
+		user.setPassword(new_password);
+		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
+		userDao.update(user);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Change password for user " + user.getName(), "UserHandler");
+	}
+
 	@WebRequest(path = "add_access", description = "Add unit access for user")
 	public void addUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException {
@@ -115,6 +128,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 			throw new RemoteException("Unknown unit: " + unitId);
 		}
 		if (accessList.getUnit(unitId) == null) {
+			RemoteLogger.performLog(LogPriority.INFORMATION, "Add access for " + user.getName(), "UserHandler");
 			UnitAccess access = new UnitAccess();
 			access.setUser(user);
 			access.setUnit(unit);
@@ -148,6 +162,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 			throw new RemoteException("Unknown unit: " + unitId);
 		}
 		if (accessList.getUnit(unitId) != null) {
+			RemoteLogger.performLog(LogPriority.INFORMATION, "Remove access for " + user.getName(), "UserHandler");
 			UnitAccess access = new UnitAccess();
 			access.setUser(user);
 			access.setUnit(unit);

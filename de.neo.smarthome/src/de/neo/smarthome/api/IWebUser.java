@@ -45,7 +45,7 @@ public interface IWebUser extends RemoteAble {
 	 */
 	@WebRequest(path = "create", description = "Creat new user")
 	public BeanUser createUser(@WebGet(name = "admin_token") String adminToken,
-			@WebGet(name = "username") String userName, @WebGet(name = "password") String password)
+			@WebGet(name = "user_name") String userName, @WebGet(name = "password") String password)
 			throws RemoteException, DaoException;
 
 	/**
@@ -59,6 +59,31 @@ public interface IWebUser extends RemoteAble {
 	@WebRequest(path = "delete", description = "Delete user")
 	public void deleteUsers(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId)
 			throws RemoteException, DaoException;
+
+	/**
+	 * Generate a user token
+	 * 
+	 * @param userName
+	 * @param password
+	 * @return user token
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(description = "Generate a user token", path = "generate_token")
+	public BeanUserToken generateUserToken(@WebGet(name = "user_name") String userName,
+			@WebGet(name = "password") String password) throws RemoteException, DaoException;
+
+	/**
+	 * Change password
+	 * 
+	 * @param token
+	 * @param new_password
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(description = "Change password", path = "change_password")
+	public void changePassword(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException;
 
 	/**
 	 * Add unit access for user
@@ -96,22 +121,8 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "remove_access", description = "Remove unit access for user")
-	public void removeUnitAccess(@WebGet(name = "admin_token") String adminToken,
-			@WebGet(name = "user_id") long userId, @WebGet(name = "unit_id") String unitId)
-			throws RemoteException, DaoException;
-
-	/**
-	 * Generate a user token
-	 * 
-	 * @param userName
-	 * @param password
-	 * @return user token
-	 * @throws RemoteException
-	 * @throws DaoException
-	 */
-	@WebRequest(description = "Generate a user token", path = "generate_token")
-	public BeanUserToken generateUserToken(@WebGet(name = "user_name") String userName,
-			@WebGet(name = "password") String password) throws RemoteException, DaoException;
+	public void removeUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException;
 
 	public static class BeanUserToken implements Serializable {
 
