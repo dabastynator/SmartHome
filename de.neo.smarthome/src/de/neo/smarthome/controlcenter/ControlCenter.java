@@ -26,6 +26,7 @@ import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.informations.WebInformation;
+import de.neo.smarthome.user.UnitAccessHandler;
 
 /**
  * Implement the control center interface.
@@ -52,9 +53,6 @@ public class ControlCenter implements IControlCenter {
 	@Persist(name = "port")
 	private int mPort;
 
-	@Persist(name = "token")
-	private String mToken;
-
 	/**
 	 * List of all control units
 	 */
@@ -64,6 +62,8 @@ public class ControlCenter implements IControlCenter {
 	private EventWorker mEventWorker = new EventWorker(this);
 
 	private WebInformation mInformation;
+
+	private UnitAccessHandler mAccessHandler = new UnitAccessHandler(this);
 
 	@OnLoad
 	public void onLoad() {
@@ -92,7 +92,12 @@ public class ControlCenter implements IControlCenter {
 
 	@Override
 	public void removeControlUnit(IControllUnit controlUnit) {
-		mControlUnits.remove(controlUnit);
+		try {
+			mControlUnits.remove(controlUnit.getID());
+		} catch (RemoteException e) {
+			RemoteLogger.performLog(LogPriority.ERROR, "Could not remove control unit: " + e.getMessage(), "");
+
+		}
 	}
 
 	@Override
@@ -309,20 +314,16 @@ public class ControlCenter implements IControlCenter {
 		return mInformation;
 	}
 
+	public UnitAccessHandler getAccessHandler() {
+		return mAccessHandler;
+	}
+
 	public int getPort() {
 		return mPort;
 	}
 
 	public void setPort(int port) {
 		mPort = port;
-	}
-
-	public String getToken() {
-		return mToken;
-	}
-
-	public void setToken(String token) {
-		mToken = token;
 	}
 
 	public List<Trigger> getStartupTrigger() {
@@ -333,5 +334,4 @@ public class ControlCenter implements IControlCenter {
 		for (CronJobTrigger job : mCronjobTrigger)
 			job.schedule();
 	}
-
 }

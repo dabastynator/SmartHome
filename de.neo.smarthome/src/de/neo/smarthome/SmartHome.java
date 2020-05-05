@@ -40,6 +40,9 @@ import de.neo.smarthome.mediaserver.MediaControlUnit;
 import de.neo.smarthome.mediaserver.WebMediaServerImpl;
 import de.neo.smarthome.rccolor.RCColorControlUnit;
 import de.neo.smarthome.rccolor.WebLEDStripImpl;
+import de.neo.smarthome.user.UnitAccess;
+import de.neo.smarthome.user.User;
+import de.neo.smarthome.user.WebUser;
 
 public class SmartHome {
 
@@ -54,6 +57,7 @@ public class SmartHome {
 		mControlUnitFactory.add(new WebSwitchImpl.SwitchFactory());
 		mControlUnitFactory.add(new WebActionImpl.ActionFactory());
 		mControlUnitFactory.add(new WebLEDStripImpl.LEDStripFactory());
+		mControlUnitFactory.add(new WebUser.UserFactory());
 	}
 
 	public static void main(String args[]) {
@@ -90,6 +94,8 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
 		builder.registerDao(new XMLDao<Wall>(Wall.class));
 		builder.registerDao(new XMLDao<Point>(Point.class));
+		builder.registerDao(new XMLDao<User>(User.class));
+		builder.registerDao(new XMLDao<UnitAccess>(UnitAccess.class));
 
 		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
 		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
@@ -148,10 +154,10 @@ public class SmartHome {
 			webServer.setPort(center.getPort());
 			for (ControlUnitFactory factory : mControlUnitFactory) {
 				AbstractUnitHandler handler = factory.createUnitHandler(center);
-				webServer.handle(handler.getWebPath(), handler, center.getToken());
+				webServer.handle(handler.getWebPath(), handler);
 			}
-			webServer.handle(WEBSERVER_PATH, center, center.getToken());
-			webServer.handle(INFORMATION_PATH, info, center.getToken());
+			webServer.handle(WEBSERVER_PATH, center);
+			webServer.handle(INFORMATION_PATH, info);
 			webServer.start();
 		}
 		return center;
