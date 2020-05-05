@@ -10,6 +10,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
+import de.neo.smarthome.user.UnitAccessHandler;
 
 /**
  * The control center handles all control units and information about the
@@ -53,10 +54,12 @@ public interface IControlCenter {
 	 * @throws RemoteException
 	 */
 	public IControllUnit getControlUnit(String id) throws RemoteException;
+	
+	public UnitAccessHandler getAccessHandler();
 
 	/**
-	 * Trigger a trigger. The trigger is specified by the parameter. EventRules
-	 * are used to map events for control unit.
+	 * Trigger a trigger. The trigger is specified by the parameter. EventRules are
+	 * used to map events for control unit.
 	 * 
 	 * @param trigger
 	 * @return number of triggered events
@@ -104,8 +107,8 @@ public interface IControlCenter {
 	public void deleteEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException;
 
 	/**
-	 * Create new event for given event rule. The event corresponds to a
-	 * specifig unit and can have an optional condition.
+	 * Create new event for given event rule. The event corresponds to a specifig
+	 * unit and can have an optional condition.
 	 * 
 	 * @param triggerID
 	 * @param unitID
@@ -192,8 +195,8 @@ public interface IControlCenter {
 			throws RemoteException, DaoException;
 
 	/**
-	 * Get all controlunits of the controlcenter. The map maps the control-unit
-	 * id to the object.
+	 * Get all controlunits of the controlcenter. The map maps the control-unit id
+	 * to the object.
 	 * 
 	 * @return map of controlunits
 	 */
