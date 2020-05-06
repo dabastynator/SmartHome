@@ -17,22 +17,13 @@ import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IWebUser;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.user.UnitAccessHandler.UserAccessList;
+import de.neo.smarthome.user.User.UserRole;
 import de.neo.smarthome.user.UserSessionHandler.UserSession;
 
 public class WebUser extends AbstractUnitHandler implements IWebUser {
 
-	private UserSessionHandler mSessionHandler;
-
 	public WebUser(ControlCenter center) {
 		super(center);
-		mSessionHandler = UserSessionHandler.getSingleton();
-	}
-
-	private User adminByToken(String token) throws RemoteException {
-		UserSession session = mSessionHandler.find(token);
-		if (session == null || session.getUser() == null || session.getUser().getRole() != User.UserRole.ADMIN)
-			throw new RemoteException("Invalid admin token");
-		return session.getUser();
 	}
 
 	private BeanUser toBean(User user) {
@@ -55,7 +46,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "list", description = "List all users of the controlcenter", genericClass = BeanUser.class)
 	public ArrayList<BeanUser> getUsers(@WebGet(name = "admin_token") String adminToken)
 			throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		ArrayList<BeanUser> result = new ArrayList<>();
 		for (User user : userDao.loadAll()) {
@@ -68,7 +59,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	public BeanUser createUser(@WebGet(name = "admin_token") String adminToken,
 			@WebGet(name = "user_name") String userName, @WebGet(name = "password") String password)
 			throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = new User();
 		user.setName(userName);
 		user.setPassword(password);
@@ -81,7 +72,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "delete", description = "Delete user")
 	public void deleteUsers(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId)
 			throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = userById(userId);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Delete user " + user.getName(), "UserHandler");
@@ -95,7 +86,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		for (User user : userDao.loadAll()) {
 			if (user.getName().equals(userName) && user.getPassword().equals(password)) {
 				Long expiration = System.currentTimeMillis() + UserSessionHandler.DEFALT_DURATION;
-				UserSession session = mSessionHandler.generate(user, expiration);
+				UserSession session = UserSessionHandler.getSingleton().generate(user, expiration);
 				BeanUserToken token = new BeanUserToken();
 				token.setToken(session.getToken());
 				token.setExpiration(session.getExpiration());
@@ -108,7 +99,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(description = "Change password", path = "change_password")
 	public void changePassword(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = userById(userId);
 		user.setPassword(new_password);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
@@ -119,7 +110,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "add_access", description = "Add unit access for user")
 	public void addUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = userById(userId);
 		Dao<UnitAccess> accessDao = DaoFactory.getInstance().getDao(UnitAccess.class);
 		UserAccessList accessList = mCenter.getAccessHandler().getAccessListByUser(user);
@@ -140,7 +131,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "get_access", description = "Get list of accessible units for user", genericClass = BeanWeb.class)
 	public ArrayList<BeanWeb> getUnitAccess(@WebGet(name = "admin_token") String adminToken,
 			@WebGet(name = "user_id") long userId) throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = userById(userId);
 		UserAccessList accessList = mCenter.getAccessHandler().getAccessListByUser(user);
 		ArrayList<BeanWeb> result = new ArrayList<>();
@@ -153,7 +144,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	@WebRequest(path = "remove_access", description = "Remove unit access for user")
 	public void removeUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException {
-		adminByToken(adminToken);
+		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = userById(userId);
 		Dao<UnitAccess> accessDao = DaoFactory.getInstance().getDao(UnitAccess.class);
 		UserAccessList accessList = mCenter.getAccessHandler().getAccessListByUser(user);

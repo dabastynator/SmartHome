@@ -33,6 +33,24 @@ public abstract class AbstractControlUnit implements IControllUnit {
 
 	private IControlCenter mCenter;
 
+	public void setName(String name) {
+		mName = name;
+	}
+
+	public void setDescription(String description) {
+		mDescription = description;
+	}
+
+	public void setPosition(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public void setId(String id) {
+		mID = id;
+	}
+
 	@Override
 	public void setControlCenter(ControlCenter center) {
 		mCenter = center;

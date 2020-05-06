@@ -12,6 +12,8 @@ public class RCColorControlUnit extends AbstractControlUnit {
 
 	private int mCurrentColor;
 
+	private LEDMode mMode;
+
 	private GPIOSender mSender = GPIOSender.getInstance();
 
 	@Override
@@ -56,5 +58,10 @@ public class RCColorControlUnit extends AbstractControlUnit {
 
 	public void setMode(LEDMode mode) {
 		mSender.setMode(mode);
+		mMode = mode;
+	}
+
+	public LEDMode getMode() {
+		return mMode;
 	}
 }
