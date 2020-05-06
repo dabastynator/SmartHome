@@ -57,6 +57,16 @@ public class UnitAccessHandler {
 		return access;
 	}
 
+	public IControllUnit require(User user, String id) throws RemoteException {
+		UserAccessList list = mAccess.get(user);
+		if (list != null) {
+			IControllUnit unit = list.getUnit(id);
+			if (unit != null)
+				return unit;
+		}
+		throw new RemoteException("Access for " + id + " denied");
+	}
+
 	public ArrayList<IControllUnit> getUnitsFor(User user) {
 		ArrayList<IControllUnit> units = new ArrayList<>();
 		UserAccessList list = getAccessListByUser(user);

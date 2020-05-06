@@ -7,6 +7,7 @@ import java.util.Random;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
+import de.neo.smarthome.user.User.UserRole;
 
 public class UserSessionHandler {
 
@@ -43,11 +44,20 @@ public class UserSessionHandler {
 		return session;
 	}
 
-	public User require(String token) throws RemoteException {
-		UserSession session = find(token);
-		if (session == null)
-			throw new RemoteException("Invalid user token");
+	public static User require(String token) throws RemoteException {
+		UserSession session = getSingleton().find(token);
+		if (session == null) {
+			throw new RemoteException("Invalid user token. Requre a new one");
+		}
 		return session.mUser;
+	}
+
+	public static User require(String token, UserRole role) throws RemoteException {
+		User user = require(token);
+		if (user.getRole() != UserRole.ADMIN) {
+			throw new RemoteException("Access denied. Invalid admin token");
+		}
+		return user;
 	}
 
 	public UserSession generate(User user, Long expiration) {

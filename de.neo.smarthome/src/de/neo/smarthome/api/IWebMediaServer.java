@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import de.neo.persist.DaoException;
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
@@ -30,7 +31,7 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @return media-server list
 	 */
 	@WebRequest(path = "list", description = "List all registered media-server with current playing state. Optional parameter id specified required media-server.", genericClass = BeanMediaServer.class)
-	public ArrayList<BeanMediaServer> getMediaServer(
+	public ArrayList<BeanMediaServer> getMediaServer(@WebGet(name = "token") String token,
 			@WebGet(name = "id", required = false, defaultvalue = "") String id) throws RemoteException;
 
 	/**
@@ -40,7 +41,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @return playlists
 	 */
 	@WebRequest(path = "playlists", description = "List all playlists of specified media server.", genericClass = BeanPlaylist.class)
-	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "id") String id) throws RemoteException;
+	public ArrayList<BeanPlaylist> getPlaylists(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
+			throws RemoteException;
 
 	/**
 	 * Add item to specified playlist.
@@ -51,8 +53,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "playlist_extend", description = "Add item to specified playlist.")
-	public void playlistExtend(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
-			@WebGet(name = "item") String item) throws RemoteException, PlayerException;
+	public void playlistExtend(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist, @WebGet(name = "item") String item)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Create new playlist.
@@ -61,8 +64,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @param playlist
 	 */
 	@WebRequest(path = "playlist_create", description = "Create new playlist.")
-	public void playlistCreate(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
-			throws RemoteException;
+	public void playlistCreate(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist) throws RemoteException;
 
 	/**
 	 * Delete specified playlist
@@ -72,8 +75,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "playlist_delete", description = "Delete specified playlist.")
-	public void playlistDelete(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
-			throws RemoteException, PlayerException;
+	public void playlistDelete(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException;
 
 	/**
 	 * Delete item from specified playlist.
@@ -84,8 +87,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "playlist_delete_item", description = "Delete item from specified playlist.")
-	public void playlistDeleteItem(@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist,
-			@WebGet(name = "item") String item) throws RemoteException, PlayerException;
+	public void playlistDeleteItem(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "playlist") String playlist, @WebGet(name = "item") String item)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * List items of specified playlist.
@@ -97,8 +101,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "playlist_content", description = "List items of specified playlist.", genericClass = BeanPlaylistItem.class)
-	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "id") String id,
-			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException;
+	public ArrayList<BeanPlaylistItem> getPlaylistContent(@WebGet(name = "token") String token,
+			@WebGet(name = "id") String id, @WebGet(name = "playlist") String playlist)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Get files and directories at specific path.
@@ -109,7 +114,7 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "files", description = "Get files and directories at specific path.", genericClass = BeanFileSystem.class)
-	public ArrayList<BeanFileSystem> getFiles(@WebGet(name = "id") String id,
+	public ArrayList<BeanFileSystem> getFiles(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
 			@WebGet(name = "path", required = false, defaultvalue = "") String path) throws RemoteException;
 
 	/**
@@ -123,8 +128,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "play_file", description = "Play specified file or directory.")
-	public PlayingBean playFile(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
-			@WebGet(name = "file") String file) throws RemoteException, PlayerException;
+	public PlayingBean playFile(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "file") String file)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Play specified playlist.
@@ -137,8 +143,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "play_playlist", description = "Play specified playlist.")
-	public PlayingBean playPlaylist(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
-			@WebGet(name = "playlist") String playlist) throws RemoteException, PlayerException;
+	public PlayingBean playPlaylist(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "playlist") String playlist)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Play youtube url.
@@ -151,12 +158,13 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "play_youtube", description = "Play youtube url.")
-	public PlayingBean playYoutube(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
-			@WebGet(name = "youtube_url") String youtube_url) throws RemoteException, PlayerException;
+	public PlayingBean playYoutube(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "youtube_url") String youtube_url)
+			throws RemoteException, PlayerException;
 
 	/**
-	 * Change state of player. Plaing -> Pause and Pause -> Playing. If player
-	 * does not play anything, throw player exception.
+	 * Change state of player. Plaing -> Pause and Pause -> Playing. If player does
+	 * not play anything, throw player exception.
 	 * 
 	 * @param id
 	 * @param player
@@ -165,8 +173,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "play_pause", description = "Change state of player. Plaing -> Pause and Pause -> Playing. If player does not play anything, throw player exception.")
-	public PlayingBean playPause(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playPause(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Play next file in playlist or filesystem.
@@ -178,8 +186,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "next", description = "Play next file in playlist or filesystem.")
-	public PlayingBean playNext(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playNext(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Play previous file in playlist or filesystem.
@@ -191,8 +199,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "previous", description = "Play previous file in playlist or filesystem.")
-	public PlayingBean playPrevious(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playPrevious(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Seek forward in current playing.
@@ -204,8 +212,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "seek_forward", description = "Seek forward in current playing.")
-	public PlayingBean playSeekForward(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playSeekForward(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Seek backward in current playing.
@@ -217,8 +225,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "seek_backward", description = "Seek backward in current playing.")
-	public PlayingBean playSeekBackward(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playSeekBackward(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Set the specified player in fullsceen mode or change to windowed mode.
@@ -230,8 +238,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "set_fullscreen", description = "Set the specified player in fullsceen mode or change to windowed mode.")
-	public PlayingBean playSetFullscreen(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
-			@WebGet(name = "fullscreen") boolean fullscreen) throws RemoteException, PlayerException;
+	public PlayingBean playSetFullscreen(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "fullscreen") boolean fullscreen)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Stop playing.
@@ -243,8 +252,8 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "stop", description = "Stop playing.")
-	public PlayingBean playStop(@WebGet(name = "id") String id, @WebGet(name = "player") String player)
-			throws RemoteException, PlayerException;
+	public PlayingBean playStop(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player) throws RemoteException, PlayerException;
 
 	/**
 	 * Set volume of the player. Value must between 0 and 100.
@@ -257,8 +266,9 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws PlayerException
 	 */
 	@WebRequest(path = "volume", description = "Set volume of the player. Value must between 0 and 100.")
-	public PlayingBean setVolume(@WebGet(name = "id") String id, @WebGet(name = "player") String player,
-			@WebGet(name = "volume") int volume) throws RemoteException, PlayerException;
+	public PlayingBean setVolume(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "volume") int volume)
+			throws RemoteException, PlayerException;
 
 	/**
 	 * Publish specified file or directory for one download.
@@ -270,8 +280,70 @@ public interface IWebMediaServer extends RemoteAble {
 	 * @throws IOException
 	 */
 	@WebRequest(path = "publish_for_download", description = "Publish specified file or directory for one download.")
-	public BeanDownload publishForDownload(@WebGet(name = "id") String id, @WebGet(name = "path") String path)
-			throws RemoteException, IOException;
+	public BeanDownload publishForDownload(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "path") String path) throws RemoteException, IOException;
+
+	/**
+	 * Create new media server
+	 * 
+	 * @param token
+	 * @param id
+	 * @param name
+	 * @param locationBrowser
+	 * @param locationPlaylist
+	 * @param description
+	 * @param type
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return new media server
+	 * @throws RemoteException
+	 * @throws IOException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "create", description = "Create new media server.")
+	public BeanMediaServer createNewMediaServer(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "name") String name, @WebGet(name = "location_browser") String locationBrowser,
+			@WebGet(name = "location_playlist") String locationPlaylist,
+			@WebGet(name = "description") String description, @WebGet(name = "x") float x, @WebGet(name = "y") float y,
+			@WebGet(name = "z") float z) throws RemoteException, IOException, DaoException;
+	
+	/**
+	 * Update existing media server
+	 * 
+	 * @param token
+	 * @param id
+	 * @param name
+	 * @param locationBrowser
+	 * @param locationPlaylist
+	 * @param description
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return updated media server
+	 * @throws RemoteException
+	 * @throws IOException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "update", description = "Update existing media server.")
+	public BeanMediaServer updateExistingMediaServer(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "name") String name, @WebGet(name = "location_browser") String locationBrowser,
+			@WebGet(name = "location_playlist") String locationPlaylist,
+			@WebGet(name = "description") String description, @WebGet(name = "x") float x, @WebGet(name = "y") float y,
+			@WebGet(name = "z") float z) throws RemoteException, IOException, DaoException;
+
+	/**
+	 * Delete media server
+	 * 
+	 * @param token
+	 * @param id
+	 * @throws RemoteException
+	 * @throws IOException
+	 * @throws DaoException 
+	 */
+	@WebRequest(path = "delete", description = "Delete media server.")
+	public void deleteMediaServer(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
+			throws RemoteException, IOException, DaoException;
 
 	public static class BeanFileSystem implements Comparable<BeanFileSystem> {
 

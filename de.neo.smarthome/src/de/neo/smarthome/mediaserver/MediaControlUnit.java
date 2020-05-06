@@ -60,6 +60,14 @@ public class MediaControlUnit extends AbstractControlUnit {
 		mOmxplayer = new OMXPlayer();
 	}
 
+	public void setBrowserLocation(String locationBrowser) {
+		mBrowserLocation = locationBrowser;
+	}
+
+	public void setPlaylistLocation(String locationPlaylist) {
+		mPlaylistLocation = locationPlaylist;
+	}
+
 	@Override
 	public boolean performEvent(Event event) throws RemoteException, EventException {
 		try {
@@ -125,7 +133,7 @@ public class MediaControlUnit extends AbstractControlUnit {
 	public IPlayer getOMXPlayer() throws RemoteException {
 		return mOmxplayer;
 	}
-	
+
 	public String[] listDirectories(String path) throws RemoteException {
 		if (path.startsWith("..") || path.contains(File.separator + ".."))
 			throw new IllegalArgumentException("Path must not contain '..'");
@@ -244,8 +252,7 @@ public class MediaControlUnit extends AbstractControlUnit {
 	/**
 	 * Checks to see if a specific port is available.
 	 *
-	 * @param port
-	 *            the port to check for availability
+	 * @param port the port to check for availability
 	 */
 	public static boolean portIsAvailable(int port) {
 		ServerSocket ss = null;
@@ -306,4 +313,5 @@ public class MediaControlUnit extends AbstractControlUnit {
 		}
 
 	}
+
 }
