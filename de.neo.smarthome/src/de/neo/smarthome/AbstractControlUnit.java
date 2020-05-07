@@ -62,7 +62,7 @@ public abstract class AbstractControlUnit implements IControllUnit {
 	}
 
 	@Override
-	public String getDescription() throws RemoteException {
+	public String getDescription() {
 		return mDescription;
 	}
 

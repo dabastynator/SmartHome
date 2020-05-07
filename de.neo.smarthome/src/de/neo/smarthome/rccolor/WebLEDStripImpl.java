@@ -42,7 +42,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	public ArrayList<BeanLEDStrips> getLEDStrips(@WebGet(name = "token") String token) throws RemoteException {
 		User user = UserSessionHandler.require(token);
 		ArrayList<BeanLEDStrips> result = new ArrayList<>();
-		for (IControllUnit unit : mCenter.getAccessHandler().getUnitsFor(user)) {
+		for (IControllUnit unit : mCenter.getAccessHandler().unitsFor(user)) {
 			if (unit instanceof RCColorControlUnit) {
 				RCColorControlUnit ledStrip = (RCColorControlUnit) unit;
 				result.add(toLEDBean(ledStrip));
@@ -56,7 +56,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	public BeanLEDStrips setColor(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
 			@WebGet(name = "red") int red, @WebGet(name = "green") int green, @WebGet(name = "blue") int blue)
 			throws RemoteException {
-		User user = UserSessionHandler.require(token);
+		RCColorControlUnit ledStrip = mCenter.getAccessHandler().require(token, id);
 		if (red < 0 || red > 255)
 			throw new IllegalArgumentException("Red componentet must be in [0..255].");
 		if (green < 0 || green > 255)
@@ -64,27 +64,17 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		if (blue < 0 || blue > 255)
 			throw new IllegalArgumentException("Blue componentet must be in [0..255].");
 		int color = (red << 16) | (green << 8) | blue;
-		IControllUnit unit = mCenter.getAccessHandler().require(user, id);
-		if (unit instanceof RCColorControlUnit) {
-			RCColorControlUnit ledStrip = (RCColorControlUnit) unit;
-			ledStrip.setColor(color);
-			return toLEDBean(ledStrip);
-		}
-		return null;
+		ledStrip.setColor(color);
+		return toLEDBean(ledStrip);
 	}
 
 	@Override
 	@WebRequest(path = "setmode", description = "Set mode for specified led strip. 'NormalMode' simply shows the color, 'PartyMode' shows the color elements with strobe effect.")
 	public BeanLEDStrips setMode(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
 			@WebGet(name = "mode") LEDMode mode) throws RemoteException {
-		User user = UserSessionHandler.require(token);
-		IControllUnit unit = mCenter.getAccessHandler().require(user, id);
-		if (unit instanceof RCColorControlUnit) {
-			RCColorControlUnit ledStrip = (RCColorControlUnit) unit;
-			ledStrip.setMode(mode);
-			return toLEDBean(ledStrip);
-		}
-		throw new RemoteException("Id does not match a LED strip");
+		RCColorControlUnit ledStrip = mCenter.getAccessHandler().require(token, id);
+		ledStrip.setMode(mode);
+		return toLEDBean(ledStrip);
 	}
 
 	@WebRequest(path = "create", description = "Create new LED strip.")
@@ -104,7 +94,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		Dao<RCColorControlUnit> dao = DaoFactory.getInstance().getDao(RCColorControlUnit.class);
 		dao.save(ledUnit);
 		mCenter.addControlUnit(ledUnit);
-		RemoteLogger.performLog(LogPriority.INFORMATION, "Create new led strip " + ledUnit.getName(), "UserHandler");
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Create new led strip " + ledUnit.getName(), "WebLEDStrip");
 		return toLEDBean(ledUnit);
 	}
 
@@ -124,7 +114,8 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		ledUnit.setPosition(x, y, z);
 		Dao<RCColorControlUnit> dao = DaoFactory.getInstance().getDao(RCColorControlUnit.class);
 		dao.update(ledUnit);
-		RemoteLogger.performLog(LogPriority.INFORMATION, "Update existing led strip " + ledUnit.getName(), "UserHandler");
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Update existing led strip " + ledUnit.getName(),
+				"WebLEDStrip");
 		return toLEDBean(ledUnit);
 	}
 
@@ -140,7 +131,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		Dao<RCColorControlUnit> dao = DaoFactory.getInstance().getDao(RCColorControlUnit.class);
 		dao.delete(ledUnit);
 		mCenter.removeControlUnit(ledUnit);
-		RemoteLogger.performLog(LogPriority.INFORMATION, "Remove led strip " + ledUnit.getName(), "UserHandler");
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Remove led strip " + ledUnit.getName(), "WebLEDStrip");
 	}
 
 	@Override

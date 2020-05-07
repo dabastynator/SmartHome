@@ -10,6 +10,10 @@ import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebSwitch.State;
 
+/**
+ * @author sebastian
+ *
+ */
 @Domain(name = "InternetSwitch")
 public class GPIOControlUnit extends AbstractControlUnit {
 
@@ -52,6 +56,22 @@ public class GPIOControlUnit extends AbstractControlUnit {
 				};
 			}.start();
 		}
+	}
+	
+	public String getFamilyCode() {
+		return mFamilyCode;
+	}
+
+	public void setFamilyCode(String familyCode) {
+		mFamilyCode = familyCode;
+	}
+
+	public int getSwitchNumber() {
+		return mSwitchNumber;
+	}
+
+	public void setSwitchNumber(int switchNumber) {
+		mSwitchNumber = switchNumber;
 	}
 
 	public State getState() {

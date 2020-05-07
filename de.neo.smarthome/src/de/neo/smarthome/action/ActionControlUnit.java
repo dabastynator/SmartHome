@@ -149,7 +149,7 @@ public class ActionControlUnit extends AbstractControlUnit {
 		fireTrigger(parameterExchange, "@action=stop");
 	}
 
-	public String getIconBase64() throws RemoteException {
+	public String getIconBase64() {
 		return mIconBase64;
 	}
 
@@ -208,7 +208,20 @@ public class ActionControlUnit extends AbstractControlUnit {
 		}
 	}
 
-	public String getClientAction() throws RemoteException {
+	public String getClientAction() {
 		return mClientAction;
 	}
+
+	public void setClientAction(String clientAction) {
+		mClientAction = clientAction;
+	}
+
+	public String getCommand() {
+		return mCommand;
+	}
+
+	public void setCommand(String command) {
+		mCommand = command;
+	}
+
 }
