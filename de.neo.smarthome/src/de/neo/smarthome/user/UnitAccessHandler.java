@@ -57,17 +57,28 @@ public class UnitAccessHandler {
 		return access;
 	}
 
-	public IControllUnit require(User user, String id) throws RemoteException {
+	public <T> T require(String token, String id) throws RemoteException {
+		User user = UserSessionHandler.require(token);
+		return require(user, id);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T require(User user, String id) throws RemoteException {
 		UserAccessList list = mAccess.get(user);
 		if (list != null) {
 			IControllUnit unit = list.getUnit(id);
-			if (unit != null)
-				return unit;
+			try {
+				if (unit != null) {
+					return (T) unit;
+				}
+			} catch (ClassCastException e) {
+				throw new RemoteException("Unit of false type");
+			}
 		}
 		throw new RemoteException("Access for " + id + " denied");
 	}
 
-	public ArrayList<IControllUnit> getUnitsFor(User user) {
+	public ArrayList<IControllUnit> unitsFor(User user) {
 		ArrayList<IControllUnit> units = new ArrayList<>();
 		UserAccessList list = getAccessListByUser(user);
 		if (list != null) {
