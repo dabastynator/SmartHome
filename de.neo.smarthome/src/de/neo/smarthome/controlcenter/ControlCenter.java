@@ -27,6 +27,8 @@ import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.informations.WebInformation;
 import de.neo.smarthome.user.UnitAccessHandler;
+import de.neo.smarthome.user.UserSessionHandler;
+import de.neo.smarthome.user.User.UserRole;
 
 /**
  * Implement the control center interface.
@@ -148,7 +150,8 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "create_event_rule", description = "Create new event rule for given trigger id.")
-	public EventRule createEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+	public EventRule createEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' already exists!");
 		EventRule rule = new EventRule();
@@ -166,7 +169,8 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "delete_event_rule", description = "Delete event rule by given trigger id.")
-	public void deleteEventRule(@WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+	public void deleteEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -181,9 +185,10 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "create_event_for_rule", description = "Create new event for given event rule. The event corresponds to a specifig unit and can have an optional condition.")
-	public EventRule createEventForRule(@WebGet(name = "trigger") String triggerID,
+	public EventRule createEventForRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "unit") String unitID, @WebGet(name = "condition") String condition)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -201,8 +206,9 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "delete_event_in_rule", description = "Delete event in given event rule by event index.")
-	public void deleteEventInRule(@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index)
+	public void deleteEventInRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -220,9 +226,10 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given event rule by event index.")
-	public EventRule addParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+	public EventRule addParameterforEventInRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "index") int index, @WebGet(name = "key") String key, @WebGet(name = "value") String value)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -244,9 +251,10 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given event rule by event index and parameter index.")
-	public EventRule deleteParameterforEventInRule(@WebGet(name = "trigger") String triggerID,
+	public EventRule deleteParameterforEventInRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "parameter_index") int parameterIndex)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -270,8 +278,9 @@ public class ControlCenter implements IControlCenter {
 
 	@Override
 	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
-	public EventRule setInformationsforEventRule(@WebGet(name = "trigger") String triggerID,
+	public EventRule setInformationsforEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "informations") String informations) throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
@@ -284,9 +293,10 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@WebRequest(path = "set_condition_for_event_in_rule", description = "Set condition for an event of an given event rule.")
-	public EventRule setConditionforEvent(@WebGet(name = "trigger") String triggerID,
+	public EventRule setConditionforEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		if (!mEventRuleMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
 		EventRule rule = mEventRuleMap.get(triggerID);
