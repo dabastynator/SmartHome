@@ -31,6 +31,7 @@ import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.CronJobTrigger;
+import de.neo.smarthome.controlcenter.WebTrigger;
 import de.neo.smarthome.gpio.GPIOControlUnit;
 import de.neo.smarthome.gpio.WebSwitchImpl;
 import de.neo.smarthome.informations.InformationUnit.InformationTrigger;
@@ -58,6 +59,7 @@ public class SmartHome {
 		mControlUnitFactory.add(new WebActionImpl.ActionFactory());
 		mControlUnitFactory.add(new WebLEDStripImpl.LEDStripFactory());
 		mControlUnitFactory.add(new WebUser.UserFactory());
+		mControlUnitFactory.add(new WebTrigger.TriggerFactory());
 	}
 
 	public static void main(String args[]) {
