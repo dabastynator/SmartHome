@@ -12,7 +12,6 @@ import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
-import de.neo.smarthome.controlcenter.ControlCenter;
 
 @Domain
 public class EventRule {
@@ -29,7 +28,7 @@ public class EventRule {
 	@Persist(name = "information")
 	private String mInformation;
 
-	private ControlCenter mCenter;
+	private IControlCenter mCenter;
 
 	public String getTriggerID() {
 		return mTrigger;
@@ -39,7 +38,7 @@ public class EventRule {
 		mTrigger = triggerID;
 	}
 
-	public void setControlcenter(ControlCenter center) {
+	public void setControlcenter(IControlCenter center) {
 		mCenter = center;
 	}
 
