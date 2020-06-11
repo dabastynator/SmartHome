@@ -29,7 +29,8 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@Override
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public HashMap<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) throws RemoteException {
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException {
+		UserSessionHandler.require(token);
 		Trigger trigger = new Trigger();
 		trigger.setTriggerID(triggerID);
 		int eventcount = mCenter.trigger(trigger);
@@ -40,7 +41,8 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@Override
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<EventRule> getEvents() throws RemoteException {
+	public List<EventRule> getEvents(@WebGet(name = "token") String token) throws RemoteException {
+		UserSessionHandler.require(token);
 		return mCenter.getEventRules();
 	}
 

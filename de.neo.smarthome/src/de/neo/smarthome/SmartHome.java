@@ -44,6 +44,7 @@ import de.neo.smarthome.rccolor.WebLEDStripImpl;
 import de.neo.smarthome.user.UnitAccess;
 import de.neo.smarthome.user.User;
 import de.neo.smarthome.user.WebUser;
+import de.neo.smarthome.user.UserSessionHandler.UserSession;
 
 public class SmartHome {
 
@@ -99,6 +100,7 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<Wall>(Wall.class));
 		builder.registerDao(new XMLDao<Point>(Point.class));
 		builder.registerDao(new XMLDao<User>(User.class));
+		builder.registerDao(new XMLDao<UserSession>(UserSession.class));
 		builder.registerDao(new XMLDao<UnitAccess>(UnitAccess.class));
 
 		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
