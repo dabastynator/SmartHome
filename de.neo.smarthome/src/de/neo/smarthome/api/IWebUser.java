@@ -11,6 +11,7 @@ import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.user.User;
+import de.neo.smarthome.user.UserSessionHandler.SessionType;
 
 /**
  * The web-user iterface allows access to users, authentification and
@@ -30,8 +31,7 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "list", description = "List all users of the controlcenter", genericClass = BeanUser.class)
-	public ArrayList<BeanUser> getUsers(@WebGet(name = "admin_token") String adminToken)
-			throws RemoteException, DaoException;
+	public ArrayList<BeanUser> getUsers(@WebGet(name = "token") String adminToken) throws RemoteException, DaoException;
 
 	/**
 	 * Creat new user
@@ -44,9 +44,8 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "create", description = "Creat new user")
-	public BeanUser createUser(@WebGet(name = "admin_token") String adminToken,
-			@WebGet(name = "user_name") String userName, @WebGet(name = "password") String password)
-			throws RemoteException, DaoException;
+	public BeanUser createUser(@WebGet(name = "token") String adminToken, @WebGet(name = "user_name") String userName,
+			@WebGet(name = "password") String password) throws RemoteException, DaoException;
 
 	/**
 	 * Delete user
@@ -57,7 +56,7 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "delete", description = "Delete user")
-	public void deleteUsers(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId)
+	public void deleteUsers(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId)
 			throws RemoteException, DaoException;
 
 	/**
@@ -82,7 +81,7 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(description = "Change password", path = "change_password")
-	public void changePassword(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+	public void changePassword(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException;
 
 	/**
@@ -95,7 +94,7 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "add_access", description = "Add unit access for user")
-	public void addUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+	public void addUnitAccess(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException;
 
 	/**
@@ -108,7 +107,7 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "get_access", description = "Get list of accessible units for user", genericClass = BeanWeb.class)
-	public ArrayList<BeanWeb> getUnitAccess(@WebGet(name = "admin_token") String adminToken,
+	public ArrayList<BeanWeb> getUnitAccess(@WebGet(name = "token") String adminToken,
 			@WebGet(name = "user_id") long userId) throws RemoteException, DaoException;
 
 	/**
@@ -121,8 +120,42 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "remove_access", description = "Remove unit access for user")
-	public void removeUnitAccess(@WebGet(name = "admin_token") String adminToken, @WebGet(name = "user_id") long userId,
+	public void removeUnitAccess(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId,
 			@WebGet(name = "unit_id") String unitId) throws RemoteException, DaoException;
+
+	/**
+	 * List all active tokens
+	 * 
+	 * @param adminToken
+	 * @return list of active tokens
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "list_tokens", description = "List all active tokens", genericClass = BeanUserToken.class)
+	public ArrayList<BeanUserToken> listTokens(@WebGet(name = "token") String adminToken) throws RemoteException, DaoException;
+	
+	/**
+	 * Create a persistent token for given user
+	 * 
+	 * @param adminToken
+	 * @param userId
+	 * @return user token
+	 * @throws RemoteException 
+	 * @throws DaoException 
+	 */
+	@WebRequest(path = "create_persistent_token", description = "Create a persistent token for given user")
+	public BeanUserToken createPersistentToken(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId) throws RemoteException, DaoException;
+	
+	/**
+	 * Delete token
+	 * 
+	 * @param adminToken
+	 * @param deleteToken
+	 * @throws RemoteException 
+	 * @throws DaoException 
+	 */
+	@WebRequest(path = "delete_token", description = "Delete token")
+	public void deleteToken(@WebGet(name = "token") String adminToken, @WebGet(name = "delete_token") String deleteToken) throws RemoteException, DaoException;
 
 	public static class BeanUserToken implements Serializable {
 
@@ -131,6 +164,12 @@ public interface IWebUser extends RemoteAble {
 
 		@WebField(name = "expiration")
 		private Long mExpiration;
+
+		@WebField(name = "type")
+		private SessionType mType;
+		
+		@WebField(name = "user")
+		private String mUser;
 
 		public String getToken() {
 			return mToken;
@@ -147,6 +186,24 @@ public interface IWebUser extends RemoteAble {
 		public void setExpiration(Long expiration) {
 			mExpiration = expiration;
 		}
+
+		public SessionType getType() {
+			return mType;
+		}
+
+		public void setType(SessionType type) {
+			mType = type;
+		}
+
+		public String getUser() {
+			return mUser;
+		}
+
+		public void setUser(String user) {
+			mUser = user;
+		}
+		
+		
 
 	}
 

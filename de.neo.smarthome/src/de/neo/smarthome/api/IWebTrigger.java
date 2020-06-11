@@ -20,7 +20,7 @@ public interface IWebTrigger extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public HashMap<String, Integer> performTrigger(@WebGet(name = "trigger") String triggerID) throws RemoteException;
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException;
 
 	/**
 	 * List all event-rules of the controlcenter. A rule can be triggered by the
@@ -30,7 +30,7 @@ public interface IWebTrigger extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<EventRule> getEvents() throws RemoteException;
+	public List<EventRule> getEvents(@WebGet(name = "token") String token) throws RemoteException;
 
 	/**
 	 * Create new event rule for given trigger id.
