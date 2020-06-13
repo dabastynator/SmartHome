@@ -13,6 +13,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
+import de.neo.smarthome.user.User.UserRole;
 
 public class UnitAccessHandler {
 
@@ -67,6 +68,9 @@ public class UnitAccessHandler {
 		UserAccessList list = mAccess.get(user);
 		if (list != null) {
 			IControllUnit unit = list.getUnit(id);
+			if (unit == null && user.getRole() == UserRole.ADMIN) {
+				unit = mCenter.getControlUnit(id);
+			}
 			try {
 				if (unit != null) {
 					return (T) unit;
@@ -80,10 +84,14 @@ public class UnitAccessHandler {
 
 	public ArrayList<IControllUnit> unitsFor(User user) {
 		ArrayList<IControllUnit> units = new ArrayList<>();
-		UserAccessList list = getAccessListByUser(user);
-		if (list != null) {
-			for (UnitAccess access : list.listAccess()) {
-				units.add(access.getUnit());
+		if (user.getRole() == UserRole.ADMIN) {
+			return new ArrayList<>(mCenter.getControlUnits().values());
+		} else {
+			UserAccessList list = getAccessListByUser(user);
+			if (list != null) {
+				for (UnitAccess access : list.listAccess()) {
+					units.add(access.getUnit());
+				}
 			}
 		}
 		return units;
