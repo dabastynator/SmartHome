@@ -45,7 +45,7 @@ public interface IWebUser extends RemoteAble {
 	 */
 	@WebRequest(path = "create", description = "Creat new user")
 	public BeanUser createUser(@WebGet(name = "token") String adminToken, @WebGet(name = "user_name") String userName,
-			@WebGet(name = "password") String password) throws RemoteException, DaoException;
+			@WebGet(name = "password") String password, @WebGet(name = "avatar") String avatar) throws RemoteException, DaoException;
 
 	/**
 	 * Delete user
@@ -81,8 +81,20 @@ public interface IWebUser extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(description = "Change password", path = "change_password")
-	public void changePassword(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId,
-			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException;
+	public void changePassword(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_password") String newPassword) throws RemoteException, DaoException;
+	
+	/**
+	 * Change avatar, as base64 encoded png
+	 * 
+	 * @param token
+	 * @param new_avatar
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(description = "Change avatar, as base64 encoded png", path = "change_avatar")
+	public void changeAvatar(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException;	
 
 	/**
 	 * Add unit access for user
@@ -202,8 +214,6 @@ public interface IWebUser extends RemoteAble {
 		public void setUser(String user) {
 			mUser = user;
 		}
-		
-		
 
 	}
 
@@ -217,6 +227,9 @@ public interface IWebUser extends RemoteAble {
 
 		@WebField(name = "role")
 		private User.UserRole mRole;
+		
+		@WebField(name = "avatar")
+		private String mAvatar;
 
 		public String getName() {
 			return mName;
@@ -242,6 +255,14 @@ public interface IWebUser extends RemoteAble {
 			mRole = role;
 		}
 
+		public String getAvatar() {
+			return mAvatar;
+		}
+
+		public void setAvatar(String avatar) {
+			mAvatar = avatar;
+		}
+		
 	}
 
 }

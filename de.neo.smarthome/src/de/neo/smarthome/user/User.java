@@ -7,6 +7,16 @@ import de.neo.persist.annotations.Persist;
 @Domain(name = "User")
 public class User {
 
+	
+	public static User DefaultRoot;
+	
+	static {
+		DefaultRoot = new User();
+		DefaultRoot.setName("admin");
+		DefaultRoot.setPassword("admin");
+		DefaultRoot.setRole(UserRole.ADMIN);
+	}
+	
 	public enum UserRole {
 		ADMIN, USER
 	};
@@ -25,6 +35,10 @@ public class User {
 
 	@Persist(name = "role")
 	private UserRole mRole;
+	
+	public boolean matches(String name, String password) {
+		return mName.equals(name) && mPassword.equals(password);
+	}
 
 	public String getName() {
 		return mName;

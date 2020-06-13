@@ -1,6 +1,7 @@
 package de.neo.smarthome.user;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
@@ -13,7 +14,6 @@ import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
-import de.neo.smarthome.api.IWebUser.BeanUserToken;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IWebUser;
 import de.neo.smarthome.controlcenter.ControlCenter;
@@ -68,11 +68,13 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 
 	@WebRequest(path = "create", description = "Creat new user")
 	public BeanUser createUser(@WebGet(name = "token") String adminToken, @WebGet(name = "user_name") String userName,
-			@WebGet(name = "password") String password) throws RemoteException, DaoException {
+			@WebGet(name = "password") String password, @WebGet(name = "avatar") String avatar)
+			throws RemoteException, DaoException {
 		UserSessionHandler.require(adminToken, UserRole.ADMIN);
 		User user = new User();
 		user.setName(userName);
 		user.setPassword(password);
+		user.setAvatar(avatar);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.save(user);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Create new user " + user.getName(), "UserHandler");
@@ -94,8 +96,12 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 	public BeanUserToken generateUserToken(@WebGet(name = "user_name") String userName,
 			@WebGet(name = "password") String password) throws RemoteException, DaoException {
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
-		for (User user : userDao.loadAll()) {
-			if (user.getName().equals(userName) && user.getPassword().equals(password)) {
+		List<User> userList = userDao.loadAll();
+		if (userList.size() == 0 && User.DefaultRoot.matches(userName, password)) {
+			userList.add(User.DefaultRoot);
+		}
+		for (User user : userList) {
+			if (user.matches(userName, password)) {
 				Long expiration = System.currentTimeMillis() + UserSessionHandler.DEFALT_DURATION;
 				UserSession session = UserSessionHandler.getSingleton().generate(user, expiration,
 						SessionType.VOLATILE);
@@ -104,16 +110,34 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		}
 		throw new RemoteException("Invalid username or password");
 	}
+	
+	private User changeableUser(String token, long userId) throws DaoException, RemoteException {
+		if (userId > 0) {
+			UserSessionHandler.require(token, UserRole.ADMIN);			
+			return userById(userId);
+		} else {
+			return UserSessionHandler.require(token);
+		}
+	}
 
 	@WebRequest(description = "Change password", path = "change_password")
-	public void changePassword(@WebGet(name = "token") String adminToken, @WebGet(name = "user_id") long userId,
-			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {
-		UserSessionHandler.require(adminToken, UserRole.ADMIN);
-		User user = userById(userId);
+	public void changePassword(@WebGet(name = "token") String token, @WebGet(name = "user_id") long userId,
+			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {		
+		User user = changeableUser(token, userId);		
 		user.setPassword(new_password);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.update(user);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Change password for user " + user.getName(), "UserHandler");
+	}
+	
+	@WebRequest(description = "Change avatar, as base64 encoded png", path = "change_avatar")
+	public void changeAvatar(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException{
+		User user = changeableUser(token, userId);		
+		user.setAvatar(newAvatar);
+		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
+		userDao.update(user);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Change avatar for user " + user.getName(), "UserHandler");
 	}
 
 	@WebRequest(path = "add_access", description = "Add unit access for user")
