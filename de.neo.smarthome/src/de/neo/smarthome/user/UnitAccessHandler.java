@@ -66,18 +66,19 @@ public class UnitAccessHandler {
 	@SuppressWarnings("unchecked")
 	public <T> T require(User user, String id) throws RemoteException {
 		UserAccessList list = mAccess.get(user);
+		IControllUnit unit = null;
 		if (list != null) {
-			IControllUnit unit = list.getUnit(id);
-			if (unit == null && user.getRole() == UserRole.ADMIN) {
-				unit = mCenter.getControlUnit(id);
+			unit = list.getUnit(id);
+		}
+		if (unit == null && user.getRole() == UserRole.ADMIN) {
+			unit = mCenter.getControlUnit(id);
+		}
+		try {
+			if (unit != null) {
+				return (T) unit;
 			}
-			try {
-				if (unit != null) {
-					return (T) unit;
-				}
-			} catch (ClassCastException e) {
-				throw new RemoteException("Unit of false type");
-			}
+		} catch (ClassCastException e) {
+			throw new RemoteException("Unit of false type");
 		}
 		throw new RemoteException("Access for " + id + " denied");
 	}
