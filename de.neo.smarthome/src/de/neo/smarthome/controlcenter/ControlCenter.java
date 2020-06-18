@@ -217,6 +217,7 @@ public class ControlCenter implements IControlCenter {
 	@Override
 	public void addCronTrigger(CronJobTrigger trigger) throws DaoException {
 		mCronjobTrigger.add(trigger);
+		trigger.schedule();
 
 		Dao<CronJobTrigger> eventRuleDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
 		eventRuleDao.save(trigger);
