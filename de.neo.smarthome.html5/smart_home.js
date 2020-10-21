@@ -1,19 +1,65 @@
 
-var mEndpoint = '';
-var mToken = '';
+
+class APIHandler {
+	configure(endpoint, name, defaultParameter = {})
+	{
+		this.endpoint = endpoint;
+		this.name = name;
+		this.defaultParameter = JSON.parse(JSON.stringify(defaultParameter));
+	}
+
+	addDefaultParameter(key, value)
+	{
+		this.defaultParameter[key] = value;
+	}
+
+	call(method, callback = null, parameters = {})
+	{
+		var separator = '?';
+		var url = this.endpoint + '/' + this.name + '/' + method;
+		parameters = {...this.defaultParameter, ...parameters }
+		for (var key in parameters)
+		{
+			url = url + separator + key + "=" + parameters[key];
+			separator = '&';
+		}
+		var xmlHttp = new XMLHttpRequest();
+		xmlHttp.onreadystatechange = function() { 
+			if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+			{
+				var jsonResponse = JSON.parse(xmlHttp.responseText);
+				if (callback)
+				{
+					callback(jsonResponse);
+				}				
+			}				
+		}
+		xmlHttp.open("GET", url, true);
+		xmlHttp.send(null);
+	}
+}
+
+
+var apiTrigger = new APIHandler();
+var apiMediaServer = new APIHandler();
+var apiSwitch = new APIHandler();
+var apiAction = new APIHandler();
+var apiUser = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
+
+
 
 function initialize() {
 	readSetting();
 	align();
 	window.addEventListener('resize', align);
 
-	if (mEndpoint == null || mEndpoint == ''){
+	/*if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == ''){
 		mEndpoint = findGetParameter('endpoint');
 		mToken = findGetParameter('token');
-	}
+	}*/
 
 	var volume_input = document.getElementById('volume_input');
 	volume_input.addEventListener('input', setVolume);
@@ -26,8 +72,9 @@ function initialize() {
 	// Setup refresh loop for 5 seconds
 	setInterval(loop, 1000 * 5);
 
-	if (mEndpoint == null || mEndpoint == '')
+	if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == ''){
 		showDialog('settings');
+	}
 }
 
 function findGetParameter(parameterName) {
@@ -42,39 +89,43 @@ function findGetParameter(parameterName) {
 }
 
 function readSetting(){
-	mEndpoint = window.localStorage.getItem("endpoint");
-	mToken = window.localStorage.getItem("token");
+	endpoint = window.localStorage.getItem("endpoint");
+	token = window.localStorage.getItem("token");
 	mMediaCenter = window.localStorage.getItem("mediacenter");
 	mPath = window.localStorage.getItem("path");
 	var animate = window.localStorage.getItem("animation");
 	mAnimation = (animate != null) && (animate === "yes");
 	if (mPath == null)
 		mPath = '';
+	parameter = {'token' : token};
+	apiTrigger.configure(endpoint, 'trigger', parameter)
+	apiMediaServer.configure(endpoint, 'mediaserver', parameter)
+	apiMediaServer.addDefaultParameter('player', 'mplayer');
+	apiMediaServer.addDefaultParameter('id', mMediaCenter);
+	apiSwitch.configure(endpoint, 'switch', parameter)
+	apiAction.configure(endpoint, 'action', parameter)
+	apiUser.configure(endpoint, 'user', parameter)
 }
 
 function initSettings(){
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
 	var animate = document.getElementById('setting_animation');
-	if (mEndpoint != null)
-		endpoint.value = mEndpoint;
-	else
-		endpoint.value = '';
-	if (mToken != null)
-		token.value = mToken;
-	else
-		token.value = '';
+
+	endpoint.value = window.localStorage.getItem("endpoint");
+	token.value = window.localStorage.getItem("token");
 	animate.checked = mAnimation;
 }
 
 function saveSettings(){
-	mEndpoint = document.getElementById('setting_endpoint').value;
-	mToken = document.getElementById('setting_token').value;
+	endpoint = document.getElementById('setting_endpoint').value;
+	token = document.getElementById('setting_token').value;
 	mAnimation = document.getElementById('setting_animation').checked;
 	mMediaCenter = '';
-	window.localStorage.setItem("endpoint", mEndpoint);
-	window.localStorage.setItem("token", mToken);
+	window.localStorage.setItem("endpoint", endpoint);
+	window.localStorage.setItem("token", token);
 	window.localStorage.setItem("animation", mAnimation ? "yes" : "no");
+	readSetting();
 	refreshControlCenter();
 	refreshFiles();
 	refreshPlaylist();
@@ -86,44 +137,27 @@ function loop() {
 }
 
 function refreshSwitches(){
-	if (mEndpoint != null && mEndpoint != ''){
-		var root = document.getElementById('west');
-		var east = document.getElementById('east');
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/switch/list?token=' + mToken;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (request.status >= 200 && request.status < 300) {
-				var switches = JSON.parse(request.responseText);
-				switches.sort(function(a, b){return a.name.localeCompare(b.name)});
-				var content = "";
-				for (var i = 0; i < switches.length; i++) {
-					var s = switches[i];
-					if (s.state == "ON") {
-						content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on">';
-					} else {
-						content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
-					}
-					content += s.name + "</div>";
-				}
-				root.innerHTML = content;
+	var root = document.getElementById('west');
+	apiSwitch.call('list', function(switches)
+	{
+		switches.sort(function(a, b){return a.name.localeCompare(b.name)});
+		var content = "";
+		for (var i = 0; i < switches.length; i++) {
+			var s = switches[i];
+			if (s.state == "ON") {
+				content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on">';
 			} else {
-				root.innerHTML = 'No switches';
+				content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
 			}
-			align();
-		});
-		request.send();
-	}
+			content += s.name + "</div>";
+		}
+		root.innerHTML = content;
+		align();
+	});
 }
 
 function switchClick(id, state){
-	var request = new XMLHttpRequest();
-	var url = mEndpoint + '/switch/set?token=' + mToken + '&id=' + id + '&state=' + state;
-	request.open("GET", url);
-	request.send();
-	request.addEventListener('load', function(event) {
-		refreshSwitches();
-	});
+	apiSwitch.call('set', refreshSwitches, {'id': id, 'state': state});
 }
 
 function mediaClick(id){
@@ -136,37 +170,25 @@ function mediaClick(id){
 }
 
 function getPlaying(callback){
-	if (mMediaCenter != null && mMediaCenter != '' && mEndpoint != null && mEndpoint != ''){
-		var url = mEndpoint + '/mediaserver/list?token=' + mToken;
-		var req = new XMLHttpRequest();  
-		req.open("GET", url);
-		req.addEventListener('load', function(event) {
-			var handled = false;
-			if (req.status >= 200 && req.status < 300) {
-				var response = JSON.parse(req.responseText);
-				if (response !== undefined && !response.error) {
-					if (response.length > 0 && response[0] !== undefined){
-						for (var i = 0; i < response.length; i++) {
-							var m = response[i];
-							if (m.id == mMediaCenter) {
-								callback(m.current_playing);
-								handled = true;
-							}
-						}
+	apiMediaServer.call('list', function(result)
+	{
+		handled = false;
+		if (checkResult(result)) {
+			if (result.length > 0 && result[0] !== undefined){
+				for (var i = 0; i < result.length; i++) {
+					var m = result[i];
+					if (m.id == mMediaCenter) {
+						callback(m.current_playing);
+						handled = true;
 					}
-				} else {
-					// Ignore error
 				}
-			} else if (req.status == 404 || req.status == 500) {
-				// Ignore error
 			}
-			if (!handled)
-				callback(null);
-		});	
-		req.timeout = 4000; // 4 seconds timeout
-		req.open("GET", url);
-		req.send();  
-	}
+		}
+		if (!handled)
+		{
+			callback(null);
+		}
+	});
 }
 
 function refreshPlayer(){
@@ -192,41 +214,31 @@ function refreshPlayer(){
 	});
 }
 
+
 function refreshControlCenter(){
 	var root = document.getElementById('controlcenter');
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/list?token=' + mToken;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			title = 'Smart Home Console';
-			if (request.status >= 200 && request.status < 300) {
-				var media = JSON.parse(request.responseText);
-				media.sort(function(a, b){return a.name.localeCompare(b.name)});
-				var content = "";
-				if (media.length == 1)
-					mMediaCenter = media[0].id;
-				for (var i = 0; i < media.length; i++) {
-					var m = media[i];
-					if (m.id == mMediaCenter) {
-						content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
-						title = m.name + ' - Smart Home Console';
-					} else {
-						content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
-					}
-					content += m.name + "</div>";
-				}
-				root.innerHTML = content;
+	root.innerHTML = 'No mediaserver';
+	document.title = 'Smart Home Console';
+	apiMediaServer.call('list', function(media) 
+	{
+		media.sort(function(a, b){return a.name.localeCompare(b.name)});
+		var content = "";
+		var title = 'Smart Home Console';
+		if (media.length == 1)
+			mMediaCenter = media[0].id;
+		for (var i = 0; i < media.length; i++) {
+			var m = media[i];
+			if (m.id == mMediaCenter) {
+				content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
+				title = m.name + ' - Smart Home Console';
 			} else {
-				root.innerHTML = 'No mediaserver';
+				content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
 			}
-			document.title = title;
-			align();
-		});
-		request.send();
-	} else {
-		root.innerHTML = 'No mediaserver';
-	}
+			content += m.name + "</div>";
+		}
+		root.innerHTML = content;
+		document.title = title;
+	}, {'id': ''});
 }
 
 function directoryClick(dir){
@@ -243,117 +255,87 @@ function directoryClick(dir){
 }
 
 function play(file){
-	if (mEndpoint != null && mEndpoint != ''){
-		mFile = file;
-		if (mPath != '' && mPath != null)
-			file = mPath + '<->' + file; 
-		playPath(file);
-	}
+	mFile = file;
+	if (mPath != '' && mPath != null)
+		file = mPath + '<->' + file; 
+	playPath(file);
 }
 
 function playPath(file){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/play_file?token=' + mToken + '&id=' + mMediaCenter + '&player=mplayer&file=' + file;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				showMessage(mFile, 'Start playing file');
-			}
-		});
-		request.send();
-	}
+	apiMediaServer.call('play_file', function(result)
+	{
+		if (checkResult(result)) {
+			showMessage(mFile, 'Start playing file');
+		}
+	}, {'file': file});	
 }
 
 function extendPls(pls, file){
 	hideDialog('playlist');
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/playlist_extend?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&item=' + file;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				showMessage('Playlist extended', 'Playlist <b>' + pls + '</b> was extended.');	
-			}
-		});
-		request.send();
-	}
+	apiMediaServer.call('playlist_extend', function(result)
+	{
+		if (checkResult(request)) {
+			showMessage('Playlist extended', 'Playlist <b>' + pls + '</b> was extended.');	
+		}
+	}, {'playlist': pls, 'item': file});	
 }
 
 function addFileToPls(path, file){
-	mFile = file;
+	mFile = file;	
 	if (path != null && path != '')
+	{
 		mFile = path + '<->' + file;
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/playlists?token=' + mToken + '&id=' + mMediaCenter;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var pls = JSON.parse(request.responseText);
-				var content = "";
-				var root = document.getElementById('playlist_content');
-				var title = document.getElementById('playlist_title');
-				title.innerHTML = "Select playlist";
-				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
-				for (var i = 0; i < pls.length; i++) {
-					var p = pls[i];
-					content += '<div onclick="extendPls(\'' + p.name + '\', \'' + mFile + '\')" class="file link">' + p.name + "</div>";
-				}
-				root.innerHTML = content;
-			} else {
-				root.innerHTML = 'No playlists';
-			}
-			showDialog('playlist');
-		});
-		request.send();
 	}
+	apiMediaServer.call('playlist_extend', function(result)
+	{
+		root.innerHTML = 'No playlists';
+		if (checkResult(request)) {
+			var content = "";
+			var root = document.getElementById('playlist_content');
+			var title = document.getElementById('playlist_title');
+			title.innerHTML = "Select playlist";
+			pls.sort(function(a, b){return a.name.localeCompare(b.name);});
+			for (var i = 0; i < pls.length; i++) {
+				var p = pls[i];
+				content += '<div onclick="extendPls(\'' + p.name + '\', \'' + mFile + '\')" class="file link">' + p.name + "</div>";
+			}
+			root.innerHTML = content;
+		}
+	});
 }
 
 function refreshFiles(){
-	var root = document.getElementById('center');
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/files?token=' + mToken + '&id=' + mMediaCenter + '&path=' + mPath;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (request.status >= 200 && request.status < 300) {
-				var files = JSON.parse(request.responseText);
-				var content = "";
-				if (mPath != ''){
-					content = '<div onclick="directoryClick(\'<->\')" class="file dir link"><table width="100%"><tr>';
-					content += '<td><img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
-					content += '</tr></table></div>';
-				}
-				files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
-				for (var i = 0; i < files.length; i++) {
-					var f = files[i];
-					if (f.filetype == "Directory") {
-						content += '<div class="file dir">';
-					} else {
-						content += '<div class="file">';
-					}
-					content += '<table width="100%"><tr>';
-					if (f.filetype == "Directory") {
-						content += '<td class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
-					} else {
-						content += '<td class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
-					}
-					content += '<td align="right" width="70px">';
-					content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
-					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
-					content += '</td></tr></table></div>';
-				}
-				root.innerHTML = content;
-			} else {
-				root.innerHTML = 'No files';
+	apiMediaServer.call('files', function(files){
+		var root = document.getElementById('center');
+		if (checkResult(files, root)) {
+			var content = "";
+			if (mPath != ''){
+				content = '<div onclick="directoryClick(\'<->\')" class="file dir link"><table width="100%"><tr>';
+				content += '<td><img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
+				content += '</tr></table></div>';
 			}
-			align();
-		});
-		request.send();
-	} else {
-		root.innerHTML = 'No files';
-	}
+			files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
+			for (var i = 0; i < files.length; i++) {
+				var f = files[i];
+				if (f.filetype == "Directory") {
+					content += '<div class="file dir">';
+				} else {
+					content += '<div class="file">';
+				}
+				content += '<table width="100%"><tr>';
+				if (f.filetype == "Directory") {
+					content += '<td class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
+				} else {
+					content += '<td class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
+				}
+				content += '<td align="right" width="70px">';
+				content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
+				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
+				content += '</td></tr></table></div>';
+			}
+			root.innerHTML = content;
+		}
+	}, {'path': mPath});
 }
 
 function showMessage(title, msg){
@@ -365,128 +347,94 @@ function showMessage(title, msg){
 }
 
 function plsClick(pls){
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/play_playlist?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&player=mplayer';
-		request.open("GET", url);
-		mPlaylist = pls;
-		request.addEventListener('load', function(event) {
-			if (request.status >= 200 && request.status < 300) {
-				var pls = JSON.parse(request.responseText);
-				showMessage(mPlaylist, 'Play playlist ' + mPlaylist);
-			}
-		});
-		request.send();
-	}
+	mPlaylist = pls;
+	apiMediaServer.call('play_playlist', function(result){
+		if (checkResult(result)) {
+			showMessage(mPlaylist, 'Play playlist ' + mPlaylist);
+		}
+	}, {'playlist': pls});
 }
 
 function deletePlsItem(pls, item){
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		mPls = pls;
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/playlist_delete_item?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls + '&item=' + item;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				showPlsContent(mPls);
-			}
-		});
-		request.send();
-	}
+	mPls = pls;
+	apiMediaServer.call('playlist_delete_item', function(result){
+		if (checkResult(result)) {
+			showPlsContent(mPls);
+		}
+	}, {'playlist': pls, 'item': item});
 }
 
 function showPlsContent(pls){
 	mPls = pls;
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/playlist_content?token=' + mToken + '&id=' + mMediaCenter + '&playlist=' + pls;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var pls = JSON.parse(request.responseText);
-				var content = "";
-				var root = document.getElementById('playlist_content');
-				var title = document.getElementById('playlist_title');
-				title.innerHTML = "Playlist content";
-				for (var i = 0; i < pls.length; i++) {
-					var p = pls[i];
-					content += '<div class="file"><table width="100%"><tr>';
-					content += '<td width="90%" onclick="mFile=\'' + p.name + '\';playPath(\'' + p.path + '\')" class="link">' + p.name + "</td>";
-					content += '<td align="right">';
-					content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
-					content += '</td></tr></table></div>';
-				}
-				root.innerHTML = content;
-			} else {
-				root.innerHTML = 'No items';
+	var root = document.getElementById('playlist_content');
+	root.innerHTML = 'No items';
+	apiMediaServer.call('playlist_content', function(result)
+	{
+		if (checkResult(result)) {
+			var content = "";			
+			var title = document.getElementById('playlist_title');
+			title.innerHTML = "Playlist content";
+			for (var i = 0; i < result.length; i++) {
+				var p = result[i];
+				content += '<div class="file"><table width="100%"><tr>';
+				content += '<td width="90%" onclick="mFile=\'' + p.name + '\';playPath(\'' + p.path + '\')" class="link">' + p.name + "</td>";
+				content += '<td align="right">';
+				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
+				content += '</td></tr></table></div>';
 			}
+			root.innerHTML = content;
 			showDialog('playlist');
-		});
-		request.send();
-	}
-}
-
-function refreshPlaylist(){
-	var root = document.getElementById('east');
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/playlists?token=' + mToken + '&id=' + mMediaCenter;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (request.status >= 200 && request.status < 300) {
-				var pls = JSON.parse(request.responseText);
-				var content = "";
-				pls.sort(function(a, b){return a.name.localeCompare(b.name);});
-				for (var i = 0; i < pls.length; i++) {
-					var p = pls[i];
-					content += '<div class="file"><table width="100%"><tr>';
-					content += '<td width="90%" onclick="plsClick(\'' + p.name + '\')" class="link">' + p.name + "</td>";
-					content += '<td align="right">';
-					//content += '<img src="img/play.png" height="32px"/ class="link" onclick="plsClick(\'' + p.name + '\')">';
-					content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
-					content += '</td></tr></table></div>';
-				}
-				root.innerHTML = content;
-			} else {
-				root.innerHTML = 'No playlists';
-			}
-			align();
-		});
-		request.send();
-	} else {
-		root.innerHTML = 'No playlists';
-	}
-}
-
-function checkResult(request){
-	if (request.status >= 200 && request.status < 300) {
-		var pls = JSON.parse(request.responseText);
-		if (pls != null && pls.success != null && pls.success == false){
-			if (pls.error != null)
-			showMessage("Error", pls.error.message);
-			return false;
 		}
-		return true;
-	} else {
+	}, {'playlist': pls});	
+}
+
+function refreshPlaylist(){	
+	apiMediaServer.call('playlists', function(result)
+	{
+		var root = document.getElementById('east');
+		if (checkResult(result, root)){
+			var content = "";
+			result.sort(function(a, b){return a.name.localeCompare(b.name);});
+			for (var i = 0; i < result.length; i++) {
+				var p = result[i];
+				content += '<div class="file"><table width="100%"><tr>';
+				content += '<td width="90%" onclick="plsClick(\'' + p.name + '\')" class="link">' + p.name + "</td>";
+				content += '<td align="right">';
+				//content += '<img src="img/play.png" height="32px"/ class="link" onclick="plsClick(\'' + p.name + '\')">';
+				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
+				content += '</td></tr></table></div>';
+			}
+			root.innerHTML = content;
+		}		
+	});
+}
+
+function checkResult(result, errorHtmlElement = null){
+	if (result != null && result.success != null && result.success == false){
+		if (result.error != null)
+		{
+			var message = result.error.message;
+			if (message == null && result.error.class != null){
+				message = 'Ups, that shouldn\'t happen... ' + result.error.class;
+			}
+			if (errorHtmlElement){
+				errorHtmlElement.innerHTML = message;
+			} else {
+				showMessage("Error", result.error.message);
+			}
+		}		
 		return false;
 	}
+	return true;
 }
 
 function playerAction(action, parameter){
-	if (mEndpoint != null && mEndpoint != '' && mMediaCenter != null && mMediaCenter != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/mediaserver/' + action + '?token=' + mToken + '&id=' + mMediaCenter + '&player=mplayer';
-		if (typeof parameter !== 'undefined') {
-			url = url + '&' + parameter;
+	apiMediaServer.call(action, function(result)
+	{
+		if (checkResult(result)) {
+			refreshPlayer();
 		}
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				refreshPlayer();
-			}
-		});
-		request.send();
-	}
+	}, parameter);
 }
 
 function getVolume(){
@@ -500,145 +448,92 @@ function getVolume(){
 
 function setVolume(){
 	var input = document.getElementById('volume_input');
-	playerAction('volume', 'volume=' + (input.value));
+	playerAction('volume', {'volume': input.value});
 }
 
 function doTrigger(trigger){
 	mTrigger = trigger;
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/dotrigger?token=' + mToken + '&trigger=' + trigger;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + rules.triggered_rules + ' events.' );
-			}
-		});
-		request.send();
-	}
+	apiTrigger.call('dotrigger', function(result)
+	{
+		if (checkResult(result)) {
+			showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + rules.triggered_rules + ' events.' );
+		}
+	}, {'trigger': trigger});
 }
 
 function deleteEventRule(trigger){
 	mTrigger = trigger;
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/delete_event_rule?token=' + mToken + '&trigger=' + trigger;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				showRules();
-			}
-		});
-		request.send();
-	}
+	apiTrigger.call('delete_event_rule', function(result)
+	{
+		if (checkResult(result)) {
+			showRules();
+		}
+	}, {'trigger': trigger});
 }
 
 function addInfo(){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var info = document.getElementById('trigger_infos');
-		var url = mEndpoint + '/controlcenter/set_information_for_event_rule?token=' + mToken + '&trigger=' + mRuleId + '&informations=' + info.value;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	var info = document.getElementById('trigger_infos');
+	apiTrigger.call('set_information_for_event_rule', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'information': info.value});
 }
 
 function deleteEvent(index){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/delete_event_in_rule?token=' + mToken + '&trigger=' + mRuleId + '&index=' + index;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	apiTrigger.call('delete_event_in_rule', function(result){
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'index': index});	
 }
 
 function createNewEvent(){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var unit = document.getElementById("new_event");
-		var condition = document.getElementById("new_event_condition");
-		var url = mEndpoint + '/controlcenter/create_event_for_rule?token=' + mToken + '&trigger=' + mRuleId + 
-			'&unit=' + unit.value + '&condition=' + condition.value;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	var unit = document.getElementById("new_event");
+	var condition = document.getElementById("new_event_condition");
+	apiTrigger.call('create_event_for_rule', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'unit': unit.value, 'condition': condition.value});
 }
 
 function createNewParameter(index){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var key = document.getElementById("new_param_key");
-		var value = document.getElementById("new_param_value");
-		var url = mEndpoint + '/controlcenter/add_parameter_for_event?token=' + mToken + '&trigger=' + mRuleId + 
-			'&index=' + index + '&key=' + key.value + '&value=' + value.value;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	var key = document.getElementById("new_param_key");
+	var value = document.getElementById("new_param_value");
+	apiTrigger.call('add_parameter_for_event', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'index': index, 'key': key.value, 'value': value.value});	
 }
 
 function updateCondition(index){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var condition = document.getElementById("condition_" + index);
-		var url = mEndpoint + '/controlcenter/set_condition_for_event_in_rule?token=' + mToken + '&trigger=' + mRuleId + 
-			'&event_index=' + index + '&condition=' + condition.value;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	var condition = document.getElementById("condition_" + index);
+	apiTrigger.call('set_condition_for_event_in_rule', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'event_index': index, 'condition': condition.value});
 }
 
 function deleteParameter(index){
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/delete_parameter_for_event?token=' + mToken + '&trigger=' + mRuleId + 
-			'&event_index=' + index + '&parameter_index=' + (mRules[mRuleIndex].events[index].parameter.length - 1);
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				hideDialog('trigger');
-				showRules();
-			}
-		});
-		request.send();
-	}
+	apiTrigger.call('delete_parameter_for_event', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('trigger');
+			showRules();
+		}
+	}, {'trigger': mRuleId, 'event_index': index, 'parameter_index': (mRules[mRuleIndex].events[index].parameter.length - 1)});
 }
 
 function showTrigger(index){
@@ -686,51 +581,40 @@ function showTrigger(index){
 
 function createEventRule(){
 	var input = document.getElementById('new_event_rule');
-	if (mEndpoint != null && mEndpoint != '' && input != null){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/create_event_rule?token=' + mToken + '&trigger=' + input.value;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				var rules = JSON.parse(request.responseText);
-				showRules();
-			}
-		});
-		request.send();
-	}
+	apiTrigger.call('create_event_rule', function(result)
+	{
+		if (checkResult(result)) {
+			showRules();
+		}
+	}, {'trigger': input.value});
 }
 
 function showRules(){
 	var root = document.getElementById('rules_content');
 	showDialog('rules');
 	root.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
-	if (mEndpoint != null && mEndpoint != ''){
-		var request = new XMLHttpRequest();
-		var url = mEndpoint + '/controlcenter/rules?token=' + mToken;
-		request.open("GET", url);
-		request.addEventListener('load', function(event) {
-			if (checkResult(request)) {
-				mRules = JSON.parse(request.responseText);
-				var root = document.getElementById('rules_content');
-				var content = "";
-				for (var i = 0; i < mRules.length; i++) {
-					var rule = mRules[i];
-					content += '<div class="file"><table width="100%"><tr>';
-					content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
-					content += '<td align="right">';
-					content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
-					content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteEventRule(\'' + rule.trigger + '\')">';
-					content += '</td></tr></table></div>';
-				}
-				content += '<div class="file"><table width="100%"><tr>';
-				content += '<td width="90%"><input value="new.event_rule" id="new_event_rule" class="fill"/></td>';
-				content += '<td align="right">';
-				content += '<img src="img/add.png" height="32px" class="link" onclick="createEventRule()">';
-				content += '</td></tr></table></div>';
-				root.innerHTML = content;
-			}
-		});
-		request.send();
-	}
-}
 
+	apiTrigger.call('rules', function(result)
+	{
+		if (checkResult(result)) {
+			mRules = JSON.parse(request.responseText);
+			var root = document.getElementById('rules_content');
+			var content = "";
+			for (var i = 0; i < mRules.length; i++) {
+				var rule = mRules[i];
+				content += '<div class="file"><table width="100%"><tr>';
+				content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
+				content += '<td align="right">';
+				content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
+				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteEventRule(\'' + rule.trigger + '\')">';
+				content += '</td></tr></table></div>';
+			}
+			content += '<div class="file"><table width="100%"><tr>';
+			content += '<td width="90%"><input value="new.event_rule" id="new_event_rule" class="fill"/></td>';
+			content += '<td align="right">';
+			content += '<img src="img/add.png" height="32px" class="link" onclick="createEventRule()">';
+			content += '</td></tr></table></div>';
+			root.innerHTML = content;
+		}
+	});
+}
