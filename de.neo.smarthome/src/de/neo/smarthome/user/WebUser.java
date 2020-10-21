@@ -110,10 +110,10 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		}
 		throw new RemoteException("Invalid username or password");
 	}
-	
+
 	private User changeableUser(String token, long userId) throws DaoException, RemoteException {
 		if (userId > 0) {
-			UserSessionHandler.require(token, UserRole.ADMIN);			
+			UserSessionHandler.require(token, UserRole.ADMIN);
 			return userById(userId);
 		} else {
 			return UserSessionHandler.require(token);
@@ -122,18 +122,19 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 
 	@WebRequest(description = "Change password", path = "change_password")
 	public void changePassword(@WebGet(name = "token") String token, @WebGet(name = "user_id") long userId,
-			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {		
-		User user = changeableUser(token, userId);		
+			@WebGet(name = "new_password") String new_password) throws RemoteException, DaoException {
+		User user = changeableUser(token, userId);
 		user.setPassword(new_password);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.update(user);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Change password for user " + user.getName(), "UserHandler");
 	}
-	
+
 	@WebRequest(description = "Change avatar, as base64 encoded png", path = "change_avatar")
-	public void changeAvatar(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
-			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException{
-		User user = changeableUser(token, userId);		
+	public void changeAvatar(@WebGet(name = "token") String token,
+			@WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException {
+		User user = changeableUser(token, userId);
 		user.setAvatar(newAvatar);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.update(user);

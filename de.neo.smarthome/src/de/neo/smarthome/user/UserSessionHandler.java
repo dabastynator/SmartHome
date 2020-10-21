@@ -74,7 +74,7 @@ public class UserSessionHandler {
 	public static User require(String token) throws RemoteException {
 		UserSession session = getSingleton().find(token);
 		if (session == null) {
-			throw new RemoteException("Invalid user token. Requre a new one");
+			throw new RemoteException("Invalid user token. Require a new one");
 		}
 		return session.mUser;
 	}
