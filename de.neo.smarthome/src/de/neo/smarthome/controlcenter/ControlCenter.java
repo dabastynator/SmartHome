@@ -18,7 +18,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.EventRule;
+import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
@@ -34,10 +34,10 @@ import de.neo.smarthome.user.UnitAccessHandler;
 @Domain
 public class ControlCenter implements IControlCenter {
 
-	@OneToMany(domainClass = EventRule.class, name = "EventRule")
-	private List<EventRule> mEventRules = Collections.synchronizedList(new ArrayList<EventRule>());
+	@OneToMany(domainClass = Script.class, name = "Script")
+	private List<Script> mScripts = Collections.synchronizedList(new ArrayList<Script>());
 
-	private Map<String, EventRule> mEventRuleMap = new HashMap<>();
+	private Map<String, Script> mScriptMap = new HashMap<>();
 
 	@OneToMany(domainClass = CronJobTrigger.class, name = "TimeTrigger")
 	private List<CronJobTrigger> mCronjobTrigger = Collections.synchronizedList(new ArrayList<CronJobTrigger>());
@@ -65,10 +65,10 @@ public class ControlCenter implements IControlCenter {
 
 	@OnLoad
 	public void onLoad() {
-		mEventRuleMap.clear();
-		for (EventRule rule : mEventRules) {
-			rule.setControlcenter(this);
-			mEventRuleMap.put(rule.getTriggerID(), rule);
+		mScriptMap.clear();
+		for (Script script : mScripts) {
+			script.setControlcenter(this);
+			mScriptMap.put(script.getTriggerID(), script);
 		}
 		for (CronJobTrigger trigger : mCronjobTrigger)
 			trigger.setControlCenter(this);
@@ -112,10 +112,10 @@ public class ControlCenter implements IControlCenter {
 	@Override
 	public int trigger(Trigger trigger) {
 		int eventCount = 0;
-		EventRule rule = mEventRuleMap.get(trigger.getTriggerID());
-		if (rule != null) {
+		Script script = mScriptMap.get(trigger.getTriggerID());
+		if (script != null) {
 			try {
-				for (Event event : rule.getEventsForTrigger(trigger)) {
+				for (Event event : script.getEventsForTrigger(trigger)) {
 					event.getParameter().putAll(trigger.getParameter());
 					mEventWorker.queueEvent(event);
 					eventCount++;
@@ -169,41 +169,46 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@Override
-	public List<EventRule> getEventRules() {
-		return mEventRules;
+	public List<Script> getScripts() {
+		return mScripts;
 	}
 
 	@Override
-	public EventRule getEventRule(String id) {
-		return mEventRuleMap.get(id);
+	public Script getScript(String id) {
+		return mScriptMap.get(id);
 	}
 
 	@Override
-	public void addEventRule(EventRule rule) throws DaoException {
-		if (mEventRuleMap.containsKey(rule.getTriggerID()))
+	public void addScript(Script script) throws DaoException {
+		if (mScriptMap.containsKey(script.getTriggerID()))
 			throw new IllegalArgumentException(
-					"Event rule with trigger id '" + rule.getTriggerID() + "' already exists!");
+					"Script with trigger id '" + script.getTriggerID() + "' already exists!");
 
-		mEventRules.add(rule);
-		mEventRuleMap.put(rule.getTriggerID(), rule);
+		mScripts.add(script);
+		mScriptMap.put(script.getTriggerID(), script);
 
-		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
-		eventRuleDao.save(rule);
+		Dao<Script> scriptDao = DaoFactory.getInstance().getDao(Script.class);
+		scriptDao.save(script);
 
 		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
 		centerDao.update(this);
 	}
 
 	@Override
-	public void deleteEventRule(String triggerID) throws DaoException {
-		if (!mEventRuleMap.containsKey(triggerID))
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		EventRule rule = mEventRuleMap.get(triggerID);
-		mEventRules.remove(rule);
-		mEventRuleMap.remove(triggerID);
+	public void deleteScript(String triggerID) throws DaoException {
+		if (!mScriptMap.containsKey(triggerID))
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		Script script = mScriptMap.get(triggerID);
+		mScripts.remove(script);
+		mScriptMap.remove(triggerID);
 
-		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
-		eventRuleDao.delete(rule);
+		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
+		for (Event event: script.getEvents()) {
+			eventDao.delete(event);
+		}
+		
+		Dao<Script> scriptDao = DaoFactory.getInstance().getDao(Script.class);
+		scriptDao.delete(script);
 
 		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
 		centerDao.update(this);
@@ -219,8 +224,8 @@ public class ControlCenter implements IControlCenter {
 		mCronjobTrigger.add(trigger);
 		trigger.schedule();
 
-		Dao<CronJobTrigger> eventRuleDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
-		eventRuleDao.save(trigger);
+		Dao<CronJobTrigger> scriptDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
+		scriptDao.save(trigger);
 
 		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
 		centerDao.update(this);
@@ -236,8 +241,8 @@ public class ControlCenter implements IControlCenter {
 	public void deleteCronTrigger(CronJobTrigger trigger) throws DaoException {
 		mCronjobTrigger.remove(trigger);
 
-		Dao<CronJobTrigger> eventRuleDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
-		eventRuleDao.delete(trigger);
+		Dao<CronJobTrigger> scriptDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
+		scriptDao.delete(trigger);
 
 		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
 		centerDao.update(this);

@@ -22,7 +22,7 @@ import de.neo.smarthome.RemoteLogger.RemoteLogListener;
 import de.neo.smarthome.action.ActionControlUnit;
 import de.neo.smarthome.action.WebActionImpl;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.EventRule;
+import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.GroundPlot.Point;
@@ -109,7 +109,7 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
 
 		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
-		builder.registerDao(new XMLDao<EventRule>(EventRule.class));
+		builder.registerDao(new XMLDao<Script>(Script.class));
 		builder.registerDao(new XMLDao<Event>(Event.class));
 		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
 		builder.registerDao(new XMLDao<Parameter>(Parameter.class));

@@ -59,7 +59,7 @@ public interface IControlCenter {
 	public IWebInformationUnit getInformationHandler();
 
 	/**
-	 * Trigger a trigger. The trigger is specified by the parameter. EventRules are
+	 * Trigger a trigger. The trigger is specified by the parameter. Scripts are
 	 * used to map events for control unit.
 	 * 
 	 * @param trigger
@@ -76,13 +76,13 @@ public interface IControlCenter {
 	 */
 	public Map<String, IControllUnit> getControlUnits();
 
-	public List<EventRule> getEventRules();
+	public List<Script> getScripts();
 
-	public EventRule getEventRule(String id);
+	public Script getScript(String id);
 
-	public void addEventRule(EventRule rule) throws DaoException;
+	public void addScript(Script script) throws DaoException;
 
-	public void deleteEventRule(String triggerID) throws DaoException;
+	public void deleteScript(String triggerID) throws DaoException;
 
 	public List<CronJobTrigger> getCronTriggers();
 

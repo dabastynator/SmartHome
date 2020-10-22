@@ -20,130 +20,129 @@ public interface IWebTrigger extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException;
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token,
+			@WebGet(name = "trigger") String triggerID) throws RemoteException;
 
 	/**
-	 * List all event-rules of the controlcenter. A rule can be triggered by the
-	 * speicified trigger.
+	 * // * List all scripts of the controlcenter. A script can be triggered by its
+	 * trigger id.
 	 * 
-	 * @return list of rules
+	 * @return list of scripts
 	 * @throws RemoteException
 	 */
-	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<EventRule> getEvents(@WebGet(name = "token") String token) throws RemoteException;
+	@WebRequest(path = "scripts", description = "List all scripts of the controlcenter. A script can be triggered by its trigger id.")
+	public List<Script> getScripts(@WebGet(name = "token") String token) throws RemoteException;
 
 	/**
-	 * Create new event rule for given trigger id.
+	 * Create new script for given trigger id.
 	 * 
 	 * @param triggerID
-	 * @return new event rule
+	 * @return new script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "create_event_rule", description = "Create new event rule for given trigger id.")
-	public EventRule createEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
+	@WebRequest(path = "create_script", description = "Create new script for given trigger id.")
+	public Script createScript(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
 			throws RemoteException, DaoException;
 
 	/**
-	 * Delete event rule by given trigger id.
+	 * Delete script by given trigger id.
 	 * 
 	 * @param triggerID
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "delete_event_rule", description = "Delete event rule by given trigger id.")
-	public void deleteEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
+	@WebRequest(path = "delete_script", description = "Delete script by given trigger id.")
+	public void deleteScript(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
 			throws RemoteException, DaoException;
 
 	/**
-	 * Create new event for given event rule. The event corresponds to a specifig
-	 * unit and can have an optional condition.
+	 * Create new event for given script. The event corresponds to a specific unit
+	 * and can have an optional condition.
 	 * 
 	 * @param triggerID
 	 * @param unitID
-	 * @return extended event rule
+	 * @return extended script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "create_event_for_rule", description = "Create new event for given event rule. The event corresponds to a specifig unit and can have an optional condition.")
-	public EventRule createEventForRule(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "unit") String unitID,
-			@WebGet(name = "condition") String condition) throws RemoteException, DaoException;
+	@WebRequest(path = "create_event", description = "Create new event for given script. The event corresponds to a specific unit and can have an optional condition.")
+	public Script createEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "unit") String unitID, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException;
 
 	/**
-	 * Delete event int given event rule by event index.
+	 * Delete event in given script by event index.
 	 * 
 	 * @param triggerID
 	 * @param index
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "delete_event_in_rule", description = "Delete event in given event rule by event index.")
-	public void deleteEventInRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+	@WebRequest(path = "delete_event", description = "Delete event in given script by event index.")
+	public void deleteEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "index") int index) throws RemoteException, DaoException;
 
 	/**
-	 * Add parameter for event given event rule by event index.
+	 * Add parameter for event given script by event index.
 	 * 
 	 * @param triggerID
 	 * @param index
 	 * @param key
 	 * @param value
-	 * @return modified event rule
+	 * @return modified script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given event rule by event index.")
-	public EventRule addParameterforEventInRule(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index,
-			@WebGet(name = "key") String key, @WebGet(name = "value") String value)
+	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given script by event index.")
+	public Script addParameterforEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "index") int index, @WebGet(name = "key") String key, @WebGet(name = "value") String value)
 			throws RemoteException, DaoException;
 
 	/**
-	 * Delete parameter for event given event rule by event index and parameter
-	 * index.
+	 * Delete parameter for event given script by event index and parameter index.
 	 * 
 	 * @param triggerID
 	 * @param eventIndex
 	 * @param parameterIndex
-	 * @return modified event rule
+	 * @return modified script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given event rule by event index and parameter index.")
-	public EventRule deleteParameterforEventInRule(@WebGet(name = "token") String token,
+	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given script by event index and parameter index.")
+	public Script deleteParameterforEvent(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger") String triggerID, @WebGet(name = "event_index") int eventIndex,
 			@WebGet(name = "parameter_index") int parameterIndex) throws RemoteException, DaoException;
 
 	/**
-	 * Set informations for event given event rule. Several information are
-	 * separated by comma.
+	 * Set informations for event given script. Several information are separated by
+	 * comma.
 	 * 
 	 * @param triggerID
 	 * @param information
-	 * @return modified event rule
+	 * @return modified script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
-	public EventRule setInformationsforEventRule(@WebGet(name = "token") String token,
+	@WebRequest(path = "set_information_for_script", description = "Set informations for event given script. Several information are separated by comma.")
+	public Script setInformationsForScript(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger") String triggerID, @WebGet(name = "informations") String informations)
 			throws RemoteException, DaoException;
 
 	/**
-	 * Set condition for an event of an given event rule.
+	 * Set condition for an event of a given script.
 	 * 
 	 * @param triggerID
 	 * @param eventIndex
 	 * @param constrains
-	 * @return modified event rule
+	 * @return modified script
 	 * @throws RemoteException
 	 * @throws DaoException
 	 */
-	@WebRequest(path = "set_condition_for_event_in_rule", description = "Set condition for an event of an given event rule.")
-	public EventRule setConditionforEvent(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "event_index") int eventIndex,
-			@WebGet(name = "condition") String condition) throws RemoteException, DaoException;
+	@WebRequest(path = "set_condition_for_event", description = "Set condition for an event of an given script.")
+	public Script setConditionForEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException;
 
 	/**
 	 * List all crone-job time trigger
@@ -188,7 +187,7 @@ public interface IWebTrigger extends RemoteAble {
 
 		@WebField(name = "id")
 		public long Id;
-		
+
 		@WebField(name = "trigger_id")
 		public String TriggerId;
 

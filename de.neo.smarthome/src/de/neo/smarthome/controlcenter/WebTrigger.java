@@ -13,7 +13,7 @@ import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.EventRule;
+import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IWebTrigger;
 import de.neo.smarthome.api.Trigger;
@@ -35,94 +35,94 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 		trigger.setTriggerID(triggerID);
 		int eventcount = mCenter.trigger(trigger);
 		HashMap<String, Integer> result = new HashMap<>();
-		result.put("triggered_rules", eventcount);
+		result.put("triggered_events", eventcount);
 		return result;
 	}
 
 	@Override
-	@WebRequest(path = "rules", description = "List all event-rules of the controlcenter. A rule can be triggered by the speicified trigger.")
-	public List<EventRule> getEvents(@WebGet(name = "token") String token) throws RemoteException {
+	@WebRequest(path = "scripts", description = "List all scripts of the controlcenter. A script can be triggered by its trigger id.")
+	public List<Script> getScripts(@WebGet(name = "token") String token) throws RemoteException{
 		UserSessionHandler.require(token);
-		return mCenter.getEventRules();
+		return mCenter.getScripts();
 	}
 
 	@Override
-	@WebRequest(path = "create_event_rule", description = "Create new event rule for given trigger id.")
-	public EventRule createEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
+	@WebRequest(path = "create_script", description = "Create new script for given trigger id.")
+	public Script createScript(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = new EventRule();
-		rule.setTriggerID(triggerID);
-		rule.setControlcenter(mCenter);
-		mCenter.addEventRule(rule);
-		return rule;
+		Script script = new Script();
+		script.setTriggerID(triggerID);
+		script.setControlcenter(mCenter);
+		mCenter.addScript(script);
+		return script;
 	}
 
 	@Override
-	@WebRequest(path = "delete_event_rule", description = "Delete event rule by given trigger id.")
-	public void deleteEventRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
+	@WebRequest(path = "delete_script", description = "Delete script by given trigger id.")
+	public void deleteScript(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		mCenter.deleteEventRule(triggerID);
+		mCenter.deleteScript(triggerID);
 	}
 
 	@Override
-	@WebRequest(path = "create_event_for_rule", description = "Create new event for given event rule. The event corresponds to a specifig unit and can have an optional condition.")
-	public EventRule createEventForRule(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "unit") String unitID,
-			@WebGet(name = "condition") String condition) throws RemoteException, DaoException {
+	@WebRequest(path = "create_event", description = "Create new event for given script. The event corresponds to a specific unit and can have an optional condition.")
+	public Script createEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "unit") String unitID, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
 		Event event = new Event();
 		event.setUnitID(unitID);
 		event.setCondition(condition);
-		rule.getEvents().add(event);
+		script.getEvents().add(event);
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.save(event);
 
-		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
-		eventRuleDao.update(rule);
-		return rule;
+		Dao<Script> scriptDao = DaoFactory.getInstance().getDao(Script.class);
+		scriptDao.update(script);
+		return script;
 	}
 
 	@Override
-	@WebRequest(path = "delete_event_in_rule", description = "Delete event in given event rule by event index.")
-	public void deleteEventInRule(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
-			@WebGet(name = "index") int index) throws RemoteException, DaoException {
+	@WebRequest(path = "delete_event", description = "Delete event in given script by event index.")
+	public void deleteEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "index") int index) throws RemoteException, DaoException{
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		if (rule.getEvents().size() <= index)
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		if (script.getEvents().size() <= index)
 			throw new IllegalArgumentException(
-					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
-		Event event = rule.getEvents().get(index);
-		rule.getEvents().remove(index);
+					"Event index out of range. Script has " + script.getEvents().size() + " event(s).");
+		Event event = script.getEvents().get(index);
+		script.getEvents().remove(index);
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.delete(event);
 
-		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
-		eventRuleDao.update(rule);
+		Dao<Script> scriptDao = DaoFactory.getInstance().getDao(Script.class);
+		scriptDao.update(script);
 	}
 
 	@Override
-	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given event rule by event index.")
-	public EventRule addParameterforEventInRule(@WebGet(name = "token") String token,
+	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given script by event index.")
+	public Script addParameterforEvent(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index,
 			@WebGet(name = "key") String key, @WebGet(name = "value") String value)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		if (rule.getEvents().size() <= index)
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		if (script.getEvents().size() <= index)
 			throw new IllegalArgumentException(
-					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
-		Event event = rule.getEvents().get(index);
+					"Event index out of range. Script has " + script.getEvents().size() + " event(s).");
+		Event event = script.getEvents().get(index);
 		Parameter param = new Parameter();
 		param.mKey = key;
 		param.mValue = value;
@@ -133,22 +133,22 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.update(event);
-		return rule;
+		return script;
 	}
 
 	@Override
-	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given event rule by event index and parameter index.")
-	public EventRule deleteParameterforEventInRule(@WebGet(name = "token") String token,
+	@WebRequest(path = "delete_parameter_for_event", description = "Delete parameter for event given Script by event index and parameter index.")
+	public Script deleteParameterforEvent(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger") String triggerID, @WebGet(name = "event_index") int eventIndex,
 			@WebGet(name = "parameter_index") int parameterIndex) throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		if (rule.getEvents().size() <= eventIndex)
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		if (script.getEvents().size() <= eventIndex)
 			throw new IllegalArgumentException(
-					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
-		Event event = rule.getEvents().get(eventIndex);
+					"Event index out of range. Script has " + script.getEvents().size() + " event(s).");
+		Event event = script.getEvents().get(eventIndex);
 		if (event.getParameter().size() <= parameterIndex)
 			throw new IllegalArgumentException(
 					"Parameter index out of range. Event has " + event.getParameter().size() + " parameter(s).");
@@ -160,44 +160,44 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.update(event);
-		return rule;
+		return script;
 	}
 
 	@Override
-	@WebRequest(path = "set_information_for_event_rule", description = "Set informations for event given event rule. Several information are separated by comma.")
-	public EventRule setInformationsforEventRule(@WebGet(name = "token") String token,
+	@WebRequest(path = "set_information_for_script", description = "Set informations for event given script. Several information are separated by comma.")
+	public Script setInformationsForScript(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger") String triggerID, @WebGet(name = "informations") String informations)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		rule.setInformation(informations);
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		script.setInformation(informations);
 
-		Dao<EventRule> eventRuleDao = DaoFactory.getInstance().getDao(EventRule.class);
-		eventRuleDao.update(rule);
+		Dao<Script> scriptDao = DaoFactory.getInstance().getDao(Script.class);
+		scriptDao.update(script);
 
-		return rule;
+		return script;
 	}
 
 	@Override
-	@WebRequest(path = "set_condition_for_event_in_rule", description = "Set condition for an event of an given event rule.")
-	public EventRule setConditionforEvent(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "event_index") int eventIndex,
-			@WebGet(name = "condition") String condition) throws RemoteException, DaoException {
+	@WebRequest(path = "set_condition_for_event", description = "Set condition for an event of an given script.")
+	public Script setConditionForEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
+			throws RemoteException, DaoException{
 		UserSessionHandler.require(token, UserRole.ADMIN);
-		EventRule rule = mCenter.getEventRule(triggerID);
-		if (rule == null)
-			throw new IllegalArgumentException("Event rule with trigger id '" + triggerID + "' does not exists!");
-		if (rule.getEvents().size() <= eventIndex)
+		Script script = mCenter.getScript(triggerID);
+		if (script == null)
+			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
+		if (script.getEvents().size() <= eventIndex)
 			throw new IllegalArgumentException(
-					"Event index out of range. Event rule has " + rule.getEvents().size() + " event(s).");
-		Event event = rule.getEvents().get(eventIndex);
+					"Event index out of range. Script has " + script.getEvents().size() + " event(s).");
+		Event event = script.getEvents().get(eventIndex);
 		event.setCondition(condition);
 
 		Dao<Event> eventDao = DaoFactory.getInstance().getDao(Event.class);
 		eventDao.update(event);
-		return rule;
+		return script;
 	}
 
 	private TimeTriggerBean toTTBean(CronJobTrigger trigger) {

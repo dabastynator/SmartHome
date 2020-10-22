@@ -14,7 +14,7 @@ import de.neo.remote.web.WebField;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
 
 @Domain
-public class EventRule {
+public class Script {
 
 	@WebField(name = "events")
 	@OneToMany(domainClass = Event.class, name = "Event")
