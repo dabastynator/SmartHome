@@ -5,17 +5,17 @@
 	<title>SmartHome console</title>
 	<script src="smart_home.js"></script>
 	<script src="utils.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Jura">
+	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
 	<link href="smart_home.css" rel="stylesheet">
 </header>
 
 <body onload="initialize()">
 
 <!-- Main border layout content -->
-<div id="north" class="card" align=right>
-	<div id="controlcenter" style="float: left;">No controlcenter</div>
+<div id="north" class="card" style="text-align:right;">
+	<div id="mediaserver" style="float: left;">No mediaserver</div>
 	<img width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
-	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showRules();"/>
+	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showScripts();"/>
 </div >
 
 <div id="south" class="card">
@@ -50,8 +50,7 @@
 			<tr><td colspan="2" class="headline">Settings</td></tr>
 			<tr><td>Endpoint</td><td><input id="setting_endpoint"/></td></tr>
 			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
-			<tr><td>Animations</td><td><input id="setting_animation" type="checkbox"></td></tr>
-			<tr><td colspan="2" align=right>	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+			<tr><td colspan="2" style="text-align:right;">	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 														<button type="button" onclick="hideDialog('settings')">Cancel</button></td></tr>
 		</table>
 	</div>
@@ -62,7 +61,7 @@
 		<table style="margin: 7px; width: 500px">
 			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
 			<tr><td><div id="playlist_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td align=right>	<button type="button" onclick="hideDialog('playlist');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('playlist');">OK</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -74,17 +73,17 @@
 			<tr><td><div id="volume_content">
 				<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
 			</div></td></tr>
-			<tr><td align=right>	<button type="button" onclick="hideDialog('volume');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('volume');">OK</button></td></tr>
 		</table>
 	</div>
 </div>
 
-<div id="rules" class="container">
-	<div id="content_rules" class="card">
-		<table style="margin: 7px; width: 500px">
-			<tr><td class="headline" id="rules_title">Rules</td></tr>
-			<tr><td><div id="rules_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td align=right>	<button type="button" onclick="hideDialog('rules');">OK</button></td></tr>
+<div id="scripts" class="container">
+	<div id="content_scripts" class="card">
+		<table style="margin: 7px; width: 700px">
+			<tr><td class="headline" id="scripts_title">Scripts</td></tr>
+			<tr><td><div id="scripts_content" style="height: 500px; overflow: auto">Content</div></td></tr>
+			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('scripts');">Close</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -93,12 +92,12 @@
 	<div id="content_trigger" class="card">
 		<table style="margin: 7px; width: 600px">
 			<tr><td colspan="3" class="headline" id="trigger_title">Trigger</td></tr>
-			<tr><td style="width: 200px">ID</td><td colspan="2"><input class="fill" id="trigger_id"/></td></tr>
+			<tr><td style="width: 200px">Trigger</td><td colspan="2"><input class="fill" id="trigger_id"/></td></tr>
 			<tr>
 				<td>Information</td><td><input id="trigger_infos" class="fill"/></td>
 				<td><img src="img/add.png" height="32px" class="link" onclick="addInfo()"></td></tr>
 			<tr><td colspan="3"><div id="trigger_content" style="height: 200px; overflow: auto">Content</div></td></tr>
-			<tr><td colspan="3" align=right>
+			<tr><td colspan="3" style="text-align:right;">
 				<button type="button" onclick="hideDialog('trigger');">OK</button>
 			</td></tr>
 		</table>
@@ -110,7 +109,7 @@
 		<table style="margin: 7px; width: 400px">
 			<tr><td class="headline" id="msg_title">Title</td></tr>
 			<tr><td id="msg_content">Message</td></tr>
-			<tr><td align=right>	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
 		</table>
 	</div>
 </div>

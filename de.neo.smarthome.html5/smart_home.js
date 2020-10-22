@@ -49,22 +49,31 @@ var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
 
-
+var htmlFiles;
+var htmlPls;
+var htmlPlsContent;
+var htmlSwitches;
+var htmlScripts;
+var htmlPlayInfo;
+var htmlMediaServer;
 
 function initialize() {
+	htmlFiles = document.getElementById('center');
+	htmlPls = document.getElementById('east');
+	htmlPlsContent = document.getElementById('playlist_content');
+	htmlSwitches = document.getElementById('west');
+	htmlScripts = document.getElementById('scripts_content');
+	htmlPlayInfo = document.getElementById('player_content');
+	htmlMediaServer = document.getElementById('mediaserver');
+
 	readSetting();
 	align();
 	window.addEventListener('resize', align);
 
-	/*if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == ''){
-		mEndpoint = findGetParameter('endpoint');
-		mToken = findGetParameter('token');
-	}*/
-
 	var volume_input = document.getElementById('volume_input');
 	volume_input.addEventListener('input', setVolume);
 
-	refreshControlCenter();
+	refreshMediaServer();
 	refreshFiles();
 	refreshPlaylist();
 	loop();
@@ -91,10 +100,12 @@ function findGetParameter(parameterName) {
 function readSetting(){
 	endpoint = window.localStorage.getItem("endpoint");
 	token = window.localStorage.getItem("token");
+	if (endpoint == null || endpoint == ''){
+		endpoint = findGetParameter('endpoint');
+		token = findGetParameter('token');
+	}	
 	mMediaCenter = window.localStorage.getItem("mediacenter");
-	mPath = window.localStorage.getItem("path");
-	var animate = window.localStorage.getItem("animation");
-	mAnimation = (animate != null) && (animate === "yes");
+	mPath = window.localStorage.getItem("path");	
 	if (mPath == null)
 		mPath = '';
 	parameter = {'token' : token};
@@ -110,23 +121,19 @@ function readSetting(){
 function initSettings(){
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
-	var animate = document.getElementById('setting_animation');
 
 	endpoint.value = window.localStorage.getItem("endpoint");
 	token.value = window.localStorage.getItem("token");
-	animate.checked = mAnimation;
 }
 
 function saveSettings(){
 	endpoint = document.getElementById('setting_endpoint').value;
 	token = document.getElementById('setting_token').value;
-	mAnimation = document.getElementById('setting_animation').checked;
 	mMediaCenter = '';
 	window.localStorage.setItem("endpoint", endpoint);
 	window.localStorage.setItem("token", token);
-	window.localStorage.setItem("animation", mAnimation ? "yes" : "no");
 	readSetting();
-	refreshControlCenter();
+	refreshMediaServer();
 	refreshFiles();
 	refreshPlaylist();
 }
@@ -137,22 +144,23 @@ function loop() {
 }
 
 function refreshSwitches(){
-	var root = document.getElementById('west');
 	apiSwitch.call('list', function(switches)
 	{
-		switches.sort(function(a, b){return a.name.localeCompare(b.name)});
-		var content = "";
-		for (var i = 0; i < switches.length; i++) {
-			var s = switches[i];
-			if (s.state == "ON") {
-				content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on">';
-			} else {
-				content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
+		if (checkResult(switches, htmlSwitches)){
+			switches.sort(function(a, b){return a.name.localeCompare(b.name)});
+			var content = "";
+			for (var i = 0; i < switches.length; i++) {
+				var s = switches[i];
+				if (s.state == "ON") {
+					content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on">';
+				} else {
+					content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
+				}
+				content += s.name + "</div>";
 			}
-			content += s.name + "</div>";
-		}
-		root.innerHTML = content;
-		align();
+			htmlSwitches.innerHTML = content;
+			align();
+		}		
 	});
 }
 
@@ -164,7 +172,7 @@ function mediaClick(id){
 	mMediaCenter = id;
 	window.localStorage.setItem("mediacenter", mMediaCenter);
 	mPath = '';
-	refreshControlCenter();
+	refreshMediaServer();
 	refreshFiles();
 	refreshPlaylist();
 }
@@ -193,8 +201,6 @@ function getPlaying(callback){
 
 function refreshPlayer(){
 	getPlaying(function(playing){
-		var content = document.getElementById('player_content');
-		var console = document.getElementById('player_console');
 		var text = '';
 		if (playing != null){
 			if (playing.path != null && playing.path != '')
@@ -210,34 +216,37 @@ function refreshPlayer(){
 		} else {
 			text += 'Nothing played';
 		}
-		content.innerHTML = text;
+		htmlPlayInfo.innerHTML = text;
 	});
 }
 
 
-function refreshControlCenter(){
-	var root = document.getElementById('controlcenter');
-	root.innerHTML = 'No mediaserver';
+function refreshMediaServer(){
 	document.title = 'Smart Home Console';
 	apiMediaServer.call('list', function(media) 
 	{
-		media.sort(function(a, b){return a.name.localeCompare(b.name)});
-		var content = "";
-		var title = 'Smart Home Console';
-		if (media.length == 1)
-			mMediaCenter = media[0].id;
-		for (var i = 0; i < media.length; i++) {
-			var m = media[i];
-			if (m.id == mMediaCenter) {
-				content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
-				title = m.name + ' - Smart Home Console';
-			} else {
-				content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
+		if (checkResult(media, htmlMediaServer)){
+			media.sort(function(a, b){return a.name.localeCompare(b.name)});
+			var content = "";
+			var title = 'Smart Home Console';
+			if (media.length == 1)
+				mMediaCenter = media[0].id;
+			for (var i = 0; i < media.length; i++) {
+				var m = media[i];
+				if (m.id == mMediaCenter) {
+					content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
+					title = m.name + ' - Smart Home Console';
+				} else {
+					content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
+				}
+				content += m.name + "</div>";
 			}
-			content += m.name + "</div>";
-		}
-		root.innerHTML = content;
-		document.title = title;
+			if (content == ''){
+				content = 'No mediaserver';
+			}
+			htmlMediaServer.innerHTML = content;
+			document.title = title;
+		}		
 	}, {'id': ''});
 }
 
@@ -288,10 +297,8 @@ function addFileToPls(path, file){
 	}
 	apiMediaServer.call('playlist_extend', function(result)
 	{
-		root.innerHTML = 'No playlists';
-		if (checkResult(request)) {
+		if (checkResult(request, htmlPlsContent)) {
 			var content = "";
-			var root = document.getElementById('playlist_content');
 			var title = document.getElementById('playlist_title');
 			title.innerHTML = "Select playlist";
 			pls.sort(function(a, b){return a.name.localeCompare(b.name);});
@@ -299,15 +306,15 @@ function addFileToPls(path, file){
 				var p = pls[i];
 				content += '<div onclick="extendPls(\'' + p.name + '\', \'' + mFile + '\')" class="file link">' + p.name + "</div>";
 			}
-			root.innerHTML = content;
+			htmlPlsContent.innerHTML = content;
 		}
 	});
 }
 
 function refreshFiles(){
-	apiMediaServer.call('files', function(files){
-		var root = document.getElementById('center');
-		if (checkResult(files, root)) {
+	apiMediaServer.call('files', function(files)
+	{
+		if (checkResult(files, htmlFiles)) {
 			var content = "";
 			if (mPath != ''){
 				content = '<div onclick="directoryClick(\'<->\')" class="file dir link"><table width="100%"><tr>';
@@ -333,7 +340,7 @@ function refreshFiles(){
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
 				content += '</td></tr></table></div>';
 			}
-			root.innerHTML = content;
+			htmlFiles.innerHTML = content;
 		}
 	}, {'path': mPath});
 }
@@ -348,7 +355,8 @@ function showMessage(title, msg){
 
 function plsClick(pls){
 	mPlaylist = pls;
-	apiMediaServer.call('play_playlist', function(result){
+	apiMediaServer.call('play_playlist', function(result)
+	{
 		if (checkResult(result)) {
 			showMessage(mPlaylist, 'Play playlist ' + mPlaylist);
 		}
@@ -357,7 +365,8 @@ function plsClick(pls){
 
 function deletePlsItem(pls, item){
 	mPls = pls;
-	apiMediaServer.call('playlist_delete_item', function(result){
+	apiMediaServer.call('playlist_delete_item', function(result)
+	{
 		if (checkResult(result)) {
 			showPlsContent(mPls);
 		}
@@ -366,11 +375,9 @@ function deletePlsItem(pls, item){
 
 function showPlsContent(pls){
 	mPls = pls;
-	var root = document.getElementById('playlist_content');
-	root.innerHTML = 'No items';
 	apiMediaServer.call('playlist_content', function(result)
 	{
-		if (checkResult(result)) {
+		if (checkResult(result, htmlPlsContent)) {
 			var content = "";			
 			var title = document.getElementById('playlist_title');
 			title.innerHTML = "Playlist content";
@@ -382,7 +389,7 @@ function showPlsContent(pls){
 				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
 				content += '</td></tr></table></div>';
 			}
-			root.innerHTML = content;
+			htmlPlsContent.innerHTML = content;
 			showDialog('playlist');
 		}
 	}, {'playlist': pls});	
@@ -391,8 +398,7 @@ function showPlsContent(pls){
 function refreshPlaylist(){	
 	apiMediaServer.call('playlists', function(result)
 	{
-		var root = document.getElementById('east');
-		if (checkResult(result, root)){
+		if (checkResult(result, htmlPls)){
 			var content = "";
 			result.sort(function(a, b){return a.name.localeCompare(b.name);});
 			for (var i = 0; i < result.length; i++) {
@@ -404,7 +410,7 @@ function refreshPlaylist(){
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
 				content += '</td></tr></table></div>';
 			}
-			root.innerHTML = content;
+			htmlPls.innerHTML = content;
 		}		
 	});
 }
@@ -456,74 +462,74 @@ function doTrigger(trigger){
 	apiTrigger.call('dotrigger', function(result)
 	{
 		if (checkResult(result)) {
-			showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + rules.triggered_rules + ' events.' );
+			showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + scripts.triggered_events + ' events.' );
 		}
 	}, {'trigger': trigger});
 }
 
-function deleteEventRule(trigger){
+function deleteScript(trigger){
 	mTrigger = trigger;
-	apiTrigger.call('delete_event_rule', function(result)
+	apiTrigger.call('delete_script', function(result)
 	{
 		if (checkResult(result)) {
-			showRules();
+			showScripts();
 		}
 	}, {'trigger': trigger});
 }
 
 function addInfo(){
 	var info = document.getElementById('trigger_infos');
-	apiTrigger.call('set_information_for_event_rule', function(result)
+	apiTrigger.call('set_information_for_script', function(result)
 	{
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'information': info.value});
+	}, {'trigger': mScriptId, 'information': info.value});
 }
 
 function deleteEvent(index){
-	apiTrigger.call('delete_event_in_rule', function(result){
+	apiTrigger.call('delete_event', function(result){
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'index': index});	
+	}, {'trigger': mScriptId, 'index': index});	
 }
 
 function createNewEvent(){
 	var unit = document.getElementById("new_event");
 	var condition = document.getElementById("new_event_condition");
-	apiTrigger.call('create_event_for_rule', function(result)
+	apiTrigger.call('create_event', function(result)
 	{
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'unit': unit.value, 'condition': condition.value});
+	}, {'trigger': mScriptId, 'unit': unit.value, 'condition': condition.value});
 }
 
 function createNewParameter(index){
 	var key = document.getElementById("new_param_key");
 	var value = document.getElementById("new_param_value");
-	apiTrigger.call('add_parameter_for_event', function(result)
+	apiTrigger.call('add_parameter', function(result)
 	{
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'index': index, 'key': key.value, 'value': value.value});	
+	}, {'trigger': mScriptId, 'index': index, 'key': key.value, 'value': value.value});	
 }
 
 function updateCondition(index){
 	var condition = document.getElementById("condition_" + index);
-	apiTrigger.call('set_condition_for_event_in_rule', function(result)
+	apiTrigger.call('set_condition_for_event', function(result)
 	{
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'event_index': index, 'condition': condition.value});
+	}, {'trigger': mScriptId, 'event_index': index, 'condition': condition.value});
 }
 
 function deleteParameter(index){
@@ -531,21 +537,21 @@ function deleteParameter(index){
 	{
 		if (checkResult(result)) {
 			hideDialog('trigger');
-			showRules();
+			showScripts();
 		}
-	}, {'trigger': mRuleId, 'event_index': index, 'parameter_index': (mRules[mRuleIndex].events[index].parameter.length - 1)});
+	}, {'trigger': mScriptId, 'event_index': index, 'parameter_index': (mScripts[mScriptIndex].events[index].parameter.length - 1)});
 }
 
 function showTrigger(index){
-	var trigger = mRules[index];
-	mRuleIndex = index;
-	mRuleId = trigger.trigger;
+	var trigger = mScripts[index];
+	mScriptIndex = index;
+	mScriptId = trigger.trigger;
 	title = document.getElementById('trigger_title');
 	content = document.getElementById('trigger_content');
 	id = document.getElementById('trigger_id');
 	infos = document.getElementById('trigger_infos');
 	
-	title.innerHTML = 'Edit trigger';
+	title.innerHTML = 'Edit script';
 	id.value = trigger.trigger;
 	infos.value = trigger.information;
 
@@ -579,42 +585,40 @@ function showTrigger(index){
 	showDialog('trigger');
 }
 
-function createEventRule(){
-	var input = document.getElementById('new_event_rule');
-	apiTrigger.call('create_event_rule', function(result)
+function createScript(){
+	var input = document.getElementById('new_script');
+	apiTrigger.call('create_script', function(result)
 	{
 		if (checkResult(result)) {
-			showRules();
+			showScripts();
 		}
 	}, {'trigger': input.value});
 }
 
-function showRules(){
-	var root = document.getElementById('rules_content');
-	showDialog('rules');
-	root.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
+function showScripts(){
+	showDialog('scripts');
+	htmlScripts.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
 
-	apiTrigger.call('rules', function(result)
+	apiTrigger.call('scripts', function(result)
 	{
-		if (checkResult(result)) {
-			mRules = JSON.parse(request.responseText);
-			var root = document.getElementById('rules_content');
+		if (checkResult(result, htmlScripts)) {
+			mScripts = result;
 			var content = "";
-			for (var i = 0; i < mRules.length; i++) {
-				var rule = mRules[i];
+			for (var i = 0; i < mScripts.length; i++) {
+				var script = mScripts[i];
 				content += '<div class="file"><table width="100%"><tr>';
-				content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + rule.trigger + "</td>";
+				content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + script.trigger + "</td>";
 				content += '<td align="right">';
-				content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + rule.trigger + '\')">';
-				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteEventRule(\'' + rule.trigger + '\')">';
+				content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + script.trigger + '\')">';
+				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteScript(\'' + script.trigger + '\')">';
 				content += '</td></tr></table></div>';
 			}
 			content += '<div class="file"><table width="100%"><tr>';
-			content += '<td width="90%"><input value="new.event_rule" id="new_event_rule" class="fill"/></td>';
+			content += '<td width="90%"><input value="new.script" id="new_script" class="fill"/></td>';
 			content += '<td align="right">';
-			content += '<img src="img/add.png" height="32px" class="link" onclick="createEventRule()">';
+			content += '<img src="img/add.png" height="32px" class="link" onclick="createScript()">';
 			content += '</td></tr></table></div>';
-			root.innerHTML = content;
+			htmlScripts.innerHTML = content;
 		}
 	});
 }
