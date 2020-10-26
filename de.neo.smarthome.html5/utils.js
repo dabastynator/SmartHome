@@ -89,6 +89,16 @@ function align(){
 			center.style.width = right - left + 'px';
 		}
 	}
+
+	offset = 15;
+	var filling = document.getElementsByClassName("filling");
+	for (var i = 0; i < filling.length; i++) {
+		filling[i].style.position = "absolute";
+		filling[i].style.left = offset + 'px';
+		filling[i].style.width = window.innerWidth - 2 * (offset + padding) + 'px';
+		filling[i].style.top = offset + 'px';
+		filling[i].style.height = window.innerHeight - 2 * (offset + padding) + 'px';
+	} 
 }
 
 function showArea(area){
@@ -117,7 +127,7 @@ function showArea(area){
 
 function showDialog(id) {
 	var container = document.getElementById(id);
-	var top_offset = 100;
+	var top_offset = 15;
 	container.style.visibility = 'visible';
 	container.style.opacity = 0;
 	currentDialog = document.getElementById('content_' + id);

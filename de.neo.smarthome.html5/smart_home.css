@@ -1,13 +1,20 @@
+html, body {
+	margin:0px;
+	padding: 0px;
+	height:100%;
+}  
+
 body {
 	background: black;
 	color: white;
 	font-family: 'Source Code Pro', monospace;
 	font-size: 120%;
-	height: 100%;
-	padding: 0px;
+	height: 100vh;
+	width: 100vw;
 }
 
 .card {
+	box-sizing: border-box;
 	background: black;
 	border-radius: 2px;
 	padding: 0px;
@@ -108,6 +115,24 @@ button{
 @-webkit-keyframes rotation {
 	from { -webkit-transform: rotate(0deg); }
 	to { -webkit-transform: rotate(359deg); }
+}
+
+.filling{
+	/* Fill by js */
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+	padding-bottom: 23px;
+}
+
+header, footer{
+	height: 30px;
+}
+
+main {
+	flex: 1;
+	overflow: auto;
 }
 
 .fill{
