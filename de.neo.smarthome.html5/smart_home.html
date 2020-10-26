@@ -13,9 +13,10 @@
 
 <!-- Main border layout content -->
 <div id="north" class="card" style="text-align:right;">
-	<div id="mediaserver" style="float: left;">No mediaserver</div>
+	<div id="mediaserver" style="float: left;">No mediaserver</div>	
 	<img width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
 	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showScripts();"/>
+	<img width=48px style="margin: 7px" src="img/timer.png" class="link right" onclick="showTimer();"/>
 </div >
 
 <div id="south" class="card">
@@ -26,7 +27,7 @@
 		<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
 		<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()"/>
 	</div>
-	<div id="player_content" style="float: left">
+	<div id="player_content" style="float: left; margin-left: 20px;">
 		Nothing played
 	</div>
 </div>
@@ -66,6 +67,16 @@
 	</div>
 </div>
 
+<div id="timetrigger" class="container">
+	<div id="content_timetrigger" class="card">
+		<table style="margin: 7px; width: 500px">
+			<tr><td class="headline" id="playlist_title">TimeTrigger</td></tr>
+			<tr><td><div id="timetrigger_content" style="height: 300px; overflow: auto">Content</div></td></tr>
+			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('timetrigger');">Close</button></td></tr>
+		</table>
+	</div>
+</div>
+
 <div id="volume" class="container">
 	<div id="content_volume" class="card">
 		<table style="margin: 7px">
@@ -79,12 +90,10 @@
 </div>
 
 <div id="scripts" class="container">
-	<div id="content_scripts" class="card">
-		<table style="margin: 7px; width: 700px">
-			<tr><td class="headline" id="scripts_title">Scripts</td></tr>
-			<tr><td><div id="scripts_content" style="height: 500px; overflow: auto">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('scripts');">Close</button></td></tr>
-		</table>
+	<div id="content_scripts" class="card filling">
+		<header class="headline" id="scripts_title">Scripts</header>
+		<main id="scripts_content">Content</main>
+		<footer style="text-align:right;">	<button type="button" onclick="hideDialog('scripts');">Close</button></footer>
 	</div>
 </div>
 

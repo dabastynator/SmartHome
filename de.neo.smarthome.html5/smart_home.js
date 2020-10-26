@@ -56,6 +56,7 @@ var htmlSwitches;
 var htmlScripts;
 var htmlPlayInfo;
 var htmlMediaServer;
+var htmlTimeTrigger;
 
 function initialize() {
 	htmlFiles = document.getElementById('center');
@@ -65,6 +66,7 @@ function initialize() {
 	htmlScripts = document.getElementById('scripts_content');
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
+	htmlTimeTrigger = document.getElementById('timetrigger_content');
 
 	readSetting();
 	align();
@@ -283,7 +285,7 @@ function extendPls(pls, file){
 	hideDialog('playlist');
 	apiMediaServer.call('playlist_extend', function(result)
 	{
-		if (checkResult(request)) {
+		if (checkResult(result)) {
 			showMessage('Playlist extended', 'Playlist <b>' + pls + '</b> was extended.');	
 		}
 	}, {'playlist': pls, 'item': file});	
@@ -297,7 +299,7 @@ function addFileToPls(path, file){
 	}
 	apiMediaServer.call('playlist_extend', function(result)
 	{
-		if (checkResult(request, htmlPlsContent)) {
+		if (checkResult(result, htmlPlsContent)) {
 			var content = "";
 			var title = document.getElementById('playlist_title');
 			title.innerHTML = "Select playlist";
@@ -475,6 +477,25 @@ function deleteScript(trigger){
 			showScripts();
 		}
 	}, {'trigger': trigger});
+}
+
+function showTimer(){
+	apiTrigger.call('list_timetrigger', function(result)
+	{
+		if (checkResult(result, htmlTimeTrigger)) {
+			var content = "";			
+			for (var i = 0; i < result.length; i++) {
+				var p = result[i];
+				content += '<div class="file"><table width="100%"><tr>';
+				content += '<td width="90%" onclick="toggleTimeTrigger(\'' + p.id + '\')" class="link">' + p.trigger_id + "</td>";
+				content += '<td align="right">';
+				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteTimeTrigger(\'' + p.id + '\')">';
+				content += '</td></tr></table></div>';
+			}
+			htmlTimeTrigger.innerHTML = content;
+			showDialog('timetrigger');
+		}
+	});
 }
 
 function addInfo(){
