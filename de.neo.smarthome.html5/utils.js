@@ -1,6 +1,4 @@
 
-mAnimation = true;
-
 function align(){
 	var north = document.getElementById('north');
 	var east = document.getElementById('east');
@@ -127,106 +125,24 @@ function showArea(area){
 
 function showDialog(id) {
 	var container = document.getElementById(id);
-	var top_offset = 15;
-	container.style.visibility = 'visible';
-	container.style.opacity = 0;
-	currentDialog = document.getElementById('content_' + id);
-	if (currentDialog != null) {
-		currentDialog.style.position = 'absolute';
-		currentDialog.style.left = (window.innerWidth - currentDialog.offsetWidth)
-				/ 2 + 'px';
-		var top = (window.innerHeight - currentDialog.offsetHeight) / 2;
-		if (top > top_offset) {
-			disableScroll();
-		} else {
-			top = top_offset;
-			currentDialog.style.height = window.innerHeight - 2 * top_offset
-					+ 'px';
-		}
-		if (mAnimation){
-			var animateOffset = 20;
-			var topAnimate = top - animateOffset;
-			currentDialog.style.top = topAnimate + 'px';
-			var id = setInterval(appearDialog, 15);
-			function appearDialog() {
-				if (topAnimate >= top) {
-					currentDialog.style.top = top;
-					clearInterval(id);
-				} else {
-					topAnimate++;
-					currentDialog.style.top = topAnimate + 'px';
-					container.style.opacity = 1 - (top - topAnimate)
-							/ animateOffset;
-				}
-			}
-		} else {
-			currentDialog.style.top = top + 'px';
-			container.style.opacity = 1;
-		}
+	container.classList.add("visible");
+	var content = document.getElementById('content_' + id);
+	if (content.classList.contains('dialog')){
+		content.classList.add("dialog_on");
+	}
+	if (content.classList.contains('filling')){
+		content.classList.add("filling_on");
 	}
 }
 
 function hideDialog(id) {
 	var container = document.getElementById(id);
-	currentDialog = document.getElementById('content_' + id);
-	if (currentDialog != null) {
-		var top = (window.innerHeight - currentDialog.offsetHeight) / 2;
-		if (top < 0) {
-			top = 10;
-		}
-		if (mAnimation){
-			var animateOffset = 20;
-			var topAnimate = top;
-			var id = setInterval(disappearDialog, 15);
-			function disappearDialog() {
-				if (topAnimate <= top - animateOffset) {
-					container.style.visibility = 'hidden';
-					clearInterval(id);
-				} else {
-					topAnimate--;
-					currentDialog.style.top = topAnimate + 'px';
-					container.style.opacity = 1 - (top - topAnimate)
-							/ animateOffset;
-				}
-			}
-		} else {
-			container.style.opacity = 0;
-			container.style.visibility = 'hidden';
-		}
+	container.classList.remove("visible");
+	var content = document.getElementById('content_' + id);
+	if (content.classList.contains('dialog')){
+		content.classList.remove("dialog_on");
 	}
-	enableScroll();
-}
-
-function preventDefault(e) {
-	e = e || window.event;
-	if (e.preventDefault)
-		e.preventDefault();
-	e.returnValue = false;
-}
-
-function preventDefaultForScrollKeys(e) {
-	if (keys[e.keyCode]) {
-		preventDefault(e);
-		return false;
+	if (content.classList.contains('filling')){
+		content.classList.remove("filling_on");
 	}
-}
-
-function disableScroll() {
-	/*if (window.addEventListener) // older FF
-		window.addEventListener('DOMMouseScroll', preventDefault, false);
-	window.onwheel = preventDefault; // modern standard
-	window.onmousewheel = document.onmousewheel = preventDefault; // older
-	// browsers,
-	// IE
-	window.ontouchmove = preventDefault; // mobile
-	document.onkeydown = preventDefaultForScrollKeys;*/
-}
-
-function enableScroll() {
-	/*if (window.removeEventListener)
-		window.removeEventListener('DOMMouseScroll', preventDefault, false);
-	window.onmousewheel = document.onmousewheel = null;
-	window.onwheel = null;
-	window.ontouchmove = null;
-	document.onkeydown = null;*/
 }
