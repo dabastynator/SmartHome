@@ -25,24 +25,52 @@ body {
 .switch {
 	cursor:pointer;
 	padding: 7px;
-	margin: 8px;
+	margin: 4px;
 	float: left;
-	width: 120px;
+	width: 145px;
 	text-align: center;
+	box-sizing: border-box;
+	transition: 0.3s;
 }
 
 .on {
 	background: #222;
 	border: 2px solid #666;
+	box-shadow: inset 0 0 0 0 #666;
+}
+
+.on:hover {
+	box-shadow: inset 10px 0 0 0 #666;
+	transition: 0.2s;
+}
+
+.on:active {
+	box-shadow: inset 150px 0 0 0 #666;
+	transition: 0.2s;
 }
 
 .off {
 	background: black;
 	border: 2px solid #222;
+	box-shadow: inset 0 0 0 0 #222;
+}
+
+.off:hover {
+	box-shadow: inset 10px 0 0 0 #222;
+	transition: 0.2s;
+}
+
+.off:active {
+	box-shadow: inset 150px 0 0 0 #222;
+	transition: 0.2s;
 }
 
 .link {
 	cursor:pointer;
+}
+
+img:hover{
+	background-image: radial-gradient(closest-side, #666, #000);
 }
 
 .right {
@@ -74,11 +102,17 @@ button, input{
 	margin: 3px;
 	padding: 5px;
 	border: 1px solid #444;
+	transition: all 0.3s;
 }
 
 button{
 	width: 160px;
 	cursor:pointer;
+}
+
+button:hover, input:focus{
+	box-shadow: inset 0 0 10px #444;
+	transition: all 0.3s;
 }
 
 .file{
@@ -129,6 +163,7 @@ main {
 	top: 0px;
 	opacity: 0;
 
+	transform: scale(1.08, 1.08);
 	transition: 0.5s cubic-bezier(0,1.04,.46,1);
 }
 
@@ -136,22 +171,12 @@ main {
 	visibility: visible;
 	opacity: 1;
 
+	transform: none;
 	transition: 0.5s cubic-bezier(0,1.04,.46,1);
 }
 
 .dialog{
 	position: absolute;
-	left: 50%;
-	top: 50%;
-
-	transform: translate(-50%, -50%) scale(1.3, 1.3);
-
-	transition: 0.5s cubic-bezier(.73,.35,.84,.42);
-}
-
-.dialog_on{
-	transition: 0.5s cubic-bezier(0,1.04,.46,1);
-	
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
@@ -163,13 +188,4 @@ main {
 	flex-direction: column;
 	padding: 8px;
 	padding-bottom: 23px;
-
-	transform: scale(1.1, 1.1);
-
-	transition: 0.5s cubic-bezier(.73,.35,.84,.42);
-}
-
-.filling_on{
-	transition: 0.5s cubic-bezier(0,1.04,.46,1);
-	transform: none;
 }

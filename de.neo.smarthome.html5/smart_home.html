@@ -51,8 +51,8 @@
 			<tr><td colspan="2" class="headline">Settings</td></tr>
 			<tr><td>Endpoint</td><td><input id="setting_endpoint"/></td></tr>
 			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
-			<tr><td colspan="2" style="text-align:right;">	<button type="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
-														<button type="button" onclick="hideDialog('settings')">Cancel</button></td></tr>
+			<tr><td colspan="2" style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+														<button onclick="hideDialog('settings')">Cancel</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -62,7 +62,7 @@
 		<table style="margin: 7px; width: 500px">
 			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
 			<tr><td><div id="playlist_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('playlist');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button onclick="hideDialog('playlist');">OK</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -72,7 +72,7 @@
 		<table style="margin: 7px; width: 500px">
 			<tr><td class="headline" id="playlist_title">TimeTrigger</td></tr>
 			<tr><td><div id="timetrigger_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('timetrigger');">Close</button></td></tr>
+			<tr><td style="text-align:right;">	<button onclick="hideDialog('timetrigger');">Close</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -84,7 +84,7 @@
 			<tr><td><div id="volume_content">
 				<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
 			</div></td></tr>
-			<tr><td style="text-align:right;">	<button type="button" onclick="hideDialog('volume');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button onclick="hideDialog('volume');">OK</button></td></tr>
 		</table>
 	</div>
 </div>
@@ -93,7 +93,7 @@
 	<div id="content_scripts" class="filling">
 		<header class="headline" id="scripts_title">Scripts</header>
 		<main id="scripts_content">Content</main>
-		<footer style="text-align:right;">	<button type="button" onclick="hideDialog('scripts');">Close</button></footer>
+		<footer style="text-align:right;">	<button onclick="hideDialog('scripts');">Close</button></footer>
 	</div>
 </div>
 
@@ -107,7 +107,7 @@
 				<td><img src="img/add.png" height="32px" class="link" onclick="addInfo()"></td></tr>
 			<tr><td colspan="3"><div id="trigger_content" style="height: 200px; overflow: auto">Content</div></td></tr>
 			<tr><td colspan="3" style="text-align:right;">
-				<button type="button" onclick="hideDialog('trigger');">OK</button>
+				<button onclick="hideDialog('trigger');">OK</button>
 			</td></tr>
 		</table>
 	</div>
@@ -118,7 +118,7 @@
 		<table style="margin: 7px; width: 400px">
 			<tr><td class="headline" id="msg_title">Title</td></tr>
 			<tr><td id="msg_content">Message</td></tr>
-			<tr><td style="text-align:right;">	<button type="button" onclick=";hideDialog('message');">OK</button></td></tr>
+			<tr><td style="text-align:right;">	<button onclick=";hideDialog('message');">OK</button></td></tr>
 		</table>
 	</div>
 </div>

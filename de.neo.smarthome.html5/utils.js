@@ -126,23 +126,9 @@ function showArea(area){
 function showDialog(id) {
 	var container = document.getElementById(id);
 	container.classList.add("visible");
-	var content = document.getElementById('content_' + id);
-	if (content.classList.contains('dialog')){
-		content.classList.add("dialog_on");
-	}
-	if (content.classList.contains('filling')){
-		content.classList.add("filling_on");
-	}
 }
 
 function hideDialog(id) {
 	var container = document.getElementById(id);
 	container.classList.remove("visible");
-	var content = document.getElementById('content_' + id);
-	if (content.classList.contains('dialog')){
-		content.classList.remove("dialog_on");
-	}
-	if (content.classList.contains('filling')){
-		content.classList.remove("filling_on");
-	}
 }
