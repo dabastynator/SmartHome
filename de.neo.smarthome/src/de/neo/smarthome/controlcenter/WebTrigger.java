@@ -29,7 +29,8 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@Override
 	@WebRequest(description = "Perform specified trigger", path = "dotrigger", genericClass = Integer.class)
-	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID) throws RemoteException {
+	public HashMap<String, Integer> performTrigger(@WebGet(name = "token") String token,
+			@WebGet(name = "trigger") String triggerID) throws RemoteException {
 		UserSessionHandler.require(token);
 		Trigger trigger = new Trigger();
 		trigger.setTriggerID(triggerID);
@@ -41,7 +42,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@Override
 	@WebRequest(path = "scripts", description = "List all scripts of the controlcenter. A script can be triggered by its trigger id.")
-	public List<Script> getScripts(@WebGet(name = "token") String token) throws RemoteException{
+	public List<Script> getScripts(@WebGet(name = "token") String token) throws RemoteException {
 		UserSessionHandler.require(token);
 		return mCenter.getScripts();
 	}
@@ -91,7 +92,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 	@Override
 	@WebRequest(path = "delete_event", description = "Delete event in given script by event index.")
 	public void deleteEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
-			@WebGet(name = "index") int index) throws RemoteException, DaoException{
+			@WebGet(name = "index") int index) throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		Script script = mCenter.getScript(triggerID);
 		if (script == null)
@@ -111,9 +112,8 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@Override
 	@WebRequest(path = "add_parameter_for_event", description = "Add parameter for event given script by event index.")
-	public Script addParameterforEvent(@WebGet(name = "token") String token,
-			@WebGet(name = "trigger") String triggerID, @WebGet(name = "index") int index,
-			@WebGet(name = "key") String key, @WebGet(name = "value") String value)
+	public Script addParameterforEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
+			@WebGet(name = "index") int index, @WebGet(name = "key") String key, @WebGet(name = "value") String value)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		Script script = mCenter.getScript(triggerID);
@@ -184,7 +184,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 	@WebRequest(path = "set_condition_for_event", description = "Set condition for an event of an given script.")
 	public Script setConditionForEvent(@WebGet(name = "token") String token, @WebGet(name = "trigger") String triggerID,
 			@WebGet(name = "event_index") int eventIndex, @WebGet(name = "condition") String condition)
-			throws RemoteException, DaoException{
+			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		Script script = mCenter.getScript(triggerID);
 		if (script == null)
@@ -204,6 +204,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 		TimeTriggerBean triggerBean = new TimeTriggerBean();
 		triggerBean.CroneJob = trigger.getCronDescription();
 		triggerBean.Id = trigger.getId();
+		triggerBean.Enabled = trigger.isEnabled();
 		if (trigger.getTriggerList().size() > 0) {
 			triggerBean.TriggerId = trigger.getTriggerList().get(0).getTriggerID();
 		}
@@ -226,6 +227,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 	public TimeTriggerBean createTimeTrigger(@WebGet(name = "token") String token,
 			@WebGet(name = "trigger_id") String triggerId, @WebGet(name = "cron_job") String cronJob)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		CronJobTrigger trigger = new CronJobTrigger();
 		trigger.setControlCenter(mCenter);
 		trigger.setCronDescription(cronJob);
@@ -236,10 +238,24 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 		return toTTBean(trigger);
 	}
 
+	@WebRequest(path = "set_timetrigger_enabled", description = "Disable/Enable crone-job time trigger.")
+	public void setTimeTriggerEnabled(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
+			@WebGet(name = "enabled") boolean enabled) throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
+		CronJobTrigger timeTrigger = mCenter.getCronTrigger(id);
+		if (timeTrigger == null) {
+			throw new RemoteException("Unknown timetrigger id: " + id);
+		}
+		timeTrigger.setEnabled(enabled);
+		Dao<CronJobTrigger> scriptDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
+		scriptDao.update(timeTrigger);
+	}
+
 	@Override
 	@WebRequest(path = "delete_timetrigger", description = "Delete crone-job time trigger for trigger id.")
 	public void deleteTimeTrigger(@WebGet(name = "token") String token, @WebGet(name = "id") long id)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		CronJobTrigger trigger = mCenter.getCronTrigger(id);
 		if (trigger == null) {
 			throw new RemoteException("Unknown timetrigger id " + id);
@@ -251,7 +267,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 	public String getWebPath() {
 		return "trigger";
 	}
-	
+
 	public static class TriggerFactory implements ControlUnitFactory {
 
 		@Override

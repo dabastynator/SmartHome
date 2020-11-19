@@ -172,6 +172,18 @@ public interface IWebTrigger extends RemoteAble {
 			throws RemoteException, DaoException;
 
 	/**
+	 * Disable/Enable crone-job time trigger
+	 * @param token
+	 * @param id
+	 * @param enabled
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "set_timetrigger_enabled", description = "Disable/Enable crone-job time trigger.")
+	public void setTimeTriggerEnabled(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
+			@WebGet(name = "enabled") boolean enabled) throws RemoteException, DaoException;
+
+	/**
 	 * Delete crone-job time trigger for trigger id
 	 * 
 	 * @param token
@@ -193,6 +205,9 @@ public interface IWebTrigger extends RemoteAble {
 
 		@WebField(name = "crone_job")
 		public String CroneJob;
+
+		@WebField(name = "enabled")
+		public boolean Enabled;
 
 	}
 }

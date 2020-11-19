@@ -24,6 +24,9 @@ public class CronJobTrigger implements Runnable {
 
 	@Persist(name = "cronjob")
 	private String mCronDescription;
+	
+	@Persist(name = "enabled")
+	private boolean mEnabled;
 
 	@OneToMany(domainClass = Trigger.class, name = "Trigger")
 	private List<Trigger> mTriggerList = new ArrayList<Trigger>();
@@ -69,11 +72,21 @@ public class CronJobTrigger implements Runnable {
 	public void setId(long id) {
 		mId = id;
 	}
+	
+	public boolean isEnabled() {
+		return mEnabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		mEnabled = enabled;
+	}
 
 	@Override
 	public void run() {
-		for (Trigger trigger : mTriggerList)
-			mCenter.trigger(trigger);
+		if (mEnabled){
+			for (Trigger trigger : mTriggerList)
+				mCenter.trigger(trigger);
+		}
 	}
 
 }
