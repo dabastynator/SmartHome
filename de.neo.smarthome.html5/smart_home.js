@@ -48,6 +48,7 @@ var apiUser = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
+var mTimeTrigger;
 
 var htmlFiles;
 var htmlPls;
@@ -483,19 +484,21 @@ function showTimer(){
 	apiTrigger.call('list_timetrigger', function(result)
 	{
 		if (checkResult(result, htmlTimeTrigger)) {
-			var content = "";			
+			var content = "";
+			mTimeTrigger = result;			
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<div class="file"><table width="100%"><tr>';
-				content += '<td width="90%" onclick="toggleTimeTrigger(\'' + p.id + '\')" class="link">' + p.trigger_id + "</td>";
-				content += '<td align="right">';
-				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteTimeTrigger(\'' + p.id + '\')">';
-				content += '</td></tr></table></div>';
+				content += '<div class="line">' + p.trigger_id;
+				content += '<img src="img/edit.png" class="icon" onclick="editTimeTrigger(\'' + i + '\')"></div>';
 			}
 			htmlTimeTrigger.innerHTML = content;
 			showDialog('timetrigger');
 		}
 	});
+}
+
+function editTimeTrigger(index){
+	showDialog('timetrigger_edit');
 }
 
 function addInfo(){

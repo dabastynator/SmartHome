@@ -17,9 +17,16 @@ body {
 	box-sizing: border-box;
 	background: black;
 	border-radius: 2px;
-	padding: 0px;
 	border: 1px solid #666;
 	overflow: auto
+}
+
+.card {
+	padding: 0px;
+}
+
+.dialog, .filling {
+	padding: 8px;
 }
 
 .switch {
@@ -69,6 +76,28 @@ body {
 	cursor:pointer;
 }
 
+.line {
+	width: 100%;
+	padding: 10px 0;
+	border-bottom: 1px solid #444;
+	vertical-align: middle;
+}
+
+.settingline {
+	width: 100%;
+	vertical-align: middle;
+}
+
+.icon {
+	cursor:pointer;
+	height: 32px;
+	width: 32px;
+	list-style: none;
+	float: right;
+	padding-right: 10px;
+	vertical-align: top;
+}
+
 img:hover{
 	background-image: radial-gradient(closest-side, #666, #000);
 }
@@ -111,7 +140,15 @@ button{
 }
 
 button:hover, input:focus{
-	box-shadow: inset 0 0 10px #444;
+	border: 1px solid #888;
+	box-shadow: inset 0 0 15px #888;
+	transition: all 0.3s;
+}
+
+button:active {
+	border: 1px solid #eee;
+	background: #eee;
+	color: black;
 	transition: all 0.3s;
 }
 
@@ -182,7 +219,7 @@ main {
 	transform: translate(-50%, -50%);
 }
 
-.filling{
+.filling, .use_space{
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;

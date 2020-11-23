@@ -47,13 +47,11 @@
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
 	<div id="content_settings" class="dialog">
-		<table style="margin: 7px">
-			<tr><td colspan="2" class="headline">Settings</td></tr>
-			<tr><td>Endpoint</td><td><input id="setting_endpoint"/></td></tr>
-			<tr><td>Token</td><td><input id="setting_token"/></td></tr>
-			<tr><td colspan="2" style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
-														<button onclick="hideDialog('settings')">Cancel</button></td></tr>
-		</table>
+		<div class="headline">Settings</div>
+		<div class="settingline">Endpoint <input id="setting_endpoint"/></div>
+		<div class="settingline">Token <input id="setting_token" class="right"/></div>
+		<div style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+													<button onclick="hideDialog('settings')">Cancel</button></div>
 	</div>
 </div>
 
@@ -68,24 +66,30 @@
 </div>
 
 <div id="timetrigger" class="container">
-	<div id="content_timetrigger" class="dialog">
+	<div id="content_timetrigger" class="dialog use_space" style="width: 500px; height: 300px">
+		<header class="headline" id="playlist_title">TimeTrigger</header>
+		<main id="timetrigger_content">Content</main>
+		<footer style="text-align:right;">	<button onclick="hideDialog('timetrigger');">Close</button></footer>
+	</div>
+</div>
+
+<div id="timetrigger_edit" class="container">
+	<div id="content_timetrigger_edit" class="dialog">
 		<table style="margin: 7px; width: 500px">
-			<tr><td class="headline" id="playlist_title">TimeTrigger</td></tr>
+			<tr><td class="headline" id="playlist_title">Edit TimeTrigger</td></tr>
 			<tr><td><div id="timetrigger_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button onclick="hideDialog('timetrigger');">Close</button></td></tr>
+			<tr><td style="text-align:right;">	<button onclick="hideDialog('timetrigger_edit');">Close</button></td></tr>
 		</table>
 	</div>
 </div>
 
 <div id="volume" class="container">
 	<div id="content_volume" class="dialog">
-		<table style="margin: 7px">
-			<tr><td class="headline" id="volume_title">Volume</td></tr>
-			<tr><td><div id="volume_content">
-				<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
-			</div></td></tr>
-			<tr><td style="text-align:right;">	<button onclick="hideDialog('volume');">OK</button></td></tr>
-		</table>
+		<div class="headline" id="volume_title">Volume</div>
+		<div id="volume_content">
+			<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
+		</div>
+		<div style="text-align:right;">	<button onclick="hideDialog('volume');">OK</button></div>
 	</div>
 </div>
 
@@ -114,12 +118,10 @@
 </div>
 
 <div id="message" class="container">
-	<div id="content_message" class="dialog">
-		<table style="margin: 7px; width: 400px">
-			<tr><td class="headline" id="msg_title">Title</td></tr>
-			<tr><td id="msg_content">Message</td></tr>
-			<tr><td style="text-align:right;">	<button onclick=";hideDialog('message');">OK</button></td></tr>
-		</table>
+	<div id="content_message" class="dialog" style="width: 400px">
+		<div class="headline" id="msg_title">Scripts</div>
+		<div id="msg_content">Content</div>
+		<div style="text-align:right;">	<button onclick="hideDialog('message');">OK</button></div>
 	</div>
 </div>
 
