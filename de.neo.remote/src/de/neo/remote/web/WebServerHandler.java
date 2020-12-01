@@ -89,6 +89,8 @@ public class WebServerHandler implements HttpHandler {
 				resultParams.add(Double.valueOf(strValue));
 			else if (paramClass.equals(long.class) || paramClass.equals(Long.class))
 				resultParams.add(Long.valueOf(strValue));
+			else if (paramClass.equals(boolean.class) || paramClass.equals(Boolean.class))
+				resultParams.add(Boolean.valueOf(strValue));
 			else if (paramClass.equals(String.class))
 				resultParams.add(strValue);
 			else if (paramClass.isEnum()) {
