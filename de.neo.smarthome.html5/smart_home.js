@@ -48,6 +48,7 @@ var apiUser = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
+var mTimeTriggerList;
 var mTimeTrigger;
 
 var htmlFiles;
@@ -485,10 +486,14 @@ function showTimer(){
 	{
 		if (checkResult(result, htmlTimeTrigger)) {
 			var content = "";
-			mTimeTrigger = result;			
+			mTimeTriggerList = result;
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<div class="line">' + p.trigger_id;
+				var disabled = '';
+				if (!p.enabled){
+					disabled = ' disabled';
+				}
+				content += '<div class="line' + disabled + '">' + p.trigger_id;
 				content += '<img src="img/edit.png" class="icon" onclick="editTimeTrigger(\'' + i + '\')"></div>';
 			}
 			htmlTimeTrigger.innerHTML = content;
@@ -498,7 +503,22 @@ function showTimer(){
 }
 
 function editTimeTrigger(index){
+	mTimeTrigger = mTimeTriggerList[index];
+	document.getElementById('tt_enabled').checked = mTimeTrigger.enabled;
+	document.getElementById('tt_trigger').value = mTimeTrigger.trigger_id;
+	document.getElementById('tt_cron').value = mTimeTrigger.crone_job;
 	showDialog('timetrigger_edit');
+}
+
+function applyTimeTrigger(){
+	var enabled = document.getElementById('tt_enabled');
+	apiTrigger.call('set_timetrigger_enabled', function(result)
+	{
+		if (checkResult(result)) {
+			hideDialog('timetrigger_edit');
+			showTimer();
+		}
+	}, {'id': mTimeTrigger.id, 'enabled': enabled.checked});
 }
 
 function addInfo(){

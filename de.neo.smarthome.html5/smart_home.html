@@ -46,10 +46,10 @@
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog">
+	<div id="content_settings" class="dialog" style="width: 500px">
 		<div class="headline">Settings</div>
-		<div class="settingline">Endpoint <input id="setting_endpoint"/></div>
-		<div class="settingline">Token <input id="setting_token" class="right"/></div>
+		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
+		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
 		<div style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 													<button onclick="hideDialog('settings')">Cancel</button></div>
 	</div>
@@ -74,12 +74,17 @@
 </div>
 
 <div id="timetrigger_edit" class="container">
-	<div id="content_timetrigger_edit" class="dialog">
-		<table style="margin: 7px; width: 500px">
-			<tr><td class="headline" id="playlist_title">Edit TimeTrigger</td></tr>
-			<tr><td><div id="timetrigger_content" style="height: 300px; overflow: auto">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button onclick="hideDialog('timetrigger_edit');">Close</button></td></tr>
-		</table>
+	<div id="content_timetrigger_edit" class="dialog" style="width: 550px">
+		<div class="headline">Edit TimeTrigger</div>
+		<div class="label" style="width:100%">Enabled
+			<input type="checkbox" id="tt_enabled" placeholder="* * * *"/><label class="cbox right" for="tt_enabled">Enabled</label>
+		</div>
+		<label for="tt_trigger">Trigger</label> <input id="tt_trigger" placeholder="trigger_id"/>
+		<label for="tt_cron">Cron Expression</label> <input id="tt_cron" placeholder="* * * *"/>
+		<div style="text-align:right;">
+			<button onclick="applyTimeTrigger();">OK</button>
+			<button onclick="hideDialog('timetrigger_edit');">Cancel</button>
+		</div>
 	</div>
 </div>
 
