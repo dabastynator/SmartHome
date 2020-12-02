@@ -95,6 +95,18 @@ public class CronScheduler extends Thread {
 	public void scheduleJob(Runnable runnable, String cronExpression) throws ParseException {
 		scheduleJob(runnable, cronExpression, REPEAT_INFINIT);
 	}
+	
+	public synchronized void remove(Runnable runnable) {
+		CronJob found = null;
+		for (CronJob job: mHeap) {
+			if (job.mRunnable == runnable) {
+				found = job;
+			}
+		}
+		if (found != null) {
+			mHeap.remove(found);	
+		}
+	}
 
 	interface JobExecuter {
 		void executeJob(Runnable runnable);

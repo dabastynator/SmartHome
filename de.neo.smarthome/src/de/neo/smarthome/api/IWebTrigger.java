@@ -1,6 +1,7 @@
 package de.neo.smarthome.api;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -173,6 +174,7 @@ public interface IWebTrigger extends RemoteAble {
 
 	/**
 	 * Disable/Enable crone-job time trigger
+	 * 
 	 * @param token
 	 * @param id
 	 * @param enabled
@@ -182,6 +184,22 @@ public interface IWebTrigger extends RemoteAble {
 	@WebRequest(path = "set_timetrigger_enabled", description = "Disable/Enable crone-job time trigger.")
 	public void setTimeTriggerEnabled(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
 			@WebGet(name = "enabled") boolean enabled) throws RemoteException, DaoException;
+
+	/**
+	 * Change crone-job time trigger properties.
+	 * 
+	 * @param token
+	 * @param id
+	 * @param trigger
+	 * @param cron
+	 * @throws RemoteException
+	 * @throws DaoException
+	 * @throws ParseException 
+	 */
+	@WebRequest(path = "set_timetrigger_properties", description = "Change crone-job time trigger properties.")
+	public void setTimeTriggerProperties(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
+			@WebGet(name = "trigger") String trigger, @WebGet(name = "cron") String cron)
+			throws RemoteException, DaoException, ParseException;
 
 	/**
 	 * Delete crone-job time trigger for trigger id

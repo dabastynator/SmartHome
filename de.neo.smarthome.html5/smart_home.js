@@ -512,12 +512,18 @@ function editTimeTrigger(index){
 
 function applyTimeTrigger(){
 	var enabled = document.getElementById('tt_enabled');
-	apiTrigger.call('set_timetrigger_enabled', function(result)
+	var trigger = document.getElementById('tt_trigger');
+	var cron = document.getElementById('tt_cron');
+	apiTrigger.call('set_timetrigger_properties', function(result)
 	{
 		if (checkResult(result)) {
 			hideDialog('timetrigger_edit');
 			showTimer();
 		}
+	}, {'id': mTimeTrigger.id, 'trigger': trigger.value, 'cron': cron.value});
+	apiTrigger.call('set_timetrigger_enabled', function(result)
+	{
+		checkResult(result);
 	}, {'id': mTimeTrigger.id, 'enabled': enabled.checked});
 }
 

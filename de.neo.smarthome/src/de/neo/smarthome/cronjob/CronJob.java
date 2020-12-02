@@ -46,7 +46,7 @@ public class CronJob {
 
 	protected long mNextExecution = 0;
 
-	private Runnable mRunnable;
+	protected Runnable mRunnable;
 
 	private int mRepeat;
 

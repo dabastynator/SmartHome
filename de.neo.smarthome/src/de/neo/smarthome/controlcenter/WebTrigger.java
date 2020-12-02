@@ -1,5 +1,6 @@
 package de.neo.smarthome.controlcenter;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IWebTrigger;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
+import de.neo.smarthome.cronjob.CronJob;
+import de.neo.smarthome.cronjob.CronScheduler;
 import de.neo.smarthome.user.User.UserRole;
 import de.neo.smarthome.user.UserSessionHandler;
 
@@ -247,8 +250,38 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 			throw new RemoteException("Unknown timetrigger id: " + id);
 		}
 		timeTrigger.setEnabled(enabled);
-		Dao<CronJobTrigger> scriptDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
-		scriptDao.update(timeTrigger);
+		Dao<CronJobTrigger> ttDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
+		ttDao.update(timeTrigger);
+	}
+
+	@WebRequest(path = "set_timetrigger_properties", description = "Change crone-job time trigger properties.")
+	public void setTimeTriggerProperties(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
+			@WebGet(name = "trigger") String trigger, @WebGet(name = "cron") String cron)
+			throws RemoteException, DaoException, ParseException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
+		CronJobTrigger timeTrigger = mCenter.getCronTrigger(id);
+		if (timeTrigger == null) {
+			throw new RemoteException("Unknown timetrigger id: " + id);
+		}
+		if (timeTrigger.getTriggerList().size() == 1) {
+			Trigger t = timeTrigger.getTriggerList().get(0);
+			if (t.getTriggerID().equals(trigger) && cron.equals(timeTrigger.getCronDescription())) {
+				return;
+			}
+		}
+		// Parse the cron expression
+		CronJob job = new CronJob(null);
+		job.parseExpression(cron);
+		
+		timeTrigger.setCronDescription(cron);
+		timeTrigger.getTriggerList().clear();
+		Trigger t = new Trigger();
+		t.setTriggerID(trigger);
+		timeTrigger.getTriggerList().add(t);
+		Dao<CronJobTrigger> ttDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
+		ttDao.update(timeTrigger);
+		CronScheduler.getInstance().remove(timeTrigger);
+		CronScheduler.getInstance().scheduleJob(timeTrigger, cron);
 	}
 
 	@Override
