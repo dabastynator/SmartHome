@@ -57,7 +57,7 @@ public class XMLDaoFactory extends DaoFactory {
 		flush(mXmlFile);
 	}
 
-	public void flush(File xmlFile) throws DaoException {
+	public synchronized void flush(File xmlFile) throws DaoException {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
