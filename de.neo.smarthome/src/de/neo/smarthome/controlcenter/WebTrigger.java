@@ -249,6 +249,9 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 		if (timeTrigger == null) {
 			throw new RemoteException("Unknown timetrigger id: " + id);
 		}
+		if (timeTrigger.isEnabled() == enabled) {
+			return;
+		}
 		timeTrigger.setEnabled(enabled);
 		Dao<CronJobTrigger> ttDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
 		ttDao.update(timeTrigger);
@@ -256,28 +259,29 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
 	@WebRequest(path = "set_timetrigger_properties", description = "Change crone-job time trigger properties.")
 	public void setTimeTriggerProperties(@WebGet(name = "token") String token, @WebGet(name = "id") long id,
-			@WebGet(name = "trigger") String trigger, @WebGet(name = "cron") String cron)
+			@WebGet(name = "trigger") String triggerId, @WebGet(name = "cron") String cron)
 			throws RemoteException, DaoException, ParseException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		CronJobTrigger timeTrigger = mCenter.getCronTrigger(id);
 		if (timeTrigger == null) {
 			throw new RemoteException("Unknown timetrigger id: " + id);
 		}
+		Trigger trigger = null;
 		if (timeTrigger.getTriggerList().size() == 1) {
-			Trigger t = timeTrigger.getTriggerList().get(0);
-			if (t.getTriggerID().equals(trigger) && cron.equals(timeTrigger.getCronDescription())) {
+			trigger = timeTrigger.getTriggerList().get(0);
+			if (trigger.getTriggerID().equals(triggerId) && cron.equals(timeTrigger.getCronDescription())) {
 				return;
 			}
+		} else {
+			trigger = new Trigger();
+			timeTrigger.getTriggerList().add(trigger);
 		}
 		// Parse the cron expression
 		CronJob job = new CronJob(null);
 		job.parseExpression(cron);
 		
 		timeTrigger.setCronDescription(cron);
-		timeTrigger.getTriggerList().clear();
-		Trigger t = new Trigger();
-		t.setTriggerID(trigger);
-		timeTrigger.getTriggerList().add(t);
+		trigger.setTriggerID(triggerId);
 		Dao<CronJobTrigger> ttDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
 		ttDao.update(timeTrigger);
 		CronScheduler.getInstance().remove(timeTrigger);
