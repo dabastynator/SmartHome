@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
-<header>
-	<meta charset="UTF-8">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>SmartHome console</title>
 	<script src="smart_home.js"></script>
 	<script src="utils.js"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
 	<link href="smart_home.css" rel="stylesheet">
-</header>
+</head>
 
 <body onload="initialize()">
 
@@ -39,14 +40,14 @@
 <div id="center" class="card">No files</div>
 
 <div id="border_navigation" class="card">
-	<div class="switch off" id="nav_switch" onclick="showArea('west')">Switches</div>
-	<div class="switch off" id="nav_files" onclick="showArea('center')">Files</div>
-	<div class="switch off" id="nav_pls" onclick="showArea('east')">Playlists</div>
+	<div class="switch off" id="nav_west" onclick="showArea('west')">Switches</div>
+	<div class="switch off" id="nav_center" onclick="showArea('center')">Files</div>
+	<div class="switch off" id="nav_east" onclick="showArea('east')">Playlists</div>
 </div>
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog" style="width: 500px">
+	<div id="content_settings" class="dialog" style="max-width: 500px">
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>

@@ -249,6 +249,7 @@ main {
 	right: 0px;
 	top: 0px;
 	opacity: 0;
+	display: flex;
 
 	transform: scale(1.08, 1.08);
 	transition: 0.5s cubic-bezier(0,1.04,.46,1);
@@ -263,10 +264,7 @@ main {
 }
 
 .dialog{
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
+	margin: auto auto;
 }
 
 .filling, .use_space{

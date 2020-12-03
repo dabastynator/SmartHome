@@ -185,7 +185,7 @@ function getPlaying(callback){
 	apiMediaServer.call('list', function(result)
 	{
 		handled = false;
-		if (checkResult(result)) {
+		if (checkResult(result, null, false)) {
 			if (result.length > 0 && result[0] !== undefined){
 				for (var i = 0; i < result.length; i++) {
 					var m = result[i];
@@ -419,7 +419,7 @@ function refreshPlaylist(){
 	});
 }
 
-function checkResult(result, errorHtmlElement = null){
+function checkResult(result, errorHtmlElement = null, showErrorMsg = true){
 	if (result != null && result.success != null && result.success == false){
 		if (result.error != null)
 		{
@@ -429,7 +429,7 @@ function checkResult(result, errorHtmlElement = null){
 			}
 			if (errorHtmlElement){
 				errorHtmlElement.innerHTML = message;
-			} else {
+			} else if (showErrorMsg) {
 				showMessage("Error", result.error.message);
 			}
 		}		

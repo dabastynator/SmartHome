@@ -100,26 +100,26 @@ function align(){
 }
 
 function showArea(area){
-	var east = document.getElementById('east');
-	var west = document.getElementById('west');
-	var center = document.getElementById('center');
-	if (east != null){
-		if (area === 'east')
-			east.style.visibility = "visible";
-		else
-			east.style.visibility = "hidden";
-	}
-	if (west != null){
-		if (area === 'west')
-			west.style.visibility = "visible";
-		else
-			west.style.visibility = "hidden";
-	}
-	if (center != null){
-		if (area === 'center')
-			center.style.visibility = "visible";
-		else
-			center.style.visibility = "hidden";
+	var areas = ["east","west","center"];
+	for (var i = 0; i < areas.length; i++) {
+		var a = areas[i];
+		var elem = document.getElementById(a);
+		var nav = document.getElementById('nav_' + a);
+		if (elem != null){
+			if (a === area)
+				elem.style.visibility = "visible";
+			else
+				elem.style.visibility = "hidden";
+		}
+		if (nav != null){
+			if (a === area){
+				nav.classList.add('on');
+				nav.classList.remove('off');
+			}else{
+				nav.classList.remove('on');
+				nav.classList.add('off');
+			}
+		}
 	}
 }
 
