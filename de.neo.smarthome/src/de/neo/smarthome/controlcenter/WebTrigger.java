@@ -218,6 +218,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 	@WebRequest(path = "list_timetrigger", description = "List all crone-job time trigger.", genericClass = TimeTriggerBean.class)
 	public ArrayList<TimeTriggerBean> getTimeTrigger(@WebGet(name = "token") String token)
 			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
 		ArrayList<TimeTriggerBean> list = new ArrayList<>();
 		for (CronJobTrigger trigger : mCenter.getCronTriggers()) {
 			list.add(toTTBean(trigger));
