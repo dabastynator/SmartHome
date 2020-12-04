@@ -235,6 +235,10 @@ main {
 	overflow: auto;
 }
 
+footer{
+	text-align:right;
+}
+
 .fill{
 	width: 95%;
 }

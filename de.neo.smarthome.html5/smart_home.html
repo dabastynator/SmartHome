@@ -18,6 +18,7 @@
 	<img width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
 	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showScripts();"/>
 	<img width=48px style="margin: 7px" src="img/timer.png" class="link right" onclick="showTimer();"/>
+	<img width=48px style="margin: 7px" src="img/user.png" class="link right" onclick="showUser();"/>
 </div >
 
 <div id="south" class="card">
@@ -56,6 +57,7 @@
 	</div>
 </div>
 
+<!-- Playlist -->
 <div id="playlist" class="container">
 	<div id="content_playlist" class="dialog">
 		<table style="margin: 7px; width: 500px">
@@ -66,11 +68,41 @@
 	</div>
 </div>
 
+<!-- User -->
+<div id="userlist" class="container">
+	<div id="content_userlist" class="dialog use_space" style="width: 500px; height: 300px">
+		<header class="headline" id="userlist_title">Users</header>
+		<main id="userlist_content">Content</main>
+		<footer>
+			<button onclick="editUser(-1);">New User</button>
+			<button onclick="hideDialog('userlist');">Close</button>
+		</footer>
+	</div>
+</div>
+
+<div id="user_edit" class="container">
+	<div id="content_user_edit" class="dialog use_space" style="width: 700px; height: 500px">
+		<header class="headline" id="edit_user_title">Edit User</header>
+		<main>
+			<label for="user_name">Name</label> <input id="user_name" placeholder="Name..."/>
+			<label for="user_name">Password</label> <input id="user_passwd" placeholder="Password..."/>
+			<div id="user_access"></div>
+		</main>
+		<div style="text-align:right;">
+			<button id="btn_user_remove" onclick="deleteUser();">Delete</button>
+			<button id="btn_user_add_access" onclick="addUserAccess();">Add Access</button>
+			<button onclick="applyUserName();">OK</button>
+			<button onclick="hideDialog('user_edit');">Cancel</button>
+		</div>
+	</div>
+</div>
+
+<!-- Playlist -->
 <div id="timetrigger" class="container">
 	<div id="content_timetrigger" class="dialog use_space" style="width: 500px; height: 300px">
-		<header class="headline" id="playlist_title">TimeTrigger</header>
+		<header class="headline" id="timetrigger_title">TimeTrigger</header>
 		<main id="timetrigger_content">Content</main>
-		<footer style="text-align:right;">	<button onclick="hideDialog('timetrigger');">Close</button></footer>
+		<footer><button onclick="hideDialog('timetrigger');">Close</button></footer>
 	</div>
 </div>
 
@@ -103,7 +135,7 @@
 	<div id="content_scripts" class="filling">
 		<header class="headline" id="scripts_title">Scripts</header>
 		<main id="scripts_content">Content</main>
-		<footer style="text-align:right;">	<button onclick="hideDialog('scripts');">Close</button></footer>
+		<footer><button onclick="hideDialog('scripts');">Close</button></footer>
 	</div>
 </div>
 

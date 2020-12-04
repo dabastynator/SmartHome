@@ -53,6 +53,12 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		}
 		throw new RemoteException("Unknown user-id: " + userId);
 	}
+	
+	@WebRequest(path = "current", description = "Get user of specified token")
+	public BeanUser currentUser(@WebGet(name = "token") String token) throws RemoteException, DaoException{
+		User user = UserSessionHandler.require(token);
+		return toBean(user);
+	}
 
 	@WebRequest(path = "list", description = "List all users of the controlcenter", genericClass = BeanUser.class)
 	public ArrayList<BeanUser> getUsers(@WebGet(name = "token") String adminToken)
@@ -113,6 +119,9 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 
 	private User changeableUser(String token, long userId) throws DaoException, RemoteException {
 		if (userId > 0) {
+			User currentUser = UserSessionHandler.require(token);
+			if(currentUser.getId() == userId)
+				return currentUser;
 			UserSessionHandler.require(token, UserRole.ADMIN);
 			return userById(userId);
 		} else {
@@ -139,6 +148,16 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.update(user);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Change avatar for user " + user.getName(), "UserHandler");
+	}
+	
+	@WebRequest(description = "Change user name", path = "change_name")
+	public void changeName(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_name") String newName) throws RemoteException, DaoException{
+		User user = changeableUser(token, userId);
+		user.setName(newName);
+		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
+		userDao.update(user);
+		RemoteLogger.performLog(LogPriority.INFORMATION, "Change name for user " + user.getName(), "UserHandler");
 	}
 
 	@WebRequest(path = "add_access", description = "Add unit access for user")

@@ -50,6 +50,8 @@ var mPath = '';
 var mPlaylist = '';
 var mTimeTriggerList;
 var mTimeTrigger;
+var mUserList;
+var mSelectedUser;
 
 var htmlFiles;
 var htmlPls;
@@ -59,6 +61,7 @@ var htmlScripts;
 var htmlPlayInfo;
 var htmlMediaServer;
 var htmlTimeTrigger;
+var htmlUserList;
 
 function initialize() {
 	htmlFiles = document.getElementById('center');
@@ -69,6 +72,7 @@ function initialize() {
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
 	htmlTimeTrigger = document.getElementById('timetrigger_content');
+	htmlUserList = document.getElementById('userlist_content');
 
 	readSetting();
 	align();
@@ -481,6 +485,10 @@ function deleteScript(trigger){
 	}, {'trigger': trigger});
 }
 
+/**********************
+***** TimeTrigger *****
+**********************/
+
 function showTimer(){
 	apiTrigger.call('list_timetrigger', function(result)
 	{
@@ -525,6 +533,126 @@ function applyTimeTrigger(){
 	{
 		checkResult(result);
 	}, {'id': mTimeTrigger.id, 'enabled': enabled.checked});
+}
+
+/***************
+***** User *****
+***************/
+
+function showUser(){
+	apiUser.call('list', function(result)
+	{
+		if (checkResult(result, htmlUserList)) {
+			var content = "";
+			mUserList = result;
+			for (var i = 0; i < result.length; i++) {
+				var u = result[i];
+				content += '<div class="line">' + u.name;
+				if (u.role === 'ADMIN'){
+					content += ' (Admin)';
+				}
+				content += '<img src="img/edit.png" class="icon" onclick="editUser(\'' + i + '\')"></div>';
+			}
+			htmlUserList.innerHTML = content;
+			showDialog('userlist');
+		}
+	});
+}
+
+function editUser(index){
+	var addAccess = document.getElementById('btn_user_add_access');
+	var deleteUser = document.getElementById('btn_user_remove');
+	var title = document.getElementById('edit_user_title');
+	document.getElementById('user_passwd').value = '';
+	if (index >= 0)
+	{
+		mSelectedUser = mUserList[index];
+		document.getElementById('user_name').value = mSelectedUser.name;
+		title.innerHTML = 'Edit User ' + mSelectedUser.name;
+		addAccess.style.visibility = 'visible';
+		deleteUser.style.visibility = 'visible';
+	} else {
+		mSelectedUser = null;
+		document.getElementById('user_name').value = '';
+		title.innerHTML = 'Create new User';
+		addAccess.style.visibility = 'hidden';
+		deleteUser.style.visibility = 'hidden';
+	}
+	showDialog('user_edit');
+}
+
+function deleteUser(){
+	if (mSelectedUser != null)
+	{
+		apiUser.call('delete', function(result)
+		{
+			if (checkResult(result)){
+				hideDialog('user_edit');
+				showUser();
+			}
+		}, {'user_id': mSelectedUser.id});
+	}
+}
+
+function refreshUserAccess(){
+	var accessList = document.getElementById('user_access');
+	if (mSelectedUser == null)
+	{
+		accessList.innerHTML = '';
+		return;
+	} else {
+		accessList.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
+	}
+	apiUser.call('get_access', function(result)
+	{
+		var accessList = document.getElementById('user_access');
+		if (checkResult(result, accessList))
+		{
+			var content = "";
+			for (var i = 0; i < result.length; i++)
+			{
+				var access = result[i];
+				content += '<div class="line">' + access.name + ' (' + access.id + ')';
+				content += '<img src="img/delete.png" class="icon" onclick="deleteUserAccess(\'' + id + '\')"></div>';
+			}
+			accessList.innerHTML = content;
+		}
+	}, {'user_id': mSelectedUser.id});
+}
+
+function deleteUserAccess(id){
+	apiUser.call('remove_access', function(result)
+	{
+		if (checkResult(result)){
+			refreshUserAccess();
+		}
+	}, {'user_id': mSelectedUser.id, 'unit_id': id});
+}
+
+function applyUserName(){
+	var newName = document.getElementById('user_name').value;
+	var newPasswd = document.getElementById('user_passwd').value;
+	var callback = function(result)
+		{
+			if (checkResult(result)){
+				hideDialog('user_edit');
+				showUser();
+			}
+		};
+	if (mSelectedUser != null)
+	{
+		apiUser.call('change_name', callback, {'user_id': mSelectedUser.id, 'new_name': newName});
+		if (newPasswd)
+		{
+			apiUser.call('change_password', null, {'user_id': mSelectedUser.id, 'new_password': newPasswd});
+		}
+	} else {
+		apiUser.call('create', callback, {'user_name': newName, 'password': newPasswd, 'avatar': ''});
+	}
+}
+
+function addUserAccess(){
+
 }
 
 function addInfo(){

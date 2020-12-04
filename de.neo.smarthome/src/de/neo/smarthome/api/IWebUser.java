@@ -23,6 +23,17 @@ import de.neo.smarthome.user.UserSessionHandler.SessionType;
 public interface IWebUser extends RemoteAble {
 
 	/**
+	 * Get user of specified token
+	 * 
+	 * @param token
+	 * @return
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "current", description = "Get user of specified token")
+	public BeanUser currentUser(@WebGet(name = "token") String token) throws RemoteException, DaoException;
+	
+	/**
 	 * List all users of the controlcenter
 	 * 
 	 * @param adminToken
@@ -94,7 +105,20 @@ public interface IWebUser extends RemoteAble {
 	 */
 	@WebRequest(description = "Change avatar, as base64 encoded png", path = "change_avatar")
 	public void changeAvatar(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
-			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException;	
+			@WebGet(name = "new_avatar") String newAvatar) throws RemoteException, DaoException;
+	
+	/**
+	 * Change user name
+	 * 
+	 * @param token
+	 * @param userId
+	 * @param newName
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "change_name", description = "Change user name")
+	public void changeName(@WebGet(name = "token") String token, @WebGet(name = "user_id", required = false, defaultvalue = "0") long userId,
+			@WebGet(name = "new_name") String newName) throws RemoteException, DaoException;
 
 	/**
 	 * Add unit access for user
