@@ -492,7 +492,7 @@ function deleteScript(trigger){
 function showTimer(){
 	apiTrigger.call('list_timetrigger', function(result)
 	{
-		if (checkResult(result, htmlTimeTrigger)) {
+		if (checkResult(result)) {
 			var content = "";
 			mTimeTriggerList = result;
 			for (var i = 0; i < result.length; i++) {
@@ -542,7 +542,7 @@ function applyTimeTrigger(){
 function showUser(){
 	apiUser.call('list', function(result)
 	{
-		if (checkResult(result, htmlUserList)) {
+		if (checkResult(result)) {
 			var content = "";
 			mUserList = result;
 			for (var i = 0; i < result.length; i++) {
@@ -579,6 +579,7 @@ function editUser(index){
 		deleteUser.style.visibility = 'hidden';
 	}
 	showDialog('user_edit');
+	refreshUserAccess();
 }
 
 function deleteUser(){
@@ -613,7 +614,7 @@ function refreshUserAccess(){
 			{
 				var access = result[i];
 				content += '<div class="line">' + access.name + ' (' + access.id + ')';
-				content += '<img src="img/delete.png" class="icon" onclick="deleteUserAccess(\'' + id + '\')"></div>';
+				content += '<img src="img/delete.png" class="icon" onclick="deleteUserAccess(\'' + access.id + '\')"></div>';
 			}
 			accessList.innerHTML = content;
 		}
@@ -652,7 +653,36 @@ function applyUserName(){
 }
 
 function addUserAccess(){
+	apiTrigger.call('list_controlunits', function(result)
+	{
+		if (checkResult(result))
+		{
+			var element = document.getElementById('accesslist_content');
+			var content = '';
+			for (var i = 0; i < result.length; i++)
+			{
+				var unit = result[i];
+				content += '<div class="line">' + unit.name + ' (' + unit.id + ')';
+				content += '<img src="img/add.png" class="icon" onclick="addUnitAccess(\'' + unit.id + '\')"></div>';
+			}
+			element.innerHTML = content;
+			showDialog('accesslist');
+		}
+	});
+}
 
+function addUnitAccess(unitId){
+	if (mSelectedUser != null)
+	{
+		apiUser.call('add_access', function(result)
+		{
+			if (checkResult(result))
+			{
+				refreshUserAccess();
+			}
+		}, {'user_id': mSelectedUser.id, 'unit_id': unitId});
+	}
+	hideDialog('accesslist');
 }
 
 function addInfo(){

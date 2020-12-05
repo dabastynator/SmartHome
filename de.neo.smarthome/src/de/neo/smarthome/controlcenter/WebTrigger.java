@@ -18,6 +18,8 @@ import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IWebTrigger;
 import de.neo.smarthome.api.Trigger;
+import de.neo.smarthome.api.IControlCenter.BeanWeb;
+import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.cronjob.CronJob;
 import de.neo.smarthome.cronjob.CronScheduler;
@@ -280,7 +282,7 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 		// Parse the cron expression
 		CronJob job = new CronJob(null);
 		job.parseExpression(cron);
-		
+
 		timeTrigger.setCronDescription(cron);
 		trigger.setTriggerID(triggerId);
 		Dao<CronJobTrigger> ttDao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
@@ -299,6 +301,17 @@ public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 			throw new RemoteException("Unknown timetrigger id " + id);
 		}
 		mCenter.deleteCronTrigger(trigger);
+	}
+
+	@WebRequest(path = "list_controlunits", description = "List all available controlunits.", genericClass = BeanWeb.class)
+	public ArrayList<BeanWeb> listControlUnits(@WebGet(name = "token") String token)
+			throws RemoteException, DaoException {
+		UserSessionHandler.require(token, UserRole.ADMIN);
+		ArrayList<BeanWeb> units = new ArrayList<>();
+		for (IControllUnit unit : mCenter.getControlUnits().values()) {
+			units.add(unit.getWebBean());
+		}
+		return units;
 	}
 
 	@Override

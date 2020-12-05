@@ -205,13 +205,11 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		if (unit == null) {
 			throw new RemoteException("Unknown unit: " + unitId);
 		}
-		if (accessList.getUnit(unitId) != null) {
+		UnitAccess access = accessList.getAccess(unitId);
+		if (access != null) {
 			RemoteLogger.performLog(LogPriority.INFORMATION, "Remove access for " + user.getName(), "UserHandler");
-			UnitAccess access = new UnitAccess();
-			access.setUser(user);
-			access.setUnit(unit);
 			accessDao.delete(access);
-			accessList.addAccess(access);
+			accessList.removeAccess(access);
 		}
 	}
 

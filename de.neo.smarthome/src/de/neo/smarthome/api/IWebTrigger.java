@@ -12,6 +12,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebGet;
 import de.neo.remote.web.WebRequest;
+import de.neo.smarthome.api.IControlCenter.BeanWeb;
 
 public interface IWebTrigger extends RemoteAble {
 
@@ -211,6 +212,18 @@ public interface IWebTrigger extends RemoteAble {
 	 */
 	@WebRequest(path = "delete_timetrigger", description = "Delete crone-job time trigger for trigger id.")
 	public void deleteTimeTrigger(@WebGet(name = "token") String token, @WebGet(name = "id") long id)
+			throws RemoteException, DaoException;
+	
+	/**
+	 * List all available controlunits
+	 * 
+	 * @param token
+	 * @return
+	 * @throws RemoteException
+	 * @throws DaoException
+	 */
+	@WebRequest(path = "list_controlunits", description = "List all available controlunits.", genericClass = BeanWeb.class)
+	public ArrayList<BeanWeb> listControlUnits(@WebGet(name = "token") String token)
 			throws RemoteException, DaoException;
 
 	public static class TimeTriggerBean implements Serializable {

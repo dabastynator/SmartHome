@@ -108,6 +108,10 @@ public class UnitAccessHandler {
 			mUser = user;
 		}
 
+		public UnitAccess getAccess(String unitId) {
+			return mUnits.get(unitId);
+		}
+		
 		public IControllUnit getUnit(String unitId) {
 			UnitAccess access = mUnits.get(unitId);
 			if (access != null) {
