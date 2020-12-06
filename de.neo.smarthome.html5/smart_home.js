@@ -89,12 +89,14 @@ function initialize() {
 	// Setup refresh loop for 5 seconds
 	setInterval(loop, 1000 * 5);
 
-	if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == ''){
+	if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == '')
+	{
 		showDialog('settings');
 	}
 }
 
-function findGetParameter(parameterName) {
+function findGetParameter(parameterName)
+{
     var result = null,
         tmp = [];
     var items = location.search.substr(1).split("&");
@@ -105,12 +107,24 @@ function findGetParameter(parameterName) {
     return result;
 }
 
-function readSetting(){
+function clearSettings()
+{
+	window.localStorage.clear();
+}
+
+function readSetting()
+{
 	endpoint = window.localStorage.getItem("endpoint");
 	token = window.localStorage.getItem("token");
-	if (endpoint == null || endpoint == ''){
+	if (endpoint == null || endpoint == '')
+	{
 		endpoint = findGetParameter('endpoint');
 		token = findGetParameter('token');
+		if (endpoint && token)
+		{
+			window.localStorage.setItem("endpoint", endpoint);
+			window.localStorage.setItem("token", token);
+		}
 	}	
 	mMediaCenter = window.localStorage.getItem("mediacenter");
 	mPath = window.localStorage.getItem("path");	
@@ -202,6 +216,7 @@ function switchClick(id, state){
 function mediaClick(id){
 	mMediaCenter = id;
 	window.localStorage.setItem("mediacenter", mMediaCenter);
+	apiMediaServer.addDefaultParameter('id', mMediaCenter);
 	mPath = '';
 	refreshMediaServer();
 	refreshFiles();
@@ -252,19 +267,28 @@ function refreshPlayer(){
 }
 
 
-function refreshMediaServer(){
+function refreshMediaServer()
+{
 	document.title = 'Smart Home Console';
 	apiMediaServer.call('list', function(media) 
 	{
-		if (checkResult(media, htmlMediaServer)){
+		if (checkResult(media, htmlMediaServer))
+		{
 			media.sort(function(a, b){return a.name.localeCompare(b.name)});
 			var content = "";
 			var title = 'Smart Home Console';
 			if (media.length == 1)
-				mMediaCenter = media[0].id;
-			for (var i = 0; i < media.length; i++) {
+			{
+				if (mMediaCenter != media[0].id)
+				{
+					mediaClick(media[0].id);
+				}
+			}
+			for (var i = 0; i < media.length; i++)
+			{
 				var m = media[i];
-				if (m.id == mMediaCenter) {
+				if (m.id == mMediaCenter)
+				{
 					content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
 					title = m.name + ' - Smart Home Console';
 				} else {
@@ -272,7 +296,8 @@ function refreshMediaServer(){
 				}
 				content += m.name + "</div>";
 			}
-			if (content == ''){
+			if (content == '')
+			{
 				content = 'No mediaserver';
 			}
 			htmlMediaServer.innerHTML = content;

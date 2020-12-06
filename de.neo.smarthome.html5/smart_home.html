@@ -50,13 +50,16 @@
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog" style="max-width: 500px">
+	<div id="content_settings" class="dialog" style="max-width: 550px">
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
 		<label for="setting_current_user">Current User</label> <input id="setting_current_user" placeholder="No active User" readonly/>
-		<div style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
-													<button onclick="hideDialog('settings')">Cancel</button></div>
+		<div style="text-align:right;">
+			<button onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
+			<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+			<button onclick="hideDialog('settings')">Cancel</button>
+		</div>
 	</div>
 </div>
 
