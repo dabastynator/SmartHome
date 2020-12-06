@@ -41,7 +41,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		token.setExpiration(session.getExpiration());
 		token.setToken(session.getToken());
 		token.setType(session.getType());
-		token.setUser(session.getUser().getName());
+		token.setUserId(session.getUser().getId());
 		return token;
 	}
 
@@ -81,6 +81,7 @@ public class WebUser extends AbstractUnitHandler implements IWebUser {
 		user.setName(userName);
 		user.setPassword(password);
 		user.setAvatar(avatar);
+		user.setRole(UserRole.USER);
 		Dao<User> userDao = DaoFactory.getInstance().getDao(User.class);
 		userDao.save(user);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Create new user " + user.getName(), "UserHandler");

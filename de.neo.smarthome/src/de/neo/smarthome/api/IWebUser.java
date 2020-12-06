@@ -204,8 +204,8 @@ public interface IWebUser extends RemoteAble {
 		@WebField(name = "type")
 		private SessionType mType;
 		
-		@WebField(name = "user")
-		private String mUser;
+		@WebField(name = "user_id")
+		private Long mUserId;
 
 		public String getToken() {
 			return mToken;
@@ -231,12 +231,12 @@ public interface IWebUser extends RemoteAble {
 			mType = type;
 		}
 
-		public String getUser() {
-			return mUser;
+		public Long getUser() {
+			return mUserId;
 		}
 
-		public void setUser(String user) {
-			mUser = user;
+		public void setUserId(Long userId) {
+			mUserId = userId;
 		}
 
 	}

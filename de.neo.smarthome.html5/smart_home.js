@@ -121,9 +121,32 @@ function readSetting(){
 	apiMediaServer.configure(endpoint, 'mediaserver', parameter)
 	apiMediaServer.addDefaultParameter('player', 'mplayer');
 	apiMediaServer.addDefaultParameter('id', mMediaCenter);
-	apiSwitch.configure(endpoint, 'switch', parameter)
-	apiAction.configure(endpoint, 'action', parameter)
-	apiUser.configure(endpoint, 'user', parameter)
+	apiSwitch.configure(endpoint, 'switch', parameter);
+	apiAction.configure(endpoint, 'action', parameter);
+	apiUser.configure(endpoint, 'user', parameter);
+
+	document.getElementById('setting_current_user').value = '';
+	setIsAdmin(false);
+	apiUser.call('current', function(result)
+	{
+		if (checkResult(result, null, false))
+		{
+			setIsAdmin(result.role === 'ADMIN');
+			document.getElementById('setting_current_user').value = result.name;
+		}
+	}, {'token': token});
+}
+
+function setIsAdmin(isAdmin)
+{
+	adminVisible = 'none';
+	if (isAdmin)
+	{
+		adminVisible = 'block';
+	}
+	document.getElementById('btn_scripts').style.display = adminVisible;
+	document.getElementById('btn_timetrigger').style.display = adminVisible;
+	document.getElementById('btn_user').style.display = adminVisible;
 }
 
 function initSettings(){
@@ -539,16 +562,20 @@ function applyTimeTrigger(){
 ***** User *****
 ***************/
 
-function showUser(){
+function showUser()
+{
 	apiUser.call('list', function(result)
 	{
-		if (checkResult(result)) {
+		if (checkResult(result))
+		{
 			var content = "";
 			mUserList = result;
-			for (var i = 0; i < result.length; i++) {
+			for (var i = 0; i < result.length; i++)
+			{
 				var u = result[i];
 				content += '<div class="line">' + u.name;
-				if (u.role === 'ADMIN'){
+				if (u.role === 'ADMIN')
+				{
 					content += ' (Admin)';
 				}
 				content += '<img src="img/edit.png" class="icon" onclick="editUser(\'' + i + '\')"></div>';
@@ -559,35 +586,41 @@ function showUser(){
 	});
 }
 
-function editUser(index){
-	var addAccess = document.getElementById('btn_user_add_access');
-	var deleteUser = document.getElementById('btn_user_remove');
+function editUser(index)
+{
 	var title = document.getElementById('edit_user_title');
 	document.getElementById('user_passwd').value = '';
+	var visibility = 'hidden';
 	if (index >= 0)
 	{
 		mSelectedUser = mUserList[index];
 		document.getElementById('user_name').value = mSelectedUser.name;
+		document.getElementById('user_role').value = mSelectedUser.role;
 		title.innerHTML = 'Edit User ' + mSelectedUser.name;
-		addAccess.style.visibility = 'visible';
-		deleteUser.style.visibility = 'visible';
+		visibility = 'visible';
 	} else {
 		mSelectedUser = null;
 		document.getElementById('user_name').value = '';
 		title.innerHTML = 'Create new User';
-		addAccess.style.visibility = 'hidden';
-		deleteUser.style.visibility = 'hidden';
+	}
+	document.getElementById('btn_user_remove').style.visibility = visibility;
+	var user_required = document.getElementsByClassName('user_required');
+	for (var i = 0; i < user_required.length; i++) {
+		user_required[i].style.visibility = visibility;
 	}
 	showDialog('user_edit');
 	refreshUserAccess();
+	refreshUserSessions();
 }
 
-function deleteUser(){
+function deleteUser()
+{
 	if (mSelectedUser != null)
 	{
 		apiUser.call('delete', function(result)
 		{
-			if (checkResult(result)){
+			if (checkResult(result))
+			{
 				hideDialog('user_edit');
 				showUser();
 			}
@@ -595,7 +628,8 @@ function deleteUser(){
 	}
 }
 
-function refreshUserAccess(){
+function refreshUserAccess()
+{
 	var accessList = document.getElementById('user_access');
 	if (mSelectedUser == null)
 	{
@@ -616,21 +650,28 @@ function refreshUserAccess(){
 				content += '<div class="line">' + access.name + ' (' + access.id + ')';
 				content += '<img src="img/delete.png" class="icon" onclick="deleteUserAccess(\'' + access.id + '\')"></div>';
 			}
+			if (!content)
+			{
+				content = '<i>No User Access</i>';
+			}
 			accessList.innerHTML = content;
 		}
 	}, {'user_id': mSelectedUser.id});
 }
 
-function deleteUserAccess(id){
+function deleteUserAccess(id)
+{
 	apiUser.call('remove_access', function(result)
 	{
-		if (checkResult(result)){
+		if (checkResult(result))
+		{
 			refreshUserAccess();
 		}
 	}, {'user_id': mSelectedUser.id, 'unit_id': id});
 }
 
-function applyUserName(){
+function applyUserName()
+{
 	var newName = document.getElementById('user_name').value;
 	var newPasswd = document.getElementById('user_passwd').value;
 	var callback = function(result)
@@ -652,7 +693,8 @@ function applyUserName(){
 	}
 }
 
-function addUserAccess(){
+function addUserAccess()
+{
 	apiTrigger.call('list_controlunits', function(result)
 	{
 		if (checkResult(result))
@@ -671,7 +713,8 @@ function addUserAccess(){
 	});
 }
 
-function addUnitAccess(unitId){
+function addUnitAccess(unitId)
+{
 	if (mSelectedUser != null)
 	{
 		apiUser.call('add_access', function(result)
@@ -684,6 +727,74 @@ function addUnitAccess(unitId){
 	}
 	hideDialog('accesslist');
 }
+
+function refreshUserSessions()
+{
+	var accessList = document.getElementById('user_session');
+	if (mSelectedUser == null)
+	{
+		accessList.innerHTML = '';
+		return;
+	} else {
+		accessList.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
+	}
+	apiUser.call('list_tokens', function(result)
+	{
+		var sessionList = document.getElementById('user_session');
+		if (checkResult(result, sessionList))
+		{
+			var content = "";
+			for (var i = 0; i < result.length; i++)
+			{
+				var session = result[i];
+				if (mSelectedUser.id === session.user_id)
+				{
+					content += '<div class="line">' + session.token;
+					content += '<img src="img/delete.png" class="icon" onclick="deleteUserSession(\'' + session.token + '\')"></div>';
+				}
+			}
+			if (!content)
+			{
+				content = '<i>No User Session</i>';
+			}
+			sessionList.innerHTML = content;
+		}
+	});
+}
+
+function deleteUserSession(session)
+{
+	if (mSelectedUser == null)
+	{
+		return;
+	}
+	apiUser.call('delete_token', function(result)
+	{
+		if (checkResult(result))
+		{
+			refreshUserSessions();
+		}
+	}, {'delete_token': session});
+}
+
+function addUserSession()
+{
+	if (mSelectedUser == null)
+	{
+		return;
+	}
+	apiUser.call('create_persistent_token', function(result)
+	{
+		if (checkResult(result))
+		{
+			refreshUserSessions();
+		}
+	}, {'user_id': mSelectedUser.id});
+}
+
+/*****************
+***** Script *****
+*****************/
 
 function addInfo(){
 	var info = document.getElementById('trigger_infos');

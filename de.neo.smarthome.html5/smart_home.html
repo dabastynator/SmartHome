@@ -17,10 +17,10 @@
 <!-- Main border layout content -->
 <div id="north" class="card" style="text-align:right;">
 	<div id="mediaserver" style="float: left;">No mediaserver</div>	
-	<img width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
-	<img width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showScripts();"/>
-	<img width=48px style="margin: 7px" src="img/timer.png" class="link right" onclick="showTimer();"/>
-	<img width=48px style="margin: 7px" src="img/user.png" class="link right" onclick="showUser();"/>
+	<img id="btn_settings" width=48px style="margin: 7px" src="img/settings.png" class="link right" onclick="initSettings();showDialog('settings');"/>
+	<img id="btn_scripts" width=48px style="margin: 7px" src="img/code.png" class="link right" onclick="showScripts();"/>
+	<img id="btn_timetrigger" width=48px style="margin: 7px" src="img/timer.png" class="link right" onclick="showTimer();"/>
+	<img id="btn_user" width=48px style="margin: 7px" src="img/user.png" class="link right" onclick="showUser();"/>
 </div >
 
 <div id="south" class="card">
@@ -54,6 +54,7 @@
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
+		<label for="setting_current_user">Current User</label> <input id="setting_current_user" placeholder="No active User" readonly/>
 		<div style="text-align:right;">	<button onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 													<button onclick="hideDialog('settings')">Cancel</button></div>
 	</div>
@@ -83,16 +84,27 @@
 </div>
 
 <div id="user_edit" class="container">
-	<div id="content_user_edit" class="dialog use_space" style="width: 700px; height: 500px">
+	<div id="content_user_edit" class="dialog use_space" style="width: 700px; height: 95%">
 		<header class="headline" id="edit_user_title">Edit User</header>
 		<main>
 			<label for="user_name">Name</label> <input id="user_name" placeholder="Name..."/>
 			<label for="user_name">Password</label> <input id="user_passwd" placeholder="Password..."/>
-			<div id="user_access"></div>
+			<label for="user_role">Role</label>
+			<select id="user_role">
+				<option value="USER">User</option>
+				<option value="ADMIN">Admin</option>
+			</select>
+			<div class="label user_required" style="width:100%">Unit Access List
+				<img src="img/add.png" class="icon" onclick="addUserAccess()">
+			</div>
+			<div class="input user_required" id="user_access"></div>
+			<div class="label user_required" style="width:100%">Active Sessions
+				<img src="img/add.png" class="icon" onclick="addUserSession()">
+			</div>
+			<div class="input user_required" id="user_session"></div>
 		</main>
 		<div style="text-align:right;">
 			<button id="btn_user_remove" onclick="deleteUser();">Delete</button>
-			<button id="btn_user_add_access" onclick="addUserAccess();">Add Access</button>
 			<button onclick="applyUserName();">OK</button>
 			<button onclick="hideDialog('user_edit');">Cancel</button>
 		</div>
