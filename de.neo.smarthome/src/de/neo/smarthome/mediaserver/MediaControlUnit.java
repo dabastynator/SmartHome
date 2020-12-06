@@ -37,10 +37,11 @@ public class MediaControlUnit extends AbstractControlUnit {
 	@Persist(name = "playlistLocation")
 	private String mPlaylistLocation;
 
-	private TotemPlayer mTotem;
-	private MPlayer mMplayer;
+	static private TotemPlayer mTotem;
+	static private MPlayer mMplayer;
+	static private OMXPlayer mOmxplayer;
+
 	private PlayList mPlaylist;
-	private OMXPlayer mOmxplayer;
 
 	@OnLoad
 	public void onLoad() {
@@ -55,9 +56,11 @@ public class MediaControlUnit extends AbstractControlUnit {
 			mBrowserLocation += File.separator;
 		mPlaylist = new PlayList(mPlaylistLocation);
 
-		mTotem = new TotemPlayer();
-		mMplayer = new MPlayer(mPlaylistLocation);
-		mOmxplayer = new OMXPlayer();
+		if (mTotem == null) {
+			mTotem = new TotemPlayer();
+			mMplayer = new MPlayer(mPlaylistLocation);
+			mOmxplayer = new OMXPlayer();
+		}
 	}
 
 	public void setBrowserLocation(String locationBrowser) {
