@@ -197,9 +197,9 @@ function refreshSwitches(){
 			for (var i = 0; i < switches.length; i++) {
 				var s = switches[i];
 				if (s.state == "ON") {
-					content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on">';
+					content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on" style="min-width: 140px">';
 				} else {
-					content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off">';
+					content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off" style="min-width: 140px">';
 				}
 				content += s.name + "</div>";
 			}
@@ -249,8 +249,6 @@ function refreshPlayer(){
 	getPlaying(function(playing){
 		var text = '';
 		if (playing != null){
-			if (playing.path != null && playing.path != '')
-				text = '<img class="player_btn" src="img/pls.png" onclick="addFileToPls(null, \'' + playing.path + '\')"/>';
 			text += '<div style="float: right">';
 			if (playing.artist != null && playing.artist != '')
 				text += playing.artist + '<br/>';
