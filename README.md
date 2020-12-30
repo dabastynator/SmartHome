@@ -11,8 +11,8 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 ```xml
 <?xml version="1.0"?>
 <SmartHome>
-	<!-- Define the port of the web-interface and the security-token required for every web call -->
-	<ControlCenter port="5061" token="security-token">
+	<!-- Define the port of the web-interface -->
+	<ControlCenter port="5061">
 
 		<!-- The optionally ground plot is used by the android-client -->
 		<!-- The client visualizes the SmartHome in an opengl-scene-->
@@ -31,15 +31,15 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 			</Wall>
 		</GroundPlot>
 
-		<!-- EventRules are used to define action-rules for any trigger -->
-		<EventRule trigger="trigger.light">
+		<!-- Scripts are used to define events for any trigger -->
+		<Script trigger="trigger.light">
 			<Event unitID="switch.light1">
 				<Parameter key="state" value="on"/>
 			</Event>
 			<Event unitID="switch.light2">
 				<Parameter key="state" value="on"/>
 			</Event>
-		</EventRule>
+		</Script>
 
 		<!-- Define jobs by the cron syntax. They can call any trigger -->
 		<TimeTrigger cronjob="30 6 * * *">
@@ -67,7 +67,7 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 
 	<!-- Define a media-server that supports file-browsing and playlists -->
 	<!-- Requires mplayer or omxplayer to play any music or video file -->
-	<MediaServer    id="media.living"
+	<MediaServer id="media.living"
 			location="/media/hdd/" 
 			playlistLocation="/media/hdd/.pls/" 
 			type="remote" 
@@ -78,7 +78,7 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 	<!-- Define any command-line action -->
 	<!-- This example starts the kodi media-server -->
 	<!-- The client-action is used for the android-client to start the kodi remote control -->
-	<CommandAction  id="action.kodi"
+	<CommandAction id="action.kodi"
 			name="Kodi"
 			type="Execute Kodi media server"
 			command="/usr/bin/kodi-standalone"
@@ -86,6 +86,30 @@ The java application requires a xml-file. The xml defines the SmartHome and cont
 			thumbnail="/home/pi/kodi.png"
 			logFile="/home/pi/Logs/kodi.log"
 			x="0.5" y="0.5" z="1.5"/>
+
+	<!-- Define access by managed users-->
+	<!-- A user can be admin witch allows access to everything -->
+	<User avatar="" 
+			id="1333524613105917070" 
+			name="admin" 
+			password="secure" 
+			role="ADMIN"/>
+
+	<!-- The normal user has the role USER and has no access by default -->
+	<User avatar="" 
+			id="2601749788507583561" 
+			name="Anonymous" 
+			password="anon" 
+			role="USER"/>
+
+	<!-- A UnitAccess allows the given user to access the defined unit -->
+	<UnitAccess unit="switch.light1" user="2601749788507583561"/>
+	<UnitAccess unit="media.living" user="2601749788507583561"/>
+
+	<!-- The web-api requires a session-token for each call -->
+	<!-- The following two sessions define a token for the admin and one for the user -->
+	<Session id="2265740024538433441" token="admin_token" user="1333524613105917070"/>
+	<Session id="1351990467740299448" token="user_token" user="2601749788507583561"/>
 
 </SmartHome>
 ```
