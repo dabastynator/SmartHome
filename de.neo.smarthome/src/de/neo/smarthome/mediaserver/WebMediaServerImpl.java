@@ -295,6 +295,18 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return null;
 	}
 
+	@WebRequest(path = "delta_volume", description = "Change volume of the player by given delta.")
+	public PlayingBean setDeltaVolume(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "delta") int delta)
+			throws RemoteException, PlayerException{
+		IPlayer p = getPlayer(token, id, player);
+		if (p != null) {
+			p.setVolume(p.getVolume() + delta);
+			return p.getPlayingBean();
+		}
+		return null;
+	}
+
 	@WebRequest(path = "set_fullscreen", description = "Set the specified player in fullsceen mode or change to windowed mode.")
 	public PlayingBean playSetFullscreen(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
 			@WebGet(name = "player") String player, @WebGet(name = "fullscreen") boolean fullscreen)

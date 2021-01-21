@@ -26,7 +26,7 @@ public interface IWebMediaServer extends RemoteAble {
 	/**
 	 * List all registered media-server with current playing state. Optional
 	 * parameter id specified required media-server.
-	 * 
+	 *
 	 * @param id
 	 * @return media-server list
 	 */
@@ -36,7 +36,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * List all playlists of specified media server.
-	 * 
+	 *
 	 * @param id
 	 * @return playlists
 	 */
@@ -46,7 +46,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Add item to specified playlist.
-	 * 
+	 *
 	 * @param id
 	 * @param playlist
 	 * @param item
@@ -59,7 +59,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Create new playlist.
-	 * 
+	 *
 	 * @param id
 	 * @param playlist
 	 */
@@ -69,7 +69,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Delete specified playlist
-	 * 
+	 *
 	 * @param id
 	 * @param playlist
 	 * @throws RemoteException
@@ -80,7 +80,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Delete item from specified playlist.
-	 * 
+	 *
 	 * @param id
 	 * @param playlist
 	 * @param item
@@ -93,7 +93,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * List items of specified playlist.
-	 * 
+	 *
 	 * @param id
 	 * @param playlist
 	 * @return playlist content
@@ -107,7 +107,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Get files and directories at specific path.
-	 * 
+	 *
 	 * @param id
 	 * @param path
 	 * @return playing bean
@@ -119,7 +119,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Play specified file or directory.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @param file
@@ -134,7 +134,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Play specified playlist.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @param playlist
@@ -149,7 +149,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Play youtube url.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @param youtube_url
@@ -165,7 +165,7 @@ public interface IWebMediaServer extends RemoteAble {
 	/**
 	 * Change state of player. Plaing -> Pause and Pause -> Playing. If player does
 	 * not play anything, throw player exception.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -178,7 +178,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Play next file in playlist or filesystem.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -191,7 +191,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Play previous file in playlist or filesystem.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -204,7 +204,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Seek forward in current playing.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -217,7 +217,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Seek backward in current playing.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -230,7 +230,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Set the specified player in fullsceen mode or change to windowed mode.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -244,7 +244,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Stop playing.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @return playing bean
@@ -257,7 +257,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Set volume of the player. Value must between 0 and 100.
-	 * 
+	 *
 	 * @param id
 	 * @param player
 	 * @param volume
@@ -271,8 +271,23 @@ public interface IWebMediaServer extends RemoteAble {
 			throws RemoteException, PlayerException;
 
 	/**
+	 * Change volume of the player by given delta.
+	 *
+	 * @param id
+	 * @param player
+	 * @param volume
+	 * @return playing bean
+	 * @throws RemoteException
+	 * @throws PlayerException
+	 */
+	@WebRequest(path = "delta_volume", description = "Change volume of the player by given delta.")
+	public PlayingBean setDeltaVolume(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
+			@WebGet(name = "player") String player, @WebGet(name = "delta") int delta)
+			throws RemoteException, PlayerException;
+
+	/**
 	 * Publish specified file or directory for one download.
-	 * 
+	 *
 	 * @param id
 	 * @param path
 	 * @return BeanDownload
@@ -285,7 +300,7 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Create new media server
-	 * 
+	 *
 	 * @param token
 	 * @param id
 	 * @param name
@@ -307,10 +322,10 @@ public interface IWebMediaServer extends RemoteAble {
 			@WebGet(name = "location_playlist") String locationPlaylist,
 			@WebGet(name = "description") String description, @WebGet(name = "x") float x, @WebGet(name = "y") float y,
 			@WebGet(name = "z") float z) throws RemoteException, IOException, DaoException;
-	
+
 	/**
 	 * Update existing media server
-	 * 
+	 *
 	 * @param token
 	 * @param id
 	 * @param name
@@ -334,12 +349,12 @@ public interface IWebMediaServer extends RemoteAble {
 
 	/**
 	 * Delete media server
-	 * 
+	 *
 	 * @param token
 	 * @param id
 	 * @throws RemoteException
 	 * @throws IOException
-	 * @throws DaoException 
+	 * @throws DaoException
 	 */
 	@WebRequest(path = "delete", description = "Delete media server.")
 	public void deleteMediaServer(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
