@@ -289,7 +289,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			throws RemoteException, PlayerException {
 		IPlayer p = getPlayer(token, id, player);
 		if (p != null) {
-			p.setVolume(volume);
+			p.setVolume(Math.max(0, Math.min(100, volume)));
 			return p.getPlayingBean();
 		}
 		return null;
@@ -301,7 +301,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			throws RemoteException, PlayerException{
 		IPlayer p = getPlayer(token, id, player);
 		if (p != null) {
-			p.setVolume(p.getVolume() + delta);
+			p.setVolume(Math.max(0, Math.min(100, p.getVolume() + delta)));
 			return p.getPlayingBean();
 		}
 		return null;
