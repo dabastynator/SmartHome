@@ -3,6 +3,7 @@ package de.neo.smarthome.mediaserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
@@ -82,7 +83,9 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			throws RemoteException {
 		ArrayList<BeanPlaylist> result = new ArrayList<>();
 		MediaControlUnit mediaServer = mCenter.getAccessHandler().require(token, id);
-		for (String str : mediaServer.getPlayList().getPlayLists()) {
+		String[] playlists = mediaServer.getPlayList().getPlayLists();
+		Arrays.sort(playlists);
+		for (String str : playlists) {
 			BeanPlaylist pls = new BeanPlaylist();
 			pls.setName(str);
 			result.add(pls);
