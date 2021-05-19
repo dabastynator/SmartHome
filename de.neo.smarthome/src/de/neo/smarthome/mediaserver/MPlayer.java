@@ -75,9 +75,9 @@ public class MPlayer extends AbstractPlayer {
 		}
 	}
 	
-	private void setAmixerVolum(int volume){
+	private static void setAmixerVolum(int volume){
 		try {
-			String[] amixerArgs = new String[] { "/usr/bin/amixer", "-q", "-M", "sset", "Speaker", mVolume + "%" };
+			String[] amixerArgs = new String[] { "/usr/bin/amixer", "-q", "-M", "sset", "Speaker", volume + "%" };
 			Process amixer = Runtime.getRuntime().exec(amixerArgs);
 			amixer.waitFor();
 			BufferedReader buf = new BufferedReader(new InputStreamReader(amixer.getInputStream()));
