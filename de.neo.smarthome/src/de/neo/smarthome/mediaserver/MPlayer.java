@@ -80,6 +80,11 @@ public class MPlayer extends AbstractPlayer {
 			String[] amixerArgs = new String[] { "/usr/bin/amixer", "-q", "-M", "sset", "Speaker", mVolume + "%" };
 			Process amixer = Runtime.getRuntime().exec(amixerArgs);
 			amixer.waitFor();
+			BufferedReader buf = new BufferedReader(new InputStreamReader(amixer.getInputStream()));
+			String line = "";
+			while ((line=buf.readLine())!=null) {
+				RemoteLogger.performLog(LogPriority.WARNING, "Set amixer volume: " + line, "MPlayer");
+			}
 		} catch (IOException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		} catch (InterruptedException e) {
