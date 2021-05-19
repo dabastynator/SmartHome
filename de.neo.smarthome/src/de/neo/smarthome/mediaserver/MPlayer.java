@@ -74,9 +74,24 @@ public class MPlayer extends AbstractPlayer {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 	}
+	
+	private void setAmixerVolum(int volume){
+		try {
+			String[] amixerArgs = new String[] { "/usr/bin/amixer", "-q", "-M", "sset", "Speaker", mVolume + "%" };
+			Process amixer = Runtime.getRuntime().exec(amixerArgs);
+			amixer.waitFor();
+		} catch (IOException e) {
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
+		} catch (InterruptedException e) {
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
+		}
+	}
 
 	protected void startPlayer() {
 		try {
+			// Set Volume
+			setAmixerVolum(mVolume);
+			
 			String[] args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet", "-idle", "-geometry",
 					mPositionLeft + ":0" };
 			mMplayerProcess = Runtime.getRuntime().exec(args);
@@ -105,6 +120,7 @@ public class MPlayer extends AbstractPlayer {
 	@Override
 	public void quit() throws PlayerException {
 		writeCommand("quit");
+		setAmixerVolum(100);
 		mMplayerIn = null;
 		mMplayerProcess = null;
 		super.quit();
