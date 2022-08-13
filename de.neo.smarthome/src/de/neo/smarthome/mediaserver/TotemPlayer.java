@@ -94,16 +94,6 @@ public class TotemPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void moveLeft() throws RemoteException, PlayerException {
-		throw new PlayerException("not supported function for totem");
-	}
-
-	@Override
-	public void moveRight() throws RemoteException, PlayerException {
-		throw new PlayerException("not supported function for totem");
-	}
-
-	@Override
 	public void playPlayList(String pls) throws RemoteException,
 			PlayerException {
 		try {

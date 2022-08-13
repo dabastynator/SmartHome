@@ -113,22 +113,6 @@ public interface IPlayer extends RemoteAble {
 	void nextAudio() throws RemoteException, PlayerException;
 
 	/**
-	 * move window left
-	 * 
-	 * @throws RemoteException
-	 * @throws PlayerException
-	 */
-	void moveLeft() throws RemoteException, PlayerException;
-
-	/**
-	 * move window right
-	 * 
-	 * @throws RemoteException
-	 * @throws PlayerException
-	 */
-	void moveRight() throws RemoteException, PlayerException;
-
-	/**
 	 * set the player to play random order for the files.
 	 * 
 	 * @param shuffle

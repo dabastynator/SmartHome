@@ -116,18 +116,6 @@ public class OMXPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void moveLeft() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void moveRight() throws RemoteException, PlayerException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void useShuffle(boolean shuffle) throws RemoteException,
 			PlayerException {
 		// TODO Auto-generated method stub

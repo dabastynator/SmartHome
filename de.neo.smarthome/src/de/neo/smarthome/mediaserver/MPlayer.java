@@ -20,7 +20,6 @@ public class MPlayer extends AbstractPlayer {
 
 	protected Process mMplayerProcess;
 	protected PrintStream mMplayerIn;
-	protected int mPositionLeft = 0;
 	private int mSeekValue;
 	private Object mPlayListfolder;
 
@@ -97,8 +96,7 @@ public class MPlayer extends AbstractPlayer {
 			// Set Volume
 			setAmixerVolum(mVolume);
 			
-			String[] args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet", "-idle", "-geometry",
-					mPositionLeft + ":0" };
+			String[] args = new String[] { "/usr/bin/mplayer", "-slave", "-quiet", "-idle" };
 			mMplayerProcess = Runtime.getRuntime().exec(args);
 			// the standard input of MPlayer
 			mMplayerIn = new PrintStream(mMplayerProcess.getOutputStream());
@@ -197,25 +195,6 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void moveLeft() throws PlayerException {
-		long time = 0;
-		if (mPlayingBean != null)
-			time = Math.max(System.currentTimeMillis() - mPlayingBean.getStartTime() - 3, 0);
-		quit();
-		mPositionLeft -= 1680;
-		startPlayer();
-		if (mPlayingBean != null && mPlayingBean.getPath() != null) {
-			play(mPlayingBean.getPath());
-			try {
-				setPlayingPosition((int) time);
-			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
-						"MPlayer");
-			}
-		}
-	}
-
-	@Override
 	public void playFromYoutube(String url) throws RemoteException, PlayerException {
 		if (mMplayerIn == null)
 			startPlayer();
@@ -225,25 +204,6 @@ public class MPlayer extends AbstractPlayer {
 			title = title + " " + split[i];
 		String youtubeStreamUrl = getStreamUrl(YOUTUBE_DL_FILE, split[split.length - 1]);
 		writeCommand("loadfile " + youtubeStreamUrl);
-	}
-
-	@Override
-	public void moveRight() throws PlayerException {
-		long time = 0;
-		if (mPlayingBean != null)
-			time = Math.max(System.currentTimeMillis() - mPlayingBean.getStartTime() - 3, 0);
-		quit();
-		mPositionLeft += 1680;
-		startPlayer();
-		if (mPlayingBean != null && mPlayingBean.getPath() != null) {
-			play(mPlayingBean.getPath());
-			try {
-				setPlayingPosition((int) time);
-			} catch (RemoteException e) {
-				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
-						"MPlayer");
-			}
-		}
 	}
 
 	@Override
