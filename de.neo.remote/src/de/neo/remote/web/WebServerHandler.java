@@ -72,7 +72,7 @@ public class WebServerHandler implements HttpHandler {
 		Annotation[][] annotations = method.getParameterAnnotations();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (int i = 0; i < annotations.length; i++) {
-			WebGet annotation = WebProxy.findWebGetAnnotation(annotations[i]);
+			WebParam annotation = WebProxy.findWebGetAnnotation(annotations[i]);
 			if (annotation == null)
 				throw new IllegalArgumentException("Parameter of method missing WebGet annotation.");
 			Class<?> paramClass = parameterTypes[i];
@@ -121,7 +121,7 @@ public class WebServerHandler implements HttpHandler {
 			jsonMethod.put("description", methodAnnotation.description());
 			Annotation[][] annotations = method.getParameterAnnotations();
 			for (int i = 0; i < annotations.length; i++) {
-				WebGet annotation = WebProxy.findWebGetAnnotation(annotations[i]);
+				WebParam annotation = WebProxy.findWebGetAnnotation(annotations[i]);
 				parameter.add(annotation.name());
 			}
 			jsonMethod.put("parameter", parameter);

@@ -7,12 +7,15 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface WebGet {
+public @interface WebParam {
+	
+	enum Type{ GetParameter, ReplaceUrl, Header, Payload};
+	
 	public String name();
 
 	public boolean required() default true;
 
 	public String defaultvalue() default "";
 
-	public boolean replaceUrl() default false;
+	public Type type() default Type.GetParameter;
 }

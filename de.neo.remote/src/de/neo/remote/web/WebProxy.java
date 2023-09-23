@@ -1,8 +1,11 @@
 package de.neo.remote.web;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -14,8 +17,8 @@ import java.net.URLEncoder;
 import org.json.simple.parser.JSONParser;
 
 import de.neo.remote.rmi.RMILogger;
-import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.rmi.RMILogger.LogPriority;
+import de.neo.remote.rmi.RemoteException;
 
 public class WebProxy implements InvocationHandler {
 
@@ -29,32 +32,60 @@ public class WebProxy implements InvocationHandler {
 		mSecurityToken = securityToken;
 	}
 
-	public static WebGet findWebGetAnnotation(Annotation[] annotations) {
+	public static WebParam findWebGetAnnotation(Annotation[] annotations) {
 		for (Annotation a : annotations)
-			if (a instanceof WebGet)
-				return (WebGet) a;
+			if (a instanceof WebParam)
+				return (WebParam) a;
 		return null;
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] parameter) throws Throwable {
 		String url = createUrl(method, parameter);
-		String result = doWebGetRequest(url);
+		String result = doWebRequest(url, method, parameter);
 		Object json = new JSONParser().parse(result);
 		WebRequest request = method.getAnnotation(WebRequest.class);
 		JSONUtils.checkForException(json);
 		return JSONUtils.jsonToObject(method.getReturnType(), json, request, null);
 	}
 
-	public static String doWebGetRequest(String urlToRead) throws RemoteException {
+	public static String doWebRequest(String urlToRead, Method method, Object[] parameter) throws RemoteException {
 		try {
 			StringBuilder result = new StringBuilder();
 			URL url;
+			boolean hasPayload = false;
 
 			url = new URL(urlToRead);
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
+			WebRequest request = method.getAnnotation(WebRequest.class);
+			if (request.type() == WebRequest.Type.Get) {
+				conn.setRequestMethod("GET");
+			} else if (request.type() == WebRequest.Type.Post) {
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type", request.content());
+			} else {
+				throw new RemoteException("Unsupported WebRequest type: " + request.type());
+			}
+			if (parameter != null) {
+				for (int i = 0; i < parameter.length; i++) {
+					if (parameter[i] != null) {
+						WebParam paramAnnotation = findWebGetAnnotation(method.getParameterAnnotations()[i]);
+						if (paramAnnotation == null)
+							throw new RemoteException("WebRequest for method '" + method.getName()
+									+ "' not supported. Parameter " + i + " not annotated.");
+						if (paramAnnotation.type() == WebParam.Type.Header) {
+							String name = paramAnnotation.name();
+							String value = parameter[i].toString();
+							conn.setRequestProperty(name, value);
+						}
+						hasPayload |= paramAnnotation.type() == WebParam.Type.Payload;
+					}
+				}
+			}
+			if (request.type() == WebRequest.Type.Post && hasPayload) {
+				writePayload(conn, method, parameter);
+			}
 			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			String line;
 			while ((line = rd.readLine()) != null) {
@@ -65,6 +96,37 @@ public class WebProxy implements InvocationHandler {
 		} catch (IOException e) {
 			throw new RemoteException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 		}
+	}
+
+	private static void writePayload(HttpURLConnection conn, Method method, Object[] parameter) throws IOException, RemoteException {
+		conn.setDoOutput(true);
+		OutputStream os = conn.getOutputStream();
+		BufferedWriter writer = new BufferedWriter(
+		        new OutputStreamWriter(os, "UTF-8"));
+		StringBuilder sb = new StringBuilder("{");
+		String prefix = "";
+		if (parameter != null) {
+			for (int i = 0; i < parameter.length; i++) {
+				if (parameter[i] != null) {
+					WebParam paramAnnotation = findWebGetAnnotation(method.getParameterAnnotations()[i]);
+					if (paramAnnotation == null)
+						throw new RemoteException("WebRequest for method '" + method.getName()
+								+ "' not supported. Parameter " + i + " not annotated.");
+					if (paramAnnotation.type() == WebParam.Type.Payload) {
+						String name = paramAnnotation.name();
+						String value = parameter[i].toString();
+						sb.append(prefix);
+						sb.append("\"" + URLEncoder.encode(name, "UTF-8") + "\": \"" + URLEncoder.encode(value, "UTF-8") +"\"");
+						prefix = ",";
+					}
+				}
+			}
+		}
+		sb.append("}");
+		writer.write(sb.toString());
+		writer.flush();
+		writer.close();
+		os.close();
 	}
 
 	private String createUrl(Method method, Object[] parameter) throws RemoteException {
@@ -83,12 +145,12 @@ public class WebProxy implements InvocationHandler {
 		if (parameter != null) {
 			for (int i = 0; i < parameter.length; i++) {
 				if (parameter[i] != null) {
-					WebGet paramAnnoration = findWebGetAnnotation(method.getParameterAnnotations()[i]);
-					if (paramAnnoration == null)
+					WebParam paramAnnotation = findWebGetAnnotation(method.getParameterAnnotations()[i]);
+					if (paramAnnotation == null)
 						throw new RemoteException("WebRequest for method '" + method.getName()
 								+ "' not supported. Parameter " + i + " not annotated.");
 
-					String name = paramAnnoration.name();
+					String name = paramAnnotation.name();
 
 					try {
 						// Encode parameter two times to avoid this signs to be
@@ -96,9 +158,9 @@ public class WebProxy implements InvocationHandler {
 						String p = URLEncoder.encode(parameter[i].toString(), "UTF-8");
 						String value = URLEncoder.encode(p, "UTF-8");
 
-						if (paramAnnoration.replaceUrl()) {
-							path = path.replace("${" + paramAnnoration.name() + "}", p);
-						} else {
+						if (paramAnnotation.type() == WebParam.Type.ReplaceUrl) {
+							path = path.replace("${" + paramAnnotation.name() + "}", p);
+						} else if (paramAnnotation.type() == WebParam.Type.GetParameter) {
 							if (firstParam)
 								sb.append("?");
 							else
