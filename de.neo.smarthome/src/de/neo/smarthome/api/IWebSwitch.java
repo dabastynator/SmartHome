@@ -7,7 +7,7 @@ import de.neo.persist.DaoException;
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
 
@@ -24,7 +24,7 @@ public interface IWebSwitch extends RemoteAble {
 	 * @return list of all switches
 	 */
 	@WebRequest(path = "list", description = "List all switches of the controlcenter. A switch has an id, name, state and type.", genericClass = BeanSwitch.class)
-	public ArrayList<BeanSwitch> getSwitches(@WebGet(name = "token") String token) throws RemoteException;
+	public ArrayList<BeanSwitch> getSwitches(@WebParam(name = "token") String token) throws RemoteException;
 
 	/**
 	 * Set the state of switch with specified id.
@@ -36,8 +36,8 @@ public interface IWebSwitch extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(description = "Set the state of switch with specified id. State must be [ON|OFF].", path = "set")
-	public BeanSwitch setSwitchState(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "state") String state) throws IllegalArgumentException, RemoteException;
+	public BeanSwitch setSwitchState(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "state") String state) throws IllegalArgumentException, RemoteException;
 
 	/**
 	 * Create new switch
@@ -57,10 +57,10 @@ public interface IWebSwitch extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "create", description = "Create new switch.")
-	public BeanSwitch create(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "family_code") String familyCode,
-			@WebGet(name = "switch_number") int switchNumber, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanSwitch create(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "family_code") String familyCode,
+			@WebParam(name = "switch_number") int switchNumber, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, IOException, DaoException;
 
 	/**
@@ -81,10 +81,10 @@ public interface IWebSwitch extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "update", description = "Update existing switch.")
-	public BeanSwitch update(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "family_code") String familyCode,
-			@WebGet(name = "switch_number") int switchNumber, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanSwitch update(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "family_code") String familyCode,
+			@WebParam(name = "switch_number") int switchNumber, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, IOException, DaoException;
 
 	/**
@@ -97,7 +97,7 @@ public interface IWebSwitch extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "delete", description = "Delete switch.")
-	public void delete(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
+	public void delete(@WebParam(name = "token") String token, @WebParam(name = "id") String id)
 			throws RemoteException, IOException, DaoException;
 
 	public static class BeanSwitch extends BeanWeb {

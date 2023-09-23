@@ -7,7 +7,7 @@ import de.neo.persist.DaoException;
 import de.neo.persist.DaoFactory;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.RemoteLogger;
@@ -39,7 +39,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 
 	@Override
 	@WebRequest(path = "list", description = "List all led strips.", genericClass = BeanLEDStrips.class)
-	public ArrayList<BeanLEDStrips> getLEDStrips(@WebGet(name = "token") String token) throws RemoteException {
+	public ArrayList<BeanLEDStrips> getLEDStrips(@WebParam(name = "token") String token) throws RemoteException {
 		User user = UserSessionHandler.require(token);
 		ArrayList<BeanLEDStrips> result = new ArrayList<>();
 		for (IControllUnit unit : mCenter.getAccessHandler().unitsFor(user)) {
@@ -53,8 +53,8 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 
 	@Override
 	@WebRequest(path = "setcolor", description = "Set color for specified led strip. Red, green and blue must between 0 and 255.")
-	public BeanLEDStrips setColor(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "red") int red, @WebGet(name = "green") int green, @WebGet(name = "blue") int blue)
+	public BeanLEDStrips setColor(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "red") int red, @WebParam(name = "green") int green, @WebParam(name = "blue") int blue)
 			throws RemoteException {
 		RCColorControlUnit ledStrip = mCenter.getAccessHandler().require(token, id);
 		if (red < 0 || red > 255)
@@ -70,17 +70,17 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 
 	@Override
 	@WebRequest(path = "setmode", description = "Set mode for specified led strip. 'NormalMode' simply shows the color, 'PartyMode' shows the color elements with strobe effect.")
-	public BeanLEDStrips setMode(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "mode") LEDMode mode) throws RemoteException {
+	public BeanLEDStrips setMode(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "mode") LEDMode mode) throws RemoteException {
 		RCColorControlUnit ledStrip = mCenter.getAccessHandler().require(token, id);
 		ledStrip.setMode(mode);
 		return toLEDBean(ledStrip);
 	}
 
 	@WebRequest(path = "create", description = "Create new LED strip.")
-	public BeanLEDStrips createNew(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanLEDStrips createNew(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		RCColorControlUnit ledUnit = new RCColorControlUnit();
@@ -88,8 +88,6 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 			throw new RemoteException("Unit with id " + id + " already exists");
 		}
 		ledUnit.setName(name);
-		ledUnit.setDescription(description);
-		ledUnit.setPosition(x, y, z);
 		ledUnit.setId(id);
 		Dao<RCColorControlUnit> dao = DaoFactory.getInstance().getDao(RCColorControlUnit.class);
 		dao.save(ledUnit);
@@ -99,9 +97,9 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	}
 
 	@WebRequest(path = "update", description = "Update existing LED strip.")
-	public BeanLEDStrips updateExisting(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanLEDStrips updateExisting(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		IControllUnit unit = mCenter.getControlUnit(id);
@@ -110,8 +108,6 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 		}
 		RCColorControlUnit ledUnit = (RCColorControlUnit) unit;
 		ledUnit.setName(name);
-		ledUnit.setDescription(description);
-		ledUnit.setPosition(x, y, z);
 		Dao<RCColorControlUnit> dao = DaoFactory.getInstance().getDao(RCColorControlUnit.class);
 		dao.update(ledUnit);
 		RemoteLogger.performLog(LogPriority.INFORMATION, "Update existing led strip " + ledUnit.getName(),
@@ -120,7 +116,7 @@ public class WebLEDStripImpl extends AbstractUnitHandler implements IWebLEDStrip
 	}
 
 	@WebRequest(path = "delete", description = "Delete LED strip.")
-	public void delete(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
+	public void delete(@WebParam(name = "token") String token, @WebParam(name = "id") String id)
 			throws RemoteException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		IControllUnit unit = mCenter.getControlUnit(id);

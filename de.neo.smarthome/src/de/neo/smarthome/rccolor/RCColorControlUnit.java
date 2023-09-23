@@ -5,7 +5,7 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebLEDStrip.LEDMode;
-import de.neo.smarthome.gpio.GPIOSender;
+import de.neo.smarthome.switches.GPIOSender;
 
 @Domain(name = "ColorSetter")
 public class RCColorControlUnit extends AbstractControlUnit {

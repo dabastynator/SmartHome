@@ -19,23 +19,6 @@ public interface IControllUnit extends RemoteAble {
 	public String getName() throws RemoteException;
 
 	/**
-	 * Get description of the control unit.
-	 * 
-	 * @return description of unit
-	 * @throws RemoteException
-	 */
-	public String getDescription() throws RemoteException;
-
-	/**
-	 * Get the position of the control unit. the length of the array must be 3
-	 * (x, y and z).
-	 * 
-	 * @return position of unit
-	 * @throws RemoteException
-	 */
-	public float[] getPosition() throws RemoteException;
-
-	/**
 	 * Get ID of this unit.
 	 * 
 	 * @return id

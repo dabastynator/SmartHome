@@ -1,4 +1,4 @@
-package de.neo.smarthome.gpio;
+package de.neo.smarthome.switches;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,16 +6,16 @@ import java.util.Map;
 import de.neo.persist.annotations.Domain;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebSwitch.State;
+import de.neo.smarthome.switches.WebSwitchImpl.SwitchUnit;
 
 /**
  * @author sebastian
  *
  */
 @Domain(name = "InternetSwitch")
-public class GPIOControlUnit extends AbstractControlUnit {
+public class GPIOControlUnit extends SwitchUnit {
 
 	public static final String FAMILY_REGEX = "[01]{5}";
 

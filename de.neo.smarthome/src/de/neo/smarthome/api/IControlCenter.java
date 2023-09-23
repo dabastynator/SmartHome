@@ -7,7 +7,6 @@ import java.util.Map;
 import de.neo.persist.DaoException;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.controlcenter.CronJobTrigger;
 import de.neo.smarthome.user.UnitAccessHandler;
 
@@ -28,14 +27,6 @@ public interface IControlCenter {
 	 */
 	public void addControlUnit(IControllUnit controlUnit) throws RemoteException;
 
-	/**
-	 * Get the ground plot of the control center area.
-	 * 
-	 * @return ground plot
-	 * @throws RemoteException
-	 */
-	@WebRequest(path = "groundplot", description = "Get the ground plot of the control center area.")
-	public GroundPlot getGroundPlot() throws RemoteException;
 
 	/**
 	 * remove remote control unit.
@@ -99,18 +90,6 @@ public interface IControlCenter {
 		@WebField(name = "name")
 		private String mName;
 
-		@WebField(name = "description")
-		private String mDescription;
-
-		@WebField(name = "x")
-		private float mX;
-
-		@WebField(name = "y")
-		private float mY;
-
-		@WebField(name = "z")
-		private float mZ;
-
 		@WebField(name = "id")
 		private String mID;
 
@@ -120,38 +99,6 @@ public interface IControlCenter {
 
 		public void setName(String name) {
 			mName = name;
-		}
-
-		public String getDescription() {
-			return mDescription;
-		}
-
-		public void setDescription(String description) {
-			mDescription = description;
-		}
-
-		public float getX() {
-			return mX;
-		}
-
-		public void setX(float x) {
-			mX = x;
-		}
-
-		public float getY() {
-			return mY;
-		}
-
-		public void setY(float y) {
-			mY = y;
-		}
-
-		public float getZ() {
-			return mZ;
-		}
-
-		public void setZ(float z) {
-			mZ = z;
 		}
 
 		public String getID() {
@@ -165,10 +112,6 @@ public interface IControlCenter {
 		public void merge(BeanWeb webBean) {
 			mID = webBean.getID();
 			mName = webBean.getName();
-			mDescription = webBean.getDescription();
-			mX = webBean.getX();
-			mY = webBean.getY();
-			mZ = webBean.getZ();
 		}
 
 	}

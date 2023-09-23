@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 
 /**
@@ -35,7 +35,7 @@ public interface IWebInformationUnit extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "info", description = "Get specific information.")
-	public InformationEntryBean getInformation(@WebGet(name = "key") String key) throws RemoteException;
+	public InformationEntryBean getInformation(@WebParam(name = "key") String key) throws RemoteException;
 
 	public static class InformationBean implements Serializable {
 

@@ -8,10 +8,9 @@ import java.util.Map;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.controlcenter.ControlCenter;
 
 public abstract class AbstractControlUnit implements IControllUnit {
@@ -19,32 +18,16 @@ public abstract class AbstractControlUnit implements IControllUnit {
 	@Persist(name = "name")
 	protected String mName;
 
-	@Persist(name = "type")
-	protected String mDescription;
-
-	@Persist
-	protected float x, y, z;
-
 	@Persist(name = "id")
 	protected String mID;
 
 	@OneToMany(domainClass = Trigger.class, name = "Trigger")
 	protected List<Trigger> mTrigger = new ArrayList<Trigger>();
 
-	private IControlCenter mCenter;
+	protected ControlCenter mCenter;
 
 	public void setName(String name) {
 		mName = name;
-	}
-
-	public void setDescription(String description) {
-		mDescription = description;
-	}
-
-	public void setPosition(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
 	}
 
 	public void setId(String id) {
@@ -59,16 +42,6 @@ public abstract class AbstractControlUnit implements IControllUnit {
 	@Override
 	public String getName() throws RemoteException {
 		return mName;
-	}
-
-	@Override
-	public String getDescription() {
-		return mDescription;
-	}
-
-	@Override
-	public float[] getPosition() throws RemoteException {
-		return new float[] { x, y, z };
 	}
 
 	@Override
@@ -100,10 +73,6 @@ public abstract class AbstractControlUnit implements IControllUnit {
 		BeanWeb bean = new BeanWeb();
 		bean.setID(mID);
 		bean.setName(mName);
-		bean.setDescription(mDescription);
-		bean.setX(x);
-		bean.setY(y);
-		bean.setZ(z);
 		return bean;
 	}
 }

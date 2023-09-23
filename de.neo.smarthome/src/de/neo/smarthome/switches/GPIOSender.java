@@ -1,4 +1,4 @@
-package de.neo.smarthome.gpio;
+package de.neo.smarthome.switches;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

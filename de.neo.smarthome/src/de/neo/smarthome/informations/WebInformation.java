@@ -8,7 +8,7 @@ import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
 import de.neo.persist.DaoFactory;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IWebInformationUnit;
 
@@ -42,7 +42,7 @@ public class WebInformation implements IWebInformationUnit {
 
 	@Override
 	@WebRequest(path = "info", description = "Get specific information.")
-	public InformationEntryBean getInformation(@WebGet(name = "key") String key) throws RemoteException {
+	public InformationEntryBean getInformation(@WebParam(name = "key") String key) throws RemoteException {
 		InformationUnit information = mInformations.get(key);
 		if (information == null)
 			throw new RemoteException("Unknown information key '" + key + "'");

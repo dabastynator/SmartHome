@@ -22,18 +22,13 @@ import de.neo.smarthome.RemoteLogger.RemoteLogListener;
 import de.neo.smarthome.action.ActionControlUnit;
 import de.neo.smarthome.action.WebActionImpl;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.Script;
-import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.GroundPlot.Point;
-import de.neo.smarthome.api.GroundPlot.Wall;
+import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.CronJobTrigger;
 import de.neo.smarthome.controlcenter.WebTrigger;
-import de.neo.smarthome.gpio.GPIOControlUnit;
-import de.neo.smarthome.gpio.WebSwitchImpl;
 import de.neo.smarthome.informations.InformationUnit.InformationTrigger;
 import de.neo.smarthome.informations.InformationWeather;
 import de.neo.smarthome.informations.WebInformation;
@@ -41,10 +36,14 @@ import de.neo.smarthome.mediaserver.MediaControlUnit;
 import de.neo.smarthome.mediaserver.WebMediaServerImpl;
 import de.neo.smarthome.rccolor.RCColorControlUnit;
 import de.neo.smarthome.rccolor.WebLEDStripImpl;
+import de.neo.smarthome.switches.GPIOControlUnit;
+import de.neo.smarthome.switches.HassHandler;
+import de.neo.smarthome.switches.HassSwitchUnit;
+import de.neo.smarthome.switches.WebSwitchImpl;
 import de.neo.smarthome.user.UnitAccess;
 import de.neo.smarthome.user.User;
-import de.neo.smarthome.user.WebUser;
 import de.neo.smarthome.user.UserSessionHandler.UserSession;
+import de.neo.smarthome.user.WebUser;
 
 public class SmartHome {
 
@@ -56,7 +55,8 @@ public class SmartHome {
 
 	static {
 		mControlUnitFactory.add(new WebMediaServerImpl.MediaFactory());
-		mControlUnitFactory.add(new WebSwitchImpl.SwitchFactory());
+		mControlUnitFactory.add(new WebSwitchImpl.GPIOFactory());
+		mControlUnitFactory.add(new WebSwitchImpl.HassSwitchFactory());
 		mControlUnitFactory.add(new WebActionImpl.ActionFactory());
 		mControlUnitFactory.add(new WebLEDStripImpl.LEDStripFactory());
 		mControlUnitFactory.add(new WebUser.UserFactory());
@@ -86,6 +86,7 @@ public class SmartHome {
 				controlcenter.trigger(trigger);
 			}
 			controlcenter.schedule();
+			HassHandler.initialize(controlcenter);
 		} catch (IOException | IllegalArgumentException | DaoException e) {
 			System.err.println(
 					"Error parsing configuration: " + e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
@@ -96,15 +97,13 @@ public class SmartHome {
 	private static void setupXMLDao(File config) throws DaoException {
 		XMLFactoryBuilder builder = new XMLDaoFactory.XMLFactoryBuilder();
 		builder.registerDao(new XMLDao<ControlCenter>(ControlCenter.class));
-		builder.registerDao(new XMLDao<GroundPlot>(GroundPlot.class));
-		builder.registerDao(new XMLDao<Wall>(Wall.class));
-		builder.registerDao(new XMLDao<Point>(Point.class));
 		builder.registerDao(new XMLDao<User>(User.class));
 		builder.registerDao(new XMLDao<UserSession>(UserSession.class));
 		builder.registerDao(new XMLDao<UnitAccess>(UnitAccess.class));
 
 		builder.registerDao(new XMLDao<MediaControlUnit>(MediaControlUnit.class));
 		builder.registerDao(new XMLDao<GPIOControlUnit>(GPIOControlUnit.class));
+		builder.registerDao(new XMLDao<HassSwitchUnit>(HassSwitchUnit.class));
 		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
 		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
 

@@ -15,13 +15,11 @@ import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.Script;
-import de.neo.smarthome.api.GroundPlot;
 import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
+import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.informations.WebInformation;
 import de.neo.smarthome.user.UnitAccessHandler;
@@ -45,11 +43,14 @@ public class ControlCenter implements IControlCenter {
 	@OneToMany(domainClass = Trigger.class, name = "StartTrigger")
 	private List<Trigger> mStartUpTrigger = new ArrayList<>();
 
-	@Persist(name = "GroundPlot")
-	private GroundPlot mGround = new GroundPlot();
-
 	@Persist(name = "port")
 	private int mPort;
+	
+	@Persist(name = "hassToken")
+	private String mHassToken;
+	
+	@Persist(name = "hassUrl")
+	private String mHassUrl;
 
 	/**
 	 * List of all control units
@@ -99,12 +100,6 @@ public class ControlCenter implements IControlCenter {
 	}
 
 	@Override
-	@WebRequest(path = "groundplot", description = "Get the ground-plot for this control center.")
-	public GroundPlot getGroundPlot() {
-		return mGround;
-	}
-
-	@Override
 	public IControllUnit getControlUnit(String id) {
 		return mControlUnits.get(id);
 	}
@@ -150,9 +145,13 @@ public class ControlCenter implements IControlCenter {
 	public int getPort() {
 		return mPort;
 	}
-
-	public void setPort(int port) {
-		mPort = port;
+	
+	public String getHassToken() {
+		return mHassToken;
+	}
+	
+	public String getHassUrl() {
+		return mHassUrl;
 	}
 
 	public List<Trigger> getStartupTrigger() {

@@ -6,7 +6,7 @@ import de.neo.persist.DaoException;
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.remote.web.WebGet;
+import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IControlCenter.BeanWeb;
 
@@ -24,7 +24,7 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "list", description = "List all led strips.", genericClass = BeanLEDStrips.class)
-	public ArrayList<BeanLEDStrips> getLEDStrips(@WebGet(name = "token") String token) throws RemoteException;
+	public ArrayList<BeanLEDStrips> getLEDStrips(@WebParam(name = "token") String token) throws RemoteException;
 
 	/**
 	 * Set color for specified led strip. Red, green and blue must between 0 and
@@ -39,8 +39,8 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "setcolor", description = "Set color for specified led strip. Red, green and blue must between 0 and 255.")
-	public BeanLEDStrips setColor(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "red") int red, @WebGet(name = "green") int green, @WebGet(name = "blue") int blue)
+	public BeanLEDStrips setColor(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "red") int red, @WebParam(name = "green") int green, @WebParam(name = "blue") int blue)
 			throws RemoteException;
 
 	/**
@@ -54,8 +54,8 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "setmode", description = "Set mode for specified led strip. 'NormalMode' simply shows the color, 'PartyMode' shows the color elements with strobe effect.")
-	public BeanLEDStrips setMode(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "mode") LEDMode mode) throws RemoteException;
+	public BeanLEDStrips setMode(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "mode") LEDMode mode) throws RemoteException;
 
 	/**
 	 * Create new LED strip
@@ -72,9 +72,9 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "create", description = "Create new LED strip.")
-	public BeanLEDStrips createNew(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanLEDStrips createNew(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, DaoException;
 
 	/**
@@ -92,9 +92,9 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "update", description = "Update existing LED strip.")
-	public BeanLEDStrips updateExisting(@WebGet(name = "token") String token, @WebGet(name = "id") String id,
-			@WebGet(name = "name") String name, @WebGet(name = "description") String description,
-			@WebGet(name = "x") float x, @WebGet(name = "y") float y, @WebGet(name = "z") float z)
+	public BeanLEDStrips updateExisting(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, @WebParam(name = "description") String description,
+			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
 			throws RemoteException, DaoException;
 
 	/**
@@ -106,7 +106,7 @@ public interface IWebLEDStrip extends RemoteAble {
 	 * @throws DaoException
 	 */
 	@WebRequest(path = "delete", description = "Delete LED strip.")
-	public void delete(@WebGet(name = "token") String token, @WebGet(name = "id") String id)
+	public void delete(@WebParam(name = "token") String token, @WebParam(name = "id") String id)
 			throws RemoteException, DaoException;
 
 	public static class BeanLEDStrips extends BeanWeb {
