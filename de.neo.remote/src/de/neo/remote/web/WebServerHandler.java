@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -137,10 +138,26 @@ public class WebServerHandler implements HttpHandler {
 		methodPath = methodPath.substring(mPath.length());
 		if (methodPath.startsWith("/"))
 			methodPath = methodPath.substring(1);
+		
 		String resultString = "";
 
 		try {
 			Map<String, String> paramMap = queryToMap(exchange.getRequestURI().getQuery());
+			if ("POST".equals(exchange.getRequestMethod()))
+			{
+				StringBuilder sb = new StringBuilder();
+	            InputStream ios = exchange.getRequestBody();
+	            int i;
+	            while ((i = ios.read()) != -1) {
+	                sb.append((char) i);
+	            }
+	            JSONObject json = (JSONObject) new JSONParser().parse(sb.toString());
+	            for (Object key: json.keySet())
+	            {
+	            	Object value = json.get(key);
+	            	paramMap.put(key.toString(), value.toString());
+	            }
+			}
 			if (mToken != null && mToken.length() > 0)
 				if (!mToken.equals(paramMap.get(mTokenParam)))
 					throw new RemoteException("Access denied");

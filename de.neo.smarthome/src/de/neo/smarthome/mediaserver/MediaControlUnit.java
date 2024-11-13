@@ -144,7 +144,12 @@ public class MediaControlUnit extends AbstractControlUnit {
 		if (!location.endsWith(File.separator))
 			location += File.separator;
 		List<String> list = new ArrayList<String>();
-		for (String str : new File(location).list())
+		File directory = new File(location);
+		if (!directory.isDirectory())
+		{
+			throw new RemoteException("Invalid path");
+		}
+		for (String str : directory.list())
 			if (new File(location + str).isDirectory())
 				if (str.length() > 0 && str.charAt(0) != '.')
 					list.add(str);
