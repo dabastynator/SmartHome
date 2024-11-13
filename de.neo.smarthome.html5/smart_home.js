@@ -15,14 +15,8 @@ class APIHandler {
 
 	call(method, callback = null, parameters = {})
 	{
-		var separator = '?';
 		var url = this.endpoint + '/' + this.name + '/' + method;
 		parameters = {...this.defaultParameter, ...parameters }
-		for (var key in parameters)
-		{
-			url = url + separator + key + "=" + parameters[key];
-			separator = '&';
-		}
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.onreadystatechange = function() { 
 			if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
@@ -34,8 +28,8 @@ class APIHandler {
 				}				
 			}				
 		}
-		xmlHttp.open("GET", url, true);
-		xmlHttp.send(null);
+		xmlHttp.open("POST", url, true);
+		xmlHttp.send(JSON.stringify(parameters));
 	}
 }
 
