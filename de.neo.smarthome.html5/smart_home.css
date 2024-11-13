@@ -72,10 +72,6 @@ body {
 	transition: 0.2s;
 }
 
-.link {
-	cursor:pointer;
-}
-
 .line {
 	width: 100%;
 	padding: 10px 0;
@@ -191,27 +187,35 @@ label, .label{
 	height: 40px;
 }
 
-button{
+.button{
 	width: 160px;
 	cursor:pointer;
 }
 
-button:hover, input:focus, select:focus{
+.button:hover, input:focus, select:focus{
 	border: 1px solid #888;
 	box-shadow: inset 0 0 10px #888;
 	transition: all 0.15s;
 }
 
-button:active {
+.switch:hover {
+	border: 2px solid #888;
+}
+
+.button:active {
 	border: 1px solid #eee;
 	background: #eee;
 	color: black;
 	transition: all 0.15s;
 }
 
-.file{
-	padding: 2px;
+.file{		
+	padding: 6px;
 	border-bottom: 1px solid #444;
+	width: 100%;
+	margin: 0px;
+	text-align: left;
+	cursor: pointer;
 }
 
 .dir{

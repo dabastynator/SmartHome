@@ -197,11 +197,11 @@ function refreshSwitches(){
 			for (var i = 0; i < switches.length; i++) {
 				var s = switches[i];
 				if (s.state == "ON") {
-					content += '<div onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on" style="min-width: 140px">';
+					content += '<button onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on" style="min-width: 140px">';
 				} else {
-					content += '<div onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off" style="min-width: 140px">';
+					content += '<button onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off" style="min-width: 140px">';
 				}
-				content += s.name + "</div>";
+				content += s.name + "</button>";
 			}
 			htmlSwitches.innerHTML = content;
 			align();
@@ -287,12 +287,12 @@ function refreshMediaServer()
 				var m = media[i];
 				if (m.id == mMediaCenter)
 				{
-					content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
+					content += '<button onclick="mediaClick(\'' + m.id + '\')" class="switch on">';
 					title = m.name + ' - Smart Home Console';
 				} else {
-					content += '<div onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
+					content += '<button onclick="mediaClick(\'' + m.id + '\')" class="switch off">';
 				}
-				content += m.name + "</div>";
+				content += m.name + "</button>";
 			}
 			if (content == '')
 			{
@@ -371,17 +371,18 @@ function refreshFiles(){
 		if (checkResult(files, htmlFiles)) {
 			var content = "";
 			if (mPath != ''){
-				content = '<div onclick="directoryClick(\'<->\')" class="file dir link"><table width="100%"><tr>';
-				content += '<td><img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
-				content += '</tr></table></div>';
+				content = '<button onclick="directoryClick(\'<->\')" class="file dir link">';
+				content += '<table width="100%"><tr><td>';
+				content += '<img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
+				content += '</tr></table></button>';
 			}
 			files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
 			for (var i = 0; i < files.length; i++) {
 				var f = files[i];
 				if (f.filetype == "Directory") {
-					content += '<div class="file dir">';
+					content += '<button class="file dir">';
 				} else {
-					content += '<div class="file">';
+					content += '<button class="file">';
 				}
 				content += '<table width="100%"><tr>';
 				if (f.filetype == "Directory") {
@@ -392,7 +393,7 @@ function refreshFiles(){
 				content += '<td align="right" width="70px">';
 				content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
-				content += '</td></tr></table></div>';
+				content += '</td></tr></table></button>';
 			}
 			htmlFiles.innerHTML = content;
 		}
@@ -437,11 +438,11 @@ function showPlsContent(pls){
 			title.innerHTML = "Playlist content";
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<div class="file"><table width="100%"><tr>';
+				content += '<button class="file"><table width="100%"><tr>';
 				content += '<td width="90%" onclick="mFile=\'' + p.name + '\';playPath(\'' + p.path + '\')" class="link">' + p.name + "</td>";
 				content += '<td align="right">';
 				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
-				content += '</td></tr></table></div>';
+				content += '</td></tr></table></button>';
 			}
 			htmlPlsContent.innerHTML = content;
 			showDialog('playlist');
@@ -457,12 +458,12 @@ function refreshPlaylist(){
 			result.sort(function(a, b){return a.name.localeCompare(b.name);});
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<div class="file"><table width="100%"><tr>';
+				content += '<button class="file"><table width="100%"><tr>';
 				content += '<td width="90%" onclick="plsClick(\'' + p.name + '\')" class="link">' + p.name + "</td>";
 				content += '<td align="right">';
 				//content += '<img src="img/play.png" height="32px"/ class="link" onclick="plsClick(\'' + p.name + '\')">';
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
-				content += '</td></tr></table></div>';
+				content += '</td></tr></table></button>';
 			}
 			htmlPls.innerHTML = content;
 		}		
