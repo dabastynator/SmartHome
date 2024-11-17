@@ -3,13 +3,16 @@ package de.neo.remote.web;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -145,12 +148,14 @@ public class WebServerHandler implements HttpHandler {
 			Map<String, String> paramMap = queryToMap(exchange.getRequestURI().getQuery());
 			if ("POST".equals(exchange.getRequestMethod()))
 			{
-				StringBuilder sb = new StringBuilder();
-	            InputStream ios = exchange.getRequestBody();
-	            int i;
-	            while ((i = ios.read()) != -1) {
-	                sb.append((char) i);
-	            }
+				 int bufferSize = 1024;
+				 char[] buffer = new char[bufferSize];
+				 StringBuilder sb = new StringBuilder();
+				 Reader in = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+				 for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
+					 sb.append(buffer, 0, numRead);
+				 }
+
 	            JSONObject json = (JSONObject) new JSONParser().parse(sb.toString());
 	            for (Object key: json.keySet())
 	            {

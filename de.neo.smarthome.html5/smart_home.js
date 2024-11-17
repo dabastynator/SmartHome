@@ -33,6 +33,7 @@ class APIHandler {
 	}
 }
 
+const Separator = "/";
 
 var apiTrigger = new APIHandler();
 var apiMediaServer = new APIHandler();
@@ -46,6 +47,7 @@ var mTimeTriggerList;
 var mTimeTrigger;
 var mUserList;
 var mSelectedUser;
+var mFiles;
 
 var htmlFiles;
 var htmlPls;
@@ -298,23 +300,31 @@ function refreshMediaServer()
 	}, {'id': ''});
 }
 
-function directoryClick(dir){
-	if (dir == '<->'){
-		if (mPath.lastIndexOf('<->') >= 1)
-			mPath = mPath.substring(0, mPath.lastIndexOf('<->'));
+function directoryClick(index){	
+	if (index == Separator)
+	{
+		if (mPath.lastIndexOf(Separator) >= 1)
+			mPath = mPath.substring(0, mPath.lastIndexOf(Separator));
 		else
 			mPath = '';
-	}else if (mPath == '')
-		mPath = dir;
+	}
+	else if (mPath == '')
+	{
+		dir = mFiles[index];
+		mPath = dir.name;
+	}
 	else
-		mPath = mPath + '<->' + dir;
+	{
+		dir = mFiles[index];
+		mPath = mPath + Separator + dir.name;
+	}
 	refreshFiles();
 }
 
-function play(file){
-	mFile = file;
+function play(index){
+	mFile = mFiles[index].name;
 	if (mPath != '' && mPath != null)
-		file = mPath + '<->' + file; 
+		file = mPath + Separator + mFile; 
 	playPath(file);
 }
 
@@ -341,7 +351,7 @@ function addFileToPls(path, file){
 	mFile = file;	
 	if (path != null && path != '')
 	{
-		mFile = path + '<->' + file;
+		mFile = path + Separator + file;
 	}
 	apiMediaServer.call('playlist_extend', function(result)
 	{
@@ -365,12 +375,13 @@ function refreshFiles(){
 		if (checkResult(files, htmlFiles)) {
 			var content = "";
 			if (mPath != ''){
-				content = '<button onclick="directoryClick(\'<->\')" class="file dir link">';
+				content = '<button onclick="directoryClick(\'' + Separator + '\')" class="file dir link">';
 				content += '<table width="100%"><tr><td>';
-				content += '<img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(/<->/g, ' | ') + '</td>';
+				content += '<img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(Separator, ' | ') + '</td>';
 				content += '</tr></table></button>';
 			}
 			files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
+			mFiles = files;
 			for (var i = 0; i < files.length; i++) {
 				var f = files[i];
 				if (f.filetype == "Directory") {
@@ -380,12 +391,12 @@ function refreshFiles(){
 				}
 				content += '<table width="100%"><tr>';
 				if (f.filetype == "Directory") {
-					content += '<td class="link" onclick="directoryClick(\'' + f.name + '\')" >' + f.name + '</td>';
+					content += '<td class="link" onclick="directoryClick(' + i + ')" >' + f.name + '</td>';
 				} else {
-					content += '<td class="link" onclick="play(\'' + f.name + '\')" >' + f.name + '</td>';
+					content += '<td class="link" onclick="play(' + i + ')" >' + f.name + '</td>';
 				}
 				content += '<td align="right" width="70px">';
-				content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(\'' + f.name + '\')">';
+				content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(' + i + ')">';
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
 				content += '</td></tr></table></button>';
 			}
