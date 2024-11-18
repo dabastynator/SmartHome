@@ -337,14 +337,14 @@ function playPath(file){
 	}, {'file': file});	
 }
 
-function extendPls(pls, file){
+function extendPls(pls){
 	hideDialog('playlist');
 	apiMediaServer.call('playlist_extend', function(result)
 	{
 		if (checkResult(result)) {
 			showMessage('Playlist extended', 'Playlist <b>' + pls + '</b> was extended.');	
 		}
-	}, {'playlist': pls, 'item': file});	
+	}, {'playlist': pls, 'item': mFile});
 }
 
 function addFileToPls(path, file){
@@ -353,18 +353,19 @@ function addFileToPls(path, file){
 	{
 		mFile = path + Separator + file;
 	}
-	apiMediaServer.call('playlist_extend', function(result)
+	apiMediaServer.call('playlists', function(result)
 	{
-		if (checkResult(result, htmlPlsContent)) {
+		if (checkResult(result)) {
 			var content = "";
 			var title = document.getElementById('playlist_title');
 			title.innerHTML = "Select playlist";
-			pls.sort(function(a, b){return a.name.localeCompare(b.name);});
-			for (var i = 0; i < pls.length; i++) {
-				var p = pls[i];
-				content += '<div onclick="extendPls(\'' + p.name + '\', \'' + mFile + '\')" class="file link">' + p.name + "</div>";
+			result.sort(function(a, b){return a.name.localeCompare(b.name);});
+			for (var i = 0; i < result.length; i++) {
+				var p = result[i];
+				content += '<div onclick="extendPls(\'' + p.name + '\')" class="file link">' + p.name + "</div>";
 			}
 			htmlPlsContent.innerHTML = content;
+			showDialog('playlist');
 		}
 	});
 }

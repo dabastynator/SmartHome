@@ -32,11 +32,11 @@ body {
 :root {
 	--offset: 8px;
 	--top: 60px;
-	--bottom: 50px;
+	--bottom: 55px;
 	--left: 306px;
 	--right: 400px;
 	--nav: 60px;
-	--nav_w: 130px;
+	--nav_w: 135px;
 }
 
 #east, #south, #west, #north, #center, #border_navigation{
