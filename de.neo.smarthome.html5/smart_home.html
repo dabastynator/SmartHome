@@ -19,17 +19,16 @@
 	<div id="mediaserver" style="float: left;">No mediaserver</div>	
 	<img id="btn_settings" src="img/settings.png" class="link setting_btn" onclick="initSettings();showDialog('settings');"/>
 	<img id="btn_scripts" src="img/code.png" class="link setting_btn" onclick="showScripts();"/>
-	<img id="btn_timetrigger" src="img/timer.png" class="link setting_btn" onclick="showTimer();"/>
 	<img id="btn_user" src="img/user.png" class="link setting_btn" onclick="showUser();"/>
 </div >
 
-<div id="south" class="card">
+<div id="south" class="card" style="white-space: nowrap">
 	<img class="player_btn" src="img/stop.png" onclick="playerAction('stop')"/>
 	<img class="player_btn" src="img/pause.png" onclick="playerAction('play_pause')"/>
 	<img class="player_btn" src="img/prev.png" onclick="playerAction('previous')"/>
 	<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
-	<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()"/>
-	<div id="player_content" style="float: left; margin-left: 20px;">
+	<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
+	<div id="player_content" style="display: inline;">
 		Nothing played
 	</div>
 </div>
@@ -119,30 +118,6 @@
 		<footer>
 			<button class="button" onclick="hideDialog('accesslist');">Close</button>
 		</footer>
-	</div>
-</div>
-
-<!-- TimeTrigger -->
-<div id="timetrigger" class="container">
-	<div id="content_timetrigger" class="dialog use_space" style="width: 500px; height: 300px">
-		<header class="headline" id="timetrigger_title">TimeTrigger</header>
-		<main id="timetrigger_content">Content</main>
-		<footer><button class="button" onclick="hideDialog('timetrigger');">Close</button></footer>
-	</div>
-</div>
-
-<div id="timetrigger_edit" class="container">
-	<div id="content_timetrigger_edit" class="dialog" style="width: 550px">
-		<div class="headline">Edit TimeTrigger</div>
-		<div class="label" style="width:100%">Enabled
-			<input type="checkbox" id="tt_enabled" placeholder="* * * *"/><label class="cbox right" for="tt_enabled">Enabled</label>
-		</div>
-		<label for="tt_trigger">Trigger</label> <input id="tt_trigger" placeholder="trigger_id"/>
-		<label for="tt_cron">Cron Expression</label> <input id="tt_cron" placeholder="* * * *"/>
-		<div style="text-align:right;">
-			<button class="button" onclick="applyTimeTrigger();">OK</button>
-			<button class="button" onclick="hideDialog('timetrigger_edit');">Cancel</button>
-		</div>
 	</div>
 </div>
 

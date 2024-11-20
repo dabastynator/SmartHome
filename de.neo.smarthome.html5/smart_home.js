@@ -43,8 +43,6 @@ var apiUser = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
-var mTimeTriggerList;
-var mTimeTrigger;
 var mUserList;
 var mSelectedUser;
 var mFiles;
@@ -56,7 +54,6 @@ var htmlSwitches;
 var htmlScripts;
 var htmlPlayInfo;
 var htmlMediaServer;
-var htmlTimeTrigger;
 var htmlUserList;
 
 function initialize() {
@@ -67,7 +64,6 @@ function initialize() {
 	htmlScripts = document.getElementById('scripts_content');
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
-	htmlTimeTrigger = document.getElementById('timetrigger_content');
 	htmlUserList = document.getElementById('userlist_content');
 
 	readSetting();
@@ -155,7 +151,6 @@ function setIsAdmin(isAdmin)
 		adminVisible = 'block';
 	}
 	document.getElementById('btn_scripts').style.display = adminVisible;
-	document.getElementById('btn_timetrigger').style.display = adminVisible;
 	document.getElementById('btn_user').style.display = adminVisible;
 }
 
@@ -245,14 +240,12 @@ function refreshPlayer(){
 	getPlaying(function(playing){
 		var text = '';
 		if (playing != null){
-			text += '<div style="float: right">';
 			if (playing.artist != null && playing.artist != '')
 				text += playing.artist + '<br/>';
 			if (playing.title != null && playing.title != '')
 				text += playing.title + '<br/>';
 			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
 				text += playing.file + '<br/>';
-			text += '</div>';
 		} else {
 			text += 'Nothing played';
 		}
@@ -536,56 +529,6 @@ function deleteScript(trigger){
 			showScripts();
 		}
 	}, {'trigger': trigger});
-}
-
-/**********************
-***** TimeTrigger *****
-**********************/
-
-function showTimer(){
-	apiTrigger.call('list_timetrigger', function(result)
-	{
-		if (checkResult(result)) {
-			var content = "";
-			mTimeTriggerList = result;
-			for (var i = 0; i < result.length; i++) {
-				var p = result[i];
-				var disabled = '';
-				if (!p.enabled){
-					disabled = ' disabled';
-				}
-				content += '<div class="line' + disabled + '">' + p.trigger_id;
-				content += '<img src="img/edit.png" class="icon" onclick="editTimeTrigger(\'' + i + '\')"></div>';
-			}
-			htmlTimeTrigger.innerHTML = content;
-			showDialog('timetrigger');
-		}
-	});
-}
-
-function editTimeTrigger(index){
-	mTimeTrigger = mTimeTriggerList[index];
-	document.getElementById('tt_enabled').checked = mTimeTrigger.enabled;
-	document.getElementById('tt_trigger').value = mTimeTrigger.trigger_id;
-	document.getElementById('tt_cron').value = mTimeTrigger.crone_job;
-	showDialog('timetrigger_edit');
-}
-
-function applyTimeTrigger(){
-	var enabled = document.getElementById('tt_enabled');
-	var trigger = document.getElementById('tt_trigger');
-	var cron = document.getElementById('tt_cron');
-	apiTrigger.call('set_timetrigger_properties', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('timetrigger_edit');
-			showTimer();
-		}
-	}, {'id': mTimeTrigger.id, 'trigger': trigger.value, 'cron': cron.value});
-	apiTrigger.call('set_timetrigger_enabled', function(result)
-	{
-		checkResult(result);
-	}, {'id': mTimeTrigger.id, 'enabled': enabled.checked});
 }
 
 /***************
