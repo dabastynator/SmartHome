@@ -34,7 +34,13 @@ public class UnitAccessHandler {
 					access.setUser(userDao.loadById(access.getUserId()));
 				}
 				if (access.getUnit() == null) {
-					access.setUnit(mCenter.getControlUnit(access.getUnitId()));
+					IControllUnit unit = mCenter.getControlUnit(access.getUnitId());
+					if (unit != null)
+					{
+						access.setUnit(unit);
+					} else {
+						RemoteLogger.performLog(LogPriority.ERROR, "Unknown access unit: " + access.getUnitId(), "UnitAccess");
+					}
 				}
 				UserAccessList accessList = getAccessListByUser(access.getUser());
 				mCenter.getControlUnits().get(access.getUnitId());
