@@ -11,11 +11,12 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.api.IWebInformationUnit;
+import de.neo.smarthome.switches.HassHandler;
 
 public class WebInformation implements IWebInformationUnit {
 
 	private static final Class<?>[] InformationClasses = new Class<?>[] { InformationTime.class,
-			InformationWeather.class };
+		InformationWeather.class, InformationHass.class };
 
 	private Map<String, InformationUnit> mInformations = new HashMap<>();
 
@@ -32,17 +33,17 @@ public class WebInformation implements IWebInformationUnit {
 	public ArrayList<InformationBean> getInformations() throws RemoteException {
 		ArrayList<InformationBean> result = new ArrayList<>();
 		for (InformationUnit i : mInformations.values()) {
-			InformationBean bean = new InformationBean();
-			bean.mKey = i.getKey();
-			bean.mDescription = i.getDescription();
-			result.add(bean);
+			InformationBean entry = i.getInformationEntry();
+			entry.mKey = i.getKey();
+			entry.mType = i.getType();
+			result.add(entry);
 		}
 		return result;
 	}
 
 	@Override
 	@WebRequest(path = "info", description = "Get specific information.")
-	public InformationEntryBean getInformation(@WebParam(name = "key") String key) throws RemoteException {
+	public InformationBean getInformation(@WebParam(name = "key") String key) throws RemoteException {
 		InformationUnit information = mInformations.get(key);
 		if (information == null)
 			throw new RemoteException("Unknown information key '" + key + "'");
@@ -58,6 +59,7 @@ public class WebInformation implements IWebInformationUnit {
 				}
 			}
 		}
+		HassHandler.setInformations(mInformations);
 	}
 
 }

@@ -10,22 +10,38 @@ import de.neo.remote.web.WebProxyBuilder;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.controlcenter.ControlCenter;
+import de.neo.smarthome.informations.InformationHass;
+import de.neo.smarthome.informations.InformationUnit;
 import de.neo.smarthome.switches.HassAPI.HassEntity;
 
 public class HassHandler implements Runnable {
 
 	public static int RefreshIntervalMS = 2000;
 	
+	private static HassHandler Handler = new HassHandler();
+	
 	public static void initialize(ControlCenter center){
-		HassHandler handler = new HassHandler(center);
-		handler.startThread();
+		Handler.setCenter(center);
+		Handler.startThread();
+	}
+	
+	public static void setInformations(Map<String, InformationUnit> informations) {
+		for(InformationUnit info: informations.values())
+		{
+			if(info instanceof InformationHass)
+			{
+				InformationHass hassInfo = (InformationHass) info;
+				Handler.mHassInformations.put(hassInfo.hassId(), hassInfo);
+			}
+		}
 	}
 	
 	private ControlCenter mCenter;
 	private HassAPI mHassAPI;
 	private String mAuth;
+	private Map<String, InformationHass> mHassInformations = new HashMap<>();
 
-	public HassHandler(ControlCenter center) {
+	private void setCenter(ControlCenter center) {
 		mCenter = center;
 		mHassAPI = new WebProxyBuilder().setEndPoint(mCenter.getHassUrl()).setInterface(HassAPI.class).create();
 		mAuth = "Bearer " + mCenter.getHassToken();
@@ -38,6 +54,7 @@ public class HassHandler implements Runnable {
 				Thread.sleep(RefreshIntervalMS);
 				try {
 					Map<String, HassSwitchUnit> hassSwitches = new HashMap<String, HassSwitchUnit>();
+					
 					for (IControllUnit unit: mCenter.getControlUnits().values()) {
 						if(unit instanceof HassSwitchUnit) {
 							HassSwitchUnit hassSwitch =  (HassSwitchUnit)unit;
@@ -50,6 +67,10 @@ public class HassHandler implements Runnable {
 						HassSwitchUnit hassSwitch = hassSwitches.get(e.id);
 						if(hassSwitch != null) {
 							hassSwitch.setStateIntern(e.state);
+						}
+						InformationHass info = mHassInformations.get(e.id);
+						if(info != null) {
+							info.setState(e.state);
 						}
 					}
 				} catch (RemoteException e) {

@@ -29,6 +29,7 @@ import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.controlcenter.CronJobTrigger;
 import de.neo.smarthome.controlcenter.WebTrigger;
+import de.neo.smarthome.informations.InformationHass;
 import de.neo.smarthome.informations.InformationUnit.InformationTrigger;
 import de.neo.smarthome.informations.InformationWeather;
 import de.neo.smarthome.informations.WebInformation;
@@ -115,6 +116,7 @@ public class SmartHome {
 
 		builder.registerDao(new XMLDao<InformationWeather>(InformationWeather.class));
 		builder.registerDao(new XMLDao<InformationTrigger>(InformationTrigger.class));
+		builder.registerDao(new XMLDao<InformationHass>(InformationHass.class));
 
 		DaoFactory.initiate(builder.setXmlFile(config).setFlushOnChange(true));
 	}

@@ -35,33 +35,21 @@ public interface IWebInformationUnit extends RemoteAble {
 	 * @throws RemoteException
 	 */
 	@WebRequest(path = "info", description = "Get specific information.")
-	public InformationEntryBean getInformation(@WebParam(name = "key") String key) throws RemoteException;
+	public InformationBean getInformation(@WebParam(name = "key") String key) throws RemoteException;
 
 	public static class InformationBean implements Serializable {
 
-		private static final long serialVersionUID = -5087796530525333429L;
-
-		@WebField(name = "key")
-		public String mKey;
-
-		@WebField(name = "description")
-		public String mDescription;
-	}
-
-	public static class InformationEntryBean implements Serializable {
-
 		private static final long serialVersionUID = -5641533643847316616L;
 
-		public InformationEntryBean() {
-			mClass = getClass().getName();
-		}
-
-		@WebField(name = "class")
-		private String mClass;
-
+		@WebField(name = "type")
+		public String mType;
+		
+		@WebField(name = "key")
+		public String mKey;
+		
 	}
 
-	public static class InformationEntryTime extends InformationEntryBean {
+	public static class InformationEntryTime extends InformationBean {
 
 		@WebField(name = "milliseconds")
 		public long mMilliseconds;
@@ -71,7 +59,7 @@ public interface IWebInformationUnit extends RemoteAble {
 
 	}
 
-	public static class InformationEntryWeather extends InformationEntryBean {
+	public static class InformationEntryWeather extends InformationBean {
 
 		public enum WeatherSun {
 			Day, Night
@@ -91,5 +79,20 @@ public interface IWebInformationUnit extends RemoteAble {
 
 		@WebField(name = "celsius")
 		public double mCelsius;
+	}
+	
+	public static class InformationEntryHass extends InformationBean {
+		
+		@WebField(name = "name")
+		public String mName;
+		
+		@WebField(name = "description")
+		public String mDescription;
+		
+		@WebField(name = "id")
+		public String mId;
+		
+		@WebField(name = "state")
+		public String mState;
 	}
 }

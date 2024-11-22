@@ -18,7 +18,7 @@ import de.neo.persist.annotations.OnLoad;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
+import de.neo.smarthome.api.IWebInformationUnit.InformationBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryWeather.WeatherSun;
 import de.neo.smarthome.cronjob.CronScheduler;
@@ -119,7 +119,7 @@ public class InformationWeather extends InformationUnit {
 	}
 
 	@Override
-	public InformationEntryBean getInformationEntry() {
+	public InformationBean getInformationEntry() {
 		return mWeather;
 	}
 

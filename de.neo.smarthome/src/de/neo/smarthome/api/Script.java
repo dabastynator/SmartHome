@@ -11,7 +11,7 @@ import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
+import de.neo.smarthome.api.IWebInformationUnit.InformationBean;
 
 @Domain
 public class Script {
@@ -117,7 +117,7 @@ public class Script {
 	}
 
 	private void fillMapByInformation(Map<String, String> map, String key) throws RemoteException {
-		InformationEntryBean info = mCenter.getInformationHandler().getInformation(key);
+		InformationBean info = mCenter.getInformationHandler().getInformation(key);
 		for (Field f : info.getClass().getDeclaredFields()) {
 			WebField annotation = f.getAnnotation(WebField.class);
 			if (annotation != null) {

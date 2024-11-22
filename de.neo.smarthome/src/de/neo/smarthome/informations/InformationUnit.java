@@ -6,7 +6,7 @@ import java.util.List;
 import de.neo.persist.annotations.Domain;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
-import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
+import de.neo.smarthome.api.IWebInformationUnit.InformationBean;
 
 public abstract class InformationUnit {
 
@@ -14,10 +14,14 @@ public abstract class InformationUnit {
 	protected List<InformationTrigger> mTrigger = new ArrayList<>();
 
 	public abstract String getKey();
+	
+	public String getType() {
+		return getKey();
+	}
 
 	public abstract String getDescription();
 
-	public abstract InformationEntryBean getInformationEntry();
+	public abstract InformationBean getInformationEntry();
 
 	@Domain
 	public static class InformationTrigger {

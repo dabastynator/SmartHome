@@ -2,7 +2,7 @@ package de.neo.smarthome.informations;
 
 import java.util.Date;
 
-import de.neo.smarthome.api.IWebInformationUnit.InformationEntryBean;
+import de.neo.smarthome.api.IWebInformationUnit.InformationBean;
 import de.neo.smarthome.api.IWebInformationUnit.InformationEntryTime;
 
 public class InformationTime extends InformationUnit {
@@ -18,7 +18,7 @@ public class InformationTime extends InformationUnit {
 	}
 
 	@Override
-	public InformationEntryBean getInformationEntry() {
+	public InformationBean getInformationEntry() {
 		InformationEntryTime entry = new InformationEntryTime();
 		entry.mMilliseconds = System.currentTimeMillis();
 		entry.mExtended = new Date().toString();
