@@ -9,7 +9,6 @@ import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.user.User;
 import de.neo.smarthome.user.UserSessionHandler.SessionType;
 

@@ -15,7 +15,6 @@ import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
-import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.IWebMediaServer;
 import de.neo.smarthome.api.PlayerException;
@@ -28,7 +27,7 @@ import de.neo.smarthome.user.UserSessionHandler;
 
 public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMediaServer {
 
-	public WebMediaServerImpl(IControlCenter center) {
+	public WebMediaServerImpl(ControlCenter center) {
 		super(center);
 	}
 

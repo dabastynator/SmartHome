@@ -2,7 +2,6 @@ package de.neo.smarthome.api;
 
 import de.neo.remote.rmi.RemoteAble;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.controlcenter.ControlCenter;
 
 /**

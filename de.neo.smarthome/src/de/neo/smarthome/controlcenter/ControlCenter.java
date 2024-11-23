@@ -17,7 +17,6 @@ import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Script;
 import de.neo.smarthome.api.Trigger;
@@ -30,7 +29,7 @@ import de.neo.smarthome.user.UnitAccessHandler;
  * @author sebastian
  */
 @Domain
-public class ControlCenter implements IControlCenter {
+public class ControlCenter {
 
 	@OneToMany(domainClass = Script.class, name = "Script")
 	private List<Script> mScripts = Collections.synchronizedList(new ArrayList<Script>());
@@ -57,6 +56,9 @@ public class ControlCenter implements IControlCenter {
 	 */
 	private Map<String, IControllUnit> mControlUnits = Collections
 			.synchronizedMap(new HashMap<String, IControllUnit>());
+	
+	private List<IControllUnit> mControlUnitList = Collections
+			.synchronizedList(new ArrayList<IControllUnit>());
 
 	private EventWorker mEventWorker = new EventWorker(this);
 
@@ -75,12 +77,12 @@ public class ControlCenter implements IControlCenter {
 			trigger.setControlCenter(this);
 	}
 
-	@Override
 	public void addControlUnit(IControllUnit controlUnit) {
 		try {
 			controlUnit.setControlCenter(this);
 			String id = controlUnit.getID();
 			mControlUnits.put(id, controlUnit);
+			mControlUnitList.add(controlUnit);
 			RemoteLogger.performLog(LogPriority.INFORMATION,
 					"Add " + mControlUnits.size() + ". control unit: " + controlUnit.getName() + " (" + id + ")",
 					"Controlcenter");
@@ -89,22 +91,20 @@ public class ControlCenter implements IControlCenter {
 		}
 	}
 
-	@Override
 	public void removeControlUnit(IControllUnit controlUnit) {
 		try {
 			mControlUnits.remove(controlUnit.getID());
+			mControlUnitList.remove(controlUnit);
 		} catch (RemoteException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, "Could not remove control unit: " + e.getMessage(), "");
 
 		}
 	}
 
-	@Override
 	public IControllUnit getControlUnit(String id) {
 		return mControlUnits.get(id);
 	}
 
-	@Override
 	public int trigger(Trigger trigger) {
 		int eventCount = 0;
 		Script script = mScriptMap.get(trigger.getTriggerID());
@@ -125,7 +125,6 @@ public class ControlCenter implements IControlCenter {
 		return eventCount;
 	}
 
-	@Override
 	public Map<String, IControllUnit> getControlUnits() {
 		return mControlUnits;
 	}
@@ -167,17 +166,14 @@ public class ControlCenter implements IControlCenter {
 		mAccessHandler.initialize();
 	}
 
-	@Override
 	public List<Script> getScripts() {
 		return mScripts;
 	}
 
-	@Override
 	public Script getScript(String id) {
 		return mScriptMap.get(id);
 	}
 
-	@Override
 	public void addScript(Script script) throws DaoException {
 		if (mScriptMap.containsKey(script.getTriggerID()))
 			throw new IllegalArgumentException(
@@ -193,7 +189,6 @@ public class ControlCenter implements IControlCenter {
 		centerDao.update(this);
 	}
 
-	@Override
 	public void deleteScript(String triggerID) throws DaoException {
 		if (!mScriptMap.containsKey(triggerID))
 			throw new IllegalArgumentException("Script with trigger id '" + triggerID + "' does not exists!");
@@ -213,12 +208,10 @@ public class ControlCenter implements IControlCenter {
 		centerDao.update(this);
 	}
 
-	@Override
 	public List<CronJobTrigger> getCronTriggers() {
 		return mCronjobTrigger;
 	}
 
-	@Override
 	public void addCronTrigger(CronJobTrigger trigger) throws DaoException {
 		mCronjobTrigger.add(trigger);
 		trigger.schedule();
@@ -230,13 +223,11 @@ public class ControlCenter implements IControlCenter {
 		centerDao.update(this);
 	}
 
-	@Override
 	public CronJobTrigger getCronTrigger(long id) throws DaoException {
 		Dao<CronJobTrigger> dao = DaoFactory.getInstance().getDao(CronJobTrigger.class);
 		return dao.loadById(id);
 	}
 
-	@Override
 	public void deleteCronTrigger(CronJobTrigger trigger) throws DaoException {
 		mCronjobTrigger.remove(trigger);
 
@@ -245,6 +236,10 @@ public class ControlCenter implements IControlCenter {
 
 		Dao<ControlCenter> centerDao = DaoFactory.getInstance().getDao(ControlCenter.class);
 		centerDao.update(this);
+	}
+
+	public ArrayList<IControllUnit> getControlUnitList() {
+		return new ArrayList<>(mControlUnitList);
 	}
 
 }

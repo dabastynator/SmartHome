@@ -12,6 +12,7 @@ import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
 import de.neo.smarthome.api.IWebInformationUnit.InformationBean;
+import de.neo.smarthome.controlcenter.ControlCenter;
 
 @Domain
 public class Script {
@@ -28,7 +29,7 @@ public class Script {
 	@Persist(name = "information")
 	private String mInformation;
 
-	private IControlCenter mCenter;
+	private ControlCenter mCenter;
 
 	public String getTriggerID() {
 		return mTrigger;
@@ -38,7 +39,7 @@ public class Script {
 		mTrigger = triggerID;
 	}
 
-	public void setControlcenter(IControlCenter center) {
+	public void setControlcenter(ControlCenter center) {
 		mCenter = center;
 	}
 

@@ -1,13 +1,13 @@
 package de.neo.smarthome;
 
 import de.neo.remote.rmi.RemoteAble;
-import de.neo.smarthome.api.IControlCenter;
+import de.neo.smarthome.controlcenter.ControlCenter;
 
 public abstract class AbstractUnitHandler implements RemoteAble {
 
-	protected IControlCenter mCenter;
+	protected ControlCenter mCenter;
 
-	public AbstractUnitHandler(IControlCenter center) {
+	public AbstractUnitHandler(ControlCenter center) {
 		mCenter = center;
 	}
 

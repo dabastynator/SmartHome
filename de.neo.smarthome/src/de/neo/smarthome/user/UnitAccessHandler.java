@@ -11,17 +11,17 @@ import de.neo.persist.DaoFactory;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.IControllUnit;
+import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.user.User.UserRole;
 
 public class UnitAccessHandler {
 
 	private Map<User, UserAccessList> mAccess = new HashMap<>();
 
-	private IControlCenter mCenter;
+	private ControlCenter mCenter;
 
-	public UnitAccessHandler(IControlCenter center) {
+	public UnitAccessHandler(ControlCenter center) {
 		mCenter = center;
 	}
 
@@ -92,7 +92,7 @@ public class UnitAccessHandler {
 	public ArrayList<IControllUnit> unitsFor(User user) {
 		ArrayList<IControllUnit> units = new ArrayList<>();
 		if (user.getRole() == UserRole.ADMIN) {
-			return new ArrayList<>(mCenter.getControlUnits().values());
+			return mCenter.getControlUnitList();
 		} else {
 			UserAccessList list = getAccessListByUser(user);
 			if (list != null) {

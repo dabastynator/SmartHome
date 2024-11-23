@@ -10,14 +10,13 @@ import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IControlCenter;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.cronjob.CronScheduler;
 
 @Domain
 public class CronJobTrigger implements Runnable {
 
-	private IControlCenter mCenter;
+	private ControlCenter mCenter;
 
 	@Id(name = "id")
 	private long mId;
@@ -31,7 +30,7 @@ public class CronJobTrigger implements Runnable {
 	@OneToMany(domainClass = Trigger.class, name = "Trigger")
 	private List<Trigger> mTriggerList = new ArrayList<Trigger>();
 
-	public void setControlCenter(IControlCenter center) {
+	public void setControlCenter(ControlCenter center) {
 		mCenter = center;
 	}
 

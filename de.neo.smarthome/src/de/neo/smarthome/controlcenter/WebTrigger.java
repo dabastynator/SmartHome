@@ -13,13 +13,12 @@ import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
 import de.neo.smarthome.SmartHome.ControlUnitFactory;
+import de.neo.smarthome.api.BeanWeb;
 import de.neo.smarthome.api.Event;
-import de.neo.smarthome.api.Script;
-import de.neo.smarthome.api.IControlCenter;
-import de.neo.smarthome.api.IWebTrigger;
-import de.neo.smarthome.api.Trigger;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
 import de.neo.smarthome.api.IControllUnit;
+import de.neo.smarthome.api.IWebTrigger;
+import de.neo.smarthome.api.Script;
+import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.cronjob.CronJob;
 import de.neo.smarthome.cronjob.CronScheduler;
@@ -28,7 +27,7 @@ import de.neo.smarthome.user.UserSessionHandler;
 
 public class WebTrigger extends AbstractUnitHandler implements IWebTrigger {
 
-	public WebTrigger(IControlCenter center) {
+	public WebTrigger(ControlCenter center) {
 		super(center);
 	}
 

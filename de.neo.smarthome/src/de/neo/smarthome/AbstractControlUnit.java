@@ -8,7 +8,7 @@ import java.util.Map;
 import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.smarthome.api.IControlCenter.BeanWeb;
+import de.neo.smarthome.api.BeanWeb;
 import de.neo.smarthome.api.IControllUnit;
 import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.controlcenter.ControlCenter;

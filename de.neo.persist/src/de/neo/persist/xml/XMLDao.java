@@ -31,6 +31,7 @@ public class XMLDao<T> implements Dao<T> {
 	private Class<? extends T> mClass;
 
 	private Map<Long, T> mDomains = new HashMap<>();
+	private List<T> mDomainList = new ArrayList<>();
 
 	private Set<Long> mAlreadySaved = new HashSet<>();
 
@@ -123,7 +124,7 @@ public class XMLDao<T> implements Dao<T> {
 
 	@Override
 	public List<T> loadAll() throws DaoException {
-		return new ArrayList<>(mDomains.values());
+		return new ArrayList<>(mDomainList);
 	}
 
 	@Override
@@ -137,14 +138,21 @@ public class XMLDao<T> implements Dao<T> {
 	}
 
 	@Override
-	public long save(T item) throws DaoException {
+	public long save(T item) throws DaoException
+	{
 		long id = nextId();
-		try {
+		try
+		{
 			setId(item, id);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e)
+		{
 			throw new DaoException("Error accessing the id field");
 		}
 		mDomains.put(id, item);
+		if (!mDomainList.contains(item))
+		{
+			mDomainList.add(item);
+		}
 		mFactory.notifyChange();
 		return id;
 	}
@@ -178,6 +186,7 @@ public class XMLDao<T> implements Dao<T> {
 	@Override
 	public void deleteAll() throws DaoException {
 		mDomains.clear();
+		mDomainList.clear();
 		mIdMap.clear();
 		mFactory.notifyChange();
 	}
@@ -208,6 +217,7 @@ public class XMLDao<T> implements Dao<T> {
 		if (mDomains.containsKey(id))
 			return mDomains.get(id);
 		mDomains.put(id, object);
+		mDomainList.add(object);
 		if (mOnCreateMethod != null) {
 			mOnCreateMethod.invoke(object);
 		}
