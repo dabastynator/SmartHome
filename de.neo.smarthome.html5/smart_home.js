@@ -60,7 +60,7 @@ function initialize() {
 	htmlFiles = document.getElementById('center');
 	htmlPls = document.getElementById('playlists');
 	htmlPlsContent = document.getElementById('playlist_content');
-	htmlSwitches = document.getElementById('west');
+	htmlSwitches = document.getElementById('switches');
 	htmlScripts = document.getElementById('scripts_content');
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
