@@ -39,16 +39,16 @@ body {
 	--nav_w: 132px;
 }
 
-#playlists, #currentplaying, #switches, #north, #filesystem, #border_navigation{
+#playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation{
 	position: absolute;
 }
 
 @media (min-width: 900px){
-	#north, #currentplaying {
+	#top_bar, #currentplaying {
 		left: var(--offset);
 		width: calc(100% - 2*var(--offset));
 	}
-	#north {
+	#top_bar {
 		top: var(--offset);
 		height: calc(var(--top) - var(--offset));
 	}
@@ -80,11 +80,11 @@ body {
 }
 
 @media (max-width: 900px) and (min-height: 450px){
-	#north, #currentplaying, #border_navigation {
+	#top_bar, #currentplaying, #border_navigation {
 		left: var(--offset);
 		width: calc(100% - 2*var(--offset));
 	}
-	#north {
+	#top_bar {
 		top: var(--offset);
 		height: calc(var(--top) - var(--offset));
 	}
@@ -106,7 +106,7 @@ body {
 }
 
 @media (max-width: 900px) and (max-height: 450px){
-	#north {
+	#top_bar {
 		left: var(--offset);
 		width: calc(100% - 2*var(--offset));
 		top: var(--offset);
