@@ -58,7 +58,7 @@ var htmlUserList;
 
 function initialize() {
 	htmlFiles = document.getElementById('center');
-	htmlPls = document.getElementById('east');
+	htmlPls = document.getElementById('playlists');
 	htmlPlsContent = document.getElementById('playlist_content');
 	htmlSwitches = document.getElementById('west');
 	htmlScripts = document.getElementById('scripts_content');

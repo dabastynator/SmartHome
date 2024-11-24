@@ -1,7 +1,7 @@
 
 window.onresize = function()
 {
-	var areas = ["east","west","center"];
+	var areas = ["playlists","west","center"];
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);
@@ -28,7 +28,7 @@ function align()
 
 function showArea(area)
 {
-	var areas = ["east","west","center"];
+	var areas = ["playlists","west","center"];
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);

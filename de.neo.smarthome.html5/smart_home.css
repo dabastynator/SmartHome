@@ -39,7 +39,7 @@ body {
 	--nav_w: 132px;
 }
 
-#east, #south, #west, #north, #center, #border_navigation{
+#playlists, #south, #west, #north, #center, #border_navigation{
 	position: absolute;
 }
 
@@ -56,7 +56,7 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#west, #east, #center
+	#west, #playlists, #center
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
@@ -66,7 +66,7 @@ body {
 		left: var(--offset);
 		width: calc(var(--left) - var(--offset));
 	}
-	#east {
+	#playlists {
 		right: var(--offset);
 		width: calc(var(--right) - var(--offset));
 	}
@@ -96,7 +96,7 @@ body {
 		top: calc(var(--top) + var(--offset));
 		height: calc(var(--nav) - var(--offset));
 	}
-	#west, #east, #center
+	#west, #playlists, #center
 	{
 		top: calc(var(--top) + var(--nav) + var(--offset));
 		height: calc(100% - var(--top) - var(--nav) - var(--bottom) - 2*(var(--offset)));
@@ -124,7 +124,7 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#west, #east, #center
+	#west, #playlists, #center
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
