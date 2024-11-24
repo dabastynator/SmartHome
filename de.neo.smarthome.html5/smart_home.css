@@ -32,14 +32,14 @@ body {
 :root {
 	--offset: 8px;
 	--top: 60px;
-	--bottom: 55px;
+	--bottom: 57px;
 	--left: 306px;
 	--right: 400px;
 	--nav: 60px;
 	--nav_w: 132px;
 }
 
-#playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation{
+#playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation, #information{
 	position: absolute;
 }
 
@@ -56,15 +56,24 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#switches, #playlists, #filesystem
+	#playlists, #filesystem
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
-		visibility: visible;
 	}
-	#switches {
+	#switches, #information {
 		left: var(--offset);
 		width: calc(var(--left) - var(--offset));
+	}
+	#switches
+	{
+		top: calc(var(--top) + var(--offset));
+		height: calc(0.5*(100% - var(--top) - var(--bottom)) - (var(--offset)));
+	}
+	#information
+	{
+		bottom: calc(var(--bottom) + var(--offset));
+		height: calc(0.5*(100% - var(--top) - var(--bottom)) - 2*(var(--offset)));
 	}
 	#playlists {
 		right: var(--offset);
@@ -96,7 +105,7 @@ body {
 		top: calc(var(--top) + var(--offset));
 		height: calc(var(--nav) - var(--offset));
 	}
-	#switches, #playlists, #filesystem
+	#switches, #playlists, #filesystem, #information
 	{
 		top: calc(var(--top) + var(--nav) + var(--offset));
 		height: calc(100% - var(--top) - var(--nav) - var(--bottom) - 2*(var(--offset)));
@@ -124,7 +133,7 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#switches, #playlists, #filesystem
+	#switches, #playlists, #filesystem, #information
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
@@ -383,4 +392,9 @@ label, .label{
 
 .disabled{
 	text-decoration: line-through;
+}
+
+.weather{
+	filter: brightness(0.9);
+	height: 32px
 }

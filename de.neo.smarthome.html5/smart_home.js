@@ -1,6 +1,7 @@
 
 
-class APIHandler {
+class APIHandler
+{
 	configure(endpoint, name, defaultParameter = {})
 	{
 		this.endpoint = endpoint;
@@ -40,6 +41,7 @@ var apiMediaServer = new APIHandler();
 var apiSwitch = new APIHandler();
 var apiAction = new APIHandler();
 var apiUser = new APIHandler();
+var apiInformation = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
 var mPlaylist = '';
@@ -55,8 +57,10 @@ var htmlScripts;
 var htmlPlayInfo;
 var htmlMediaServer;
 var htmlUserList;
+var htmlInformation;
 
-function initialize() {
+function initialize()
+{
 	htmlFiles = document.getElementById('filesystem');
 	htmlPls = document.getElementById('playlists');
 	htmlPlsContent = document.getElementById('playlist_content');
@@ -65,6 +69,7 @@ function initialize() {
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
 	htmlUserList = document.getElementById('userlist_content');
+	htmlInformation = document.getElementById('information');
 
 	readSetting();
 	align();
@@ -79,7 +84,7 @@ function initialize() {
 	loop();
 	
 	// Setup refresh loop for 5 seconds
-	setInterval(loop, 1000 * 5);
+	setInterval(loop, 1000 * 30);
 
 	if (apiMediaServer.endpoint == null || apiMediaServer.endpoint == '')
 	{
@@ -92,7 +97,8 @@ function findGetParameter(parameterName)
     var result = null,
         tmp = [];
     var items = location.search.substr(1).split("&");
-    for (var index = 0; index < items.length; index++) {
+	for (var index = 0; index < items.length; index++)
+	{
         tmp = items[index].split("=");
         if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
     }
@@ -130,6 +136,7 @@ function readSetting()
 	apiSwitch.configure(endpoint, 'switch', parameter);
 	apiAction.configure(endpoint, 'action', parameter);
 	apiUser.configure(endpoint, 'user', parameter);
+	apiInformation.configure(endpoint, 'information', parameter);
 
 	document.getElementById('setting_current_user').value = '';
 	setIsAdmin(false);
@@ -154,7 +161,8 @@ function setIsAdmin(isAdmin)
 	document.getElementById('btn_user').style.display = adminVisible;
 }
 
-function initSettings(){
+function initSettings()
+{
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
 
@@ -162,7 +170,8 @@ function initSettings(){
 	token.value = window.localStorage.getItem("token");
 }
 
-function saveSettings(){
+function saveSettings()
+{
 	endpoint = document.getElementById('setting_endpoint').value;
 	token = document.getElementById('setting_token').value;
 	mMediaCenter = '';
@@ -174,28 +183,98 @@ function saveSettings(){
 	refreshPlaylist();
 }
 
-function loop() {
+function loop()
+{
 	refreshPlayer();
 	refreshSwitches();
+	refreshInformation();
 }
 
-function refreshSwitches(){
+function refreshSwitches()
+{
 	apiSwitch.call('list', function(switches)
 	{
-		if (checkResult(switches, htmlSwitches)){
+		if (checkResult(switches, htmlSwitches))
+		{
 			switches.sort(function(a, b){return a.name.localeCompare(b.name)});
 			var content = "";
-			for (var i = 0; i < switches.length; i++) {
+			for (var i = 0; i < switches.length; i++)
+			{
 				var s = switches[i];
-				if (s.state == "ON") {
-					content += '<button onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on" style="min-width: 140px">';
-				} else {
-					content += '<button onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off" style="min-width: 140px">';
+				if (s.state == "ON")
+				{
+					content += '<button onclick="switchClick(\'' + s.id + '\', \'OFF\')" class="switch on" style="width: 140px">';
+				}
+				else
+				{
+					content += '<button onclick="switchClick(\'' + s.id + '\', \'ON\')" class="switch off" style="width: 140px">';
 				}
 				content += s.name + "</button>";
 			}
 			htmlSwitches.innerHTML = content;
-			align();
+		}		
+	});
+}
+
+function refreshInformation()
+{
+	apiInformation.call('list', function(informations)
+	{
+		if (checkResult(informations, htmlInformation))
+		{
+			var content = "";
+			for (var i = 0; i < informations.length; i++)
+			{
+				var info = informations[i];
+				
+				if (info.id == "sensor.garage_door")
+				{
+					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					content += info.name + "</td>";
+					content += '<td align="right">';
+					content += '<img src="img/cover_' + info.state + '.png" height="32px"/ class="link">';
+					content += '</td></tr></table></button>';
+				}
+				if (info.id == "sensor.rct_power_storage_generator_a_energy_production_day")
+				{
+					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					var sunContent = Math.round(Number(info.state) / 100) / 10 + "kWh";
+					content += info.name + ' ' + sunContent + "</td>";
+					content += '<td align="right">';
+					content += '<img src="img/sun_power.png" height="32px"/ class="link">';
+					content += '</td></tr></table></button>';
+				}
+				if (info.type == "weather")
+				{
+					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					content += 'Draußen ' + Math.round(info.celsius) + '&deg;' + '</td><td align="right">';
+
+					var icon_text = '<img class="weather" src="img/';
+					var icon_name = '';
+					// Respect sunrise-sunset
+					if (info.day_night == 'Day')
+						icon_name = 'sun';
+					else
+						icon_name = 'moon';
+					// Respect clouds
+					if (info.clouds >= 90)
+						icon_name = 'cloud';
+					else if (info.clouds > 50)
+						icon_name += '_cloud';
+					else if (info.clouds > 10)
+					  icon_name += '_cloud_less';
+					// Respect rain and snow
+					if (info.rain != null && info.rain)
+						icon_name += '_rain';
+					else if (info.snow != null && info.snow)
+						icon_name += '_snow';
+					icon_text += icon_name + '.png"/>';
+					content += icon_text;
+
+					content += '</td></tr></table></button>';
+				}
+			}
+			htmlInformation.innerHTML = content;
 		}		
 	});
 }

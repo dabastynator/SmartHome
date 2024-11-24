@@ -1,12 +1,22 @@
 
 window.onresize = function()
 {
-	var areas = ["playlists","switches","filesystem"];
+	var areas = ["playlists","switches","filesystem", "information"];
+	var navBar = document.getElementById("border_navigation");
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);
-		if (elem != null){
-			elem.style.zIndex = "auto";
+		var navButton = document.getElementById('nav_' + a);
+		if (elem != null)
+		{
+			if(navBar.style.visibility == "hidden" || navButton.style.classList == undefined || navButton.style.classList.contains('on'))
+			{
+				elem.style.zIndex = "auto";
+			}
+			else
+			{
+				elem.style.zIndex = -1;
+			}
 		}
 	}
 };
@@ -28,7 +38,7 @@ function align()
 
 function showArea(area)
 {
-	var areas = ["playlists","switches","filesystem"];
+	var areas = ["playlists","switches","filesystem", "information"];
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);
