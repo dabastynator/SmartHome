@@ -39,12 +39,12 @@ body {
 	--nav_w: 132px;
 }
 
-#playlists, #south, #switches, #north, #filesystem, #border_navigation{
+#playlists, #currentplaying, #switches, #north, #filesystem, #border_navigation{
 	position: absolute;
 }
 
 @media (min-width: 900px){
-	#north, #south {
+	#north, #currentplaying {
 		left: var(--offset);
 		width: calc(100% - 2*var(--offset));
 	}
@@ -52,7 +52,7 @@ body {
 		top: var(--offset);
 		height: calc(var(--top) - var(--offset));
 	}
-	#south {
+	#currentplaying {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
@@ -80,7 +80,7 @@ body {
 }
 
 @media (max-width: 900px) and (min-height: 450px){
-	#north, #south, #border_navigation {
+	#north, #currentplaying, #border_navigation {
 		left: var(--offset);
 		width: calc(100% - 2*var(--offset));
 	}
@@ -88,7 +88,7 @@ body {
 		top: var(--offset);
 		height: calc(var(--top) - var(--offset));
 	}
-	#south {
+	#currentplaying {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
@@ -118,7 +118,7 @@ body {
 		bottom: var(--offset);
 		width: calc(var(--nav_w) - var(--offset));
 	}
-	#south {
+	#currentplaying {
 		left: calc(var(--nav_w) + var(--offset));
 		right: var(--offset);
 		bottom: var(--offset);
