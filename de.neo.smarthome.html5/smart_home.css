@@ -39,7 +39,7 @@ body {
 	--nav_w: 132px;
 }
 
-#playlists, #south, #switches, #north, #center, #border_navigation{
+#playlists, #south, #switches, #north, #filesystem, #border_navigation{
 	position: absolute;
 }
 
@@ -56,7 +56,7 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#switches, #playlists, #center
+	#switches, #playlists, #filesystem
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
@@ -70,7 +70,7 @@ body {
 		right: var(--offset);
 		width: calc(var(--right) - var(--offset));
 	}
-	#center {
+	#filesystem {
 		left: calc(var(--left) + var(--offset));
 		width: calc(100% - var(--left) - var(--right) - 2*var(--offset));
 	}
@@ -96,7 +96,7 @@ body {
 		top: calc(var(--top) + var(--offset));
 		height: calc(var(--nav) - var(--offset));
 	}
-	#switches, #playlists, #center
+	#switches, #playlists, #filesystem
 	{
 		top: calc(var(--top) + var(--nav) + var(--offset));
 		height: calc(100% - var(--top) - var(--nav) - var(--bottom) - 2*(var(--offset)));
@@ -124,7 +124,7 @@ body {
 		bottom: var(--offset);
 		height: calc(var(--bottom) - var(--offset));
 	}
-	#switches, #playlists, #center
+	#switches, #playlists, #filesystem
 	{
 		top: calc(var(--top) + var(--offset));
 		height: calc(100% - var(--top) - var(--bottom) - 2*(var(--offset)));
@@ -139,7 +139,7 @@ body {
 	margin: 4px;
 	float: left;
 	min-width: 110px;
-	text-align: center;
+	text-align: filesystem;
 	box-sizing: border-box;
 	transition: 0.3s;
 }

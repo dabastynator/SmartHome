@@ -57,7 +57,7 @@ var htmlMediaServer;
 var htmlUserList;
 
 function initialize() {
-	htmlFiles = document.getElementById('center');
+	htmlFiles = document.getElementById('filesystem');
 	htmlPls = document.getElementById('playlists');
 	htmlPlsContent = document.getElementById('playlist_content');
 	htmlSwitches = document.getElementById('switches');
