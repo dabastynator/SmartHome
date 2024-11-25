@@ -1,16 +1,9 @@
 package de.neo.smarthome;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import de.neo.persist.annotations.OneToMany;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.api.BeanWeb;
 import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.Trigger;
 import de.neo.smarthome.controlcenter.ControlCenter;
 
 public abstract class AbstractControlUnit implements IControllUnit {
@@ -20,9 +13,6 @@ public abstract class AbstractControlUnit implements IControllUnit {
 
 	@Persist(name = "id")
 	protected String mID;
-
-	@OneToMany(domainClass = Trigger.class, name = "Trigger")
-	protected List<Trigger> mTrigger = new ArrayList<Trigger>();
 
 	protected ControlCenter mCenter;
 
@@ -47,25 +37,6 @@ public abstract class AbstractControlUnit implements IControllUnit {
 	@Override
 	public String getID() throws RemoteException {
 		return mID;
-	}
-
-	public void fireTrigger(Map<String, String> parameterExchange, String condition) {
-		for (Trigger trigger : mTrigger) {
-			String triggerCondition = trigger.getParameter("condition");
-			if (triggerCondition == null || condition.equalsIgnoreCase(triggerCondition)) {
-				Trigger fireTrigger = new Trigger(trigger);
-				if (parameterExchange != null) {
-					Map<String, String> exchange = new HashMap<String, String>();
-					for (String key : trigger.getParameter().keySet()) {
-						String value = trigger.getParameter(key);
-						if (parameterExchange.containsKey(value))
-							exchange.put(key, parameterExchange.get(value));
-					}
-					fireTrigger.getParameter().putAll(exchange);
-				}
-				mCenter.trigger(fireTrigger);
-			}
-		}
 	}
 
 	@Override

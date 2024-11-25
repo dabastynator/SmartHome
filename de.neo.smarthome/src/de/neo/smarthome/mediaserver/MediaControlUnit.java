@@ -21,10 +21,8 @@ import de.neo.remote.transceiver.FileSender;
 import de.neo.remote.transceiver.SenderProgress;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
 import de.neo.smarthome.api.IWebMediaServer.BeanDownload.DownloadType;
-import de.neo.smarthome.api.PlayerException;
 
 @Domain(name = "MediaServer")
 public class MediaControlUnit extends AbstractControlUnit {
@@ -69,56 +67,6 @@ public class MediaControlUnit extends AbstractControlUnit {
 
 	public void setPlaylistLocation(String locationPlaylist) {
 		mPlaylistLocation = locationPlaylist;
-	}
-
-	@Override
-	public boolean performEvent(Event event) throws RemoteException, EventException {
-		try {
-			String action = event.getParameter("action");
-			String value = event.getParameter("value");
-			String player = event.getParameter("player");
-			IPlayer remotePlayer = null;
-			if (action == null)
-				throw new EventException(
-						"Parameter action (play|playList|pause|stop|volume|shutdown) missing to execute media event!");
-			if ("mplayer".equals(player))
-				remotePlayer = getMPlayer();
-			else if ("omxplayer".equals(player))
-				remotePlayer = getOMXPlayer();
-			else if ("totem".equals(player))
-				remotePlayer = getTotemPlayer();
-
-			switch (action) {
-			case "play":
-				remotePlayer.play(value);
-				break;
-			case "playList":
-				remotePlayer.playPlayList(value);
-				break;
-			case "pause":
-				remotePlayer.playPause();
-				break;
-			case "vol":
-			case "volume":
-				if ("up".equals(value))
-					remotePlayer.volUp();
-				else if ("down".equals(value))
-					remotePlayer.volDown();
-				else
-					remotePlayer.setVolume(Integer.parseInt(value));
-				break;
-			case "stop":
-			case "quit":
-				remotePlayer.quit();
-				break;
-			default:
-				throw new EventException("Unknown player action: " + action);
-			}
-
-		} catch (RemoteException | PlayerException e) {
-			throw new EventException(e.getClass().getSimpleName() + ": " + e.getMessage());
-		}
-		return true;
 	}
 
 	public IPlayer getTotemPlayer() throws RemoteException {

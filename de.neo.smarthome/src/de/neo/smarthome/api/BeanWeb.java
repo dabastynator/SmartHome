@@ -1,14 +1,8 @@
 package de.neo.smarthome.api;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
-import de.neo.persist.DaoException;
-import de.neo.remote.rmi.RemoteException;
 import de.neo.remote.web.WebField;
-import de.neo.smarthome.controlcenter.CronJobTrigger;
-import de.neo.smarthome.user.UnitAccessHandler;
 
 /**
  * The control center handles all control units and information about the

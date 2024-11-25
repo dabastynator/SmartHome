@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import de.neo.persist.annotations.Domain;
 import de.neo.persist.annotations.OnLoad;
@@ -20,7 +18,6 @@ import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.Event;
 
 @Domain(name = "CommandAction")
 public class ActionControlUnit extends AbstractControlUnit {
@@ -95,24 +92,6 @@ public class ActionControlUnit extends AbstractControlUnit {
 		return bytes;
 	}
 
-	@Override
-	public boolean performEvent(Event event) throws RemoteException, EventException {
-		try {
-			String action = event.getParameter("action");
-			if (action == null)
-				throw new EventException("Parameter action (start|stop) missing to execute command event!");
-			if (action.equalsIgnoreCase("start"))
-				startAction();
-			else if (action.equalsIgnoreCase("stop"))
-				stopAction();
-			else
-				throw new EventException("Unknown parameter value for action event! Excpected: start|stop");
-		} catch (IOException e) {
-			throw new EventException(e.getClass().getSimpleName() + ": " + e.getMessage());
-		}
-		return true;
-	}
-
 	public void startAction() throws IOException {
 		if (isRunning()) {
 			throw new IOException("Process is already running");
@@ -129,9 +108,6 @@ public class ActionControlUnit extends AbstractControlUnit {
 			mOutListener.start();
 			mErrListener = new OutputListener(mProcess.getErrorStream());
 			mErrListener.start();
-			Map<String, String> parameterExchange = new HashMap<String, String>();
-			parameterExchange.put("@action", "start");
-			fireTrigger(parameterExchange, "@action=start");
 		}
 	}
 
@@ -144,9 +120,6 @@ public class ActionControlUnit extends AbstractControlUnit {
 			mErrListener.mRunning = false;
 		mOutListener = null;
 		mErrListener = null;
-		Map<String, String> parameterExchange = new HashMap<String, String>();
-		parameterExchange.put("@action", "stop");
-		fireTrigger(parameterExchange, "@action=stop");
 	}
 
 	public String getIconBase64() {

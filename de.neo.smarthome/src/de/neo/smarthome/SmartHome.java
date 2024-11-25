@@ -21,14 +21,8 @@ import de.neo.remote.web.WebServer;
 import de.neo.smarthome.RemoteLogger.RemoteLogListener;
 import de.neo.smarthome.action.ActionControlUnit;
 import de.neo.smarthome.action.WebActionImpl;
-import de.neo.smarthome.api.Event;
 import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.api.Script;
-import de.neo.smarthome.api.Trigger;
-import de.neo.smarthome.api.Trigger.Parameter;
 import de.neo.smarthome.controlcenter.ControlCenter;
-import de.neo.smarthome.controlcenter.CronJobTrigger;
-import de.neo.smarthome.controlcenter.WebTrigger;
 import de.neo.smarthome.informations.InformationHass;
 import de.neo.smarthome.informations.InformationUnit.InformationTrigger;
 import de.neo.smarthome.informations.InformationWeather;
@@ -61,7 +55,6 @@ public class SmartHome {
 		mControlUnitFactory.add(new WebActionImpl.ActionFactory());
 		mControlUnitFactory.add(new WebLEDStripImpl.LEDStripFactory());
 		mControlUnitFactory.add(new WebUser.UserFactory());
-		mControlUnitFactory.add(new WebTrigger.TriggerFactory());
 	}
 
 	public static void main(String args[]) {
@@ -83,10 +76,6 @@ public class SmartHome {
 
 			controlcenter.onPostLoad();
 			
-			for (Trigger trigger : controlcenter.getStartupTrigger()) {
-				controlcenter.trigger(trigger);
-			}
-			controlcenter.schedule();
 			HassHandler.initialize(controlcenter);
 		} catch (IOException | IllegalArgumentException | DaoException e) {
 			System.err.println(
@@ -107,12 +96,6 @@ public class SmartHome {
 		builder.registerDao(new XMLDao<HassSwitchUnit>(HassSwitchUnit.class));
 		builder.registerDao(new XMLDao<RCColorControlUnit>(RCColorControlUnit.class));
 		builder.registerDao(new XMLDao<ActionControlUnit>(ActionControlUnit.class));
-
-		builder.registerDao(new XMLDao<CronJobTrigger>(CronJobTrigger.class));
-		builder.registerDao(new XMLDao<Script>(Script.class));
-		builder.registerDao(new XMLDao<Event>(Event.class));
-		builder.registerDao(new XMLDao<Trigger>(Trigger.class));
-		builder.registerDao(new XMLDao<Parameter>(Parameter.class));
 
 		builder.registerDao(new XMLDao<InformationWeather>(InformationWeather.class));
 		builder.registerDao(new XMLDao<InformationTrigger>(InformationTrigger.class));
@@ -157,7 +140,6 @@ public class SmartHome {
 		ControlCenter center = dao.loadAll().get(0);
 		WebInformation info = new WebInformation();
 		info.initialize();
-		center.setInformationHandler(info);
 		WebServer webServer = WebServer.getInstance();
 		if (center.getPort() > 0) {
 			webServer.setPort(center.getPort());

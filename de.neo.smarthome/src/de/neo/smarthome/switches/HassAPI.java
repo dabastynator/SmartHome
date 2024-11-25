@@ -16,7 +16,7 @@ public interface HassAPI extends RemoteAble{
 			@WebParam(name = "Authorization", type = WebParam.Type.Header) String authorization
 	) throws RemoteException;
 	
-	@WebRequest(description = "", path = "services/${type}/turn_${state}", genericClass = HassEntity.class, type = WebRequest.Type.Post, content = "application/json")
+	@WebRequest(description = "", path = "services/${type}/turn_${state}", type = WebRequest.Type.Post, content = "application/json")
 	public void setState(
 			@WebParam(name = "Authorization", type = WebParam.Type.Header) String authorization,
 			@WebParam(name = "entity_id", type = WebParam.Type.Payload) String entityId,

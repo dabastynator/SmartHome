@@ -33,15 +33,6 @@ public interface IControllUnit extends RemoteAble {
 	public void setControlCenter(ControlCenter controlCenter);
 
 	/**
-	 * Perform specified event on this control unit
-	 * 
-	 * @param event
-	 * @return true if successfully performed event, false otherwise
-	 * @throws RemoteException
-	 */
-	public boolean performEvent(Event event) throws RemoteException, EventException;
-
-	/**
 	 * Return beanweb for this control unit.
 	 * 
 	 * @return beanweb
