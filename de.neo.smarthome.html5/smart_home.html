@@ -18,7 +18,6 @@
 <div id="top_bar" class="card" style="text-align:right;">
 	<div id="mediaserver" style="float: left;">No mediaserver</div>	
 	<img id="btn_settings" src="img/settings.png" class="link setting_btn" onclick="initSettings();showDialog('settings');"/>
-	<img id="btn_scripts" src="img/code.png" class="link setting_btn" onclick="showScripts();"/>
 	<img id="btn_user" src="img/user.png" class="link setting_btn" onclick="showUser();"/>
 </div >
 
@@ -134,33 +133,9 @@
 	</div>
 </div>
 
-<div id="scripts" class="container">
-	<div id="content_scripts" class="filling">
-		<header class="headline" id="scripts_title">Scripts</header>
-		<main id="scripts_content">Content</main>
-		<footer><button class="button" onclick="hideDialog('scripts');">Close</button></footer>
-	</div>
-</div>
-
-<div id="trigger" class="container">
-	<div id="content_trigger" class="dialog">
-		<table style="margin: 7px; width: 600px">
-			<tr><td colspan="3" class="headline" id="trigger_title">Trigger</td></tr>
-			<tr><td style="width: 200px">Trigger</td><td colspan="2"><input class="fill" id="trigger_id"/></td></tr>
-			<tr>
-				<td>Information</td><td><input id="trigger_infos" class="fill"/></td>
-				<td><img src="img/add.png" height="32px" class="link" onclick="addInfo()"></td></tr>
-			<tr><td colspan="3"><div id="trigger_content" style="height: 200px; overflow: auto">Content</div></td></tr>
-			<tr><td colspan="3" style="text-align:right;">
-				<button class="button" onclick="hideDialog('trigger');">OK</button>
-			</td></tr>
-		</table>
-	</div>
-</div>
-
 <div id="message" class="container">
 	<div id="content_message" class="dialog" style="width: 400px">
-		<div class="headline" id="msg_title">Scripts</div>
+		<div class="headline" id="msg_title">Title</div>
 		<div id="msg_content">Content</div>
 		<div style="text-align:right;">	<button class="button" onclick="hideDialog('message');">OK</button></div>
 	</div>

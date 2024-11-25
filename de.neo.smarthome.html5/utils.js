@@ -1,15 +1,14 @@
+var currentVisible = undefined;
 
 window.onresize = function()
 {
 	var areas = ["playlists","switches","filesystem", "information"];
-	var navBar = document.getElementById("border_navigation");
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);
-		var navButton = document.getElementById('nav_' + a);
 		if (elem != null)
 		{
-			if(navBar.style.visibility == "hidden" || navButton.style.classList == undefined || navButton.style.classList.contains('on'))
+			if (elem == currentVisible || window.width >= 900)
 			{
 				elem.style.zIndex = "auto";
 			}
@@ -45,9 +44,14 @@ function showArea(area)
 		var nav = document.getElementById('nav_' + a);
 		if (elem != null){
 			if (a === area)
+			{
 				elem.style.zIndex = "auto";
+				currentVisible = elem;
+			}
 			else
+			{
 				elem.style.zIndex = -1;
+			}
 		}
 		if (nav != null){
 			if (a === area){

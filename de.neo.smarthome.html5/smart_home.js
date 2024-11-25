@@ -53,7 +53,6 @@ var htmlFiles;
 var htmlPls;
 var htmlPlsContent;
 var htmlSwitches;
-var htmlScripts;
 var htmlPlayInfo;
 var htmlMediaServer;
 var htmlUserList;
@@ -65,7 +64,6 @@ function initialize()
 	htmlPls = document.getElementById('playlists');
 	htmlPlsContent = document.getElementById('playlist_content');
 	htmlSwitches = document.getElementById('switches');
-	htmlScripts = document.getElementById('scripts_content');
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
 	htmlUserList = document.getElementById('userlist_content');
@@ -157,7 +155,6 @@ function setIsAdmin(isAdmin)
 	{
 		adminVisible = 'block';
 	}
-	document.getElementById('btn_scripts').style.display = adminVisible;
 	document.getElementById('btn_user').style.display = adminVisible;
 }
 
@@ -590,26 +587,6 @@ function setVolume(){
 	playerAction('volume', {'volume': input.value});
 }
 
-function doTrigger(trigger){
-	mTrigger = trigger;
-	apiTrigger.call('dotrigger', function(result)
-	{
-		if (checkResult(result)) {
-			showMessage('Perform trigger', 'Perform <b>' + mTrigger + '</b> with ' + scripts.triggered_events + ' events.' );
-		}
-	}, {'trigger': trigger});
-}
-
-function deleteScript(trigger){
-	mTrigger = trigger;
-	apiTrigger.call('delete_script', function(result)
-	{
-		if (checkResult(result)) {
-			showScripts();
-		}
-	}, {'trigger': trigger});
-}
-
 /***************
 ***** User *****
 ***************/
@@ -745,26 +722,6 @@ function applyUserName()
 	}
 }
 
-function addUserAccess()
-{
-	apiTrigger.call('list_controlunits', function(result)
-	{
-		if (checkResult(result))
-		{
-			var element = document.getElementById('accesslist_content');
-			var content = '';
-			for (var i = 0; i < result.length; i++)
-			{
-				var unit = result[i];
-				content += '<div class="line">' + unit.name + ' (' + unit.id + ')';
-				content += '<img src="img/add.png" class="icon" onclick="addUnitAccess(\'' + unit.id + '\')"></div>';
-			}
-			element.innerHTML = content;
-			showDialog('accesslist');
-		}
-	});
-}
-
 function addUnitAccess(unitId)
 {
 	if (mSelectedUser != null)
@@ -842,154 +799,4 @@ function addUserSession()
 			refreshUserSessions();
 		}
 	}, {'user_id': mSelectedUser.id});
-}
-
-/*****************
-***** Script *****
-*****************/
-
-function addInfo(){
-	var info = document.getElementById('trigger_infos');
-	apiTrigger.call('set_information_for_script', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'information': info.value});
-}
-
-function deleteEvent(index){
-	apiTrigger.call('delete_event', function(result){
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'index': index});	
-}
-
-function createNewEvent(){
-	var unit = document.getElementById("new_event");
-	var condition = document.getElementById("new_event_condition");
-	apiTrigger.call('create_event', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'unit': unit.value, 'condition': condition.value});
-}
-
-function createNewParameter(index){
-	var key = document.getElementById("new_param_key");
-	var value = document.getElementById("new_param_value");
-	apiTrigger.call('add_parameter', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'index': index, 'key': key.value, 'value': value.value});	
-}
-
-function updateCondition(index){
-	var condition = document.getElementById("condition_" + index);
-	apiTrigger.call('set_condition_for_event', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'event_index': index, 'condition': condition.value});
-}
-
-function deleteParameter(index){
-	apiTrigger.call('delete_parameter_for_event', function(result)
-	{
-		if (checkResult(result)) {
-			hideDialog('trigger');
-			showScripts();
-		}
-	}, {'trigger': mScriptId, 'event_index': index, 'parameter_index': (mScripts[mScriptIndex].events[index].parameter.length - 1)});
-}
-
-function showTrigger(index){
-	var trigger = mScripts[index];
-	mScriptIndex = index;
-	mScriptId = trigger.trigger;
-	title = document.getElementById('trigger_title');
-	content = document.getElementById('trigger_content');
-	id = document.getElementById('trigger_id');
-	infos = document.getElementById('trigger_infos');
-	
-	title.innerHTML = 'Edit script';
-	id.value = trigger.trigger;
-	infos.value = trigger.information;
-
-	contentText = '<table width="100%">';
-	for (var i = 0; i < trigger.events.length; i++){
-		var event = trigger.events[i];
-		contentText += '<tr><td colspan="3" class="highlight">' + event.unit_id;
-		contentText += '<img src="img/delete.png" height="32px" class="link right" onclick="deleteEvent(' + i + ')">';
-		contentText += '</td></tr>';
-		condition = '';
-		if (event.condition != null)
-			condition = event.condition;
-		contentText += '<tr><td style="width: 195px">Condition</td><td><input class="fill" value="' + condition + '" id="condition_'+i+'"/></td>';
-		contentText += '<td style="width: 40px"><img src="img/add.png" height="32px" class="link right" onclick="updateCondition(' + i + ')"></td></tr>';
-		parameter = '';
-		for (var j = 0; j < event.parameter.length; j++){
-			parameter += event.parameter[j].key + '=\'' + event.parameter[j].value + '\', ';
-		}
-		contentText += '<tr><td>Parameter</td><td><input class="fill" value="' + parameter + '"/></td>';
-		contentText += '<td><img src="img/delete.png" height="32px" class="link right" onclick="deleteParameter(' + i + ')"></td></tr>';
-		contentText += '<tr><td>New Parameter</td>';
-		contentText += '<td><input class="half" id="new_param_key" value="key"/><input class="half" id="new_param_value" value="value"/></td>';
-		contentText += '<td><img src="img/add.png" height="32px" class="link right" onclick="createNewParameter(' + i + ')"></td></tr>';
-	}
-	contentText += '<tr><td class="highlight" style="width: 195px">New event</td>';
-	contentText += '<td class="highlight"><input class="half" id="new_event" value="unit_id"/><input class="half" id="new_event_condition"  value="condition"/></td>';
-	contentText += '<td><img src="img/add.png" height="32px" class="link right" onclick="createNewEvent()"></td>';
-	contentText += '</tr></table>';
-	content.innerHTML = contentText;
-
-	showDialog('trigger');
-}
-
-function createScript(){
-	var input = document.getElementById('new_script');
-	apiTrigger.call('create_script', function(result)
-	{
-		if (checkResult(result)) {
-			showScripts();
-		}
-	}, {'trigger': input.value});
-}
-
-function showScripts(){
-	showDialog('scripts');
-	htmlScripts.innerHTML = '<div style="text-align: center"><img src="img/loading.png" class="rotate" width="128px"/></div>';
-
-	apiTrigger.call('scripts', function(result)
-	{
-		if (checkResult(result, htmlScripts)) {
-			mScripts = result;
-			var content = "";
-			for (var i = 0; i < mScripts.length; i++) {
-				var script = mScripts[i];
-				content += '<div class="file"><table width="100%"><tr>';
-				content += '<td width="80%" onclick="showTrigger(' + i + ')" class="link">' + script.trigger + "</td>";
-				content += '<td align="right">';
-				content += '<img src="img/play.png" height="32px"/ class="link" onclick="doTrigger(\'' + script.trigger + '\')">';
-				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deleteScript(\'' + script.trigger + '\')">';
-				content += '</td></tr></table></div>';
-			}
-			content += '<div class="file"><table width="100%"><tr>';
-			content += '<td width="90%"><input value="new.script" id="new_script" class="fill"/></td>';
-			content += '<td align="right">';
-			content += '<img src="img/add.png" height="32px" class="link" onclick="createScript()">';
-			content += '</td></tr></table></div>';
-			htmlScripts.innerHTML = content;
-		}
-	});
 }
