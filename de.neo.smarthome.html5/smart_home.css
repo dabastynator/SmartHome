@@ -1,12 +1,33 @@
+:root {
+	--body_background: rgb(0, 87, 78);
+	--background: rgba(228, 255, 253);
+	--font: black;
+	--title: rgb(0, 87, 78);
+	--border: rgb(0, 87, 78);
+	--border_light: rgb(46, 117, 113);
+	--focus: rgb(0, 87, 78);
+	--btn_on: rgb(0, 87, 78);
+	--btn_off: rgb(54, 228, 219);
+	--img_brightness: 0.5;
+	
+	--offset: 8px;
+	--top: 60px;
+	--bottom: 57px;
+	--left: 306px;
+	--right: 400px;
+	--nav: 60px;
+	--nav_w: 132px;
+}
+
 html, body {
 	margin:0px;
 	padding: 0px;
 	height:100%;
-}  
+}
 
 body {
-	background: black;
-	color: white;
+	background: var(--body_background);
+	color: var(--font);
 	font-family: 'Source Code Pro', monospace;
 	font-size: 110%;
 	height: 100vh;
@@ -15,9 +36,9 @@ body {
 
 .card, .dialog, .filling {
 	box-sizing: border-box;
-	background: black;
+	background: var(--background);
 	border-radius: 2px;
-	border: 1px solid #666;
+	border: 1px solid var(--border);
 	overflow: auto
 }
 
@@ -29,18 +50,19 @@ body {
 	padding: 8px;
 }
 
-:root {
-	--offset: 8px;
-	--top: 60px;
-	--bottom: 57px;
-	--left: 306px;
-	--right: 400px;
-	--nav: 60px;
-	--nav_w: 132px;
-}
-
 #playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation, #information{
 	position: absolute;
+}
+
+#border_navigation
+{
+	white-space: nowrap;
+}
+
+.nav_button
+{
+	float: initial;
+	display: inline;
 }
 
 @media (min-width: 900px){
@@ -154,41 +176,41 @@ body {
 }
 
 .on {
-	background: #222;
-	border: 2px solid #666;
-	box-shadow: inset 0 0 0 0 #666;
+	background: var(--btn_on);
+	border: 2px solid var(--border);
+	box-shadow: inset 0 0 0 0 var(--border);
 }
 
 .on:hover {
-	box-shadow: inset 10px 0 0 0 #666;
+	box-shadow: inset 10px 0 0 0 var(--border);
 	transition: 0.2s;
 }
 
 .on:active {
-	box-shadow: inset 150px 0 0 0 #666;
+	box-shadow: inset 150px 0 0 0 var(--border);
 	transition: 0.2s;
 }
 
 .off {
-	background: black;
-	border: 2px solid #222;
-	box-shadow: inset 0 0 0 0 #222;
+	background: var(--background);
+	border: 2px solid var(--btn_off);
+	box-shadow: inset 0 0 0 0 var(--btn_off);
 }
 
 .off:hover {
-	box-shadow: inset 10px 0 0 0 #222;
+	box-shadow: inset 10px 0 0 0 var(--btn_off);
 	transition: 0.2s;
 }
 
 .off:active {
-	box-shadow: inset 150px 0 0 0 #222;
+	box-shadow: inset 150px 0 0 0 var(--btn_off);
 	transition: 0.2s;
 }
 
 .line {
 	width: 100%;
 	padding: 10px 0;
-	border-bottom: 1px solid #444;
+	border-bottom: 1px solid var(--border_light);
 	vertical-align: middle;
 }
 
@@ -203,7 +225,7 @@ body {
 }
 
 img:hover{
-	background-image: radial-gradient(closest-side, #666, #000);
+	background-image: radial-gradient(closest-side, var(--border), #ff000000);
 }
 
 .right {
@@ -216,7 +238,7 @@ img:hover{
 
 .headline {
 	font-weight: bold;
-	color: #aaa;
+	color: var(--title);
 	font-size: 120%;
 	padding-bottom: 10px;
 }
@@ -235,13 +257,13 @@ img:hover{
 }
 
 button, input, .input, select{
-	background: black;
-	color: white;
+	background: var(--background);
+	color: var(--font);
 	font-family: 'Source Code Pro', monospace;
 	font-size: 100%;
 	margin: 5px 0px 5px 0px;
 	padding: 5px;
-	border: 1px solid #444;
+	border: 1px solid var(--border_light);
 	transition: all 0.15s;
 }
 
@@ -272,7 +294,7 @@ input:checked + label:after {
 	text-indent: -9999px;
 	width: 80px;
 	height: 30px;
-	background: #444;
+	background: var(--border_light);
 	display: block;
 	border-radius: 30px;
 	position: relative;
@@ -285,7 +307,7 @@ input:checked + label:after {
 	left: 5px;
 	width: 23px;
 	height: 23px;
-	background: #fff;
+	background: var(--font);
 	border-radius: 50%;
 	transition: 0.3s;
 }
@@ -306,25 +328,24 @@ label, .label{
 }
 
 .button:hover, input:focus, select:focus{
-	border: 1px solid #888;
-	box-shadow: inset 0 0 10px #888;
+	border: 1px solid var(--focus);
+	box-shadow: inset 0 0 10px var(--focus);
 	transition: all 0.15s;
 }
 
 .switch:hover {
-	border: 2px solid #888;
+	border: 2px solid var(--focus);
 }
 
 .button:active {
-	border: 1px solid #eee;
-	background: #eee;
-	color: black;
+	border: 1px solid var(--focus);
+	background: var(--focus);
 	transition: all 0.15s;
 }
 
 .file{		
 	padding: 6px;
-	border-bottom: 1px solid #444;
+	border-bottom: 1px solid var(--border_light);
 	width: 100%;
 	margin: 0px;
 	text-align: left;
@@ -337,12 +358,6 @@ label, .label{
 
 .rotate {
 	-webkit-animation: rotation 1s infinite linear;
-}
-
-.highlight {
-	font-weight: bold;
-	color: #aaa;
-	border-bottom: 1px solid #aaa;
 }
 
 @-webkit-keyframes rotation {
@@ -394,7 +409,10 @@ label, .label{
 	text-decoration: line-through;
 }
 
+img{
+	filter: brightness(var(--img_brightness));
+}
+
 .weather{
-	filter: brightness(0.9);
 	height: 32px
 }

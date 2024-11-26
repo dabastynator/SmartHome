@@ -90,6 +90,51 @@ function initialize()
 	}
 }
 
+loadAppearence();
+function loadAppearence()
+{
+	appearence = token = window.localStorage.getItem("appearence");
+	if(appearence == 'bright')
+	{
+		document.documentElement.style.setProperty("--body_background", "white");
+		document.documentElement.style.setProperty("--background", "white");
+		document.documentElement.style.setProperty("--font", "black");
+		document.documentElement.style.setProperty("--title", "#222");
+		document.documentElement.style.setProperty("--border", "#888");
+		document.documentElement.style.setProperty("--border_light", "#888");
+		document.documentElement.style.setProperty("--focus", "#666");
+		document.documentElement.style.setProperty("--btn_on", "#aaa");
+		document.documentElement.style.setProperty("--btn_off", "#aaa");
+		document.documentElement.style.setProperty("--img_brightness", "0.4");
+	}
+	else if(appearence == 'turquoise')
+	{
+		document.documentElement.style.setProperty("--body_background", "rgb(0, 87, 78)");
+		document.documentElement.style.setProperty("--background", "rgba(228, 255, 253)");
+		document.documentElement.style.setProperty("--font", "black");
+		document.documentElement.style.setProperty("--title", "rgb(0, 87, 78)");
+		document.documentElement.style.setProperty("--border", "rgb(0, 87, 78)");
+		document.documentElement.style.setProperty("--border_light", "rgb(46, 117, 113)");
+		document.documentElement.style.setProperty("--focus", "rgb(0, 87, 78)");
+		document.documentElement.style.setProperty("--btn_on", "rgb(0, 87, 78)");
+		document.documentElement.style.setProperty("--btn_off", "rgb(54, 228, 219)");
+		document.documentElement.style.setProperty("--img_brightness", "0.5");
+	}
+	else
+	{
+		document.documentElement.style.setProperty("--body_background", "black");
+		document.documentElement.style.setProperty("--background", "black");
+		document.documentElement.style.setProperty("--font", "white");
+		document.documentElement.style.setProperty("--title", "#aaa");
+		document.documentElement.style.setProperty("--border", "#666");
+		document.documentElement.style.setProperty("--border_light", "#444");
+		document.documentElement.style.setProperty("--focus", "#888");
+		document.documentElement.style.setProperty("--btn_on", "#222");
+		document.documentElement.style.setProperty("--btn_off", "#222");
+		document.documentElement.style.setProperty("--img_brightness", "0.9");
+	}
+}
+
 function findGetParameter(parameterName)
 {
     var result = null,
@@ -136,14 +181,14 @@ function readSetting()
 	apiUser.configure(endpoint, 'user', parameter);
 	apiInformation.configure(endpoint, 'information', parameter);
 
-	document.getElementById('setting_current_user').value = '';
+	//document.getElementById('setting_current_user').value = '';
 	setIsAdmin(false);
 	apiUser.call('current', function(result)
 	{
 		if (checkResult(result, null, false))
 		{
 			setIsAdmin(result.role === 'ADMIN');
-			document.getElementById('setting_current_user').value = result.name;
+			//document.getElementById('setting_current_user').value = result.name;
 		}
 	}, {'token': token});
 }
@@ -171,9 +216,12 @@ function saveSettings()
 {
 	endpoint = document.getElementById('setting_endpoint').value;
 	token = document.getElementById('setting_token').value;
+	appearence = document.getElementById('setting_appearence');
 	mMediaCenter = '';
 	window.localStorage.setItem("endpoint", endpoint);
 	window.localStorage.setItem("token", token);
+	window.localStorage.setItem("appearence", appearence.value);
+	loadAppearence();
 	readSetting();
 	refreshMediaServer();
 	refreshFiles();

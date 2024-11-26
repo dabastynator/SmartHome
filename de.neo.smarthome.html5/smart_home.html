@@ -53,7 +53,12 @@
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
-		<label for="setting_current_user">Current User</label> <input id="setting_current_user" placeholder="No active User" readonly/>
+		<label for="setting_appearence">Appearence</label>
+			<select id="setting_appearence">
+				<option value="dark">Dark</option>
+				<option value="bright">Bright</option>
+				<option value="turquoise">Turquoise</option>
+			</select>
 		<div style="text-align:right;">
 			<button class="button" onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
 			<button class="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
