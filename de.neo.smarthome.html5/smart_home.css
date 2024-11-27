@@ -1,15 +1,4 @@
 :root {
-	--body_background: rgb(0, 87, 78);
-	--background: rgba(228, 255, 253);
-	--font: black;
-	--title: rgb(0, 87, 78);
-	--border: rgb(0, 87, 78);
-	--border_light: rgb(46, 117, 113);
-	--focus: rgb(0, 87, 78);
-	--btn_on: rgb(0, 87, 78);
-	--btn_off: rgb(54, 228, 219);
-	--img_brightness: 0.5;
-	
 	--offset: 8px;
 	--top: 60px;
 	--bottom: 57px;
@@ -37,8 +26,8 @@ body {
 .card, .dialog, .filling {
 	box-sizing: border-box;
 	background: var(--background);
-	border-radius: 2px;
-	border: 1px solid var(--border);
+	border-radius: var(--card_radius);
+	border: var(--card_border);
 	overflow: auto
 }
 
@@ -52,17 +41,6 @@ body {
 
 #playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation, #information{
 	position: absolute;
-}
-
-#border_navigation
-{
-	white-space: nowrap;
-}
-
-.nav_button
-{
-	float: initial;
-	display: inline;
 }
 
 @media (min-width: 900px){
@@ -170,47 +148,49 @@ body {
 	margin: 4px;
 	float: left;
 	min-width: 110px;
-	text-align: filesystem;
 	box-sizing: border-box;
 	transition: 0.3s;
+	border-radius: var(--btn_radius);
 }
 
 .on {
-	background: var(--btn_on);
-	border: 2px solid var(--border);
-	box-shadow: inset 0 0 0 0 var(--border);
+	background: var(--btn_on_bg);
+	border: var(--btn_on_border);
+	box-shadow: inset 0 0 0 0 var(--btn_on_border_color);
 }
 
 .on:hover {
-	box-shadow: inset 10px 0 0 0 var(--border);
+	border: var(--btn_hover_border);
+	box-shadow: inset 10px 0 0 0 var(--btn_on_border_color);
 	transition: 0.2s;
 }
 
 .on:active {
-	box-shadow: inset 150px 0 0 0 var(--border);
+	box-shadow: inset 150px 0 0 0 var(--btn_on_border_color);
 	transition: 0.2s;
 }
 
 .off {
-	background: var(--background);
-	border: 2px solid var(--btn_off);
-	box-shadow: inset 0 0 0 0 var(--btn_off);
+	background: var(--btn_off_bg);
+	border: var(--btn_off_border);
+	box-shadow: inset 0 0 0 0 var(--btn_off_border_color);
 }
 
 .off:hover {
-	box-shadow: inset 10px 0 0 0 var(--btn_off);
+	box-shadow: inset 10px 0 0 0 var(--btn_off_border_color);
+	border: var(--btn_hover_border);
 	transition: 0.2s;
 }
 
 .off:active {
-	box-shadow: inset 150px 0 0 0 var(--btn_off);
+	box-shadow: inset 150px 0 0 0 var(--btn_off_border_color);
 	transition: 0.2s;
 }
 
 .line {
 	width: 100%;
 	padding: 10px 0;
-	border-bottom: 1px solid var(--border_light);
+	border-bottom: 1px solid var(--border);
 	vertical-align: middle;
 }
 
@@ -263,7 +243,7 @@ button, input, .input, select{
 	font-size: 100%;
 	margin: 5px 0px 5px 0px;
 	padding: 5px;
-	border: 1px solid var(--border_light);
+	border: 1px solid var(--border);
 	transition: all 0.15s;
 }
 
@@ -294,7 +274,7 @@ input:checked + label:after {
 	text-indent: -9999px;
 	width: 80px;
 	height: 30px;
-	background: var(--border_light);
+	background: var(--border);
 	display: block;
 	border-radius: 30px;
 	position: relative;
@@ -327,14 +307,19 @@ label, .label{
 	cursor:pointer;
 }
 
-.button:hover, input:focus, select:focus{
-	border: 1px solid var(--focus);
-	box-shadow: inset 0 0 10px var(--focus);
+.button:hover, input:hover, select:hover, .file:hover{
+	box-shadow: inset 0 0 5px var(--focus);
 	transition: all 0.15s;
 }
 
-.switch:hover {
-	border: 2px solid var(--focus);
+.button:hover, input:hover, select:hover{
+	border: 1px solid var(--focus);
+}
+
+input:focus, select:focus{
+	border: 1px solid var(--focus);
+	box-shadow: inset 0 0 15px var(--focus);
+	transition: all 0.15s;
 }
 
 .button:active {
@@ -345,9 +330,7 @@ label, .label{
 
 .file{		
 	padding: 6px;
-	border-bottom: 1px solid var(--border_light);
-	width: 100%;
-	margin: 0px;
+	border-bottom: 1px solid var(--border);
 	text-align: left;
 	cursor: pointer;
 }

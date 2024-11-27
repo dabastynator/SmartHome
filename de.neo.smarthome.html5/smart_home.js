@@ -99,26 +99,40 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--body_background", "white");
 		document.documentElement.style.setProperty("--background", "white");
 		document.documentElement.style.setProperty("--font", "black");
-		document.documentElement.style.setProperty("--title", "#222");
-		document.documentElement.style.setProperty("--border", "#888");
-		document.documentElement.style.setProperty("--border_light", "#888");
-		document.documentElement.style.setProperty("--focus", "#666");
-		document.documentElement.style.setProperty("--btn_on", "#aaa");
-		document.documentElement.style.setProperty("--btn_off", "#aaa");
-		document.documentElement.style.setProperty("--img_brightness", "0.4");
+		document.documentElement.style.setProperty("--title", "black");
+		document.documentElement.style.setProperty("--border", "black");
+		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
+		document.documentElement.style.setProperty("--card_radius", "0px");
+		document.documentElement.style.setProperty("--focus", "black");
+		document.documentElement.style.setProperty("--btn_radius", "0px");
+		document.documentElement.style.setProperty("--btn_on_border_color", "#888");
+		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_bg", "#aaa");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#ddd");
+		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_bg", "white");
+		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #888");
+		document.documentElement.style.setProperty("--img_brightness", "0.3");
 	}
 	else if(appearence == 'turquoise')
 	{
-		document.documentElement.style.setProperty("--body_background", "rgb(0, 87, 78)");
-		document.documentElement.style.setProperty("--background", "rgba(228, 255, 253)");
+		document.documentElement.style.setProperty("--body_background", "#05445e");
+		document.documentElement.style.setProperty("--background", "#d4f1f4");
 		document.documentElement.style.setProperty("--font", "black");
-		document.documentElement.style.setProperty("--title", "rgb(0, 87, 78)");
-		document.documentElement.style.setProperty("--border", "rgb(0, 87, 78)");
-		document.documentElement.style.setProperty("--border_light", "rgb(46, 117, 113)");
-		document.documentElement.style.setProperty("--focus", "rgb(0, 87, 78)");
-		document.documentElement.style.setProperty("--btn_on", "rgb(0, 87, 78)");
-		document.documentElement.style.setProperty("--btn_off", "rgb(54, 228, 219)");
-		document.documentElement.style.setProperty("--img_brightness", "0.5");
+		document.documentElement.style.setProperty("--title", "black");
+		document.documentElement.style.setProperty("--border", "black");
+		document.documentElement.style.setProperty("--card_border", "0px");
+		document.documentElement.style.setProperty("--card_radius", "27px");
+		document.documentElement.style.setProperty("--focus", "#05445e");
+		document.documentElement.style.setProperty("--btn_radius", "20px");
+		document.documentElement.style.setProperty("--btn_on_border_color", "#05445E");
+		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_bg", "#189AB4");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#75E6DA");
+		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
+		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #05445e");
+		document.documentElement.style.setProperty("--img_brightness", "0.3");
 	}
 	else
 	{
@@ -127,10 +141,17 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--font", "white");
 		document.documentElement.style.setProperty("--title", "#aaa");
 		document.documentElement.style.setProperty("--border", "#666");
-		document.documentElement.style.setProperty("--border_light", "#444");
+		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
+		document.documentElement.style.setProperty("--card_radius", "3px");
 		document.documentElement.style.setProperty("--focus", "#888");
-		document.documentElement.style.setProperty("--btn_on", "#222");
-		document.documentElement.style.setProperty("--btn_off", "#222");
+		document.documentElement.style.setProperty("--btn_radius", "2px");
+		document.documentElement.style.setProperty("--btn_on_border_color", "#666");
+		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_bg", "#222");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#222");
+		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_bg", "black");
+		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #888");
 		document.documentElement.style.setProperty("--img_brightness", "0.9");
 	}
 }
@@ -274,24 +295,24 @@ function refreshInformation()
 				
 				if (info.id == "sensor.garage_door")
 				{
-					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					content += '<div class="file"><table width="100%"><tr><td width="90%" class="link">';
 					content += info.name + "</td>";
 					content += '<td align="right">';
 					content += '<img src="img/cover_' + info.state + '.png" height="32px"/ class="link">';
-					content += '</td></tr></table></button>';
+					content += '</td></tr></table></div>';
 				}
 				if (info.id == "sensor.rct_power_storage_generator_a_energy_production_day")
 				{
-					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					content += '<div class="file"><table width="100%"><tr><td width="90%" class="link">';
 					var sunContent = Math.round(Number(info.state) / 100) / 10 + "kWh";
 					content += info.name + ' ' + sunContent + "</td>";
 					content += '<td align="right">';
 					content += '<img src="img/sun_power.png" height="32px"/ class="link">';
-					content += '</td></tr></table></button>';
+					content += '</td></tr></table></div>';
 				}
 				if (info.type == "weather")
 				{
-					content += '<button class="file"><table width="100%"><tr><td width="90%" class="link">';
+					content += '<div class="file"><table width="100%"><tr><td width="90%" class="link">';
 					content += 'Draußen ' + Math.round(info.celsius) + '&deg;' + '</td><td align="right">';
 
 					var icon_text = '<img class="weather" src="img/';
@@ -316,7 +337,7 @@ function refreshInformation()
 					icon_text += icon_name + '.png"/>';
 					content += icon_text;
 
-					content += '</td></tr></table></button>';
+					content += '</td></tr></table></div>';
 				}
 			}
 			htmlInformation.innerHTML = content;
@@ -493,30 +514,30 @@ function refreshFiles(){
 		if (checkResult(files, htmlFiles)) {
 			var content = "";
 			if (mPath != ''){
-				content = '<button onclick="directoryClick(\'' + Separator + '\')" class="file dir link">';
+				content = '<div onclick="directoryClick(\'' + Separator + '\')" class="file dir">';
 				content += '<table width="100%"><tr><td>';
-				content += '<img src="img/arrow.png" height="16px" class="link"></td><td width="100%">' + mPath.replace(Separator, ' | ') + '</td>';
-				content += '</tr></table></button>';
+				content += '<img src="img/arrow.png" height="16px"></td><td width="100%">' + mPath.replace(Separator, ' | ') + '</td>';
+				content += '</tr></table></div>';
 			}
 			files.sort(function(a, b){if (a.filetype == b.filetype) { return a.name.localeCompare(b.name);} return a.filetype.localeCompare(b.filetype);});
 			mFiles = files;
 			for (var i = 0; i < files.length; i++) {
 				var f = files[i];
 				if (f.filetype == "Directory") {
-					content += '<button class="file dir">';
+					content += '<div class="file dir">';
 				} else {
-					content += '<button class="file">';
+					content += '<div class="file">';
 				}
 				content += '<table width="100%"><tr>';
 				if (f.filetype == "Directory") {
-					content += '<td class="link" onclick="directoryClick(' + i + ')" >' + f.name + '</td>';
+					content += '<td onclick="directoryClick(' + i + ')" >' + f.name + '</td>';
 				} else {
-					content += '<td class="link" onclick="play(' + i + ')" >' + f.name + '</td>';
+					content += '<td onclick="play(' + i + ')" >' + f.name + '</td>';
 				}
 				content += '<td align="right" width="70px">';
-				content += '<img src="img/play.png" height="32px"/ class="link" onclick="play(' + i + ')">';
-				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="addFileToPls(mPath, \'' + f.name + '\')">';
-				content += '</td></tr></table></button>';
+				content += '<img src="img/play.png" height="32px"/ onclick="play(' + i + ')">';
+				content += '<img src="img/pls.png" height="32px"/ onclick="addFileToPls(mPath, \'' + f.name + '\')">';
+				content += '</td></tr></table></div>';
 			}
 			htmlFiles.innerHTML = content;
 		}
@@ -581,12 +602,12 @@ function refreshPlaylist(){
 			result.sort(function(a, b){return a.name.localeCompare(b.name);});
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<button class="file"><table width="100%"><tr>';
+				content += '<div class="file"><table width="100%"><tr>';
 				content += '<td width="90%" onclick="plsClick(\'' + p.name + '\')" class="link">' + p.name + "</td>";
 				content += '<td align="right">';
 				//content += '<img src="img/play.png" height="32px"/ class="link" onclick="plsClick(\'' + p.name + '\')">';
 				content += '<img src="img/pls.png" height="32px"/ class="link" onclick="showPlsContent(\'' + p.name + '\')">';
-				content += '</td></tr></table></button>';
+				content += '</td></tr></table></div>';
 			}
 			htmlPls.innerHTML = content;
 		}		
