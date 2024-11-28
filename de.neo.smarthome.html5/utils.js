@@ -2,13 +2,17 @@ var currentVisible = undefined;
 
 window.onresize = function()
 {
+	if (currentVisible == undefined)
+	{
+		currentVisible = document.getElementById("switches");
+	}
 	var areas = ["playlists","switches","filesystem", "information"];
 	for (var i = 0; i < areas.length; i++) {
 		var a = areas[i];
 		var elem = document.getElementById(a);
 		if (elem != null)
 		{
-			if (elem == currentVisible || window.width >= 900)
+			if (elem == currentVisible || window.innerWidth >= 900)
 			{
 				elem.style.zIndex = "auto";
 			}

@@ -99,19 +99,22 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--body_background", "white");
 		document.documentElement.style.setProperty("--background", "white");
 		document.documentElement.style.setProperty("--font", "black");
+		document.documentElement.style.setProperty("--font_on", "white");
 		document.documentElement.style.setProperty("--title", "black");
 		document.documentElement.style.setProperty("--border", "black");
 		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
 		document.documentElement.style.setProperty("--card_radius", "0px");
 		document.documentElement.style.setProperty("--focus", "black");
 		document.documentElement.style.setProperty("--btn_radius", "0px");
+		document.documentElement.style.setProperty("--btn_border", "1px");
 		document.documentElement.style.setProperty("--btn_on_border_color", "#888");
-		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
-		document.documentElement.style.setProperty("--btn_on_bg", "#aaa");
-		document.documentElement.style.setProperty("--btn_off_border_color", "#ddd");
-		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid white");
+		document.documentElement.style.setProperty("--btn_on_bg", "black");
+		document.documentElement.style.setProperty("--btn_off_border_color", "black");
+		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid black");
 		document.documentElement.style.setProperty("--btn_off_bg", "white");
-		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #888");
 		document.documentElement.style.setProperty("--img_brightness", "0.3");
 	}
 	else if(appearence == 'turquoise')
@@ -119,39 +122,68 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--body_background", "#05445e");
 		document.documentElement.style.setProperty("--background", "#d4f1f4");
 		document.documentElement.style.setProperty("--font", "black");
+		document.documentElement.style.setProperty("--font_on", "var(--font)");
 		document.documentElement.style.setProperty("--title", "black");
 		document.documentElement.style.setProperty("--border", "black");
 		document.documentElement.style.setProperty("--card_border", "0px");
-		document.documentElement.style.setProperty("--card_radius", "27px");
+		document.documentElement.style.setProperty("--card_radius", "25px");
 		document.documentElement.style.setProperty("--focus", "#05445e");
 		document.documentElement.style.setProperty("--btn_radius", "20px");
+		document.documentElement.style.setProperty("--btn_border", "1px");
 		document.documentElement.style.setProperty("--btn_on_border_color", "#05445E");
-		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid #05445E");
 		document.documentElement.style.setProperty("--btn_on_bg", "#189AB4");
-		document.documentElement.style.setProperty("--btn_off_border_color", "#75E6DA");
-		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_border_color", "#189AB4");
+		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #189AB4");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
-		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #05445e");
 		document.documentElement.style.setProperty("--img_brightness", "0.3");
+	}
+	else if(appearence == 'darkred')
+	{
+		document.documentElement.style.setProperty("--body_background", "black");
+		document.documentElement.style.setProperty("--background", "#100");
+		document.documentElement.style.setProperty("--font", "white");
+		document.documentElement.style.setProperty("--font_on", "var(--font)");
+		document.documentElement.style.setProperty("--title", "white");
+		document.documentElement.style.setProperty("--border", "#800");
+		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
+		document.documentElement.style.setProperty("--card_radius", "13px");
+		document.documentElement.style.setProperty("--focus", "#f55");
+		document.documentElement.style.setProperty("--btn_radius", "8px");
+		document.documentElement.style.setProperty("--btn_border", "1px");
+		document.documentElement.style.setProperty("--btn_on_border_color", "#a00");
+		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid #a00");
+		document.documentElement.style.setProperty("--btn_on_bg", "#500");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#a00");
+		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #a00");
+		document.documentElement.style.setProperty("--btn_off_bg", "#000");
+		document.documentElement.style.setProperty("--img_brightness", "0.9");
 	}
 	else
 	{
 		document.documentElement.style.setProperty("--body_background", "black");
 		document.documentElement.style.setProperty("--background", "black");
 		document.documentElement.style.setProperty("--font", "white");
+		document.documentElement.style.setProperty("--font_on", "var(--font)");
 		document.documentElement.style.setProperty("--title", "#aaa");
 		document.documentElement.style.setProperty("--border", "#666");
 		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
 		document.documentElement.style.setProperty("--card_radius", "3px");
 		document.documentElement.style.setProperty("--focus", "#888");
 		document.documentElement.style.setProperty("--btn_radius", "2px");
+		document.documentElement.style.setProperty("--btn_border", "2px");
 		document.documentElement.style.setProperty("--btn_on_border_color", "#666");
 		document.documentElement.style.setProperty("--btn_on_border", "2px solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border_hover", "2px solid #888");
 		document.documentElement.style.setProperty("--btn_on_bg", "#222");
 		document.documentElement.style.setProperty("--btn_off_border_color", "#222");
 		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
+		document.documentElement.style.setProperty("--btn_off_border_hover", "2px solid #888");
 		document.documentElement.style.setProperty("--btn_off_bg", "black");
-		document.documentElement.style.setProperty("--btn_hover_border", "2px solid #888");
 		document.documentElement.style.setProperty("--img_brightness", "0.9");
 	}
 }
@@ -228,9 +260,11 @@ function initSettings()
 {
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
+	var appearence = document.getElementById('setting_appearence');
 
 	endpoint.value = window.localStorage.getItem("endpoint");
 	token.value = window.localStorage.getItem("token");
+	appearence.value = window.localStorage.getItem("appearence");
 }
 
 function saveSettings()
@@ -528,7 +562,7 @@ function refreshFiles(){
 				} else {
 					content += '<div class="file">';
 				}
-				content += '<table width="100%"><tr>';
+				content += '<table width="100%" style="table-layout:fixed;"><tr>';
 				if (f.filetype == "Directory") {
 					content += '<td onclick="directoryClick(' + i + ')" >' + f.name + '</td>';
 				} else {
@@ -582,11 +616,11 @@ function showPlsContent(pls){
 			title.innerHTML = "Playlist content";
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
-				content += '<button class="file"><table width="100%"><tr>';
+				content += '<div class="file"><table width="100%"><tr>';
 				content += '<td width="90%" onclick="mFile=\'' + p.name + '\';playPath(\'' + p.path + '\')" class="link">' + p.name + "</td>";
 				content += '<td align="right">';
 				content += '<img src="img/delete.png" height="32px"/ class="link" onclick="deletePlsItem(\'' + mPls + '\', \'' + p.path + '\')">';
-				content += '</td></tr></table></button>';
+				content += '</td></tr></table></div>';
 			}
 			htmlPlsContent.innerHTML = content;
 			showDialog('playlist');

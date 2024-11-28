@@ -27,7 +27,7 @@
 	<img class="player_btn" src="img/prev.png" onclick="playerAction('previous')"/>
 	<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
 	<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
-	<div id="player_content" style="display: inline;">
+	<div id="player_content" style="display: inline">
 		Nothing played
 	</div>
 </div>
@@ -38,13 +38,14 @@
 
 <div id="information" class="card">No information</div>
 
-<div id="filesystem" class="card">No files</div>
+<div id="filesystem" class="card" style="overflow-x: hidden;">No files</div>
 
 <div id="border_navigation" class="card">
-	<div class="switch off" id="nav_switches" onclick="showArea('switches')">Switches</div>
-	<div class="switch off" id="nav_filesystem" onclick="showArea('filesystem')">Files</div>
-	<div class="switch off" id="nav_playlists" onclick="showArea('playlists')">Playlists</div>
-	<div class="switch off" id="nav_information" onclick="showArea('information')">Information</div>
+	<!-- https://css-tricks.com/fighting-the-space-between-inline-block-elements/ -->
+	<div class="switch on nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</div><!--
+	--><div class="switch off nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</div><!--
+	--><div class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</div><!--
+	--><div class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Information</div>
 </div>
 
 <!-- List of all Dialogs -->
@@ -58,6 +59,7 @@
 				<option value="dark">Dark</option>
 				<option value="bright">Bright</option>
 				<option value="turquoise">Turquoise</option>
+				<option value="darkred">Dark Red</option>
 			</select>
 		<div style="text-align:right;">
 			<button class="button" onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
@@ -72,7 +74,7 @@
 	<div id="content_playlist" class="dialog">
 		<table style="margin: 7px; width: 500px">
 			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
-			<tr><td><div id="playlist_content" style="height: 300px; overflow: auto">Content</div></td></tr>
+			<tr><td><div id="playlist_content">Content</div></td></tr>
 			<tr><td style="text-align:right;">	<button class="button" onclick="hideDialog('playlist');">OK</button></td></tr>
 		</table>
 	</div>
