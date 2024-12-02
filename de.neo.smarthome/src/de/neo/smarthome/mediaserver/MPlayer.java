@@ -16,18 +16,21 @@ import de.neo.smarthome.api.PlayerException;
 import de.neo.smarthome.api.PlayingBean;
 import de.neo.smarthome.api.PlayingBean.STATE;
 
-public class MPlayer extends AbstractPlayer {
+public class MPlayer extends AbstractPlayer
+{
 
 	protected Process mMplayerProcess;
 	protected PrintStream mMplayerIn;
 	private int mSeekValue;
 	private Object mPlayListfolder;
 
-	public MPlayer(String playListfolder) {
+	public MPlayer(String playListfolder) 
+	{
 		this.mPlayListfolder = playListfolder;
 	}
 
-	protected void writeCommand(String cmd) throws PlayerException {
+	protected void writeCommand(String cmd) throws PlayerException 
+	{
 		if (mMplayerIn == null)
 			throw new PlayerException("mplayer is down");
 		mMplayerIn.print(cmd);
@@ -36,27 +39,36 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void play(String file) {
+	public void play(String file) 
+	{
 		if (mMplayerProcess == null)
 			startPlayer();
 
-		if (new File(file).isDirectory()) {
+		if (new File(file).isDirectory()) 
+		{
 			createPlayList(file);
 			mMplayerIn.print("loadlist " + mPlayListfolder + "/playlist.pls\n");
 			mMplayerIn.flush();
-		} else {
+		}
+		else 
+		{
 			mMplayerIn.print("loadfile \"" + file + "\" 0\n");
 			mMplayerIn.flush();
 		}
-		try {
+		try 
+		{
 			writeVolume();
-		} catch (PlayerException e) {
+		} 
+		catch (PlayerException e) 
+		{
 		}
 		super.play(file);
 	}
 
-	private void createPlayList(String file) {
-		try {
+	private void createPlayList(String file) 
+	{
+		try
+		{
 			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "find \"" + file + "/\" | sort" });
 			PrintStream output = new PrintStream(new FileOutputStream(mPlayListfolder + "/playlist.pls"));
 			BufferedReader input = new BufferedReader(new InputStreamReader(exec.getInputStream()));
@@ -69,30 +81,41 @@ public class MPlayer extends AbstractPlayer {
 			output.close();
 			input.close();
 			error.close();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 	}
 	
-	private static void setAmixerVolum(int volume){
-		try {
+	private static void setAmixerVolum(int volume)
+	{
+		try 
+		{
 			String[] amixerArgs = new String[] { "/usr/bin/amixer", "-q", "-M", "sset", "Speaker", volume + "%" };
 			Process amixer = Runtime.getRuntime().exec(amixerArgs);
 			amixer.waitFor();
 			BufferedReader buf = new BufferedReader(new InputStreamReader(amixer.getInputStream()));
 			String line = "";
-			while ((line=buf.readLine())!=null) {
+			while ((line=buf.readLine())!=null) 
+			{
 				RemoteLogger.performLog(LogPriority.WARNING, "Set amixer volume: " + line, "MPlayer");
 			}
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
-		} catch (InterruptedException e) {
+		} 
+		catch (InterruptedException e) 
+		{
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 	}
 
-	protected void startPlayer() {
-		try {
+	protected void startPlayer() 
+	{
+		try 
+		{
 			// Set Volume
 			setAmixerVolum(mVolume);
 			
@@ -107,21 +130,27 @@ public class MPlayer extends AbstractPlayer {
 			mMplayerIn.flush();
 			// wait for mplayer to get the new volume
 			Thread.sleep(200);
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			// throw new PlayerException(e.getMessage());
-		} catch (InterruptedException e) {
+		} 
+		catch (InterruptedException e) 
+		{
 			// ignore
 		}
 	}
 
 	@Override
-	public void playPause() throws PlayerException {
+	public void playPause() throws PlayerException 
+	{
 		writeCommand("pause");
 		super.playPause();
 	}
 
 	@Override
-	public void quit() throws PlayerException {
+	public void quit() throws PlayerException 
+	{
 		writeCommand("quit");
 		setAmixerVolum(100);
 		mMplayerIn = null;
@@ -130,19 +159,22 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void next() throws PlayerException {
+	public void next() throws PlayerException 
+	{
 		writeCommand("pt_step 1");
 		super.next();
 	}
 
 	@Override
-	public void previous() throws PlayerException {
+	public void previous() throws PlayerException 
+	{
 		writeCommand("pt_step -1");
 		super.previous();
 	}
 
 	@Override
-	public void seekForwards() throws RemoteException, PlayerException {
+	public void seekForwards() throws RemoteException, PlayerException 
+	{
 		if (mSeekValue <= 0)
 			mSeekValue = 5;
 		else if (mSeekValue < -600)
@@ -152,7 +184,8 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void seekBackwards() throws RemoteException, PlayerException {
+	public void seekBackwards() throws RemoteException, PlayerException 
+	{
 		if (mSeekValue >= 0)
 			mSeekValue = -5;
 		else if (mSeekValue > -600)
@@ -162,7 +195,8 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void volUp() throws PlayerException {
+	public void volUp() throws PlayerException 
+	{
 		mVolume += 3;
 		if (mVolume > 100)
 			mVolume = 100;
@@ -170,19 +204,22 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void volDown() throws PlayerException {
+	public void volDown() throws PlayerException 
+	{
 		mVolume -= 3;
 		if (mVolume < 0)
 			mVolume = 0;
 		writeVolume();
 	}
 
-	private void writeVolume() throws PlayerException {
+	private void writeVolume() throws PlayerException 
+	{
 		writeCommand("volume " + mVolume + " 1");
 	}
 
 	@Override
-	public void fullScreen(boolean full) throws PlayerException {
+	public void fullScreen(boolean full) throws PlayerException 
+	{
 		if (full)
 			writeCommand("vo_fullscreen 1");
 		else
@@ -190,12 +227,14 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void nextAudio() throws PlayerException {
+	public void nextAudio() throws PlayerException 
+	{
 		writeCommand("switch_audio -1");
 	}
 
 	@Override
-	public void playFromYoutube(String url) throws RemoteException, PlayerException {
+	public void playFromYoutube(String url) throws RemoteException, PlayerException 
+	{
 		if (mMplayerIn == null)
 			startPlayer();
 		String[] split = url.split(" ");
@@ -207,59 +246,76 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void playPlayList(String pls) throws RemoteException, PlayerException {
-		if (mMplayerIn == null) {
+	public void playPlayList(String pls) throws RemoteException, PlayerException 
+	{
+		if (mMplayerIn == null) 
+		{
 			startPlayer();
 		}
 		if (!new File(pls).exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
 
-		if (lineOfFileStartsWith(pls, "[playlist]") != null) {
+		if (lineOfFileStartsWith(pls, "[playlist]") != null) 
+		{
 			String url = lineOfFileStartsWith(pls, "File");
 			url = url.substring(url.indexOf("=") + 1);
 			mMplayerIn.print("loadfile " + url + "\n");
-		} else
+		} 
+		else
 			mMplayerIn.print("loadlist \"" + pls + "\"\n");
 
 		writeVolume();
 	}
 
-	private String lineOfFileStartsWith(String file, String prefix) {
+	private String lineOfFileStartsWith(String file, String prefix) 
+	{
 		String match = null;
-		try {
+		try 
+		{
 			BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
 			String line = null;
 			while ((line = reader.readLine()) != null)
-				if (line.startsWith(prefix)) {
+				if (line.startsWith(prefix)) 
+				{
 					match = line;
 					break;
 				}
 			reader.close();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 		return match;
 	}
 
-	class PlayerObserver extends Thread {
+	class PlayerObserver extends Thread 
+	{
 		private BufferedReader input;
 
-		public PlayerObserver(InputStream stream) {
+		public PlayerObserver(InputStream stream) 
+		{
 			input = new BufferedReader(new InputStreamReader(stream));
 		}
 
 		@Override
-		public void run() {
+		public void run() 
+		{
 			String line = null;
 			PlayingBean bean = new PlayingBean();
 			try {
-				while ((line = input.readLine()) != null) {
-					if (line.startsWith("Playing")) {
-						try {
+				while ((line = input.readLine()) != null) 
+				{
+					if (line.startsWith("Playing")) 
+					{
+						try 
+						{
 							String file = line.substring(8);
 							file = file.substring(0, file.length() - 1);
 							bean = readFileInformations(new File(file));
-						} catch (IOException e) {
+						} 
+						catch (IOException e) 
+						{
 							bean = new PlayingBean();
 						}
 						String file = line.substring(line.lastIndexOf(File.separator) + 1);
@@ -281,7 +337,8 @@ public class MPlayer extends AbstractPlayer {
 						loadThumbnail(bean);
 						informPlayingBean(bean);
 					}
-					if (line.startsWith("ICY Info")) {
+					if (line.startsWith("ICY Info")) 
+					{
 						bean.setStartTime(System.currentTimeMillis());
 						bean.parseICYInfo(line);
 						bean.setState(STATE.PLAY);
@@ -292,7 +349,9 @@ public class MPlayer extends AbstractPlayer {
 				bean.setVolume(mVolume);
 				bean.setState(PlayingBean.STATE.DOWN);
 				informPlayingBean(bean);
-			} catch (IOException e) {
+			} 
+			catch (IOException e) 
+			{
 				RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(),
 						"MPlayerListener");
 			}
@@ -301,17 +360,20 @@ public class MPlayer extends AbstractPlayer {
 	}
 
 	@Override
-	public void setPlayingPosition(int second) throws RemoteException, PlayerException {
+	public void setPlayingPosition(int second) throws RemoteException, PlayerException 
+	{
 		writeCommand("seek " + second + " 2");
 	}
 
 	@Override
-	public void useShuffle(boolean shuffle) throws RemoteException, PlayerException {
+	public void useShuffle(boolean shuffle) throws RemoteException, PlayerException 
+	{
 		throw new PlayerException("shuffle is not supported jet.");
 	}
 
 	@Override
-	public void setVolume(int volume) throws RemoteException, PlayerException {
+	public void setVolume(int volume) throws RemoteException, PlayerException 
+	{
 		mVolume = volume;
 		if (mPlayingBean != null)
 			mPlayingBean.setVolume(volume);

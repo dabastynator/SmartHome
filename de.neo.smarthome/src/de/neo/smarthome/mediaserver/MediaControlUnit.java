@@ -1,14 +1,10 @@
 package de.neo.smarthome.mediaserver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import de.neo.persist.annotations.Domain;
@@ -16,13 +12,10 @@ import de.neo.persist.annotations.OnLoad;
 import de.neo.persist.annotations.Persist;
 import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
-import de.neo.remote.transceiver.DirectorySender;
-import de.neo.remote.transceiver.FileSender;
-import de.neo.remote.transceiver.SenderProgress;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IWebMediaServer.BeanDownload;
-import de.neo.smarthome.api.IWebMediaServer.BeanDownload.DownloadType;
+import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
+import de.neo.smarthome.api.IWebMediaServer.FileType;
 
 @Domain(name = "MediaServer")
 public class MediaControlUnit extends AbstractControlUnit {
@@ -122,152 +115,39 @@ public class MediaControlUnit extends AbstractControlUnit {
 		return mBrowserLocation;
 	}
 
-	public BeanDownload publishForDownload(String file) throws RemoteException, IOException {
-		// Get next free port
-		int port = DOWNLOAD_PORT;
-		while (!portIsAvailable(port) && port < DOWNLOAD_PORT + 10) {
-			port++;
-		}
-		if (!portIsAvailable(port))
-			throw new IOException("There is no open port available. Too many downloads.");
-		// Check file type to create right publisher
-		File download = new File(mBrowserLocation + file);
-		BeanDownload result = new BeanDownload();
-		result.setIP(getLocalHostLANAddress().getHostAddress());
-		result.setPort(port);
-		if (download.isFile()) {
-			result.setType(DownloadType.File);
-			FileSender sender = new FileSender(download, port, 1, 1024 * 512);
-			sender.getProgressListener().add(new FileSendListener(file));
-			sender.sendAsync();
-		} else if (download.isDirectory()) {
-			result.setType(DownloadType.Directory);
-			DirectorySender sender = new DirectorySender(download, port, 1);
-			sender.getProgressListener().add(new FileSendListener(file));
-			sender.sendAsync();
-		} else {
-			throw new IOException("File does not exist: " + file);
-		}
-		return result;
-	}
-
-	private static InetAddress getLocalHostLANAddress() throws UnknownHostException {
-		try {
-			InetAddress candidateAddress = null;
-			// Iterate all NICs (network interface cards)...
-			for (Enumeration ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
-				NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
-				// Iterate all IP addresses assigned to each card...
-				for (Enumeration inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-					InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
-					if (!inetAddr.isLoopbackAddress()) {
-
-						if (inetAddr.isSiteLocalAddress()) {
-							// Found non-loopback site-local address. Return it
-							// immediately...
-							return inetAddr;
-						} else if (candidateAddress == null) {
-							// Found non-loopback address, but not necessarily
-							// site-local.
-							// Store it as a candidate to be returned if
-							// site-local address is not subsequently found...
-							candidateAddress = inetAddr;
-							// Note that we don't repeatedly assign non-loopback
-							// non-site-local addresses as candidates,
-							// only the first. For subsequent iterations,
-							// candidate will be non-null.
-						}
-					}
+	public ArrayList<BeanFileSystem> search(String path, String target) {
+		path = mBrowserLocation + path;
+		ArrayList<BeanFileSystem> matches = new ArrayList<>();
+		try
+		{
+			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", " find '" + path + "' -type d -path '*/.*' -prune -o -not -name '.*' -type f -iname '*" + target + "*' -print | sort" });
+			BufferedReader input = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+			BufferedReader error = new BufferedReader(new InputStreamReader(exec.getErrorStream()));
+			String line = "";
+			while ((line = input.readLine()) != null) 
+			{
+				BeanFileSystem bean = new BeanFileSystem();
+				File file = new File(line);
+				bean.path = file.getAbsolutePath().substring(mBrowserLocation.length());
+				bean.name = file.getName();
+				if (file.isDirectory())
+				{
+					bean.fileType = FileType.Directory;
 				}
-			}
-			if (candidateAddress != null) {
-				// We did not find a site-local address, but we found some other
-				// non-loopback address.
-				// Server might have a non-site-local address assigned to its
-				// NIC (or it might be running
-				// IPv6 which deprecates the "site-local" concept).
-				// Return this non-loopback candidate address...
-				return candidateAddress;
-			}
-			// At this point, we did not find a non-loopback address.
-			// Fall back to returning whatever InetAddress.getLocalHost()
-			// returns...
-			InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
-			if (jdkSuppliedAddress == null) {
-				throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
-			}
-			return jdkSuppliedAddress;
-		} catch (Exception e) {
-			UnknownHostException unknownHostException = new UnknownHostException(
-					"Failed to determine LAN address: " + e);
-			unknownHostException.initCause(e);
-			throw unknownHostException;
-		}
-	}
-
-	/**
-	 * Checks to see if a specific port is available.
-	 *
-	 * @param port the port to check for availability
-	 */
-	public static boolean portIsAvailable(int port) {
-		ServerSocket ss = null;
-		DatagramSocket ds = null;
-		try {
-			ss = new ServerSocket(port);
-			ss.setReuseAddress(true);
-			ds = new DatagramSocket(port);
-			ds.setReuseAddress(true);
-			return true;
-		} catch (IOException e) {
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
-
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException e) {
-					/* should not be thrown */
+				else if (file.isFile())
+				{
+					bean.fileType = FileType.File;
 				}
+				matches.add(bean);
 			}
+			input.close();
+			error.close();
+		} 
+		catch (IOException e) 
+		{
+			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
-
-		return false;
-	}
-
-	public class FileSendListener implements SenderProgress {
-
-		private String mFile;
-
-		public FileSendListener(String file) {
-			mFile = file;
-		}
-
-		@Override
-		public void startSending(long size) {
-		}
-
-		@Override
-		public void progressSending(long size) {
-		}
-
-		@Override
-		public void endSending(long size) {
-			RemoteLogger.performLog(LogPriority.INFORMATION, "Successfully send file :" + mFile, "Mediaserver");
-		}
-
-		@Override
-		public void exceptionOccurred(Exception e) {
-			RemoteLogger.performLog(LogPriority.ERROR, "Error occured sending file '" + mFile + "': "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage(), "Mediaserver");
-		}
-
-		@Override
-		public void sendingCanceled() {
-		}
-
+		return matches;
 	}
 
 }
