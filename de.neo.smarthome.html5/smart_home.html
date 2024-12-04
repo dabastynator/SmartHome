@@ -5,10 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta name="theme-color" content="#000000">
 	<title>SmartHome console</title>
-	<script src="smart_home.js"></script>
-	<script src="utils.js"></script>
+	<script src="smart_home.js?v=1.0"></script>
+	<script src="utils.js?v=1.0"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
-	<link href="smart_home.css" rel="stylesheet">
+	<link href="smart_home.css?v=1.0" rel="stylesheet">
 	<link rel="icon" href="img/SmartHome.png" type="image/png">
 </head>
 
@@ -32,20 +32,31 @@
 	</div>
 </div>
 
-<div id="playlists" class="card">No playlists</div>
+<div id="playlists" class="card">
+	<div id="playlists_list" class="card_fill">No playlists</div>	
+	<div id="playlists_buttons" class="card_buttons">
+		<div id="playlist_add" class="card_btn gone" onclick="newPlaylist();"><img src="img/plus.png" class="card_btn_img"/></div>
+	</div>
+</div>
 
 <div id="switches" class="card">No switches</div>
 
 <div id="information" class="card">No information</div>
 
-<div id="filesystem" class="card" style="overflow-x: hidden;">No files</div>
+<div id="filesystem" class="card" style="overflow: hidden">
+	<div id="filesystem_files" class="card_fill">No files</div>	
+	<div id="filesystem_buttons" class="card_buttons">
+		<div id="filesystem_back" class="card_btn gone"><img src="img/back.png" class="card_btn_img"/></div>
+		<div id="filesystem_search" class="card_btn gone" onclick="searchFilesDlg()"><img src="img/magnifier.png" class="card_btn_img"/></div>
+	</div>
+</div>
 
 <div id="border_navigation" class="card">
 	<!-- https://css-tricks.com/fighting-the-space-between-inline-block-elements/ -->
 	<div class="switch on nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</div><!--
 	--><div class="switch off nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</div><!--
 	--><div class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</div><!--
-	--><div class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Information</div>
+	--><div class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Info</div>
 </div>
 
 <!-- List of all Dialogs -->
@@ -64,7 +75,7 @@
 		<div style="text-align:right;">
 			<button class="button" onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
 			<button class="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
-			<button class="button" onclick="hideDialog('settings')">Cancel</button>
+			<button class="button" onclick="hideDialog('settings')">Close</button>
 		</div>
 	</div>
 </div>
@@ -75,7 +86,10 @@
 		<table style="margin: 7px; width: 500px">
 			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
 			<tr><td><div id="playlist_content">Content</div></td></tr>
-			<tr><td style="text-align:right;">	<button class="button" onclick="hideDialog('playlist');">OK</button></td></tr>
+			<tr><td style="text-align:right;">
+				<button class="button" onclick="hideDialog('playlist');deletePlaylist()">Delete</button>
+				<button class="button" onclick="hideDialog('playlist');">Close</button>				
+			</td></tr>
 		</table>
 	</div>
 </div>
@@ -137,6 +151,17 @@
 			<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
 		</div>
 		<div style="text-align:right;">	<button class="button" onclick="hideDialog('volume');">OK</button></div>
+	</div>
+</div>
+
+<div id="text_input" class="container">
+	<div id="content_text_input" class="dialog" style="width: 400px">
+		<div class="headline" id="text_input_title">Title</div>
+		<label id="text_input_label" for="test_input_edit">Endpoint</label> <input id="text_input_edit" placeholder=""/>
+		<div style="text-align:right;">
+			<button id="text_input_button" class="button" onclick="hideDialog('text_input');">OK</button>
+			<button class="button" onclick="hideDialog('text_input');">Cancel</button>
+		</div>
 	</div>
 </div>
 
