@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body
+{
+	background-image: linear-gradient(#444, black);
+	background-attachment: fixed;
+	color: white;
+}
+canvas
+{
+	border: 1px solid white;
+}
+input
+{
+	width: 500px
+}
+</style>
+</head>
+<body>
+<h1>Player Buttons by html canvas</h1>
+<h2>Configurations</h2>
+<table>
+	<tr>
+		<td>
+			Margin 1 (40)
+		</td>
+		<td>
+			<input id="margin_1" type="range" min="1" max="200" value="40" oninput="redraw()">
+		</td><td><div id="margin_1_output"></div></td>
+	</tr>
+	<tr>
+		<td>
+			Margin 2 (70)
+		</td>
+		<td>
+			<input id="margin_2" type="range" min="1" max="200" value="70" oninput="redraw()">
+		</td><td><div id="margin_2_output"></div></td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td>
+			<h2>Pause</h2>
+			<canvas id="pause" width="512" height="512" ></canvas>
+		</td>
+		<td>
+			<h2>Forward</h2>
+			<canvas id="forward" width="512" height="512" ></canvas>
+		</td>
+		<td>
+			<h2>Backward</h2>
+			<canvas id="back" width="512" height="512" ></canvas>
+		</td>
+		<td>
+			<h2>Next</h2>
+			<canvas id="next" width="512" height="512" ></canvas>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<h2>Prev</h2>
+			<canvas id="prev" width="512" height="512" ></canvas>
+		</td>
+		<td>
+			<h2>Play</h2>
+			<canvas id="triangle" width="512" height="512" ></canvas>
+		</td>
+		<td>
+			<h2>Stop</h2>
+			<canvas id="stop" width="512" height="512" ></canvas>
+		</td>
+	</tr>
+</table>
+
+<script>
+var width = 512;
+var height = 512;
+var pi = 3.1415926;
+var margin_1 = 0;
+var margin_2 = 0;
+
+redraw();
+
+function redraw()
+{
+	margin_1 = Number(document.getElementById("margin_1").value);
+	margin_2 = Number(document.getElementById("margin_2").value);
+	document.getElementById("margin_1_output").innerHTML = margin_1;
+	document.getElementById("margin_2_output").innerHTML = margin_2;
+	pause();
+	forward();
+	back();
+	next();
+	prev();
+	stop();
+	play();
+}
+
+function drawEquilateralTriangle(context, x, y, a)
+{
+	context.beginPath();
+	var r = a * Math.sqrt(3) / 3;
+	var count = 3;
+	for (var i=0; i<=count; i++)
+	{
+		if (i==0)
+		{
+			context.moveTo(x + r*Math.cos(i*2*pi/count), y + r*Math.sin(i*2*pi/count));
+		}
+		else
+		{
+			context.lineTo(x + r*Math.cos(i*2*pi/count), y + r*Math.sin(i*2*pi/count));
+		}
+	}
+	context.fill();
+}
+
+function drawTriangleInBox(context, x, y, w, h, dir = 1)
+{
+	context.beginPath();
+	if(dir == 1)
+	{
+		context.moveTo(x, y);
+		context.lineTo(x+w, y+h/2);
+		context.lineTo(x, y+h);
+		context.lineTo(x, y);
+	}
+	else
+	{
+		context.moveTo(x+w, y);
+		context.lineTo(x+w, y+h);
+		context.lineTo(x, y+h/2);
+		context.lineTo(x+w, y);
+	}
+	context.fill();
+}
+
+function pause()
+{
+	var canvas = document.getElementById("pause");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var ps_margin = margin_1;
+	var ps_margin_x = margin_2;
+	var ps_block = 0.25 * width;
+	context.fillRect(ps_margin_x, ps_margin, ps_block, height - 2*ps_margin);
+	context.fillRect(width - ps_margin_x - ps_block, ps_margin, ps_block, height - 2*ps_margin);
+}
+
+function forward()
+{
+	var canvas = document.getElementById("forward");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var for_margin = margin_1;
+	var for_block = (width - for_margin*2) / 2;
+	drawTriangleInBox(context, for_margin, for_margin, for_block, height - for_margin*2, 1);
+	drawTriangleInBox(context, for_margin + for_block, for_margin, for_block, height - for_margin*2, 1);
+}
+
+function back()
+{
+	var canvas = document.getElementById("back");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var for_margin = margin_1;
+	var for_block = (width - for_margin*2) / 2;
+	drawTriangleInBox(context, for_margin, for_margin, for_block, height - for_margin*2, -1);
+	drawTriangleInBox(context, for_margin + for_block, for_margin, for_block, height - for_margin*2, -1);
+}
+
+function prev()
+{
+	var canvas = document.getElementById("prev");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var nx_margin = margin_1;
+	var nx_block = 0.75 * (width - nx_margin*2);
+	drawTriangleInBox(context, width - nx_margin - nx_block, nx_margin, nx_block, height - 2*nx_margin, -1);
+	context.fillRect(nx_margin, nx_margin, width - 2*nx_margin - nx_block, height - 2*nx_margin);
+}
+
+function next()
+{
+	var canvas = document.getElementById("next");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var nx_margin = margin_1;
+	var nx_block = 0.75 * (width - nx_margin*2);
+	drawTriangleInBox(context, nx_margin, nx_margin, nx_block, height - 2*nx_margin, 1);
+	context.fillRect(nx_block + nx_margin, nx_margin, width - 2*nx_margin - nx_block, height - 2*nx_margin);
+}
+
+function play()
+{
+	var canvas = document.getElementById("triangle");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = "white";
+	var a = width - 2*margin_1;
+	var h = a * Math.sqrt(3) / 2;
+	var r = a * Math.sqrt(3) / 3;
+	drawEquilateralTriangle(context, width/2 - (h-r)/2, height/2, a);
+}
+
+function stop()
+{
+	var canvas = document.getElementById("stop");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	var box_margin = margin_2;
+	context.fillStyle = "white";
+	context.fillRect(box_margin, box_margin, width - 2*box_margin, height - 2*box_margin);
+}
+
+</script>
+
+</body>
+</html>
+

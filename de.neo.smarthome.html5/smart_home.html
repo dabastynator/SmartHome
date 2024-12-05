@@ -22,11 +22,12 @@
 </div >
 
 <div id="currentplaying" class="card" style="white-space: nowrap">
-	<img class="player_btn" src="img/stop.png" onclick="playerAction('stop')"/>
-	<img class="player_btn" src="img/pause.png" onclick="playerAction('play_pause')"/>
-	<img class="player_btn" src="img/prev.png" onclick="playerAction('previous')"/>
-	<img class="player_btn" src="img/next.png" onclick="playerAction('next')"/>
-	<img class="player_btn" src="img/vol_up.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
+	<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
+	<img class="player_btn" src="player/pause.png" onclick="playerAction('play_pause')"/>
+	<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
+	<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
+	<img class="player_btn" src="player/forward.png" onclick="playerAction('seek_forward')"/>
+	<img class="player_btn" src="player/speaker.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
 	<div id="player_content" style="display: inline">
 		Nothing played
 	</div>

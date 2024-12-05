@@ -334,9 +334,9 @@ img:hover
 
 .player_btn
 {
-	padding: 2px;
-	width: 35px;
-	margin-top: 4px;
+	padding-left: 8px;
+	width: 27px;
+	margin-top: 10px;
 	cursor:pointer;
 	float: left;
 }
@@ -465,6 +465,11 @@ input:focus, select:focus
 .dir
 {
 	font-weight: bold;	
+}
+
+.search_result
+{
+	font-size: 80%;
 }
 
 .rotate
