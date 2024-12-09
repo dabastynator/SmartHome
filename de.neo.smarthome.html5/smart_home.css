@@ -110,6 +110,7 @@ img
 
 .card_btn_img:hover
 {
+	filter: brightness(var(--img_card_brightness));
 	background-image: none;
 }
 
@@ -200,6 +201,10 @@ img
 		left: var(--offset);
 		right: var(--offset);
 	}
+	#playlists, #filesystem, #information
+	{
+		z-index: -1;
+	}
 }
 
 @media (max-width: 900px) and (max-height: 450px)
@@ -232,6 +237,10 @@ img
 		left: calc(var(--nav_w) + var(--offset));
 		right: var(--offset);
 	}
+	#playlists, #filesystem, #information
+	{
+		z-index: -1;
+	}
 }
 
 .switch
@@ -241,7 +250,7 @@ img
 	margin: 4px;
 	text-align: center;
 	height: calc(44px - 2*var(--btn_border));
-	float: left;
+	/*float: left;*/
 	min-width: 110px;
 	box-sizing: border-box;
 	transition: 0.3s;
@@ -310,7 +319,7 @@ img
 
 img:hover
 {
-	background-image: radial-gradient(closest-side, var(--focus), #ff000000);
+	filter: brightness(var(--img_brightness_hover));
 }
 
 .right
@@ -334,7 +343,7 @@ img:hover
 
 .player_btn
 {
-	padding-left: 8px;
+	padding-left: 5px;
 	width: 27px;
 	margin-top: 10px;
 	cursor:pointer;

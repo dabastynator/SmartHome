@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta name="theme-color" content="#000000">
 	<title>SmartHome console</title>
-	<script src="smart_home.js?v=1.0"></script>
-	<script src="utils.js?v=1.0"></script>
+	<script src="smart_home.js?v=2.0"></script>
+	<script src="utils.js?v=2.0"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
 	<link href="smart_home.css?v=1.0" rel="stylesheet">
 	<link rel="icon" href="img/SmartHome.png" type="image/png">
@@ -22,11 +22,12 @@
 </div >
 
 <div id="currentplaying" class="card" style="white-space: nowrap">
-	<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
-	<img class="player_btn" src="player/pause.png" onclick="playerAction('play_pause')"/>
 	<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
-	<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
+	<img class="player_btn" src="player/backward.png" onclick="playerAction('seek_backward')"/>
+	<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
+	<img class="player_btn" src="player/pause.png" id="play_pause" onclick="playerAction('play_pause')"/>
 	<img class="player_btn" src="player/forward.png" onclick="playerAction('seek_forward')"/>
+	<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
 	<img class="player_btn" src="player/speaker.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
 	<div id="player_content" style="display: inline">
 		Nothing played
@@ -40,12 +41,21 @@
 	</div>
 </div>
 
-<div id="switches" class="card">No switches</div>
+<div id="switches" class="card">
+	<div class="card_fill">
+		<div id="switch_list" class="line">
+			No Switches
+		</div>
+		<div id="scene_list" class="line">
+			No Scenes
+		</div>
+	</div>
+</div>
 
 <div id="information" class="card">No information</div>
 
 <div id="filesystem" class="card" style="overflow: hidden">
-	<div id="filesystem_files" class="card_fill">No files</div>	
+	<div id="filesystem_files" class="card_fill">No files</div>
 	<div id="filesystem_buttons" class="card_buttons">
 		<div id="filesystem_back" class="card_btn gone"><img src="img/back.png" class="card_btn_img"/></div>
 		<div id="filesystem_search" class="card_btn gone" onclick="searchFilesDlg()"><img src="img/magnifier.png" class="card_btn_img"/></div>

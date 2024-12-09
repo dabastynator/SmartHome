@@ -39,6 +39,7 @@ const Separator = "/";
 var apiTrigger = new APIHandler();
 var apiMediaServer = new APIHandler();
 var apiSwitch = new APIHandler();
+var apiScenes = new APIHandler();
 var apiAction = new APIHandler();
 var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
@@ -54,6 +55,7 @@ var htmlFiles;
 var htmlPls;
 var htmlPlsContent;
 var htmlSwitches;
+var htmlScenes;
 var htmlPlayInfo;
 var htmlMediaServer;
 var htmlUserList;
@@ -61,13 +63,15 @@ var htmlInformation;
 var htmlFilesBack;
 var htmlFilesSearch;
 var htmlPlsAdd;
+var htmlPlayPause;
 
 function initialize()
 {
 	htmlFiles = document.getElementById('filesystem_files');
 	htmlPls = document.getElementById('playlists_list');
 	htmlPlsContent = document.getElementById('playlist_content');
-	htmlSwitches = document.getElementById('switches');
+	htmlSwitches = document.getElementById('switch_list');
+	htmlScenes = document.getElementById('scene_list');
 	htmlPlayInfo = document.getElementById('player_content');
 	htmlMediaServer = document.getElementById('mediaserver');
 	htmlUserList = document.getElementById('userlist_content');
@@ -75,6 +79,7 @@ function initialize()
 	htmlFilesBack = document.getElementById('filesystem_back');
 	htmlFilesSearch = document.getElementById('filesystem_search');
 	htmlPlsAdd = document.getElementById('playlist_add');
+	htmlPlayPause = document.getElementById('play_pause');
 
 	readSetting();
 	align();
@@ -89,6 +94,7 @@ function initialize()
 	refreshInformation();
 	refreshPlayer();
 	refreshSwitches();
+	refreshScenes();
 	
 	setInterval(loopLong, 1000 * 30);
 	setInterval(loopShort, 1000 * 1);
@@ -141,6 +147,7 @@ function readSetting()
 	apiMediaServer.addDefaultParameter('player', 'mplayer');
 	apiMediaServer.addDefaultParameter('id', mMediaCenter);
 	apiSwitch.configure(endpoint, 'switch', parameter);
+	apiScenes.configure(endpoint, 'scene', parameter);
 	apiAction.configure(endpoint, 'action', parameter);
 	apiUser.configure(endpoint, 'user', parameter);
 	apiInformation.configure(endpoint, 'information', parameter);
@@ -197,12 +204,32 @@ function saveSettings()
 function loopLong()
 {
 	refreshInformation();
+	refreshScenes();
 }
 
 function loopShort()
 {
 	refreshPlayer();
 	refreshSwitches();
+}
+
+function refreshScenes()
+{
+	apiScenes.call('list', function(scenes)
+	{
+		if (checkResult(scenes, htmlScenes))
+		{
+			scenes.sort(function(a, b){return a.name.localeCompare(b.name)});
+			var content = "";
+			for (var i = 0; i < scenes.length; i++)
+			{
+				var scene = scenes[i];
+				content += '<button onclick="sceneClick(\'' + scene.id + '\')" class="switch off" style="width: 140px">';
+				content += scene.name + "</button>";
+			}
+			htmlScenes.innerHTML = content;
+		}		
+	});
 }
 
 function refreshSwitches()
@@ -294,8 +321,14 @@ function refreshInformation()
 	});
 }
 
-function switchClick(id, state){
+function switchClick(id, state)
+{
 	apiSwitch.call('set', refreshSwitches, {'id': id, 'state': state});
+}
+
+function sceneClick(id)
+{
+	apiScenes.call('activate', null, {'id': id});
 }
 
 function mediaClick(id){
@@ -340,7 +373,12 @@ function refreshPlayer(){
 				text += playing.title + '<br/>';
 			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
 				text += playing.file + '<br/>';
+			if (playing.state == "PLAY")
+				htmlPlayPause.src = 'player/pause.png';
+			else
+				htmlPlayPause.src = 'player/play.png';
 		} else {
+			htmlPlayPause.src = 'player/play.png';
 			text += 'Nothing played';
 		}
 		htmlPlayInfo.innerHTML = text;

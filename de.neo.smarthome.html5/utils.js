@@ -52,6 +52,7 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid black");
 		document.documentElement.style.setProperty("--btn_off_bg", "white");
 		document.documentElement.style.setProperty("--img_brightness", "0.3");
+		document.documentElement.style.setProperty("--img_brightness_hover", "0");
 		document.documentElement.style.setProperty("--btn_card_color", "#4d4d4d");
 		document.documentElement.style.setProperty("--img_card_brightness", "1");
 	}
@@ -78,6 +79,7 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #189AB4");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
 		document.documentElement.style.setProperty("--img_brightness", "0.3");
+		document.documentElement.style.setProperty("--img_brightness_hover", "0");
 		document.documentElement.style.setProperty("--btn_card_color", "var(--body_background)");
 		document.documentElement.style.setProperty("--img_card_brightness", "0.9");
 	}
@@ -103,7 +105,8 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #a00");
 		document.documentElement.style.setProperty("--btn_off_bg", "#000");
-		document.documentElement.style.setProperty("--img_brightness", "0.9");
+		document.documentElement.style.setProperty("--img_brightness", "0.8");
+		document.documentElement.style.setProperty("--img_brightness_hover", "1");
 		document.documentElement.style.setProperty("--btn_card_color", "white");
 		document.documentElement.style.setProperty("--img_card_brightness", "0");
 	}
@@ -129,7 +132,8 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "2px solid #888");
 		document.documentElement.style.setProperty("--btn_off_bg", "black");
-		document.documentElement.style.setProperty("--img_brightness", "0.9");
+		document.documentElement.style.setProperty("--img_brightness", "0.8");
+		document.documentElement.style.setProperty("--img_brightness_hover", "1");
 		document.documentElement.style.setProperty("--btn_card_color", "#e6e6e6");
 		document.documentElement.style.setProperty("--img_card_brightness", "0");
 	}
