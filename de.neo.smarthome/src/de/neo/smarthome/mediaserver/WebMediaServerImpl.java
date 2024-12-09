@@ -78,7 +78,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 	{
 		BeanMediaServer webMedia = new BeanMediaServer();
 		webMedia.merge(unit.getWebBean());
-		webMedia.setID(unit.getID());
+		webMedia.mID = unit.getID();
 		if (mediaServer.getMPlayer().getPlayingBean() != null
 				&& mediaServer.getMPlayer().getPlayingBean().getState() != STATE.DOWN)
 			webMedia.currentPlaying = mediaServer.getMPlayer().getPlayingBean();

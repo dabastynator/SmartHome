@@ -13,7 +13,6 @@ import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.RemoteLogger;
 import de.neo.smarthome.api.IControllUnit;
-import de.neo.smarthome.informations.WebInformation;
 import de.neo.smarthome.user.UnitAccessHandler;
 
 /**

@@ -44,8 +44,8 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 				SwitchUnit switchUnit = (SwitchUnit) unit;
 				BeanSwitch webSwitch = new BeanSwitch();
 				webSwitch.merge(unit.getWebBean());
-				webSwitch.setID(unit.getID());
-				webSwitch.setName(unit.getName());
+				webSwitch.mID = unit.getID();
+				webSwitch.mName = unit.getName();
 				webSwitch.setState(switchUnit.getState());
 				result.add(webSwitch);
 			}
@@ -69,10 +69,13 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 	}
 
 	@WebRequest(path = "create", description = "Create new switch.")
-	public BeanSwitch create(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
-			@WebParam(name = "name") String name, @WebParam(name = "family_code") String familyCode,
-			@WebParam(name = "switch_number") int switchNumber, @WebParam(name = "description") String description,
-			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
+	public BeanSwitch create(
+			@WebParam(name = "token") String token, 
+			@WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, 
+			@WebParam(name = "family_code") String familyCode,
+			@WebParam(name = "switch_number") int switchNumber, 
+			@WebParam(name = "description") String description)
 			throws RemoteException, IOException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		GPIOControlUnit unit = new GPIOControlUnit();
@@ -91,10 +94,13 @@ public class WebSwitchImpl extends AbstractUnitHandler implements IWebSwitch {
 	}
 
 	@WebRequest(path = "update", description = "Update existing switch.")
-	public BeanSwitch update(@WebParam(name = "token") String token, @WebParam(name = "id") String id,
-			@WebParam(name = "name") String name, @WebParam(name = "family_code") String familyCode,
-			@WebParam(name = "switch_number") int switchNumber, @WebParam(name = "description") String description,
-			@WebParam(name = "x") float x, @WebParam(name = "y") float y, @WebParam(name = "z") float z)
+	public BeanSwitch update(
+			@WebParam(name = "token") String token, 
+			@WebParam(name = "id") String id,
+			@WebParam(name = "name") String name, 
+			@WebParam(name = "family_code") String familyCode,
+			@WebParam(name = "switch_number") int switchNumber, 
+			@WebParam(name = "description") String description)
 			throws RemoteException, IOException, DaoException {
 		UserSessionHandler.require(token, UserRole.ADMIN);
 		IControllUnit unit = mCenter.getControlUnit(id);

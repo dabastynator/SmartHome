@@ -16,30 +16,14 @@ public class BeanWeb implements Serializable {
 		private static final long serialVersionUID = -4066506544238955935L;
 
 		@WebField(name = "name")
-		private String mName;
+		public String mName;
 
 		@WebField(name = "id")
-		private String mID;
-
-		public String getName() {
-			return mName;
-		}
-
-		public void setName(String name) {
-			mName = name;
-		}
-
-		public String getID() {
-			return mID;
-		}
-
-		public void setID(String iD) {
-			mID = iD;
-		}
+		public String mID;
 
 		public void merge(BeanWeb webBean) {
-			mID = webBean.getID();
-			mName = webBean.getName();
+			mID = webBean.mID;
+			mName = webBean.mID;
 		}
 
 	}

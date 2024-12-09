@@ -42,8 +42,8 @@ public abstract class AbstractControlUnit implements IControllUnit {
 	@Override
 	public BeanWeb getWebBean() {
 		BeanWeb bean = new BeanWeb();
-		bean.setID(mID);
-		bean.setName(mName);
+		bean.mID = mID;
+		bean.mID = mName;
 		return bean;
 	}
 }

@@ -31,6 +31,7 @@ import de.neo.smarthome.mediaserver.MediaControlUnit;
 import de.neo.smarthome.mediaserver.WebMediaServerImpl;
 import de.neo.smarthome.rccolor.RCColorControlUnit;
 import de.neo.smarthome.rccolor.WebLEDStripImpl;
+import de.neo.smarthome.scenes.WebSceneImpl;
 import de.neo.smarthome.switches.GPIOControlUnit;
 import de.neo.smarthome.switches.HassHandler;
 import de.neo.smarthome.switches.HassSwitchUnit;
@@ -44,6 +45,7 @@ public class SmartHome {
 
 	public static String WEBSERVER_PATH = "controlcenter";
 	public static String INFORMATION_PATH = "information";
+	public static String SCENE_PATH = "scene";
 	private static List<ControlUnitFactory> mControlUnitFactory = new ArrayList<>();
 
 	public static final SimpleDateFormat LogFormat = new SimpleDateFormat("dd.MM-HH:mm");
@@ -139,6 +141,7 @@ public class SmartHome {
 			throw new DaoException("Controlcenter was not loaded!");
 		ControlCenter center = dao.loadAll().get(0);
 		WebInformation info = new WebInformation();
+		WebSceneImpl scene = new WebSceneImpl(center);
 		info.initialize();
 		WebServer webServer = WebServer.getInstance();
 		if (center.getPort() > 0) {
@@ -149,6 +152,7 @@ public class SmartHome {
 			}
 			webServer.handle(WEBSERVER_PATH, center);
 			webServer.handle(INFORMATION_PATH, info);
+			webServer.handle(SCENE_PATH, scene);
 			webServer.start();
 		}
 		return center;
