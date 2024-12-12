@@ -293,6 +293,7 @@ function fileRow(row, buttons)
 	if (Object.hasOwn(row, 'subrow'))
 	{
 		file += '</div>';
+		file += '<div class="flex_line">';
 		file += '<div class="file_caption search_result" ' + row.subrow.onclick + '>' + row.subrow.caption + '</div>';
 		if (Object.hasOwn(row, 'subbutton'))
 		{
