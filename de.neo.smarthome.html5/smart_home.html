@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta name="theme-color" content="#000000"/>
 	<title>SmartHome console</title>
-	<script src="smart_home.js?v=2.1"></script>
-	<script src="utils.js?v=2.1"></script>
+	<script src="smart_home.js?v=2.2"></script>
+	<script src="utils.js?v=2.2"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
 	<link href="smart_home.css?v=1.0" rel="stylesheet"/>
@@ -56,7 +56,7 @@
 <div id="information" class="card">No information</div>
 
 <div id="filesystem" class="card" style="overflow: hidden">
-	<div id="filesystem_files" class="card_fill">No files</div>
+	<div id="filesystem_files" class="card_fill" style="overflow-x: hidden;">No files</div>
 	<div id="filesystem_buttons" class="card_buttons">
 		<div id="filesystem_back" class="card_btn gone"><img src="img/back.png" class="card_btn_img"/></div>
 		<div id="filesystem_search" class="card_btn gone" onclick="searchFilesDlg()"><img src="img/magnifier.png" class="card_btn_img"/></div>
@@ -73,7 +73,7 @@
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog dialog_fixed" style="--dlg_width: 550px; --dlg_height: 368px">
+	<div id="content_settings" class="dialog" style="--dlg_width: 550px; --dlg_height: 370px">
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
@@ -155,17 +155,17 @@
 </div>
 
 <div id="volume" class="container">
-	<div id="content_volume" class="dialog">
+	<div id="content_volume" class="dialog" style="--dlg_height: 180px">
 		<div class="headline" id="volume_title">Volume</div>
-		<div id="volume_content">
-			<input id="volume_input" type="range" style="width: 400px" min="0" max="100" value="30"/>
+		<input id="volume_input" style="margin:0px" type="range" min="0" max="100" value="30"/>
+		<div class="dialog_dynamic_footer">
+			<button class="button" onclick="hideDialog('volume');">OK</button>
 		</div>
-		<div style="text-align:right;">	<button class="button" onclick="hideDialog('volume');">OK</button></div>
 	</div>
 </div>
 
 <div id="text_input" class="container">
-	<div id="content_text_input" class="dialog" style="--dlg_width: 400px; --dlg_height: 204px">
+	<div id="content_text_input" class="dialog" style="--dlg_width: 400px; --dlg_height: 206px">
 		<div class="headline" id="text_input_title">Title</div>
 		<label id="text_input_label" for="test_input_edit">Endpoint</label>
 		<input id="text_input_edit" placeholder=""/>
