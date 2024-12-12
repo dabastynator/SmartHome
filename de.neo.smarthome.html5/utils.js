@@ -139,21 +139,6 @@ function loadAppearence()
 	}
 }
 
-function align()
-{
-	var padding = 0;
-
-	offset = 15;
-	var filling = document.getElementsByClassName("filling");
-	for (var i = 0; i < filling.length; i++) {
-		filling[i].style.position = "absolute";
-		filling[i].style.left = offset + 'px';
-		filling[i].style.width = window.innerWidth - 2 * (offset + padding) + 'px';
-		filling[i].style.top = offset + 'px';
-		filling[i].style.height = window.innerHeight - 2 * (offset + padding) + 'px';
-	} 
-}
-
 function showArea(area)
 {
 	var areas = ["playlists","switches","filesystem", "information"];

@@ -31,7 +31,7 @@ img
 	filter: brightness(var(--img_brightness));
 }
 
-.card, .dialog, .filling
+.card, .dialog
 {
 	box-sizing: border-box;
 	background: var(--background);
@@ -43,11 +43,6 @@ img
 .card
 {
 	padding: 0px;
-}
-
-.dialog, .filling
-{
-	padding: 8px;
 }
 
 .card_fill
@@ -245,12 +240,13 @@ img
 
 .switch
 {
+	--switch_height: calc(44px - 2*var(--btn_border));
 	cursor:pointer;
 	padding: 7px;
 	margin: 4px;
 	text-align: center;
-	height: calc(44px - 2*var(--btn_border));
-	/*float: left;*/
+	height: var(--switch_height);
+	vertical-align: middle;
 	min-width: 110px;
 	box-sizing: border-box;
 	transition: 0.3s;
@@ -339,6 +335,7 @@ img:hover
 	color: var(--title);
 	font-size: 120%;
 	padding-bottom: 10px;
+	flex: 0 0 auto;
 }
 
 .player_btn
@@ -357,14 +354,13 @@ img:hover
 	float: right;
 }
 
-button, input, .input, select
+button, .input, input, select
 {
 	background: var(--background);
 	color: var(--font);
 	font-family: var(--font_name);
 	font-size: 100%;
-	margin: 5px 0px 5px 0px;
-	padding: 5px;
+
 	border: 1px solid var(--border);
 	transition: all 0.15s;
 }
@@ -427,15 +423,18 @@ input:checked + label:after
 
 label, .label
 {
-	padding: 3px 5px;
+	margin-top: 9px;
+	padding: 2px;
 	box-sizing: border-box;
-	height: 40px;
 }
 
 .button
 {
-	width: 160px;
+	margin-top: 9px;
+	margin-left: 9px;
+	width: 140px;
 	cursor:pointer;
+	height: 35px;
 }
 
 .button:hover, input:hover, select:hover, .file:hover
@@ -463,15 +462,37 @@ input:focus, select:focus
 	transition: all 0.15s;
 }
 
-.file
+.flex_line, .file
 {
-	padding: 6px;
-	border-bottom: 1px solid var(--border);
+	width: 100%;
 	text-align: left;
 	cursor: pointer;
+	display: flex;
 }
 
-.dir
+.file
+{
+	border-bottom: 1px solid var(--border);
+}
+
+.file_caption
+{
+	min-width: 0;
+	margin: 6px;
+	display: flex;
+	flex: 1 1 auto;
+	line-height: 30px;
+}
+
+.file_button
+{
+	height: 32px;
+	margin: 6px;
+	display: flex;
+	flex: 0 0 auto;
+}
+
+.bold
 {
 	font-weight: bold;	
 }
@@ -501,7 +522,7 @@ input:focus, select:focus
 {
 	visibility: hidden;
 	position: fixed;
-	background: rgba(0, 0, 0, 0.7);
+	background: rgba(0, 0, 0, 0.3);
 	width: 100%;
 	height: 100%;
 	left: 0px;
@@ -525,16 +546,36 @@ input:focus, select:focus
 
 .dialog
 {
-	margin: auto auto;
-}
+	--dlg_width: 600px;
+	--dlg_height: 200px;
+	--dlg_offset_x: calc(max(50% - 0.5*var(--dlg_width), 10px));
+	--dlg_offset_y: calc(max(50% - 0.5*var(--dlg_height), 10px));
 
-.filling, .use_space
-{
-	box-sizing: border-box;
+	padding: 20px;
+	box-shadow: 0px 10px 30px black, 0px 0px 5px black;
+	position: absolute;
 	display: flex;
 	flex-direction: column;
-	padding: 8px;
-	padding-bottom: 23px;
+	left: var(--dlg_offset_x);
+	right: var(--dlg_offset_x);
+	top: var(--dlg_offset_y);
+	bottom: var(--dlg_offset_y);
+}
+
+.dialog_dynamic_body
+{
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	overflow: auto;
+	border: 1px solid var(--border);
+}
+
+.dialog_dynamic_footer
+{
+	display: flex;
+	justify-content: flex-end;
+	flex: 0 0 auto;
 }
 
 .disabled
@@ -547,11 +588,30 @@ input:focus, select:focus
 	height: 32px
 }
 
-#playlist_content
-{
-	height: 300px;
-	overflow: auto;
-	border: 1px solid var(--border);
+#toast {
+	--toast_width: 400px;
+	--toast_offset: calc(max(50% - 0.5*var(--toast_width), 10px));
+	background-color: #333;
+	color: #fff;
+	text-align: center;
+	border-radius: 2px;
+	padding: 16px;
+	position: absolute;
+	display: block;
+	left: var(--toast_offset);
+	right: var(--toast_offset);
+	z-index: 1;
+	bottom: 20px;
+	visibility: hidden;
+	opacity: 0%;
+	transition: 0.3s;
+}
+
+#toast.show {
+	visibility: visible;
+	opacity: 100%;
+	transform: translateY(-10px);
+	transition: 0.3s;
 }
 
 @media (max-width: 900px) and (min-height: 450px)

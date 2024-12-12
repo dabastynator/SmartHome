@@ -3,13 +3,14 @@
 <head>
 	<meta charset="UTF-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<meta name="theme-color" content="#000000">
+	<meta name="theme-color" content="#000000"/>
 	<title>SmartHome console</title>
 	<script src="smart_home.js?v=2.0"></script>
 	<script src="utils.js?v=2.0"></script>
-	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"> 
-	<link href="smart_home.css?v=1.0" rel="stylesheet">
-	<link rel="icon" href="img/SmartHome.png" type="image/png">
+	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
+	<link href="smart_home.css?v=1.0" rel="stylesheet"/>
+	<link rel="icon" href="img/SmartHome.png" type="image/png"/>
 </head>
 
 <body onload="initialize()" tabindex="-1">
@@ -64,15 +65,15 @@
 
 <div id="border_navigation" class="card">
 	<!-- https://css-tricks.com/fighting-the-space-between-inline-block-elements/ -->
-	<div class="switch on nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</div><!--
-	--><div class="switch off nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</div><!--
-	--><div class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</div><!--
-	--><div class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Info</div>
+	<button class="switch on nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</button><!--
+	--><button class="switch off nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</button><!--
+	--><button class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</button><!--
+	--><button class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Info</button>
 </div>
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog" style="max-width: 550px">
+	<div id="content_settings" class="dialog dialog_fixed" style="--dlg_width: 550px; --dlg_height: 365px">
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
@@ -83,7 +84,7 @@
 				<option value="turquoise">Turquoise</option>
 				<option value="darkred">Dark Red</option>
 			</select>
-		<div style="text-align:right;">
+		<div class="dialog_dynamic_footer">
 			<button class="button" onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
 			<button class="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
 			<button class="button" onclick="hideDialog('settings')">Close</button>
@@ -93,34 +94,32 @@
 
 <!-- Playlist -->
 <div id="playlist" class="container">
-	<div id="content_playlist" class="dialog">
-		<table style="margin: 7px; width: 500px">
-			<tr><td class="headline" id="playlist_title">Playlist</td></tr>
-			<tr><td><div id="playlist_content">Content</div></td></tr>
-			<tr><td style="text-align:right;">
-				<button class="button" onclick="hideDialog('playlist');deletePlaylist()">Delete</button>
-				<button class="button" onclick="hideDialog('playlist');">Close</button>				
-			</td></tr>
-		</table>
+	<div id="content_playlist" class="dialog dialog_dynamic" style="--dlg_width: 500px; --dlg_height: 500px">
+		<div class="headline" id="playlist_title">Playlist</div>
+		<div id="playlist_content" class="dialog_dynamic_body">Content</div>
+		<div class="dialog_dynamic_footer">
+			<button class="button" onclick="hideDialog('playlist');deletePlaylist()">Delete</button>
+			<button class="button" onclick="hideDialog('playlist');">Close</button>				
+		</div>
 	</div>
 </div>
 
 <!-- User -->
 <div id="userlist" class="container">
-	<div id="content_userlist" class="dialog use_space" style="width: 500px; height: 300px">
-		<header class="headline" id="userlist_title">Users</header>
-		<main id="userlist_content">Content</main>
-		<footer>
+	<div id="content_userlist" class="dialog" style="width: 500px; height: 300px">
+		<div id="userlist_title" class="headline">Users</div>
+		<div id="userlist_content" class="dialog_dynamic_body">Content</div>
+		<div class="dialog_dynamic_footer">
 			<button class="button" onclick="editUser(-1);">New User</button>
 			<button class="button" onclick="hideDialog('userlist');">Close</button>
-		</footer>
+		</div>
 	</div>
 </div>
 
 <div id="user_edit" class="container">
-	<div id="content_user_edit" class="dialog use_space" style="width: 700px; height: 95%">
-		<header class="headline" id="edit_user_title">Edit User</header>
-		<main>
+	<div id="content_user_edit" class="dialog" style="--dlg_width: 700px; --dlg_height: 500px">
+		<div class="headline" id="edit_user_title">Edit User</div>
+		<div class="dialog_dynamic_body">
 			<label for="user_name">Name</label> <input id="user_name" placeholder="Name..."/>
 			<label for="user_name">Password</label> <input id="user_passwd" placeholder="Password..."/>
 			<label for="user_role">Role</label>
@@ -129,16 +128,16 @@
 				<option value="ADMIN">Admin</option>
 			</select>
 			<div class="label user_required" style="width:100%">Unit Access List
-				<img src="img/add.png" class="icon" onclick="addUserAccess()">
+				<img src="img/add.png" class="icon" onclick="addUserAccess()"/>
 			</div>
 			<div class="input user_required" id="user_access"></div>
 			<div class="label user_required" style="width:100%">Active Sessions
-				<img src="img/add.png" class="icon" onclick="addUserSession()">
+				<img src="img/add.png" class="icon" onclick="addUserSession()"/>
 			</div>
 			<div class="input user_required" id="user_session"></div>
-		</main>
-		<div style="text-align:right;">
-			<button id="btn_user_remove" onclick="deleteUser();">Delete</button>
+		</div>
+		<div class="dialog_dynamic_footer">
+			<button class="button" id="btn_user_remove" onclick="deleteUser();">Delete</button>
 			<button class="button" onclick="applyUserName();">OK</button>
 			<button class="button" onclick="hideDialog('user_edit');">Cancel</button>
 		</div>
@@ -146,12 +145,12 @@
 </div>
 
 <div id="accesslist" class="container">
-	<div id="content_accesslist" class="dialog use_space" style="width: 500px; height: 500px">
-		<header class="headline" id="accesslist_title">Add Access for User</header>
-		<main id="accesslist_content">Content</main>
-		<footer>
+	<div id="content_accesslist" class="dialog" style="--dlg_width: 500px; --dlg_height: 500px">
+		<div class="headline" id="accesslist_title">Add Access for User</div>
+		<div id="accesslist_content" class="dialog_dynamic_body">Content</div>
+		<div class="dialog_dynamic_footer">
 			<button class="button" onclick="hideDialog('accesslist');">Close</button>
-		</footer>
+		</div>
 	</div>
 </div>
 
@@ -166,22 +165,18 @@
 </div>
 
 <div id="text_input" class="container">
-	<div id="content_text_input" class="dialog" style="width: 400px">
+	<div id="content_text_input" class="dialog" style="--dlg_width: 400px">
 		<div class="headline" id="text_input_title">Title</div>
-		<label id="text_input_label" for="test_input_edit">Endpoint</label> <input id="text_input_edit" placeholder=""/>
-		<div style="text-align:right;">
+		<label id="text_input_label" for="test_input_edit">Endpoint</label>
+		<input id="text_input_edit" placeholder=""/>
+		<div class="dialog_dynamic_footer">
 			<button id="text_input_button" class="button" onclick="hideDialog('text_input');">OK</button>
 			<button class="button" onclick="hideDialog('text_input');">Cancel</button>
 		</div>
 	</div>
 </div>
 
-<div id="message" class="container">
-	<div id="content_message" class="dialog" style="width: 400px">
-		<div class="headline" id="msg_title">Title</div>
-		<div id="msg_content">Content</div>
-		<div style="text-align:right;">	<button class="button" onclick="hideDialog('message');">OK</button></div>
-	</div>
+<div id="toast">
 </div>
 
 </body>
