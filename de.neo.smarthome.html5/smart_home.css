@@ -83,7 +83,7 @@ img
 
 .card_btn:hover
 {
-	box-shadow: 0px 2px 8px var(--font);
+	box-shadow: 0px 2px 8px 1px var(--font);
     transform: translateY(-2px);
 	transition: 0.2s;
 }
@@ -435,7 +435,7 @@ label, .label
 
 .file:hover
 {
-	box-shadow: 0 0 10px var(--focus);
+	box-shadow: 0 0 10px 1px var(--focus);
 	transition: all 0.15s;
 }
 
@@ -554,7 +554,7 @@ input:focus, select:focus
 	--dlg_width: 600px;
 
 	padding: 20px 10px 20px 10px;
-	box-shadow: 0px 10px 30px black;
+	box-shadow: 0px 10px 30px 10px black;
 	position: absolute;
 	display: flex;
 	flex-direction: column;

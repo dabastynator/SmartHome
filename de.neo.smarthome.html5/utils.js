@@ -157,6 +157,33 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_card_color", "white");
 		document.documentElement.style.setProperty("--img_card_brightness", "0");
 	}
+	else if(appearence == 'sepia')
+	{
+		document.documentElement.style.setProperty("--body_background", "#A0522D");
+		document.documentElement.style.setProperty("--background", "#D2B48C");
+		document.documentElement.style.setProperty("--font", "black");
+		document.documentElement.style.setProperty("--font_on", "#D2B48C");
+		document.documentElement.style.setProperty("--font_name", "'Courgette', cursive");
+		document.documentElement.style.setProperty("--title", "#5B3A29");
+		document.documentElement.style.setProperty("--border", "#5B3A29");
+		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
+		document.documentElement.style.setProperty("--card_radius", "8px");
+		document.documentElement.style.setProperty("--focus", "#5B3A29");
+		document.documentElement.style.setProperty("--btn_radius", "3px");
+		document.documentElement.style.setProperty("--btn_border", "2px");
+		document.documentElement.style.setProperty("--btn_on_border_color", "#8B4513");
+		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
+		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid #8B4513");
+		document.documentElement.style.setProperty("--btn_on_bg", "#5B3A29");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#C19A6B");
+		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");
+		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #C19A6B");
+		document.documentElement.style.setProperty("--btn_off_bg", "#D2B48C");
+		document.documentElement.style.setProperty("--img_brightness", "0.3");
+		document.documentElement.style.setProperty("--img_brightness_hover", "0.1");
+		document.documentElement.style.setProperty("--btn_card_color", "#5B3A29");
+		document.documentElement.style.setProperty("--img_card_brightness", "0.7");
+	}
 	else
 	{
 		document.documentElement.style.setProperty("--body_background", "black");

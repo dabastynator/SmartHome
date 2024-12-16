@@ -9,6 +9,7 @@
 	<script src="utils.js?v=2.4"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
+	<link href="https://fonts.googleapis.com/css2?family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet">
 	<link href="smart_home.css?v=1.0" rel="stylesheet"/>
 	<link rel="icon" href="img/SmartHome.png" type="image/png"/>
 </head>
@@ -86,10 +87,11 @@
 				<option value="bright">Bright</option>
 				<option value="turquoise">Turquoise</option>
 				<option value="darkred">Dark Red</option>
+				<option value="sepia">Sepia</option>
 			</select>
 		<div class="dialog_dynamic_footer">
-			<button class="button" onclick="clearSettings();hideDialog('settings');loop();">Clear</button>
-			<button class="button" onclick="saveSettings();hideDialog('settings');loop();">OK</button>
+			<button class="button" onclick="clearSettings();hideDialog('settings');initialize();">Clear</button>
+			<button class="button" onclick="saveSettings();hideDialog('settings');initialize();">OK</button>
 			<button class="button" onclick="hideDialog('settings')">Close</button>
 		</div>
 	</div>
@@ -168,7 +170,7 @@
 </div>
 
 <div id="text_input" class="container">
-	<div id="content_text_input" class="dialog" style="--dlg_width: 400; --dlg_height: 206">
+	<div id="content_text_input" class="dialog" style="--dlg_width: 400">
 		<div class="headline" id="text_input_title">Title</div>
 		<label id="text_input_label" for="test_input_edit">Endpoint</label>
 		<input id="text_input_edit" placeholder=""/>
