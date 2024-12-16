@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta name="theme-color" content="#000000"/>
 	<title>SmartHome console</title>
-	<script src="smart_home.js?v=2.2"></script>
-	<script src="utils.js?v=2.2"></script>
+	<script src="smart_home.js?v=2.4"></script>
+	<script src="utils.js?v=2.4"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
 	<link href="smart_home.css?v=1.0" rel="stylesheet"/>
@@ -16,10 +16,10 @@
 <body onload="initialize()" tabindex="-1">
 
 <!-- Main border layout content -->
-<div id="top_bar" class="card" style="text-align:right;">
-	<div id="mediaserver" style="float: left;">No mediaserver</div>	
-	<img id="btn_settings" src="img/settings.png" class="link setting_btn" onclick="initSettings();showDialog('settings');"/>
-	<img id="btn_user" src="img/user.png" class="link setting_btn" onclick="showUser();"/>
+<div id="top_bar" class="card" style="display: flex;">
+	<div id="mediaserver" style="flex: 1 0 auto;">No mediaserver</div>
+	<img id="btn_user" src="img/user.png" class="file_button" onclick="showUser();"/>
+	<img id="btn_settings" src="img/settings.png" class="file_button" onclick="initSettings();showDialog('settings');"/>
 </div >
 
 <div id="currentplaying" class="card" style="white-space: nowrap">
@@ -44,10 +44,11 @@
 
 <div id="switches" class="card">
 	<div class="card_fill">
-		<div id="switch_list" class="line">
+		<div id="switch_list" >
 			No Switches
 		</div>
-		<div id="scene_list" class="line">
+		<div class="gradient" style="margin-top: 6px; margin-bottom: 6px;"></div>
+		<div id="scene_list" >
 			No Scenes
 		</div>
 	</div>
@@ -64,16 +65,18 @@
 </div>
 
 <div id="border_navigation" class="card">
-	<!-- https://css-tricks.com/fighting-the-space-between-inline-block-elements/ -->
-	<button class="switch on nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</button><!--
-	--><button class="switch off nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</button><!--
-	--><button class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</button><!--
-	--><button class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Info</button>
+	<div id="border_navigation_content" class="card_fill">
+		<!-- https://css-tricks.com/fighting-the-space-between-inline-block-elements/ -->
+		<button class="switch off nav_btn" id="nav_switches" onclick="showArea('switches')">Switches</button><!--
+		--><button class="switch on nav_btn" id="nav_filesystem" onclick="showArea('filesystem')">Files</button><!--
+		--><button class="switch off nav_btn" id="nav_playlists" onclick="showArea('playlists')">Playlists</button><!--
+		--><button class="switch off nav_btn" id="nav_information" onclick="showArea('information')">Info</button>
+	</div>
 </div>
 
 <!-- List of all Dialogs -->
 <div id="settings" class="container">
-	<div id="content_settings" class="dialog" style="--dlg_width: 550px; --dlg_height: 370px">
+	<div id="content_settings" class="dialog" style="--dlg_width: 550;">
 		<div class="headline">Settings</div>
 		<label for="setting_endpoint">Endpoint</label> <input id="setting_endpoint" placeholder="http://raspberrypi:5061"/>
 		<label for="setting_token">Token</label> <input id="setting_token" placeholder="mytoken..."/>
@@ -94,7 +97,7 @@
 
 <!-- Playlist -->
 <div id="playlist" class="container">
-	<div id="content_playlist" class="dialog dialog_dynamic" style="--dlg_width: 500px; --dlg_height: 500px">
+	<div id="content_playlist" class="dialog" style="--dlg_width: 500; --dlg_height: 500">
 		<div class="headline" id="playlist_title">Playlist</div>
 		<div id="playlist_content" class="dialog_dynamic_body">Content</div>
 		<div class="dialog_dynamic_footer">
@@ -106,7 +109,7 @@
 
 <!-- User -->
 <div id="userlist" class="container">
-	<div id="content_userlist" class="dialog" style="width: 500px; height: 300px">
+	<div id="content_userlist" class="dialog" style="--dlg_width: 500; --dlg_height: 300">
 		<div id="userlist_title" class="headline">Users</div>
 		<div id="userlist_content" class="dialog_dynamic_body">Content</div>
 		<div class="dialog_dynamic_footer">
@@ -117,7 +120,7 @@
 </div>
 
 <div id="user_edit" class="container">
-	<div id="content_user_edit" class="dialog" style="--dlg_width: 700px; --dlg_height: 500px">
+	<div id="content_user_edit" class="dialog" style="--dlg_width: 700; --dlg_height: 500">
 		<div class="headline" id="edit_user_title">Edit User</div>
 		<div class="dialog_dynamic_body">
 			<label for="user_name">Name</label> <input id="user_name" placeholder="Name..."/>
@@ -145,7 +148,7 @@
 </div>
 
 <div id="accesslist" class="container">
-	<div id="content_accesslist" class="dialog" style="--dlg_width: 500px; --dlg_height: 500px">
+	<div id="content_accesslist" class="dialog" style="--dlg_width: 500; --dlg_height: 500">
 		<div class="headline" id="accesslist_title">Add Access for User</div>
 		<div id="accesslist_content" class="dialog_dynamic_body">Content</div>
 		<div class="dialog_dynamic_footer">
@@ -155,7 +158,7 @@
 </div>
 
 <div id="volume" class="container">
-	<div id="content_volume" class="dialog" style="--dlg_height: 180px">
+	<div id="content_volume" class="dialog" style="--dlg_width: 500">
 		<div class="headline" id="volume_title">Volume</div>
 		<input id="volume_input" style="margin:0px" type="range" min="0" max="100" value="30"/>
 		<div class="dialog_dynamic_footer">
@@ -165,7 +168,7 @@
 </div>
 
 <div id="text_input" class="container">
-	<div id="content_text_input" class="dialog" style="--dlg_width: 400px; --dlg_height: 206px">
+	<div id="content_text_input" class="dialog" style="--dlg_width: 400; --dlg_height: 206">
 		<div class="headline" id="text_input_title">Title</div>
 		<label id="text_input_label" for="test_input_edit">Endpoint</label>
 		<input id="text_input_edit" placeholder=""/>

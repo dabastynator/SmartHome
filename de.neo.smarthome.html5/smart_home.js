@@ -45,7 +45,6 @@ var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
-var mPlaylist = '';
 var mUserList;
 var mSelectedUser;
 var mFiles;
@@ -84,6 +83,8 @@ function initialize()
 	htmlPlayPause = document.getElementById('play_pause');
 
 	readSetting();
+	placeDialogs();
+	updateVisibleCard();
 
 	var volume_input = document.getElementById('volume_input');
 	volume_input.addEventListener('input', setVolume);
@@ -265,18 +266,18 @@ function refreshSwitches()
 function fileRow(row, buttons)
 {
 	var file = '<div class="file">';
-	if (Object.hasOwn(row, 'subrow'))
+	if (row.hasOwnProperty('subrow'))
 	{
 		file = '<div class="file" style="flex-flow: wrap">';
 		file += '<div class="flex_line">';
 	}
 	var captionClasses = "file_caption"
 	var onclick = "";
-	if (Object.hasOwn(row, 'bold') && row.bold)
+	if (row.hasOwnProperty('bold') && row.bold)
 	{
 		captionClasses += " bold";
 	}
-	if (Object.hasOwn(row, 'onclick'))
+	if (row.hasOwnProperty('onclick'))
 	{
 		onclick = row.onclick
 	}
@@ -284,27 +285,28 @@ function fileRow(row, buttons)
 	for(button of buttons)
 	{
 		var onclick = ''
-		if (Object.hasOwn(button, 'onclick') && button.onclick)
+		if (button.hasOwnProperty('onclick') && button.onclick)
 		{
 			onclick = button.onclick;
 		}
-		file += '<img class="file_button link" src="' + button.src + '" ' + onclick + '>';
+		file += '<img class="file_button" src="' + button.src + '" ' + onclick + '>';
 	}
-	if (Object.hasOwn(row, 'subrow'))
+	if (row.hasOwnProperty('subrow'))
 	{
 		file += '</div>';
+		file += '<div class="gradient"></div>';
 		file += '<div class="flex_line">';
 		file += '<div class="file_caption search_result" ' + row.subrow.onclick + '>' + row.subrow.caption + '</div>';
-		if (Object.hasOwn(row, 'subbutton'))
+		if (row.hasOwnProperty('subbutton'))
 		{
 			for(button of row.subbutton)
 			{
 				var onclick = ''
-				if (Object.hasOwn(button, 'onclick') && button.onclick)
+				if (button.hasOwnProperty('onclick') && button.onclick)
 				{
 					onclick = button.onclick;
 				}
-				file += '<img class="file_button link" src="' + button.src + '" ' + onclick + '>';
+				file += '<img class="file_button" src="' + button.src + '" ' + onclick + '>';
 			}
 		}
 		file += '</div>';
@@ -505,14 +507,15 @@ function playPlsFile(index)
 	}, {'file': plsFile.path});
 }
 
-function extendPls(pls){
+function extendPls(index){
+	mPlaylist = mPlaylists[index];
 	hideDialog('playlist');
 	apiMediaServer.call('playlist_extend', function(result)
 	{
 		if (checkResult(result)) {
-			showToast('Playlist <b>' + pls + '</b> was extended.');	
+			showToast('Playlist <b>' + mPlaylist.name + '</b> was extended.');
 		}
-	}, {'playlist': pls, 'item': mFile.path});
+	}, {'playlist': mPlaylist.name, 'item': mFile.path});
 }
 
 function addFileToPls(path, index){
@@ -524,11 +527,12 @@ function addFileToPls(path, index){
 			var title = document.getElementById('playlist_title');
 			title.innerHTML = "Select playlist";
 			result.sort(function(a, b){return a.name.localeCompare(b.name);});
+			mPlaylists = result;
 			for (var i = 0; i < result.length; i++) {
 				var p = result[i];
 				content += fileRow(
-					{"caption": p.name, "onclick": 'onclick="extendPls(\'' + p.name + '\')"'},
-					[{"src": "img/add.png", "onclick": 'onclick="extendPls(\'' + p.name + '\')"'}]
+					{"caption": p.name, "onclick": 'onclick="extendPls(\'' + i + '\')"'},
+					[{"src": "img/add.png", "onclick": 'onclick="extendPls(\'' + i + '\')"'}]
 				);
 			}
 			htmlPlsContent.innerHTML = content;
@@ -708,9 +712,9 @@ function deletePlsItem(index){
 	apiMediaServer.call('playlist_delete_item', function(result)
 	{
 		if (checkResult(result)) {
-			showPlsContent(mPls);
+			showPlsContent(-1);
 		}
-	}, {'playlist': mPls, 'item': plsFile.path});
+	}, {'playlist': mPlaylist.name, 'item': plsFile.path});
 }
 
 function deletePlaylist()
@@ -723,16 +727,19 @@ function deletePlaylist()
 	{
 		if (checkResult(result))
 		{
-			showToast('<b>' + mPls + "</b> deleted.");
+			showToast('<b>' + mPls.name + "</b> deleted.");
 			refreshPlaylist();
 		}
 		mPls = null;
-	}, {'playlist': mPls});
+	}, {'playlist': mPls.name});
 }
 
-function showPlsContent(pls)
+function showPlsContent(index)
 {
-	mPls = pls;
+	if (index >= 0)
+	{
+		mPls = mPlaylists[index];
+	}
 	apiMediaServer.call('playlist_content', function(result)
 	{
 		if (checkResult(result, htmlPlsContent))
@@ -740,7 +747,7 @@ function showPlsContent(pls)
 			mPlaylistContent = result;
 			var content = "";			
 			var title = document.getElementById('playlist_title');
-			title.innerHTML = pls;
+			title.innerHTML = mPls.name;
 			for (var i = 0; i < result.length; i++)
 			{
 				var p = result[i];
@@ -752,7 +759,7 @@ function showPlsContent(pls)
 			htmlPlsContent.innerHTML = content;
 			showDialog('playlist');
 		}
-	}, {'playlist': pls});
+	}, {'playlist': mPls.name});
 }
 
 function createNewPlaylist()
@@ -801,7 +808,7 @@ function refreshPlaylist()
 				var p = result[i];
 				content += fileRow(
 					{"caption": p.name, "onclick": 'onclick="plsClick(\'' + i + '\')"'},
-					[{"src": "img/pls.png", "onclick": 'onclick="showPlsContent(\'' + p.name + '\')"'}]
+					[{"src": "img/pls.png", "onclick": 'onclick="showPlsContent(\'' + i + '\')"'}]
 				);
 			}
 			content += '<div style="height:50px"></div>';

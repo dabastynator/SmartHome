@@ -318,16 +318,6 @@ img:hover
 	filter: brightness(var(--img_brightness_hover));
 }
 
-.right
-{
-	float: right
-}
-
-.left
-{
-	float: left
-}
-
 .headline
 {
 	text-align: center;
@@ -437,9 +427,15 @@ label, .label
 	height: 35px;
 }
 
-.button:hover, input:hover, select:hover, .file:hover
+.button:hover, input:hover, select:hover
 {
 	box-shadow: inset 0 0 5px var(--focus);
+	transition: all 0.15s;
+}
+
+.file:hover
+{
+	box-shadow: 0 0 10px var(--focus);
 	transition: all 0.15s;
 }
 
@@ -488,6 +484,7 @@ input:focus, select:focus
 {
 	height: 32px;
 	margin: auto;
+	margin-right: 10px;
 	display: flex;
 	flex: 0 0 auto;
 }
@@ -516,6 +513,14 @@ input:focus, select:focus
 .fill
 {
 	width: 95%;
+}
+
+.gradient
+{
+	background-image: linear-gradient(to right, rgba(255,0,0,0), var(--border), rgba(255,0,0,0));
+	width: 100%;
+	height: 1px;
+	filter: blur(0.5px);
 }
 
 .container
@@ -547,19 +552,12 @@ input:focus, select:focus
 .dialog
 {
 	--dlg_width: 600px;
-	--dlg_height: 200px;
-	--dlg_offset_x: calc(max(50% - 0.5*var(--dlg_width), 10px));
-	--dlg_offset_y: calc(max(50% - 0.5*var(--dlg_height), 10px));
 
 	padding: 20px 10px 20px 10px;
-	box-shadow: 0px 10px 30px black, 0px 0px 5px black;
+	box-shadow: 0px 10px 30px black;
 	position: absolute;
 	display: flex;
 	flex-direction: column;
-	left: var(--dlg_offset_x);
-	right: var(--dlg_offset_x);
-	top: var(--dlg_offset_y);
-	bottom: var(--dlg_offset_y);
 }
 
 .dialog_dynamic_body
@@ -578,19 +576,13 @@ input:focus, select:focus
 	flex: 0 0 auto;
 }
 
-.disabled
+.z_index_back
 {
-	text-decoration: line-through;
-}
-
-.weather
-{
-	height: 32px
+	z-index: -1;
 }
 
 #toast {
-	--toast_width: 400px;
-	--toast_offset: calc(max(50% - 0.5*var(--toast_width), 10px));
+	--dlg_width: 400;
 	background-color: #333;
 	color: #fff;
 	text-align: center;
@@ -598,10 +590,8 @@ input:focus, select:focus
 	padding: 16px;
 	position: absolute;
 	display: block;
-	left: var(--toast_offset);
-	right: var(--toast_offset);
 	z-index: 1;
-	bottom: 20px;
+	bottom: 25px;
 	visibility: hidden;
 	opacity: 0%;
 	transition: 0.3s;

@@ -1,13 +1,62 @@
 var currentVisible = undefined;
 
+var mDialogMargin = 5;
+
+loadAppearence();
+
 window.onresize = function()
+{
+	updateVisibleCard();
+	placeDialogs();
+};
+
+function centerElementHorizontally(element)
+{
+	var style = getComputedStyle(element);
+	var width = style.getPropertyValue('--dlg_width');
+	var offset = Math.max(mDialogMargin, (window.innerWidth - Number(width)) / 2);
+	element.style.left = offset + 'px';
+	element.style.right = offset + 'px';
+}
+
+function centerElementVertically(element)
+{
+	var style = getComputedStyle(element);
+	var height = parseInt(style.height, 10);
+	var setBottom = false;
+	if(element.getAttribute("style").indexOf('--dlg_height') != -1)
+	{
+		height = style.getPropertyValue('--dlg_height');
+		setBottom = true;
+	}
+	offset = Math.max(mDialogMargin, (window.innerHeight - Number(height)) / 2);
+	element.style.top = offset + 'px';
+	if(setBottom)
+	{
+		element.style.bottom = offset + 'px';
+	}
+}
+
+function placeDialogs()
+{
+	var dialogs = document.getElementsByClassName("dialog");
+	for (var i = 0; i < dialogs.length; i++)
+	{
+		centerElementHorizontally(dialogs[i]);
+		centerElementVertically(dialogs[i]);
+	}
+	centerElementHorizontally(document.getElementById("toast"));
+}
+
+function updateVisibleCard()
 {
 	if (currentVisible == undefined)
 	{
-		currentVisible = document.getElementById("switches");
+		currentVisible = document.getElementById("filesystem");
 	}
 	var areas = ["playlists","switches","filesystem", "information"];
-	for (var i = 0; i < areas.length; i++) {
+	for (var i = 0; i < areas.length; i++)
+	{
 		var a = areas[i];
 		var elem = document.getElementById(a);
 		if (elem != null)
@@ -22,10 +71,8 @@ window.onresize = function()
 			}
 		}
 	}
-};
+}
 
-
-loadAppearence();
 function loadAppearence()
 {
 	appearence = token = window.localStorage.getItem("appearence");
@@ -173,10 +220,15 @@ function showDialog(id)
 {
 	var container = document.getElementById(id);
 	container.classList.add("visible");
+	container.classList.remove("z_index_back");
 }
 
 function hideDialog(id)
 {
 	var container = document.getElementById(id);
 	container.classList.remove("visible");
+	setTimeout(function()
+	{
+		container.classList.add("z_index_back");
+	}, 500);
 }
