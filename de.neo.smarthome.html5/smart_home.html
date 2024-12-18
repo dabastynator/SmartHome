@@ -9,7 +9,8 @@
 	<script src="utils.js?v=2.4"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
-	<link href="https://fonts.googleapis.com/css2?family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css2?family=Baumans&family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet"/>
 	<link href="smart_home.css?v=1.0" rel="stylesheet"/>
 	<link rel="icon" href="img/SmartHome.png" type="image/png"/>
 </head>
@@ -124,7 +125,7 @@
 <div id="user_edit" class="container">
 	<div id="content_user_edit" class="dialog" style="--dlg_width: 700; --dlg_height: 500">
 		<div class="headline" id="edit_user_title">Edit User</div>
-		<div class="dialog_dynamic_body">
+		<div class="dialog_dynamic_body" style="padding: 10px;">
 			<label for="user_name">Name</label> <input id="user_name" placeholder="Name..."/>
 			<label for="user_name">Password</label> <input id="user_passwd" placeholder="Password..."/>
 			<label for="user_role">Role</label>
@@ -132,14 +133,16 @@
 				<option value="USER">User</option>
 				<option value="ADMIN">Admin</option>
 			</select>
-			<div class="label user_required" style="width:100%">Unit Access List
-				<img src="img/add.png" class="icon" onclick="addUserAccess()"/>
+			<div class="file">
+				<div class="file_caption">Unit Access List</div>
+				<img src="img/add.png" class="file_button" onclick="addUserAccess()"/>
 			</div>
-			<div class="input user_required" id="user_access"></div>
-			<div class="label user_required" style="width:100%">Active Sessions
-				<img src="img/add.png" class="icon" onclick="addUserSession()"/>
+			<div class="input" id="user_access"></div>
+			<div class="file">
+				<div class="file_caption">Active Sessions</div>
+				<img src="img/add.png" class="file_button" onclick="addUserSession()"/>
 			</div>
-			<div class="input user_required" id="user_session"></div>
+			<div class="input" id="user_session"></div>
 		</div>
 		<div class="dialog_dynamic_footer">
 			<button class="button" id="btn_user_remove" onclick="deleteUser();">Delete</button>

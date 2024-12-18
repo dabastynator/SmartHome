@@ -2,7 +2,7 @@
 {
 	--offset: 8px;
 	--top: 60px;
-	--bottom: 57px;
+	--bottom: 63px;
 	--left: 306px;
 	--right: 400px;
 	--nav: 60px;
@@ -28,7 +28,7 @@ body
 
 img
 {
-	filter: brightness(var(--img_brightness));
+	filter: var(--img_filter);
 }
 
 .card, .dialog
@@ -43,6 +43,11 @@ img
 .card
 {
 	padding: 0px;
+}
+
+.card_gone
+{
+	visibility: hidden;
 }
 
 .card_fill
@@ -100,18 +105,19 @@ img
 {
 	width: 35px;
 	height: 35px;
-	filter: brightness(var(--img_card_brightness));
+	filter: var(--img_card_filter);
 }
 
 .card_btn_img:hover
 {
-	filter: brightness(var(--img_card_brightness));
+	filter: var(--img_card_filter);
 	background-image: none;
 }
 
 #playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation, #information
 {
 	position: absolute;
+	box-shadow: var(--card_shadow);
 }
 
 @media (min-width: 900px)
@@ -302,20 +308,9 @@ img
 	vertical-align: middle;
 }
 
-.icon
-{
-	cursor:pointer;
-	height: 32px;
-	width: 32px;
-	list-style: none;
-	float: right;
-	padding-right: 10px;
-	vertical-align: top;
-}
-
 img:hover
 {
-	filter: brightness(var(--img_brightness_hover));
+	filter: var(--img_filter_hover);
 }
 
 .headline
@@ -332,7 +327,7 @@ img:hover
 {
 	padding-left: 5px;
 	width: 27px;
-	margin-top: 10px;
+	margin-top: 12px;
 	cursor:pointer;
 	float: left;
 }
@@ -485,6 +480,7 @@ input:focus, select:focus
 	height: 32px;
 	margin: auto;
 	margin-right: 10px;
+	cursor: pointer;
 	display: flex;
 	flex: 0 0 auto;
 }

@@ -64,10 +64,12 @@ function updateVisibleCard()
 			if (elem == currentVisible || window.innerWidth >= 900)
 			{
 				elem.style.zIndex = "auto";
+				elem.classList.remove("card_gone");
 			}
 			else
 			{
 				elem.style.zIndex = -1;
+				elem.classList.add("card_gone");
 			}
 		}
 	}
@@ -76,13 +78,14 @@ function updateVisibleCard()
 function loadAppearence()
 {
 	appearence = token = window.localStorage.getItem("appearence");
+	document.documentElement.style.setProperty("--card_shadow", "");
 	if(appearence == 'bright')
 	{
 		document.documentElement.style.setProperty("--body_background", "white");
 		document.documentElement.style.setProperty("--background", "white");
 		document.documentElement.style.setProperty("--font", "black");
 		document.documentElement.style.setProperty("--font_on", "white");
-		document.documentElement.style.setProperty("--font_name", "'Source Code Pro', monospace");
+		document.documentElement.style.setProperty("--font_name", "'Baumans', system-ui");
 		document.documentElement.style.setProperty("--title", "black");
 		document.documentElement.style.setProperty("--border", "black");
 		document.documentElement.style.setProperty("--card_border", "1px solid var(--border)");
@@ -98,15 +101,16 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid black");
 		document.documentElement.style.setProperty("--btn_off_bg", "white");
-		document.documentElement.style.setProperty("--img_brightness", "0.3");
-		document.documentElement.style.setProperty("--img_brightness_hover", "0");
-		document.documentElement.style.setProperty("--btn_card_color", "#4d4d4d");
-		document.documentElement.style.setProperty("--img_card_brightness", "1");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.3)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0)");
+		document.documentElement.style.setProperty("--btn_card_color", "black");
+		document.documentElement.style.setProperty("--img_card_filter", "brightness(1)");
 	}
 	else if(appearence == 'turquoise')
 	{
 		document.documentElement.style.setProperty("--body_background", "#05445e");
 		document.documentElement.style.setProperty("--background", "#d4f1f4");
+		document.documentElement.style.setProperty("--card_shadow", "0px 0px 8px 0px black");
 		document.documentElement.style.setProperty("--font", "black");
 		document.documentElement.style.setProperty("--font_on", "var(--font)");
 		document.documentElement.style.setProperty("--font_name", "Ubuntu");
@@ -125,10 +129,10 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #189AB4");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
-		document.documentElement.style.setProperty("--img_brightness", "0.3");
-		document.documentElement.style.setProperty("--img_brightness_hover", "0");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.3)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0)");
 		document.documentElement.style.setProperty("--btn_card_color", "var(--body_background)");
-		document.documentElement.style.setProperty("--img_card_brightness", "0.9");
+		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.9)");
 	}
 	else if(appearence == 'darkred')
 	{
@@ -152,15 +156,16 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #a00");
 		document.documentElement.style.setProperty("--btn_off_bg", "#000");
-		document.documentElement.style.setProperty("--img_brightness", "0.8");
-		document.documentElement.style.setProperty("--img_brightness_hover", "1");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.8)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(1)");
 		document.documentElement.style.setProperty("--btn_card_color", "white");
-		document.documentElement.style.setProperty("--img_card_brightness", "0");
+		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.5) sepia(100%) saturate(10000%) saturate(0.4) brightness(0.6)");
 	}
 	else if(appearence == 'sepia')
 	{
 		document.documentElement.style.setProperty("--body_background", "#A0522D");
 		document.documentElement.style.setProperty("--background", "#D2B48C");
+		document.documentElement.style.setProperty("--card_shadow", "0px 0px 8px -2px black");
 		document.documentElement.style.setProperty("--font", "black");
 		document.documentElement.style.setProperty("--font_on", "#D2B48C");
 		document.documentElement.style.setProperty("--font_name", "'Courgette', cursive");
@@ -175,14 +180,14 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
 		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid #8B4513");
 		document.documentElement.style.setProperty("--btn_on_bg", "#5B3A29");
-		document.documentElement.style.setProperty("--btn_off_border_color", "#C19A6B");
+		document.documentElement.style.setProperty("--btn_off_border_color", "#8B4513");
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");
-		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #C19A6B");
+		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #8B4513");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D2B48C");
-		document.documentElement.style.setProperty("--img_brightness", "0.3");
-		document.documentElement.style.setProperty("--img_brightness_hover", "0.1");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(45deg) saturate(0.6) brightness(1)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(45deg) saturate(0.6) brightness(0.5)");
 		document.documentElement.style.setProperty("--btn_card_color", "#5B3A29");
-		document.documentElement.style.setProperty("--img_card_brightness", "0.7");
+		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(34deg) saturate(0.3) brightness(4)");
 	}
 	else
 	{
@@ -206,10 +211,10 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "2px solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "2px solid #888");
 		document.documentElement.style.setProperty("--btn_off_bg", "black");
-		document.documentElement.style.setProperty("--img_brightness", "0.8");
-		document.documentElement.style.setProperty("--img_brightness_hover", "1");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.8)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(1)");
 		document.documentElement.style.setProperty("--btn_card_color", "#e6e6e6");
-		document.documentElement.style.setProperty("--img_card_brightness", "0");
+		document.documentElement.style.setProperty("--img_card_filter", "brightness(0)");
 	}
 }
 
@@ -224,11 +229,13 @@ function showArea(area)
 			if (a === area)
 			{
 				elem.style.zIndex = "auto";
+				elem.classList.remove("card_gone");
 				currentVisible = elem;
 			}
 			else
 			{
 				elem.style.zIndex = -1;
+				elem.classList.add("card_gone");
 			}
 		}
 		if (nav != null){

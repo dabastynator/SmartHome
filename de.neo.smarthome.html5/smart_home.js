@@ -880,12 +880,15 @@ function showUser()
 			for (var i = 0; i < result.length; i++)
 			{
 				var u = result[i];
-				content += '<div class="line">' + u.name;
+				var caption = u.name;
 				if (u.role === 'ADMIN')
 				{
-					content += ' (Admin)';
+					caption += ' (Admin)';
 				}
-				content += '<img src="img/edit.png" class="icon" onclick="editUser(\'' + i + '\')"></div>';
+				content += fileRow(
+					{"caption": caption},
+					[{"src": "img/edit.png", "onclick": 'onclick="editUser(\'' + i + '\')"'}]
+				);
 			}
 			htmlUserList.innerHTML = content;
 			showDialog('userlist');
@@ -954,10 +957,12 @@ function refreshUserAccess()
 			for (var i = 0; i < result.length; i++)
 			{
 				var access = result[i];
-				content += '<div class="line">' + access.name + ' (' + access.id + ')';
-				content += '<img src="img/trash.png" class="icon" onclick="deleteUserAccess(\'' + access.id + '\')"></div>';
+				content += fileRow(
+					{"caption": access.name},
+					[{"src": "img/trash.png", "onclick": 'onclick="deleteUserAccess(\'' + access.id + '\')"'}]
+				);
 			}
-			if (!content)
+			if (content == "")
 			{
 				content = '<i>No User Access</i>';
 			}
@@ -1036,11 +1041,13 @@ function refreshUserSessions()
 				var session = result[i];
 				if (mSelectedUser.id === session.user_id)
 				{
-					content += '<div class="line">' + session.token;
-					content += '<img src="img/trash.png" class="icon" onclick="deleteUserSession(\'' + session.token + '\')"></div>';
+					content += fileRow(
+						{"caption": session.token},
+						[{"src": "img/trash.png", "onclick": 'onclick="deleteUserSession(\'' + session.token + '\')"'}]
+					);
 				}
 			}
-			if (!content)
+			if (content == "")
 			{
 				content = '<i>No User Session</i>';
 			}
