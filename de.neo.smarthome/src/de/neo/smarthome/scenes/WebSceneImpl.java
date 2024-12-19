@@ -56,7 +56,7 @@ public class WebSceneImpl extends AbstractUnitHandler implements IWebScenes{
 		UserSessionHandler.require(token);
 		for(BeanScene scene: mScenes)
 		{
-			if (scene.mID == id)
+			if (scene.mID.equals(id))
 			{
 				getHassAPI().setState(mAuth, id, "scene", "on");
 				return scene;
