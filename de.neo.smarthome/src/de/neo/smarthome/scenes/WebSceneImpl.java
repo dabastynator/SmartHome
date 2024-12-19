@@ -7,12 +7,9 @@ import de.neo.remote.web.WebParam;
 import de.neo.remote.web.WebProxyBuilder;
 import de.neo.remote.web.WebRequest;
 import de.neo.smarthome.AbstractUnitHandler;
-import de.neo.smarthome.api.BeanWeb;
 import de.neo.smarthome.api.IWebScenes;
-import de.neo.smarthome.api.IWebScenes.BeanScene;
 import de.neo.smarthome.controlcenter.ControlCenter;
 import de.neo.smarthome.switches.HassAPI;
-import de.neo.smarthome.user.User;
 import de.neo.smarthome.user.UserSessionHandler;
 
 public class WebSceneImpl extends AbstractUnitHandler implements IWebScenes{
@@ -52,12 +49,20 @@ public class WebSceneImpl extends AbstractUnitHandler implements IWebScenes{
 
 	@Override
 	@WebRequest(path = "activate", description = "Activate a given scene by specified id.")
-	public void activateScene(
+	public BeanScene activateScene(
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id) throws RemoteException
 	{
 		UserSessionHandler.require(token);
-		getHassAPI().setState(mAuth, id, "scene", "on");
+		for(BeanScene scene: mScenes)
+		{
+			if (scene.mID == id)
+			{
+				getHassAPI().setState(mAuth, id, "scene", "on");
+				return scene;
+			}
+		}
+		throw new RemoteException("Unknown scene: " + id);
 	}
 	
 	public void setScenes(ArrayList<BeanScene> scenes)

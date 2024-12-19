@@ -178,7 +178,20 @@ public class XMLDao<T> implements Dao<T> {
 	}
 
 	@Override
-	public void delete(long id) throws DaoException {
+	public synchronized void delete(long id) throws DaoException {
+		for (int i = mDomainList.size()-1; i >= 0; i--)
+		{
+			T domain = mDomainList.get(i);
+			try {
+				if (getId(domain) == id)
+				{
+					mDomainList.remove(i);
+				}
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new DaoException("Error accessing id for " + mName + ". " + e.getClass().getSimpleName()
+						+ ": " + e.getMessage());
+			}
+		}
 		mDomains.remove(id);
 		mFactory.notifyChange();
 	}

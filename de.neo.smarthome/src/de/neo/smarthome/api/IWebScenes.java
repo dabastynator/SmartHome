@@ -15,7 +15,7 @@ public interface IWebScenes extends RemoteAble {
 					throws RemoteException;
 
 	@WebRequest(path = "activate", description = "Activate a given scene by specified id.")
-	public void activateScene(
+	public BeanScene activateScene(
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id)
 					throws IllegalArgumentException, RemoteException;
