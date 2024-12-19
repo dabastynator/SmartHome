@@ -58,6 +58,7 @@ var htmlPlsContent;
 var htmlSwitches;
 var htmlScenes;
 var htmlPlayInfo;
+var htmlPlayProgress;
 var htmlMediaServer;
 var htmlUserList;
 var htmlInformation;
@@ -74,6 +75,7 @@ function initialize()
 	htmlSwitches = document.getElementById('switch_list');
 	htmlScenes = document.getElementById('scene_list');
 	htmlPlayInfo = document.getElementById('player_content');
+	htmlPlayProgress = document.getElementById('playing_progress');
 	htmlMediaServer = document.getElementById('mediaserver');
 	htmlUserList = document.getElementById('userlist_content');
 	htmlInformation = document.getElementById('information');
@@ -410,6 +412,7 @@ function getPlaying(callback){
 function refreshPlayer(){
 	getPlaying(function(playing){
 		var text = '';
+		var progress = '0%';
 		if (playing != null){
 			if (playing.artist != null && playing.artist != '')
 				text += playing.artist + '<br/>';
@@ -421,11 +424,16 @@ function refreshPlayer(){
 				htmlPlayPause.src = 'player/pause.png';
 			else
 				htmlPlayPause.src = 'player/play.png';
+			if (playing.durationSec > 0)
+			{
+				progress = Math.round(100 * playing.inTrackSec / playing.durationSec) + '%';
+			}
 		} else {
 			htmlPlayPause.src = 'player/play.png';
 			text += 'Nothing played';
 		}
 		htmlPlayInfo.innerHTML = text;
+		htmlPlayProgress.style.width = progress;
 	});
 }
 

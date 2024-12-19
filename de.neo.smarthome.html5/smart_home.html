@@ -24,17 +24,20 @@
 	<img id="btn_settings" src="img/settings.png" class="file_button" onclick="initSettings();showDialog('settings');"/>
 </div >
 
-<div id="currentplaying" class="card" style="white-space: nowrap">
-	<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
-	<img class="player_btn" src="player/backward.png" onclick="playerAction('seek_backward')"/>
-	<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
-	<img class="player_btn" src="player/pause.png" id="play_pause" onclick="playerAction('play_pause')"/>
-	<img class="player_btn" src="player/forward.png" onclick="playerAction('seek_forward')"/>
-	<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
-	<img class="player_btn" src="player/speaker.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
-	<div id="player_content">
-		Nothing played
+<div id="currentplaying" class="card">
+	<div class="card_fill playing_button">
+		<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
+		<img class="player_btn" src="player/backward.png" onclick="playerAction('seek_backward')"/>
+		<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
+		<img class="player_btn" src="player/pause.png" id="play_pause" onclick="playerAction('play_pause')"/>
+		<img class="player_btn" src="player/forward.png" onclick="playerAction('seek_forward')"/>
+		<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
+		<img class="player_btn" src="player/speaker.png" onclick="showDialog('volume');getVolume()" style=" padding-right: 20px;"/>
+		<div id="player_content">
+			Nothing played
+		</div>
 	</div>
+	<div id="playing_progress"></div>
 </div>
 
 <div id="playlists" class="card">

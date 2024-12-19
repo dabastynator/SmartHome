@@ -326,9 +326,20 @@ img:hover
 	flex: 0 0 auto;
 }
 
-#currentplaying
+.playing_button
 {
 	display: flex;
+	white-space: nowrap;
+}
+
+#playing_progress
+{
+	position: absolute;
+	bottom: 0px;
+	height: 3px;
+	width: 60%;
+	background-image: linear-gradient(to right, var(--focus), var(--font));
+	transition: 1.5s linear;
 }
 
 #player_content
