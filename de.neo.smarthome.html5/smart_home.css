@@ -43,11 +43,14 @@ img
 .card
 {
 	padding: 0px;
+	transition: 0.3s;
 }
 
 .card_gone
 {
 	visibility: hidden;
+	opacity: 0;
+	transition: 0.3s;
 }
 
 .card_fill
@@ -323,13 +326,26 @@ img:hover
 	flex: 0 0 auto;
 }
 
+#currentplaying
+{
+	display: flex;
+}
+
+#player_content
+{
+	margin: auto;
+	display: inline;
+	flex: 1 1 auto;
+}
+
 .player_btn
 {
 	padding-left: 5px;
 	width: 27px;
-	margin-top: 12px;
+	margin: auto;
 	cursor:pointer;
-	float: left;
+	display: flex;
+	flex: 0 0 auto;
 }
 
 .setting_btn

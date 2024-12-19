@@ -48,33 +48,6 @@ function placeDialogs()
 	centerElementHorizontally(document.getElementById("toast"));
 }
 
-function updateVisibleCard()
-{
-	if (currentVisible == undefined)
-	{
-		currentVisible = document.getElementById("filesystem");
-	}
-	var areas = ["playlists","switches","filesystem", "information"];
-	for (var i = 0; i < areas.length; i++)
-	{
-		var a = areas[i];
-		var elem = document.getElementById(a);
-		if (elem != null)
-		{
-			if (elem == currentVisible || window.innerWidth >= 900)
-			{
-				elem.style.zIndex = "auto";
-				elem.classList.remove("card_gone");
-			}
-			else
-			{
-				elem.style.zIndex = -1;
-				elem.classList.add("card_gone");
-			}
-		}
-	}
-}
-
 function loadAppearence()
 {
 	appearence = token = window.localStorage.getItem("appearence");
@@ -112,7 +85,7 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--background", "#d4f1f4");
 		document.documentElement.style.setProperty("--card_shadow", "0px 0px 8px 0px black");
 		document.documentElement.style.setProperty("--font", "black");
-		document.documentElement.style.setProperty("--font_on", "var(--font)");
+		document.documentElement.style.setProperty("--font_on", "white");
 		document.documentElement.style.setProperty("--font_name", "Ubuntu");
 		document.documentElement.style.setProperty("--title", "black");
 		document.documentElement.style.setProperty("--border", "black");
@@ -124,13 +97,13 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_on_border_color", "#05445E");
 		document.documentElement.style.setProperty("--btn_on_border", "var(--btn_border) solid var(--btn_on_border_color)");
 		document.documentElement.style.setProperty("--btn_on_border_hover", "var(--btn_border) solid #05445E");
-		document.documentElement.style.setProperty("--btn_on_bg", "#189AB4");
+		document.documentElement.style.setProperty("--btn_on_bg", "var(--body_background)");
 		document.documentElement.style.setProperty("--btn_off_border_color", "#189AB4");
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #189AB4");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
-		document.documentElement.style.setProperty("--img_filter", "brightness(0.3)");
-		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0)");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(180deg) saturate(0.6)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(180deg) saturate(0.6) brightness(0.3)");
 		document.documentElement.style.setProperty("--btn_card_color", "var(--body_background)");
 		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.9)");
 	}
@@ -245,6 +218,34 @@ function showArea(area)
 			}else{
 				nav.classList.remove('on');
 				nav.classList.add('off');
+			}
+		}
+	}
+}
+
+
+function updateVisibleCard()
+{
+	if (currentVisible == undefined)
+	{
+		currentVisible = document.getElementById("filesystem");
+	}
+	var areas = ["playlists","switches","filesystem", "information"];
+	for (var i = 0; i < areas.length; i++)
+	{
+		var a = areas[i];
+		var elem = document.getElementById(a);
+		if (elem != null)
+		{
+			if (elem == currentVisible || window.innerWidth >= 900)
+			{
+				elem.style.zIndex = "auto";
+				elem.classList.remove("card_gone");
+			}
+			else
+			{
+				elem.style.zIndex = -1;
+				elem.classList.add("card_gone");
 			}
 		}
 	}
