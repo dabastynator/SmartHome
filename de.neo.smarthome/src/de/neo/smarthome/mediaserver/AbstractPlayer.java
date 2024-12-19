@@ -44,7 +44,6 @@ public abstract class AbstractPlayer implements IPlayer {
 	protected int mVolume = 50;
 
 	public AbstractPlayer() {
-		new PlayingTimeCounter().start();
 		// ThumbnailHandler.instance().calculationListener().add(this);
 	}
 
@@ -57,7 +56,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	 */
 	protected PlayingBean readFileInformations(File file) throws IOException {
 		PlayingBean bean = new PlayingBean();
-		bean.setVolume(mVolume);
+		bean.mVolume = mVolume;
 		readFileTags(file, bean);
 		return bean;
 	}
@@ -71,41 +70,41 @@ public abstract class AbstractPlayer implements IPlayer {
 		// so use mp3agic in second step
 		try {
 			MP3File mp3File = new MP3File(file);
-			bean.setFile(file.getName().trim());
-			bean.setPath(file.getPath());
+			bean.mFile = file.getName().trim();
+			bean.mPath = file.getPath();
 			AbstractID3v2 id3v2Tag = mp3File.getID3v2Tag();
 			if (id3v2Tag != null) {
 				if (id3v2Tag.getAuthorComposer() != null)
-					bean.setArtist(id3v2Tag.getAuthorComposer().trim());
+					bean.mArtist = id3v2Tag.getAuthorComposer().trim();
 				if (id3v2Tag.getSongTitle() != null)
-					bean.setTitle(id3v2Tag.getSongTitle().trim());
+					bean.mTitle = id3v2Tag.getSongTitle().trim();
 				if (id3v2Tag.getAlbumTitle() != null)
-					bean.setAlbum(id3v2Tag.getAlbumTitle().trim());
+					bean.mAlbum = id3v2Tag.getAlbumTitle().trim();
 			}
 		} catch (TagException | IOException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, "Cant read file-information: " + e.getMessage(), "Mediaserver");
 		}
 		try {
 			Mp3File mp3File = new Mp3File(file.getAbsolutePath());
-			bean.setFile(file.getName().trim());
-			bean.setPath(file.getPath());
+			bean.mFile = file.getName().trim();
+			bean.mPath = file.getPath();
 			if (mp3File.hasId3v1Tag()) {
 				ID3v1 tag = mp3File.getId3v1Tag();
 				if (tag.getArtist() != null)
-					bean.setArtist(tag.getArtist().trim());
+					bean.mArtist = tag.getArtist().trim();
 				if (tag.getTitle() != null)
-					bean.setTitle(tag.getTitle().trim());
+					bean.mTitle = tag.getTitle().trim();
 				if (tag.getAlbum() != null)
-					bean.setAlbum(tag.getAlbum().trim());
+					bean.mAlbum = tag.getAlbum().trim();
 			}
 			if (mp3File.hasId3v2Tag()) {
 				ID3v2 tag = mp3File.getId3v2Tag();
 				if (tag.getArtist() != null)
-					bean.setArtist(tag.getArtist().trim());
+					bean.mArtist = tag.getArtist().trim();
 				if (tag.getTitle() != null)
-					bean.setTitle(tag.getTitle().trim());
+					bean.mTitle = tag.getTitle().trim();
 				if (tag.getAlbum() != null)
-					bean.setAlbum(tag.getAlbum().trim());
+					bean.mAlbum = tag.getAlbum().trim();
 			}
 		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 			RemoteLogger.performLog(LogPriority.ERROR, "Cant read file-information: " + e.getMessage(), "Mediaserver");
@@ -121,7 +120,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	 */
 	protected void informFile(File file) throws IOException {
 		PlayingBean bean = readFileInformations(file);
-		bean.setState(STATE.PLAY);
+		bean.mState = STATE.PLAY;
 		informPlayingBean(bean);
 	}
 
@@ -132,7 +131,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	 */
 	protected void informPlayingBean(PlayingBean bean) {
 		mPlayingBean = new PlayingBean(bean);
-		mPlayingBean.setVolume(mVolume);
+		mPlayingBean.mVolume = mVolume;
 	}
 
 	@Override
@@ -143,7 +142,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void playPause() throws PlayerException {
 		if (mPlayingBean != null) {
-			mPlayingBean.setState((mPlayingBean.getState() == STATE.PLAY) ? STATE.PAUSE : STATE.PLAY);
+			mPlayingBean.mState = (mPlayingBean.mState == STATE.PLAY) ? STATE.PAUSE : STATE.PLAY;
 			informPlayingBean(mPlayingBean);
 		}
 	}
@@ -173,9 +172,8 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void play(String file) {
 		if (mPlayingBean != null) {
-			mPlayingBean.setState(STATE.PLAY);
-			mPlayingBean.setFile(file);
-			mPlayingBean.setStartTime(System.currentTimeMillis());
+			mPlayingBean.mState = STATE.PLAY;
+			mPlayingBean.mFile = file;
 			informPlayingBean(mPlayingBean);
 		}
 	}
@@ -184,20 +182,20 @@ public abstract class AbstractPlayer implements IPlayer {
 	public void quit() throws PlayerException {
 		if (mPlayingBean == null)
 			mPlayingBean = new PlayingBean();
-		mPlayingBean.setState(STATE.DOWN);
-		mPlayingBean.setArtist(null);
-		mPlayingBean.setTitle(null);
-		mPlayingBean.setAlbum(null);
-		mPlayingBean.setFile(null);
-		mPlayingBean.setPath(null);
-		mPlayingBean.setRadio(null);
+		mPlayingBean.mState = STATE.DOWN;
+		mPlayingBean.mArtist = null;
+		mPlayingBean.mTitle = null;
+		mPlayingBean.mAlbum = null;
+		mPlayingBean.mFile = null;
+		mPlayingBean.mPath = null;
+		mPlayingBean.mRadio = null;
 		informPlayingBean(mPlayingBean);
 	}
 
 	@Override
 	public void next() throws PlayerException {
 		if (mPlayingBean != null) {
-			mPlayingBean.setState(STATE.PLAY);
+			mPlayingBean.mState = STATE.PLAY;
 			informPlayingBean(mPlayingBean);
 		}
 	}
@@ -205,7 +203,7 @@ public abstract class AbstractPlayer implements IPlayer {
 	@Override
 	public void previous() throws PlayerException {
 		if (mPlayingBean != null) {
-			mPlayingBean.setState(STATE.PLAY);
+			mPlayingBean.mState = STATE.PLAY;
 			informPlayingBean(mPlayingBean);
 		}
 	}
@@ -271,22 +269,6 @@ public abstract class AbstractPlayer implements IPlayer {
 	// }
 	// }
 
-	class PlayingTimeCounter extends Thread {
-
-		@Override
-		public void run() {
-			while (true) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-				}
-				if (mPlayingBean != null && mPlayingBean.getState() == STATE.PLAY) {
-					mPlayingBean.incrementCurrentTime(1);
-				}
-			}
-		}
-
-	}
 
 	// class PlayerThumbnailJob extends ThumbnailJob {
 	//
@@ -359,10 +341,10 @@ public abstract class AbstractPlayer implements IPlayer {
 	public static void main(String[] args) {
 		PlayingBean bean = new PlayingBean();
 		readFileTags(new File("/home/sebastian/Musik/01 - Kryptic Minds - Intro.mp3"), bean);
-		System.out.println(bean.getArtist() + " - " + bean.getAlbum() + " - " + bean.getTitle());
+		System.out.println(bean.mArtist + " - " + bean.mAlbum + " - " + bean.mTitle);
 		bean = new PlayingBean();
 		readFileTags(new File("/home/sebastian/Musik/Pichl Michl - Track 2.mp3"), bean);
-		System.out.println(bean.getArtist() + " - " + bean.getAlbum() + " - " + bean.getTitle());
+		System.out.println(bean.mArtist + " - " + bean.mAlbum + " - " + bean.mTitle);
 	}
 
 	@Override

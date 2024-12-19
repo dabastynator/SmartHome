@@ -163,9 +163,9 @@ public class OMXPlayer extends AbstractPlayer {
 			mOmxObserver = new OMXObserver(mOmxProcess.getInputStream());
 			mOmxObserver.start();
 			mPlayingBean = new PlayingBean();
-			mPlayingBean.setPath(url);
-			mPlayingBean.setTitle(title);
-			mPlayingBean.setState(STATE.PLAY);
+			mPlayingBean.mPath = url;
+			mPlayingBean.mTitle = title;
+			mPlayingBean.mState = STATE.PLAY;
 			informPlayingBean(mPlayingBean);
 		} catch (IOException e) {
 			throw new PlayerException("Could not stream url: " + e.getMessage());
@@ -194,11 +194,11 @@ public class OMXPlayer extends AbstractPlayer {
 			try {
 				while ((line = omxStream.readLine()) != null) {
 					if (line.startsWith("have a nice day ;)")) {
-						bean.setState(PlayingBean.STATE.DOWN);
+						bean.mState = PlayingBean.STATE.DOWN;
 						informPlayingBean(bean);
 					}
 					if (line.startsWith("Audio codec")) {
-						bean.setState(PlayingBean.STATE.PLAY);
+						bean.mState = PlayingBean.STATE.PLAY;
 						try {
 							writeCurrentVolume();
 						} catch (RemoteException | PlayerException e) {
