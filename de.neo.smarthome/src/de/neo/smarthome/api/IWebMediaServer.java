@@ -18,7 +18,6 @@ public interface IWebMediaServer extends RemoteAble
 		Directory, File
 	}
 
-	public static final String FileSeparator = "<->";
 	public static final String MPlayer = "mplayer";
 	public static final String OMXPlayer = "omxplayer";
 	public static final String TOTEM = "totem";
@@ -136,6 +135,14 @@ public interface IWebMediaServer extends RemoteAble
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id,
 			@WebParam(name = "player") String player) 
+					throws RemoteException, PlayerException;
+
+	@WebRequest(path = "seek", description = "Seek to specific time in current playing.")
+	public PlayingBean playSeek(
+			@WebParam(name = "token") String token,
+			@WebParam(name = "id") String id,
+			@WebParam(name = "player") String player,
+			@WebParam(name = "seek_time_sec") int timeSec)
 					throws RemoteException, PlayerException;
 
 	@WebRequest(path = "set_fullscreen", description = "Set the specified player in fullsceen mode or change to windowed mode.")

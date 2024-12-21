@@ -23,6 +23,7 @@ public class MPlayer extends AbstractPlayer
 	protected PrintStream mMplayerIn;
 	private int mSeekValue;
 	private Object mPlayListfolder;
+	private PlayerObserver mPlayerObserver;
 
 	public MPlayer(String playListfolder) 
 	{
@@ -61,6 +62,10 @@ public class MPlayer extends AbstractPlayer
 		} 
 		catch (PlayerException e) 
 		{
+		}
+		if(mPlayerObserver != null)
+		{
+			mPlayerObserver.setRadio(null);
 		}
 		super.play(file);
 	}
@@ -124,7 +129,8 @@ public class MPlayer extends AbstractPlayer
 			// the standard input of MPlayer
 			mMplayerIn = new PrintStream(mMplayerProcess.getOutputStream());
 			// start player observer
-			new PlayerObserver(mMplayerProcess.getInputStream()).start();
+			mPlayerObserver = new PlayerObserver(mMplayerProcess.getInputStream());
+			mPlayerObserver.start();
 			// set default volume
 			mMplayerIn.print("volume " + mVolume + " 1\n");
 			mMplayerIn.flush();
@@ -155,6 +161,7 @@ public class MPlayer extends AbstractPlayer
 		setAmixerVolum(100);
 		mMplayerIn = null;
 		mMplayerProcess = null;
+		mPlayerObserver = null;
 		super.quit();
 	}
 
@@ -176,9 +183,13 @@ public class MPlayer extends AbstractPlayer
 	public void seekForwards() throws RemoteException, PlayerException 
 	{
 		if (mSeekValue <= 0)
+		{
 			mSeekValue = 5;
-		else if (mSeekValue < -600)
-			mSeekValue *= 5;
+		}
+		else
+		{
+			mSeekValue = Math.min(300, mSeekValue * 2);
+		}
 		writeCommand("seek " + mSeekValue + " 0");
 	}
 
@@ -186,9 +197,13 @@ public class MPlayer extends AbstractPlayer
 	public void seekBackwards() throws RemoteException, PlayerException 
 	{
 		if (mSeekValue >= 0)
+		{
 			mSeekValue = -5;
-		else if (mSeekValue > -600)
-			mSeekValue *= 5;
+		}
+		else
+		{
+			mSeekValue = Math.max(-300, mSeekValue * 2);
+		}
 		writeCommand("seek " + mSeekValue + " 0");
 	}
 
@@ -250,7 +265,8 @@ public class MPlayer extends AbstractPlayer
 		{
 			startPlayer();
 		}
-		if (!new File(pls).exists())
+		File file = new File(pls);
+		if (!file.exists())
 			throw new PlayerException("playlist " + pls + " does not exist");
 
 		if (lineOfFileStartsWith(pls, "[playlist]") != null) 
@@ -261,7 +277,10 @@ public class MPlayer extends AbstractPlayer
 		} 
 		else
 			mMplayerIn.print("loadlist \"" + pls + "\"\n");
-
+		if(mPlayerObserver != null)
+		{
+			mPlayerObserver.setRadio(file.getName());
+		}
 		writeVolume();
 	}
 
@@ -289,20 +308,32 @@ public class MPlayer extends AbstractPlayer
 
 	class PlayerObserver extends Thread 
 	{
-		private BufferedReader input;
+		private BufferedReader mInput;
+		private PlayingBean mBean;
+		private String mRadio;
+		
 
 		public PlayerObserver(InputStream stream) 
 		{
-			input = new BufferedReader(new InputStreamReader(stream));
+			mInput = new BufferedReader(new InputStreamReader(stream));
+			mBean = new PlayingBean();
+		}
+		
+		void setRadio(String radio)
+		{
+			mRadio = radio;
+			if (mBean != null)
+			{
+				mBean.mRadio = radio;
+			}
 		}
 
 		@Override
 		public void run() 
 		{
 			String line = null;
-			PlayingBean bean = new PlayingBean();
 			try {
-				while ((line = input.readLine()) != null) 
+				while ((line = mInput.readLine()) != null) 
 				{
 					if (line.startsWith("Playing")) 
 					{
@@ -310,33 +341,36 @@ public class MPlayer extends AbstractPlayer
 						{
 							String file = line.substring(8);
 							file = file.substring(0, file.length() - 1);
-							bean = readFileInformations(new File(file));
+							mBean = readFileInformations(new File(file));
+							mBean.mRadio = mRadio;
 						} 
 						catch (IOException e) 
 						{
-							bean = new PlayingBean();
 						}
 						String file = line.substring(line.lastIndexOf(File.separator) + 1);
 						file = file.substring(0, file.length() - 1);
-						bean.mFile = file.trim();
+						mBean.mFile = file.trim();
+						mSeekValue = 0;
 					}
 					if (line.startsWith(" Title: "))
-						bean.mTitle = line.substring(8).trim();
+						mBean.mTitle = line.substring(8).trim();
 					if (line.startsWith(" Artist: "))
-						bean.mArtist = line.substring(9).trim();
+						mBean.mArtist = line.substring(9).trim();
 					if (line.startsWith(" Album: "))
-						bean.mAlbum = line.substring(8).trim();
+						mBean.mAlbum = line.substring(8).trim();
 					if (line.equals("Starting playback...")) {
-						bean.mState = PlayingBean.STATE.PLAY;
-						loadThumbnail(bean);
-						informPlayingBean(bean);
+						mBean.mState = PlayingBean.STATE.PLAY;
+						loadThumbnail(mBean);
+						informPlayingBean(mBean);
 					}
 					if (line.startsWith("ICY Info")) 
 					{
-						bean.parseICYInfo(line);
-						bean.mState = STATE.PLAY;
-						loadThumbnail(bean);
-						informPlayingBean(bean);
+						mBean.parseICYInfo(line);
+						mBean.mState = STATE.PLAY;
+						mBean.mRadio = mRadio;
+						loadThumbnail(mBean);
+						informPlayingBean(mBean);
+						mSeekValue = 0;
 					}
 					if (line.startsWith("A: "))
 					{
@@ -345,13 +379,13 @@ public class MPlayer extends AbstractPlayer
 							String[] split = line.substring(2).trim().split(" ");
 							if (split.length > 3)
 							{
-								bean.mInTrackSec = (int)Double.parseDouble(split[0]);
-								bean.mDurationSec = (int)Double.parseDouble(split[3]);
+								mBean.mInTrackSec = (int)Double.parseDouble(split[0]);
+								mBean.mDurationSec = (int)Double.parseDouble(split[3]);
 								if (mPlayingBean != null)
 								{
-									bean.mState = mPlayingBean.mState;	
+									mBean.mState = mPlayingBean.mState;	
 								}
-								informPlayingBean(bean);
+								informPlayingBean(mBean);
 							}
 						}
 						catch (Exception e)
@@ -360,9 +394,9 @@ public class MPlayer extends AbstractPlayer
 						}
 					}
 				}
-				bean.mVolume = mVolume;
-				bean.mState = PlayingBean.STATE.DOWN;
-				informPlayingBean(bean);
+				mBean.mVolume = mVolume;
+				mBean.mState = PlayingBean.STATE.DOWN;
+				informPlayingBean(mBean);
 			} 
 			catch (IOException e) 
 			{

@@ -148,7 +148,6 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebParam(name = "item") String item) throws RemoteException, PlayerException
 	{
 		MediaControlUnit mediaServer = mCenter.getAccessHandler().require(token, id);
-		item = item.replace(IWebMediaServer.FileSeparator, File.separator);
 		if (!item.startsWith(mediaServer.getBrowserPath()))
 			item = mediaServer.getBrowserPath() + item;
 		mediaServer.getPlayList().extendPlayList(playlist, item);
@@ -200,7 +199,6 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 					throws RemoteException
 	{
 		ArrayList<BeanFileSystem> result = new ArrayList<>();
-		path = path.replace(IWebMediaServer.FileSeparator, File.separator);
 		if (!path.endsWith(File.separator))
 		{
 			path += File.separator;
@@ -233,7 +231,6 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebParam(name = "path", required = false, defaultvalue = "") String path)
 					throws RemoteException
 	{
-		path = path.replace(IWebMediaServer.FileSeparator, File.separator);
 		if (!path.endsWith(File.separator))
 		{
 			path += File.separator;
@@ -263,7 +260,6 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebParam(name = "file") String file)
 			throws PlayerException, RemoteException
 	{
-		file = file.replace(IWebMediaServer.FileSeparator, File.separator);
 		IPlayer p = getPlayer(token, id, player);
 		MediaControlUnit mediaServer = mCenter.getAccessHandler().require(token, id);
 		file = mediaServer.getBrowserPath() + file;
@@ -365,6 +361,24 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		}
 		return null;
 	}
+
+	@WebRequest(path = "seek", description = "Seek to specific time in current playing.")
+	public PlayingBean playSeek(
+			@WebParam(name = "token") String token,
+			@WebParam(name = "id") String id,
+			@WebParam(name = "player") String player,
+			@WebParam(name = "seek_time_sec") int timeSec)
+					throws RemoteException, PlayerException
+	{
+		IPlayer p = getPlayer(token, id, player);
+		if (p != null)
+		{
+			p.setPlayingPosition(timeSec);
+			return p.getPlayingBean();
+		}
+		return null;
+	}
+
 
 	@WebRequest(path = "stop", description = "Stop playing.")
 	public PlayingBean playStop(
