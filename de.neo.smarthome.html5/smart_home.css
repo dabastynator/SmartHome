@@ -338,7 +338,7 @@ img:hover
 	bottom: 0px;
 	height: 3px;
 	width: 60%;
-	background-image: linear-gradient(to right, var(--focus), var(--font));
+	background-image: linear-gradient(to right, var(--background), var(--focus));
 	transition: 1.5s linear;
 }
 
@@ -357,6 +357,61 @@ img:hover
 	cursor:pointer;
 	display: flex;
 	flex: 0 0 auto;
+}
+
+.player_btn_circle
+{
+	background-color: var(--btn_card_color);
+	display: inline-block;
+	cursor:pointer;
+	padding: 15px;
+	border-radius: 50%;
+	transition: 0.2s;
+	display: flex;
+	flex: 0 0 auto;
+}
+
+.player_btn_circle:hover
+{
+	box-shadow: inset 0 0 20px var(--background);
+}
+
+.player_dlg_range_side
+{
+	width: 50px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	align-items: center;
+	flex: 0 0 auto;
+}
+
+.player_dlg_row
+{
+	display: flex;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.player_dlg_info
+{
+	text-align: center;
+}
+
+.player_dlg_sub
+{
+	text-align: left;
+	font-size: small;
+}
+
+#player_dlg_play_btn
+{
+	transition: 0.2s;
+}
+
+.player_dlg_img_play
+{
+	transform: translateX(3px);
 }
 
 .setting_btn
@@ -382,7 +437,7 @@ input, select
 	width: 100%;
 	display: inline-block;
 	box-sizing: border-box;
-	padding: 12px
+	padding: 12px;
 }
 
 input[type=checkbox]
@@ -403,34 +458,61 @@ input:checked + label:after
 	transform: translateX(-100%);
 }
 
-.cbox
+/* chromium */
+input[type="range" i]
 {
-	cursor: pointer;
-	text-indent: -9999px;
-	width: 80px;
-	height: 30px;
-	background: var(--border);
-	display: block;
-	border-radius: 30px;
-	position: relative;
+	border: none;
+	box-shadow: none;
 }
-
-.cbox:after
-{
-	content: '';
-	position: absolute;
-	top: 3px;
-	left: 5px;
-	width: 23px;
-	height: 23px;
-	background: var(--font);
+input[type="range" i]::-webkit-slider-thumb{
+	height: var(--s);
+	aspect-ratio: 1;
 	border-radius: 50%;
-	transition: 0.3s;
+	box-shadow: 0 0 0 var(--_b,var(--l)) inset var(--_c);
+	border-image: linear-gradient(90deg,var(--_c) 50%,#ababab 0) 0 1/calc(50% - var(--l)/2) 100vw/0 calc(100vw + var(--g));
+	-webkit-appearance: none;
+	appearance: none;
+	transition: .3s;
+}
+/* Firefox */
+input[type="range"]
+{
+	--c: var(--btn_card_color); /* active color */
+	--g: 8px; /* the gap */
+	--l: 5px; /* line thickness*/
+	--s: 23px; /* thumb size*/
+	width: 400px;
+	height: var(--s); /* needed for Firefox*/
+	--_c: color-mix(in srgb, var(--c), #000 var(--p,0%));
+	-webkit-appearance :none;
+	-moz-appearance :none;
+	appearance :none;
+	background: none;
+	cursor: pointer;
+	overflow: hidden;
+}
+input[type="range"], input[type="range"]:hover, input[type="range"]:focus
+{
+	border: none;
+	box-shadow: none;
+}
+input[type="range"]::-moz-range-thumb {
+	height: var(--s);
+	width: var(--s);
+	border-radius: 50%;
+	border: none;
+	background: var(--background);
+	box-shadow: 0 0 0 var(--_b,var(--l)) inset var(--_c);
+	border-image: linear-gradient(90deg,var(--_c) 50%,var(--title) 0) 0 1/calc(50% - var(--l)/2) 100vw/0 calc(100vw + var(--g));
+	-moz-appearance: none;
+	appearance: none;
+	transition: .3s;
 }
 
-.cbox:active:after
-{
-	width: 32px;
+@supports not (color: color-mix(in srgb,red,red)) {
+	input {
+		--_c: var(--c);
+	}
 }
 
 label, .label
@@ -453,6 +535,7 @@ label, .label
 {
 	box-shadow: inset 0 0 5px var(--focus);
 	transition: all 0.15s;
+	--p: 25%;
 }
 
 .file:hover
@@ -471,6 +554,11 @@ input:focus, select:focus
 	border: 1px solid var(--focus);
 	box-shadow: inset 0 0 15px var(--focus);
 	transition: all 0.15s;
+}
+
+input:active,
+input:focus-visible{
+  --_b: var(--s)
 }
 
 .button:active

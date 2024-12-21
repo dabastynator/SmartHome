@@ -35,6 +35,7 @@ class APIHandler
 }
 
 const Separator = "/";
+const PlayerProgressSteps = 300;
 
 var apiTrigger = new APIHandler();
 var apiMediaServer = new APIHandler();
@@ -51,6 +52,8 @@ var mFiles;
 var mPlaylists;
 var mPlaylistContent;
 var mSwitchesCache = '';
+var mCurrentPlaying = null;
+var mCurrentPlayingToPlaylist = null;
 
 var htmlFiles;
 var htmlPls;
@@ -66,6 +69,15 @@ var htmlFilesBack;
 var htmlFilesSearch;
 var htmlPlsAdd;
 var htmlPlayPause;
+var htmlPlayDlgTitle;
+var htmlPlayDlgArtist;
+var htmlPlayDlgAlbum;
+var htmlPlayDlgPlayImg;
+var htmlPlayDlgInTrack;
+var htmlPlayDlgDuration;
+var htmlPlayDlgInTrackProgress;
+var htmlPlayDlgVolume;
+
 
 function initialize()
 {
@@ -83,13 +95,21 @@ function initialize()
 	htmlFilesSearch = document.getElementById('filesystem_search');
 	htmlPlsAdd = document.getElementById('playlist_add');
 	htmlPlayPause = document.getElementById('play_pause');
+	htmlPlayDlgTitle = document.getElementById('player_dlg_title');
+	htmlPlayDlgArtist = document.getElementById('player_dlg_artist');
+	htmlPlayDlgAlbum = document.getElementById('player_dlg_album');
+	htmlPlayDlgPlayImg = document.getElementById('player_dlg_play_btn');
+	htmlPlayDlgInTrack = document.getElementById('player_dlg_in_track');
+	htmlPlayDlgDuration = document.getElementById('player_dlg_duration');
+	htmlPlayDlgInTrackProgress = document.getElementById('player_dlg_progress');
+	htmlPlayDlgVolume = document.getElementById('volume_input');
 
 	readSetting();
 	placeDialogs();
 	updateVisibleCard();
 
-	var volume_input = document.getElementById('volume_input');
-	volume_input.addEventListener('input', setVolume);
+	htmlPlayDlgVolume.addEventListener('input', setVolume);
+	htmlPlayDlgInTrackProgress.addEventListener('input', setTrackSeekPosition);
 
 	refreshMediaServer();
 	refreshFiles();
@@ -409,31 +429,84 @@ function getPlaying(callback){
 	});
 }
 
+function formatTime(seconds)
+{
+	var minutes = Math.floor(seconds / 60);
+	var seconds = (seconds % 60);
+	if (seconds < 10)
+	{
+		seconds = '0' + seconds;
+	}
+	return minutes + ':' + seconds;
+}
+
 function refreshPlayer(){
 	getPlaying(function(playing){
 		var text = '';
 		var progress = '0%';
+		mCurrentPlaying = playing;
+		var title = '';
+		var artist = '';
+		var album = '';
+		var inTrack = '-';
+		var duration = '-';
 		if (playing != null){
 			if (playing.artist != null && playing.artist != '')
+			{
 				text += playing.artist + '<br/>';
+				artist = playing.artist;
+			}
 			if (playing.title != null && playing.title != '')
+			{
 				text += playing.title + '<br/>';
+				title = playing.title;
+			}
+			if (playing.album != null && playing.album != '')
+			{
+				album = playing.album;
+			}
+			else if (playing.file != null && playing.file != '')
+			{
+				album = playing.file;
+			}
+			else if (playing.radio != null)
+			{
+				album = playing.radio;
+			}
 			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
 				text += playing.file + '<br/>';
 			if (playing.state == "PLAY")
+			{
 				htmlPlayPause.src = 'player/pause.png';
+				htmlPlayDlgPlayImg.src = 'player/pause.png';
+				htmlPlayDlgPlayImg.classList.remove('player_dlg_img_play');
+			}
 			else
+			{
 				htmlPlayPause.src = 'player/play.png';
+				htmlPlayDlgPlayImg.src = 'player/play.png';
+				htmlPlayDlgPlayImg.classList.add('player_dlg_img_play');
+			}
 			if (playing.durationSec > 0)
 			{
-				progress = Math.round(100 * playing.inTrackSec / playing.durationSec) + '%';
+				progress = Math.round(PlayerProgressSteps * playing.inTrackSec / playing.durationSec);
+				duration = formatTime(playing.durationSec);
+
 			}
+			inTrack = formatTime(playing.inTrackSec);
+			htmlPlayDlgVolume.value = playing.volume;
 		} else {
 			htmlPlayPause.src = 'player/play.png';
 			text += 'Nothing played';
 		}
+		htmlPlayDlgTitle.innerHTML = title;
+		htmlPlayDlgArtist.innerHTML = artist;
+		htmlPlayDlgAlbum.innerHTML = album;
+		htmlPlayDlgInTrack.innerHTML = inTrack;
+		htmlPlayDlgDuration.innerHTML = duration;
+		htmlPlayDlgInTrackProgress.value = progress;
 		htmlPlayInfo.innerHTML = text;
-		htmlPlayProgress.style.width = progress;
+		htmlPlayProgress.style.width = progress + '%';
 	});
 }
 
@@ -518,16 +591,38 @@ function playPlsFile(index)
 function extendPls(index){
 	mPlaylist = mPlaylists[index];
 	hideDialog('playlist');
+	var path = null;
+	if (mFile != null)
+	{
+		path = mFile.path;
+	}
+	else if (mCurrentPlayingToPlaylist != null)
+	{
+		path = mCurrentPlayingToPlaylist.path
+	}
+	if (path == null)
+	{
+		showToast("No file to add to playlist!");
+		return;
+	}
 	apiMediaServer.call('playlist_extend', function(result)
 	{
 		if (checkResult(result)) {
 			showToast('Playlist <b>' + mPlaylist.name + '</b> was extended.');
 		}
-	}, {'playlist': mPlaylist.name, 'item': mFile.path});
+	}, {'playlist': mPlaylist.name, 'item': path});
 }
 
-function addFileToPls(path, index){
-	mFile = mFiles[index];
+function addFileToPls(index){
+	mFile = null;
+	if (index >= 0)
+	{
+		mFile = mFiles[index];
+	}
+	else if (mCurrentPlaying != null)
+	{
+		mCurrentPlayingToPlaylist = mCurrentPlaying;
+	}
 	apiMediaServer.call('playlists', function(result)
 	{
 		if (checkResult(result)) {
@@ -635,7 +730,7 @@ function showFiles(files, isSearch)
 		var buttons =
 		[
 			{"src": "player/play.png", "onclick": 'onclick="play(' + i + ')"'},
-			{"src": "img/pls.png", "onclick": 'onclick="addFileToPls(mPath, \'' + i + '\')"'}
+			{"src": "img/pls.png", "onclick": 'onclick="addFileToPls(\'' + i + '\')"'}
 		];
 		if (isSearch)
 		{
@@ -859,18 +954,18 @@ function playerAction(action, parameter){
 	}, parameter);
 }
 
-function getVolume(){
-	getPlaying(function(playing){
-		if (playing != null){
-			var input = document.getElementById('volume_input');
-			input.value = playing.volume;
-		}
-	});
+function setVolume()
+{
+	playerAction('volume', {'volume': htmlPlayDlgVolume.value});
 }
 
-function setVolume(){
-	var input = document.getElementById('volume_input');
-	playerAction('volume', {'volume': input.value});
+function setTrackSeekPosition()
+{
+	if (mCurrentPlaying != null)
+	{
+		var sec = Math.round(htmlPlayDlgInTrackProgress.value * mCurrentPlaying.durationSec / PlayerProgressSteps);
+		playerAction('seek', {'seek_time_sec': sec});
+	}
 }
 
 /***************
