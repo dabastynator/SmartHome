@@ -337,7 +337,7 @@ img:hover
 	position: absolute;
 	bottom: 0px;
 	height: 3px;
-	width: 60%;
+	width: 0%;
 	background-image: linear-gradient(to right, var(--background), var(--focus));
 	transition: 1.5s linear;
 }
@@ -406,6 +406,7 @@ img:hover
 
 #player_dlg_play_btn
 {
+	margin: auto;
 	transition: 0.2s;
 }
 
@@ -665,7 +666,7 @@ input:focus-visible{
 	--dlg_width: 600px;
 
 	padding: 20px 10px 20px 10px;
-	box-shadow: 0px 10px 30px 10px black;
+	box-shadow: var(--dialog_shadow);
 	position: absolute;
 	display: flex;
 	flex-direction: column;

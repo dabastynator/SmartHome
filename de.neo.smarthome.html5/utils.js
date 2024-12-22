@@ -52,8 +52,10 @@ function loadAppearence()
 {
 	appearence = token = window.localStorage.getItem("appearence");
 	document.documentElement.style.setProperty("--card_shadow", "");
+	document.documentElement.style.setProperty("--dialog_shadow", "0px 10px 30px 10px black");
 	if(appearence == 'bright')
 	{
+		document.documentElement.style.setProperty("--dialog_shadow", "");
 		document.documentElement.style.setProperty("--body_background", "white");
 		document.documentElement.style.setProperty("--background", "white");
 		document.documentElement.style.setProperty("--font", "black");

@@ -101,17 +101,19 @@
 
 <div id="player_dlg" class="container">
 	<div id="content_volume" class="dialog" style="--dlg_width: 500">
-		<div class="gradient"></div>
-		<div class="player_dlg_sub">Title</div>
-		<div id="player_dlg_title" class="player_dlg_info">Title</div>
-		<div class="gradient" style="margin-top: 16px;"></div>
-		<div class="player_dlg_sub">Artist</div>
-		<div id="player_dlg_artist" class="player_dlg_info">Artist</div>
-		<div class="gradient" style="margin-top: 16px;"></div>
-		<div class="player_dlg_sub">Album / File</div>
-		<div id="player_dlg_album" class="player_dlg_info">Album</div>
-		<div class="gradient" style="margin-top: 16px; margin-bottom: 10px;"></div>
-		<div class="player_dlg_row">
+		<div id="player_dlg_infos">
+			<div class="gradient"></div>
+			<div class="player_dlg_sub">Title</div>
+			<div id="player_dlg_title" class="player_dlg_info">Title</div>
+			<div class="gradient" style="margin-top: 16px;"></div>
+			<div class="player_dlg_sub">Artist</div>
+			<div id="player_dlg_artist" class="player_dlg_info">Artist</div>
+			<div class="gradient" style="margin-top: 16px;"></div>
+			<div class="player_dlg_sub">Album / File</div>
+			<div id="player_dlg_album" class="player_dlg_info">Album</div>
+			<div class="gradient" style="margin-top: 16px; margin-bottom: 10px;"></div>
+		</div>
+		<div class="player_dlg_row" style="height: 65px;">
 			<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
 			<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
 			<img class="player_btn" src="player/backward.png" onclick="playerAction('seek_backward')"/>
@@ -121,9 +123,13 @@
 			<img class="player_btn" src="img/pls.png" onclick="addFileToPls(-1)"/>
 		</div>
 		<div class="player_dlg_row">
-			<div class="player_dlg_range_side" style="display: flex;"><img class="player_btn" style="margin: auto;" src="player/speaker_low.png" /></div>
+			<div class="player_dlg_range_side" style="display: flex;">
+				<img class="player_btn" style="margin: auto;" src="player/speaker_low.png" onclick="playerAction('delta_volume', {'delta':-3})" />
+			</div>
 			<input id="volume_input" style="margin:auto; flex: 1 1 auto;" type="range" min="0" max="100" value="30"/>
-			<div class="player_dlg_range_side" style="display: flex;"><img class="player_btn" style="margin: auto;" src="player/speaker.png" /></div>
+			<div class="player_dlg_range_side" style="display: flex;">
+				<img class="player_btn" style="margin: auto;" src="player/speaker.png" onclick="playerAction('delta_volume', {'delta':3})"/>
+			</div>
 		</div>
 		<div class="player_dlg_row">
 			<div id="player_dlg_in_track" class="player_dlg_range_side">?</div>

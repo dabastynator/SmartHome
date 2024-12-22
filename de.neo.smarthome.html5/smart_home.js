@@ -95,6 +95,7 @@ function initialize()
 	htmlFilesSearch = document.getElementById('filesystem_search');
 	htmlPlsAdd = document.getElementById('playlist_add');
 	htmlPlayPause = document.getElementById('play_pause');
+	htmlPlayDlgInfos = document.getElementById('player_dlg_infos');
 	htmlPlayDlgTitle = document.getElementById('player_dlg_title');
 	htmlPlayDlgArtist = document.getElementById('player_dlg_artist');
 	htmlPlayDlgAlbum = document.getElementById('player_dlg_album');
@@ -443,11 +444,12 @@ function formatTime(seconds)
 function refreshPlayer(){
 	getPlaying(function(playing){
 		var text = '';
-		var progress = '0%';
+		var progressWidth = '0%';
+		var progressInput = 0;
 		mCurrentPlaying = playing;
-		var title = '';
-		var artist = '';
-		var album = '';
+		var title = '-';
+		var artist = '-';
+		var album = '-';
 		var inTrack = '-';
 		var duration = '-';
 		if (playing != null){
@@ -489,24 +491,35 @@ function refreshPlayer(){
 			}
 			if (playing.durationSec > 0)
 			{
-				progress = Math.round(PlayerProgressSteps * playing.inTrackSec / playing.durationSec);
+				progressInput = Math.round(PlayerProgressSteps * playing.inTrackSec / playing.durationSec);
+				progressWidth = Math.round(100 * playing.inTrackSec / playing.durationSec) + '%';
 				duration = formatTime(playing.durationSec);
 
 			}
 			inTrack = formatTime(playing.inTrackSec);
 			htmlPlayDlgVolume.value = playing.volume;
+			if (htmlPlayDlgInfos.style.display != 'block')
+			{
+				htmlPlayDlgInfos.style.display = 'block';
+				placeDialogs();
+			}
 		} else {
 			htmlPlayPause.src = 'player/play.png';
 			text += 'Nothing played';
+			if (htmlPlayDlgInfos.style.display != 'none')
+			{
+				htmlPlayDlgInfos.style.display = 'none';
+				placeDialogs();
+			}
 		}
 		htmlPlayDlgTitle.innerHTML = title;
 		htmlPlayDlgArtist.innerHTML = artist;
 		htmlPlayDlgAlbum.innerHTML = album;
 		htmlPlayDlgInTrack.innerHTML = inTrack;
 		htmlPlayDlgDuration.innerHTML = duration;
-		htmlPlayDlgInTrackProgress.value = progress;
+		htmlPlayDlgInTrackProgress.value = progressInput;
 		htmlPlayInfo.innerHTML = text;
-		htmlPlayProgress.style.width = progress + '%';
+		htmlPlayProgress.style.width = progressWidth;
 	});
 }
 
