@@ -372,15 +372,18 @@ public class MPlayer extends AbstractPlayer
 						informPlayingBean(mBean);
 						mSeekValue = 0;
 					}
-					if (line.startsWith("A: "))
+					int indexOf = line.indexOf("of");
+					int indexA = line.indexOf("A:");
+					if (indexA >= 0 && indexOf >= 0)
 					{
 						try
 						{
-							String[] split = line.substring(2).trim().split(" ");
-							if (split.length > 3)
+							String[] splitA = line.substring(indexA + 2).trim().split(" ");
+							String[] splitOf = line.substring(indexOf + 2).trim().split(" ");
+							if (splitA.length > 3 && splitOf.length > 2)
 							{
-								mBean.mInTrackSec = (int)Double.parseDouble(split[0]);
-								mBean.mDurationSec = (int)Double.parseDouble(split[3]);
+								mBean.mInTrackSec = (int)Double.parseDouble(splitA[0]);
+								mBean.mDurationSec = (int)Double.parseDouble(splitOf[0]);
 								if (mPlayingBean != null)
 								{
 									mBean.mState = mPlayingBean.mState;	

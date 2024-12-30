@@ -5,25 +5,28 @@ import java.util.List;
 
 import de.neo.remote.rmi.RMILogger.LogPriority;
 
-/**
- * The logger gets log information and informs listener.
- * 
- * @author sebastian
- * 
- */
 public class RemoteLogger {
 
 	public static List<RemoteLogListener> mListeners = new ArrayList<RemoteLogger.RemoteLogListener>();
 
-	/**
-	 * Perform log. All log listeners will be informed about the log.
-	 * 
-	 * @param priority
-	 * @param message
-	 * @param object
-	 */
+	public static void info(String message)
+	{
+		performLog(LogPriority.INFORMATION, message, "");
+	}
+	
+	public static void error(String message)
+	{
+		performLog(LogPriority.ERROR, message, "");
+	}
+	
+	public static void warning(String message)
+	{
+		performLog(LogPriority.WARNING, message, "");
+	}
+	
 	public static void performLog(LogPriority priority, String message,
-			String object) {
+			String object)
+	{
 		long time = System.currentTimeMillis();
 		if (object == null)
 			object = "";
@@ -31,24 +34,8 @@ public class RemoteLogger {
 			listener.remoteLog(priority, message, object, time);
 	}
 
-	/**
-	 * the log listener gets log information from the rmi logger.
-	 * 
-	 * @author sebastian
-	 * 
-	 */
 	public interface RemoteLogListener {
 
-		/**
-		 * Inform about log with given priority, message and date when the log
-		 * occurs. The object is the name of the involved global object, if
-		 * there is any one.
-		 * 
-		 * @param priority
-		 * @param message
-		 * @param object
-		 * @param date
-		 */
 		public void remoteLog(LogPriority priority, String message,
 				String object, long date);
 

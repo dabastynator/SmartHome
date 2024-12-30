@@ -432,13 +432,26 @@ function getPlaying(callback){
 
 function formatTime(seconds)
 {
+	var hours = '';
+	var addZero = false;
+	if (seconds > 60 * 60)
+	{
+		hours = Math.floor(seconds / (60 * 60));
+		seconds -= hours * 60 * 60;
+		hours = hours + ':';
+		addZero = true;
+	}
 	var minutes = Math.floor(seconds / 60);
+	if (addZero && minutes < 10)
+	{
+		minutes = '0' + minutes;
+	}
 	var seconds = (seconds % 60);
 	if (seconds < 10)
 	{
 		seconds = '0' + seconds;
 	}
-	return minutes + ':' + seconds;
+	return hours + minutes + ':' + seconds;
 }
 
 function refreshPlayer(){
