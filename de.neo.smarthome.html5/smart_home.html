@@ -39,7 +39,9 @@
 </div>
 
 <div id="playlists" class="card">
-	<div id="playlists_list" class="card_fill">No playlists</div>	
+	<div id="playlists_list" class="card_fill">
+		<div class="loader"></div>
+	</div>	
 	<div id="playlists_buttons" class="card_buttons">
 		<div id="playlist_add" class="card_btn gone" onclick="newPlaylist();"><img src="img/plus.png" class="card_btn_img"/></div>
 	</div>
@@ -48,19 +50,23 @@
 <div id="switches" class="card">
 	<div class="card_fill">
 		<div id="switch_list" >
-			No Switches
+			<div class="loader"></div>
 		</div>
 		<div class="gradient" style="margin-top: 6px; margin-bottom: 6px;"></div>
 		<div id="scene_list" >
-			No Scenes
+			<div class="loader"></div>
 		</div>
 	</div>
 </div>
 
-<div id="information" class="card">No information</div>
+<div id="information" class="card">
+	<div class="loader"></div>
+</div>
 
 <div id="filesystem" class="card" style="overflow: hidden">
-	<div id="filesystem_files" class="card_fill" style="overflow-x: hidden;">No files</div>
+	<div id="filesystem_files" class="card_fill" style="overflow-x: hidden;">
+		<div class="loader"></div>
+	</div>
 	<div id="filesystem_buttons" class="card_buttons">
 		<div id="filesystem_back" class="card_btn gone"><img src="img/back.png" class="card_btn_img"/></div>
 		<div id="filesystem_search" class="card_btn gone" onclick="searchFilesDlg()"><img src="img/magnifier.png" class="card_btn_img"/></div>
@@ -117,7 +123,9 @@
 			<img class="player_btn" src="player/stop.png" onclick="playerAction('stop')"/>
 			<img class="player_btn" src="player/prev.png" onclick="playerAction('previous')"/>
 			<img class="player_btn" src="player/backward.png" onclick="playerAction('seek_backward')"/>
-			<div class="player_btn_circle"><img id="player_dlg_play_btn" class="card_btn_img" src="player/pause.png" onclick="playerAction('play_pause')"/></div>
+			<div class="player_btn_circle">
+				<img id="player_dlg_play_btn" class="card_btn_img" src="player/pause.png" onclick="playerAction('play_pause')"/>
+			</div>
 			<img class="player_btn" src="player/forward.png" onclick="playerAction('seek_forward')"/>
 			<img class="player_btn" src="player/next.png" onclick="playerAction('next')"/>
 			<img class="player_btn" src="img/pls.png" onclick="addFileToPls(-1)"/>

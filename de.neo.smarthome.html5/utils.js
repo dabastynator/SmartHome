@@ -104,8 +104,8 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--btn_off_border", "var(--btn_border) solid var(--btn_off_border_color)");		
 		document.documentElement.style.setProperty("--btn_off_border_hover", "var(--btn_border) solid #189AB4");
 		document.documentElement.style.setProperty("--btn_off_bg", "#D4F1F4");
-		document.documentElement.style.setProperty("--img_filter", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(180deg) saturate(0.6)");
-		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(180deg) saturate(0.6) brightness(0.3)");
+		document.documentElement.style.setProperty("--img_filter", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(190deg) saturate(0.6) brightness(0.8)");
+		document.documentElement.style.setProperty("--img_filter_hover", "brightness(0.5) sepia(100%) saturate(10000%) hue-rotate(190deg) saturate(0.6) brightness(0.3)");
 		document.documentElement.style.setProperty("--btn_card_color", "var(--body_background)");
 		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.9)");
 	}
@@ -113,6 +113,7 @@ function loadAppearence()
 	{
 		document.documentElement.style.setProperty("--body_background", "black");
 		document.documentElement.style.setProperty("--background", "#100");
+		document.documentElement.style.setProperty("--card_shadow", "0px 0px 6px #a00");
 		document.documentElement.style.setProperty("--font", "white");
 		document.documentElement.style.setProperty("--font_on", "var(--font)");
 		document.documentElement.style.setProperty("--font_name", "'Source Code Pro', monospace");
@@ -135,6 +136,7 @@ function loadAppearence()
 		document.documentElement.style.setProperty("--img_filter_hover", "brightness(1)");
 		document.documentElement.style.setProperty("--btn_card_color", "white");
 		document.documentElement.style.setProperty("--img_card_filter", "brightness(0.5) sepia(100%) saturate(10000%) saturate(0.4) brightness(0.6)");
+		document.documentElement.style.setProperty("--dialog_shadow", "0px 0px 15px 2px white");
 	}
 	else if(appearence == 'sepia')
 	{

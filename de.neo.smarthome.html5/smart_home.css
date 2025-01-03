@@ -115,6 +115,7 @@ img
 {
 	filter: var(--img_card_filter);
 	background-image: none;
+	transform: none;
 }
 
 #playlists, #currentplaying, #switches, #top_bar, #filesystem, #border_navigation, #information
@@ -314,6 +315,7 @@ img
 img:hover
 {
 	filter: var(--img_filter_hover);
+	transform: scale(1.05);
 }
 
 .headline
@@ -366,19 +368,20 @@ img:hover
 	cursor:pointer;
 	padding: 15px;
 	border-radius: 50%;
-	transition: 0.2s;
 	display: flex;
 	flex: 0 0 auto;
+	filter: brightness(0.85);
 }
 
 .player_btn_circle:hover
 {
-	box-shadow: inset 0 0 20px var(--background);
+	transform: scale(1.05);
+	filter: none;
 }
 
 .player_dlg_range_side
 {
-	width: 50px;
+	width: 70px;
 	height: 40px;
 	line-height: 40px;
 	text-align: center;
@@ -400,6 +403,7 @@ img:hover
 
 .player_dlg_sub
 {
+	color: var(--btn_card_color);
 	text-align: left;
 	font-size: small;
 }
@@ -407,10 +411,13 @@ img:hover
 #player_dlg_play_btn
 {
 	margin: auto;
-	transition: 0.2s;
 }
 
 .player_dlg_img_play
+{
+	transform: translateX(3px);
+}
+.player_dlg_img_play:hover
 {
 	transform: translateX(3px);
 }
@@ -609,6 +616,20 @@ input:focus-visible{
 .search_result
 {
 	font-size: 80%;
+}
+
+.loader
+{
+	text-align: center;
+	background-image: url("img/loading.png");
+	background-size: 128px;
+	background-repeat: no-repeat;
+	background-position: center;
+	filter: var(--img_filter);
+	animation: rotation 1s infinite linear;
+	width: 100%;
+	height: 250px;
+	border-radius: 50%;
 }
 
 .rotate
