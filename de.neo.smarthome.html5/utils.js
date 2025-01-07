@@ -271,3 +271,14 @@ function hideDialog(id)
 		container.classList.add("z_index_back");
 	}, 500);
 }
+
+function showToast(message)
+{
+	var toast = document.getElementById("toast");
+	toast.innerHTML = message;
+	toast.classList.add("show");
+	setTimeout(function()
+	{
+		toast.classList.remove("show");
+	}, 2000);
+}

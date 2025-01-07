@@ -750,3 +750,8 @@ input:focus-visible{
 		display: inline-block;
 	}
 }
+
+#border_navigation_content
+{
+	scrollbar-width: none;
+}

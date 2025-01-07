@@ -815,17 +815,6 @@ function refreshFiles()
 	}, {'path': mPath});
 }
 
-function showToast(message)
-{
-	var toast = document.getElementById("toast");
-	toast.innerHTML = message;
-	toast.classList.add("show");
-	setTimeout(function()
-	{
-		toast.classList.remove("show");
-	}, 2000);
-}
-
 function plsClick(index){
 	mPlaylist = mPlaylists[index];
 	apiMediaServer.call('play_playlist', function(result)
