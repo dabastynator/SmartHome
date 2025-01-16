@@ -96,6 +96,12 @@ img
 	transition: 0.2s;
 }
 
+.card_btn:active
+{
+	box-shadow: 0px 0px 2px var(--font);
+    transform: scale(0.95) translateY(-1px);
+}
+
 .gone, .card_btn:hover.gone
 {
 	opacity: 0%;
