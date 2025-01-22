@@ -68,6 +68,7 @@ var htmlInformation;
 var htmlFilesBack;
 var htmlFilesSearch;
 var htmlPlsAdd;
+var htmlPlsBack;
 var htmlPlayPause;
 var htmlPlayDlgTitle;
 var htmlPlayDlgArtist;
@@ -94,6 +95,7 @@ function initialize()
 	htmlFilesBack = document.getElementById('filesystem_back');
 	htmlFilesSearch = document.getElementById('filesystem_search');
 	htmlPlsAdd = document.getElementById('playlist_add');
+	htmlPlsBack = document.getElementById('playlist_back');
 	htmlPlayPause = document.getElementById('play_pause');
 	htmlPlayDlgInfos = document.getElementById('player_dlg_infos');
 	htmlPlayDlgTitle = document.getElementById('player_dlg_title');
@@ -912,6 +914,68 @@ function newPlaylist()
 	input.focus();
 }
 
+function showPlaylist(filter)
+{
+	var content = "";
+	var groupName = null;
+	var groups = [];
+	var hasFilter = filter != "";
+	for (var i = 0; i < mPlaylists.length; i++)
+	{
+		var p = mPlaylists[i];
+		if (!hasFilter || p.name.startsWith(filter))
+		{
+			groupName = p.name.split(" ")[0];
+			var doMerge = groups.length == 0 || groups[groups.length-1].name != groupName;
+			if (doMerge || hasFilter)
+			{
+				groups.push({"name": groupName, "count": 1, "pls": p, "index": i});
+			}
+			else
+			{
+				groups[groups.length-1].count = groups[groups.length-1].count+1;
+			}
+		}
+	}
+
+	for (var i = 0; i < groups.length; i++)
+	{
+		var group = groups[i];
+		var pls = group.pls;
+		if (group.count > 1)
+		{
+			var onclick = 'onclick="showPlaylist(\'' + group.name + '\')"';
+			content += fileRow(
+				{"caption": group.name, "onclick": onclick,
+				"subrow": {
+					"caption": group.count + " Playlists",
+					"onclick": onclick
+				}},
+				[{"src": "img/go.png", "onclick": onclick}]
+			);
+		}
+		else
+		{
+			content += fileRow(
+				{"caption": pls.name, "onclick": 'onclick="plsClick(\'' + group.index + '\')"'},
+				[{"src": "img/pls.png", "onclick": 'onclick="showPlsContent(\'' + group.index + '\')"'}]
+			);
+		}
+	}
+	content += '<div style="height:50px"></div>';
+	content += '</div>';
+	htmlPls.innerHTML = content;
+	htmlPlsAdd.classList.remove("gone");
+	if (hasFilter)
+	{
+		htmlPlsBack.classList.remove("gone");
+	}
+	else
+	{
+		htmlPlsBack.classList.add("gone");
+	}
+}
+
 function refreshPlaylist()
 {
 	apiMediaServer.call('playlists', function(result)
@@ -921,22 +985,12 @@ function refreshPlaylist()
 			var content = "";
 			result.sort(function(a, b){return a.name.localeCompare(b.name);});
 			mPlaylists = result;
-			for (var i = 0; i < result.length; i++)
-			{
-				var p = result[i];
-				content += fileRow(
-					{"caption": p.name, "onclick": 'onclick="plsClick(\'' + i + '\')"'},
-					[{"src": "img/pls.png", "onclick": 'onclick="showPlsContent(\'' + i + '\')"'}]
-				);
-			}
-			content += '<div style="height:50px"></div>';
-			content += '</div>';
-			htmlPls.innerHTML = content;
-			htmlPlsAdd.classList.remove("gone");
+			showPlaylist('');
 		}
 		else
 		{
 			htmlPlsAdd.classList.add("gone");
+			htmlPlsBack.classList.add("gone");
 		}
 	});
 }
