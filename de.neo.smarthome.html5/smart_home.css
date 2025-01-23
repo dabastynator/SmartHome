@@ -86,14 +86,14 @@ img
 	margin-left: 10px;
 	border-radius: 50%;
 	box-shadow: 0px 0px 2px var(--font);
-	transition: 0.2s;
+	transition: 0.15s;
 }
 
 .card_btn:hover
 {
 	box-shadow: 0px 2px 8px 1px var(--font);
     transform: translateY(-2px);
-	transition: 0.2s;
+	transition: 0.15s;
 }
 
 .card_btn:active
@@ -376,13 +376,11 @@ img:hover
 	border-radius: 50%;
 	display: flex;
 	flex: 0 0 auto;
-	filter: brightness(0.85);
 }
 
 .player_btn_circle:hover
 {
 	transform: scale(1.05);
-	filter: none;
 }
 
 .player_dlg_range_side
@@ -621,7 +619,9 @@ input:focus-visible{
 
 .search_result
 {
-	font-size: 80%;
+	color: var(--btn_card_color);
+	margin: 0px 6px 4px 6px;
+	font-size: 70%;
 }
 
 .loader

@@ -319,7 +319,10 @@ function fileRow(row, buttons)
 	if (row.hasOwnProperty('subrow'))
 	{
 		file += '</div>';
-		file += '<div class="gradient"></div>';
+		if (row.hasOwnProperty('subbutton') && row.subbutton.length > 0)
+		{
+			file += '<div class="gradient"></div>';
+		}
 		file += '<div class="flex_line">';
 		file += '<div class="file_caption search_result" ' + row.subrow.onclick + '>' + row.subrow.caption + '</div>';
 		if (row.hasOwnProperty('subbutton'))
@@ -946,7 +949,7 @@ function showPlaylist(filter)
 		{
 			var onclick = 'onclick="showPlaylist(\'' + group.name + '\')"';
 			content += fileRow(
-				{"caption": group.name, "onclick": onclick,
+				{"caption": group.name, "onclick": onclick, "bold": true,
 				"subrow": {
 					"caption": group.count + " Playlists",
 					"onclick": onclick
