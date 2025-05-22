@@ -701,23 +701,27 @@ function searchFiles()
 	}, {"target": input.value, "path": mPath});
 }
 
-function searchFilesDlg()
+function textInputDlg(title, placeholder, value, labelText, onSubmit)
 {
 	var headline = document.getElementById("text_input_title");
 	var input = document.getElementById("text_input_edit");
 	var label = document.getElementById("text_input_label");
-	var button = document.getElementById("text_input_button");
-	headline.innerHTML = "Search";
-	input.placeholder = "search...";
-	input.value = "";
-	label.innerHTML = "Enter text to search for";
-	button.onclick = function()
+	var form = document.getElementById("text_input_form");
+	headline.innerHTML = title;
+	input.placeholder = placeholder;
+	input.value = value;
+	label.innerHTML = labelText;
+	form.onsubmit = function()
 	{
 		hideDialog('text_input');
-		searchFiles();
+		onSubmit();
+		return false;
 	};
 	showDialog('text_input');
-	input.focus();
+	setTimeout(function() {
+		input.focus();
+		input.select();
+	}, 10);
 }
 
 function getPath(file)
@@ -900,21 +904,7 @@ function createNewPlaylist()
 
 function newPlaylist()
 {
-	var headline = document.getElementById("text_input_title");
-	var input = document.getElementById("text_input_edit");
-	var label = document.getElementById("text_input_label");
-	var button = document.getElementById("text_input_button");
-	headline.innerHTML = "Create new Playlist";
-	input.placeholder = "Playlist Name";
-	input.value = "";
-	label.innerHTML = "Name of the new Playlist";
-	button.onclick = function()
-	{
-		hideDialog('text_input');
-		createNewPlaylist()
-	};
-	showDialog('text_input');
-	input.focus();
+	textInputDlg("Create new Playlist", "Playlist Name", "", "Name of the new Playlist", createNewPlaylist);
 }
 
 function showPlaylist(filter)

@@ -5,13 +5,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<meta name="theme-color" content="#000000"/>
 	<title>SmartHome console</title>
-	<script src="smart_home.js?v=3.1"></script>
-	<script src="utils.js?v=3.1"></script>
+	<script src="smart_home.js?v=3.11"></script>
+	<script src="utils.js?v=3.11"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin" rel="stylesheet" type="text/css"/>
 	<link href="https://fonts.googleapis.com/css2?family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css2?family=Baumans&family=Courgette&family=Playwrite+IE+Guides&family=Playwrite+NO+Guides&family=Shadows+Into+Light&display=swap" rel="stylesheet"/>
-	<link href="smart_home.css?v=3.1" rel="stylesheet"/>
+	<link href="smart_home.css?v=3.11" rel="stylesheet"/>
 	<link rel="icon" href="img/SmartHome.png" type="image/png"/>
 </head>
 
@@ -38,13 +38,13 @@
 	<div id="playing_progress"></div>
 </div>
 
-<div id="playlists" class="card">
+<div id="playlists" class="card" style="overflow: hidden">
 	<div id="playlists_list" class="card_fill">
 		<div class="loader"></div>
 	</div>	
 	<div id="playlists_buttons" class="card_buttons">
 		<div id="playlist_back" class="card_btn gone" onclick="showPlaylist('');"><img src="img/back.png" class="card_btn_img"/></div>
-		<div id="playlist_add" class="card_btn gone" onclick="newPlaylist();"><img src="img/plus.png" class="card_btn_img"/></div>
+		<div id="playlist_add" class="card_btn gone" onclick="textInputDlg('Create new Playlist', 'Playlist Name', '', 'Name of the new Playlist', createNewPlaylist);"><img src="img/plus.png" class="card_btn_img"/></div>
 	</div>
 </div>
 
@@ -70,7 +70,7 @@
 	</div>
 	<div id="filesystem_buttons" class="card_buttons">
 		<div id="filesystem_back" class="card_btn gone"><img src="img/back.png" class="card_btn_img"/></div>
-		<div id="filesystem_search" class="card_btn gone" onclick="searchFilesDlg()"><img src="img/magnifier.png" class="card_btn_img"/></div>
+		<div id="filesystem_search" class="card_btn gone" onclick="textInputDlg('Search', 'search...', '', 'Enter text to search for', searchFiles)"><img src="img/magnifier.png" class="card_btn_img"/></div>
 	</div>
 </div>
 
@@ -217,13 +217,15 @@
 
 <div id="text_input" class="container">
 	<div id="content_text_input" class="dialog" style="--dlg_width: 400">
-		<div class="headline" id="text_input_title">Title</div>
-		<label id="text_input_label" for="test_input_edit">Endpoint</label>
-		<input id="text_input_edit" placeholder=""/>
-		<div class="dialog_dynamic_footer">
-			<button id="text_input_button" class="button" onclick="hideDialog('text_input');">OK</button>
-			<button class="button" onclick="hideDialog('text_input');">Cancel</button>
-		</div>
+		<form id="text_input_form">
+			<div class="headline" id="text_input_title">Title</div>
+			<label id="text_input_label" for="test_input_edit">Endpoint</label>
+			<input id="text_input_edit" placeholder=""/>
+			<div class="dialog_dynamic_footer">
+				<button type="submit" id="text_input_button" class="button">OK</button>
+				<button type="button" class="button" onclick="hideDialog('text_input');">Cancel</button>
+			</div>
+		</form>
 	</div>
 </div>
 
