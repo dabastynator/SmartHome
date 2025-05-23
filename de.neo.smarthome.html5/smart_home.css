@@ -53,6 +53,12 @@ img
 	transition: 0.3s;
 }
 
+.list_gone
+{
+	opacity: 0.2;
+	transition: 0.5s;
+}
+
 .card_fill
 {
 	scrollbar-color: var(--border) var(--background);

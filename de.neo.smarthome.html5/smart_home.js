@@ -800,8 +800,10 @@ function showFiles(files, isSearch)
 
 function refreshFiles()
 {
+	htmlFiles.classList.add("list_gone");
 	apiMediaServer.call('files', function(files)
 	{
+		htmlFiles.classList.remove("list_gone");
 		if (checkResult(files, htmlFiles))
 		{
 			showFiles(files, false);
@@ -900,11 +902,6 @@ function createNewPlaylist()
 			showToast("Playlist <b>" + input.value + "</b> created.");
 		}		
 	}, {"playlist": input.value});
-}
-
-function newPlaylist()
-{
-	textInputDlg("Create new Playlist", "Playlist Name", "", "Name of the new Playlist", createNewPlaylist);
 }
 
 function showPlaylist(filter)
