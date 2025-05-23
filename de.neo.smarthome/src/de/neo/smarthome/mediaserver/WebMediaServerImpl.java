@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
@@ -27,6 +30,53 @@ import de.neo.smarthome.user.UserSessionHandler;
 
 public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMediaServer
 {
+	private class FileCache
+	{
+		static int MAX_SIZE = 5;
+		
+		private class CacheEntry
+		{
+			String mPath;
+			ArrayList<BeanFileSystem> mFiles = new ArrayList<>();
+		}
+		
+		private List<CacheEntry> mEntries = new ArrayList<>();
+		
+		public ArrayList<BeanFileSystem> getCachedFiles(String path)
+		{
+			int idx = -1;
+			for (int i = 0; i < mEntries.size(); i++)
+			{
+				if (mEntries.get(i).mPath.equals(path))
+				{
+					idx = i;
+					break;
+				}
+			}
+			if (idx >= 0)
+			{
+				CacheEntry entry = mEntries.get(idx);
+				mEntries.remove(idx);
+				mEntries.add(0, entry);
+				return entry.mFiles;
+			}
+			return null;
+		}
+		
+		public void addCachedFiles(String path, ArrayList<BeanFileSystem> files)
+		{
+			CacheEntry entry = new CacheEntry();
+			entry.mPath = path;
+			entry.mFiles = files;
+			while (mEntries.size() >= MAX_SIZE)
+			{
+				mEntries.remove(mEntries.size()-1);
+			}
+			mEntries.add(0, entry);
+		}
+	}
+	
+	private Map<User, FileCache> mFilesCache = new HashMap<>();
 
 	public WebMediaServerImpl(ControlCenter center)
 	{
@@ -198,11 +248,27 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			@WebParam(name = "path", required = false, defaultvalue = "") String path)
 					throws RemoteException
 	{
-		ArrayList<BeanFileSystem> result = new ArrayList<>();
 		if (!path.endsWith(File.separator))
 		{
 			path += File.separator;
 		}
+		User user = UserSessionHandler.require(token);
+		FileCache cache;
+		if (mFilesCache.containsKey(user))
+		{
+			cache = mFilesCache.get(user);
+		}
+		else
+		{
+			cache = new FileCache();
+			mFilesCache.put(user, cache);
+		}
+		ArrayList<BeanFileSystem> result = cache.getCachedFiles(path);
+		if (result != null)
+		{
+			return result;
+		}
+		result = new ArrayList<>();	
 		MediaControlUnit mediaServer = mCenter.getAccessHandler().require(token, id);
 		for (String dir : mediaServer.listDirectories(path))
 		{
@@ -220,6 +286,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			bean.fileType = FileType.File;
 			result.add(bean);
 		}
+		cache.addCachedFiles(path, result);
 		return result;
 	}
 	

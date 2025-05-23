@@ -115,7 +115,7 @@ public class JSONUtils {
 
 	@SuppressWarnings("unchecked")
 	public static Object jsonToObject(Class<?> resultClass, Object json, WebRequest request, WebField webfield)
-			throws InstantiationException, IllegalAccessException {
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		if (json == null || void.class.equals(resultClass) || Void.class.equals(resultClass))
 			return null;
 		if (Integer.class.equals(resultClass) && json instanceof Long)
@@ -126,7 +126,7 @@ public class JSONUtils {
 			return ((Long) json).doubleValue();
 		if (Float.class.equals(resultClass) && json instanceof Long)
 			return ((Long) json).floatValue();
-		Object result = resultClass.newInstance();
+		Object result = resultClass.getConstructor().newInstance();
 		if (result instanceof Collection<?>) {
 			Collection<? super Object> resultList = (Collection<? super Object>) result;
 			if (!(json instanceof JSONArray))
@@ -196,7 +196,7 @@ public class JSONUtils {
 		Object success = obj.get("success");
 		if (!(error instanceof JSONObject))
 			return;
-		if (success == null || !new Boolean(false).equals(success))
+		if (success == null || !Boolean.valueOf(false).equals(success))
 			return;
 		JSONObject e = (JSONObject) error;
 		Object cl = e.get("class");

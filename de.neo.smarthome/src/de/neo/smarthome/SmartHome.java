@@ -52,7 +52,7 @@ public class SmartHome {
 
 	static {
 		mControlUnitFactory.add(new WebMediaServerImpl.MediaFactory());
-		mControlUnitFactory.add(new WebSwitchImpl.GPIOFactory());
+		//mControlUnitFactory.add(new WebSwitchImpl.GPIOFactory());
 		mControlUnitFactory.add(new WebSwitchImpl.HassSwitchFactory());
 		mControlUnitFactory.add(new WebActionImpl.ActionFactory());
 		mControlUnitFactory.add(new WebLEDStripImpl.LEDStripFactory());
@@ -77,7 +77,7 @@ public class SmartHome {
 				controlcenter.addControlUnit(unit);
 
 			controlcenter.onPostLoad();
-			
+
 			HassHandler.initialize(controlcenter);
 		} catch (IOException | IllegalArgumentException | DaoException e) {
 			System.err.println(

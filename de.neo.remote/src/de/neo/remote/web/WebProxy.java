@@ -11,6 +11,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -55,7 +57,11 @@ public class WebProxy implements InvocationHandler {
 			URL url;
 			boolean hasPayload = false;
 
-			url = new URL(urlToRead);
+			try {
+				url = new URI(urlToRead).toURL();
+			} catch (URISyntaxException e) {
+				throw new RemoteException(e.getMessage()); 
+			}
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			WebRequest request = method.getAnnotation(WebRequest.class);

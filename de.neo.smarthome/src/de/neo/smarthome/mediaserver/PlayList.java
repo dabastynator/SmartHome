@@ -28,6 +28,10 @@ public class PlayList {
 	public String[] getPlayLists() throws RemoteException {
 		List<String> plsList = new ArrayList<String>();
 		File playlistFolder = new File(mPlaylistLocation);
+		if (!playlistFolder.exists())
+		{
+			throw new RemoteException("Playlist folder does not exist!");
+		}
 		for (File pls : playlistFolder.listFiles()) {
 			String n = pls.getName();
 			if (!n.startsWith(".") && n.length() > 4)
