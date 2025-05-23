@@ -212,7 +212,7 @@ public class XMLDao<T> implements Dao<T> {
 				try {
 					readDomainXML((Element) item);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new DaoException("Error reading the xml for " + mName + ". " + e.getClass().getSimpleName()
 							+ ": " + e.getMessage());
 				}
@@ -222,8 +222,8 @@ public class XMLDao<T> implements Dao<T> {
 	}
 
 	protected T readDomainXML(Element e) throws IllegalArgumentException, IllegalAccessException,
-			InstantiationException, DaoException, InvocationTargetException {
-		T object = mClass.newInstance();
+			InstantiationException, DaoException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		T object = mClass.getDeclaredConstructor().newInstance();
 		for (PersistentField f : mPersistentFields)
 			f.setValueToObject(object, e);
 		Long id = getId(object);

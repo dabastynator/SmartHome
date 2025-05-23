@@ -30,7 +30,7 @@ public abstract class PersistentField {
 	}
 
 	public abstract void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
-			IllegalArgumentException, InstantiationException, InvocationTargetException;
+			IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException;
 
 	public abstract void setValueToXML(Document doc, Object object, Element element)
 			throws IllegalArgumentException, IllegalAccessException, DaoException;

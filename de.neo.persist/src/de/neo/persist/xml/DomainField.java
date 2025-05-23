@@ -20,7 +20,7 @@ public class DomainField extends PersistentField {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
-			IllegalArgumentException, InstantiationException, InvocationTargetException {
+			IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Dao dao = mFactory.getDao(mField.getType());
 		if (element.hasAttribute(mName)) {
 			try {

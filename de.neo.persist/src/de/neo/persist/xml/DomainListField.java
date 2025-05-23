@@ -27,7 +27,7 @@ public class DomainListField extends PersistentField {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void setValueToObject(Object object, Element element) throws IllegalAccessException, DaoException,
-			IllegalArgumentException, InstantiationException, InvocationTargetException {
+			IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Dao dao = mFactory.getDao(mOneToMany.domainClass());
 		Object field = mField.get(object);
 		if ((field instanceof List) && (dao instanceof XMLDao)) {
