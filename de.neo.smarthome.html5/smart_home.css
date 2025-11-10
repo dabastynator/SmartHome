@@ -767,3 +767,183 @@ input:focus-visible{
 {
 	scrollbar-width: none;
 }
+
+.album_container
+{
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.album-card
+{
+  width: 200px;
+  margin: 5px;
+  background: #111;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  font-family: sans-serif;
+  color: #fff;
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 0;
+}
+
+.cd-case
+{
+  position: relative;
+  width: 100%;
+  height: 200px;
+  perspective: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.case-cover
+{
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease;
+  transform-origin: left center;
+  z-index: 2;
+  object-fit: cover;
+  z-index: 210;
+}
+
+.cd-disc
+{
+  position: absolute;
+  width: 198px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  transition: opacity 0.4s ease 0.2s, transform 0.6s ease;
+  z-index: 100;
+}
+
+.case-cover,
+.case-cover:hover,
+.cd-disc,
+.cd-disc:hover
+{
+	filter: none;
+}
+
+.album-card:hover .case-cover
+{
+  transform: rotateY(-30deg);
+}
+
+.album-card:hover .cd-disc
+{
+  transform: translate(-35%, -50%) rotate(180deg);
+}
+
+.album-info h3
+{
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.album-actions
+{
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.album-actions button
+{
+  flex: 1;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #222;
+  color: #fff;
+  transition: background 0.3s ease;
+}
+
+.marquee
+{
+  width: 360px;                 /* set your h3 width limit here (or use max-width) */
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.25rem 0;           /* optional spacing */
+  background: transparent;
+  /* When not scrolling we center content; when scrolling a class toggles behavior */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The inner element holds the text. Use inline-block so scrollWidth is measured correctly. */
+.marquee_inner
+{
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  /* default (non-scrolling) state: centered */
+  transform: translateX(0);
+  transition: transform 300ms ease; /* small transition for class toggles */
+  font-size: 1.05rem;              /* example */
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+
+/* When overflowing we add is-scrolling to the container; that enables animation */
+.marquee.is-scrolling
+{
+  justify-content: flex-start; /* left-aligned during scroll so animation math is simpler */
+}
+
+/* keyframes: move from start position (0) to the negative distance stored in CSS variable */
+@keyframes marquee-scroll
+{
+  0%   { transform: translateX(0); opacity: 0% }
+  10%  { transform: translateX(0); opacity: 100% } /* small pause at start so user can register beginning */
+  90%  { transform: translateX(var(--scroll-distance)); opacity: 100%; }
+  100% { transform: translateX(var(--scroll-distance)); opacity: 0% } /* small pause at end */
+}
+
+/* Apply the animation only when container has the is-scrolling class.
+   --scroll-duration and --scroll-distance are set by JS. */
+.marquee.is-scrolling .marquee_inner
+{
+  /* --scroll-distance must be a negative px value like "-200px" */
+  animation-name: marquee-scroll;
+  animation-duration: var(--scroll-duration, 10s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+  animation-play-state: running;
+  /* let user pause by hovering */
+  animation-fill-mode: none;
+  padding-right: 1rem; /* so last characters have breathing room when scrolled fully */
+}
+
+/* Pause on hover (and make it resumable) */
+.marquee.is-scrolling:hover .marquee_inner
+{
+  animation-play-state: paused;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce)
+{
+  .marquee.is-scrolling .marquee_inner {
+    animation: none;
+  }
+}
+
+/* small utility: let the H3 look normal */
+.marquee_inner
+{
+  margin: 0;
+  font-weight: 600;
+}

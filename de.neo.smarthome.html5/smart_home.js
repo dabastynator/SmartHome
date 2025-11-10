@@ -733,9 +733,45 @@ function getPath(file)
 	return file.path.substr(0, file.path.lastIndexOf(Separator));
 }
 
+function cdItem(f, buttons)
+{
+	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
+	var img_src = current_url + '/' + mMediaCenter + '/' + f.cover;
+	var title = f.name;
+	var artist = '';
+	var split = f.name.split(" - ");
+	if (split.length > 1)
+	{
+		artist = split[0];
+		title = split[1];
+	}
+	result = '<div class="album-card">';
+	result += ' <div class="cd-case">';
+	result += '  <img class="case-cover" src="' + img_src + '" alt="Album Cover">';
+	result += '  <img class="cd-disc" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/CD_icon_test.svg/2048px-CD_icon_test.svg.png">';
+	result += ' </div>';
+
+	result += ' <div class="album-info">';
+	result += '  <div class="marquee">';
+	result += '   <h3 class="marquee_inner">' + title + '</h3>';
+	result += '  </div>';
+	result += ' <p>' + artist + '</p>';
+	result += ' </div>';
+
+	result += ' <div class="album-actions">';
+	result += '  <button class="file_button" ' + buttons[0].onclick + '><img src="' + buttons[0].src + '"></button>';
+	result += '  <button class="file_button" ' + buttons[1].onclick + '><img src="' + buttons[1].src + '"></button>';
+	result += ' </div>';
+	result += '</div>';
+
+	return result;
+}
+
 function showFiles(files, isSearch)
 {
 	var content = "";
+	var listContent = "";
+	var cdItems = "";
 	if (mPath != '')
 	{
 		if (mPath.startsWith("/"))
@@ -778,11 +814,18 @@ function showFiles(files, isSearch)
 				{"src": "img/go.png", "onclick": 'onclick="directoryClick(' + i + ')"' }
 			];
 		}
-		content += fileRow(row, buttons);
+		if (f.cover != null && f.cover.length > 0)
+		{
+			cdItems += cdItem(f, buttons);
+		}
+		else
+		{
+			listContent += fileRow(row, buttons);
+		}
 	}
 	if (files.length == 0)
 	{
-		content += '<div class="headline">';
+		listContent += '<div class="headline">';
 		if (isSearch)
 		{
 			content += 'No search result';
@@ -793,7 +836,8 @@ function showFiles(files, isSearch)
 		}
 		content += '</div>';
 	}
-	content += '<div style="height:50px"></div>';
+	content += '<div class=album_container>' + cdItems + '</div>';
+	content += listContent + '<div style="height:50px"></div>';
 	content += '</div>';
 	htmlFiles.innerHTML = content;
 }
