@@ -276,6 +276,11 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			bean.name = dir;
 			bean.path = path + dir;
 			bean.fileType = FileType.Directory;
+			String cover = path + dir + File.separator + MediaControlUnit.Cover;
+			if (mediaServer.isFile(cover))
+			{
+				bean.cover = cover;
+			}
 			result.add(bean);
 		}
 		for (String file : mediaServer.listFiles(path))

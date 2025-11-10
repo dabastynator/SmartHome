@@ -214,6 +214,9 @@ public interface IWebMediaServer extends RemoteAble
 		@WebField(name = "path")
 		public String path;
 
+		@WebField(name = "cover")
+		public String cover;
+		
 		@Override
 		public int compareTo(BeanFileSystem another)
 		{

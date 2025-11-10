@@ -21,6 +21,8 @@ import de.neo.smarthome.api.IWebMediaServer.FileType;
 public class MediaControlUnit extends AbstractControlUnit {
 
 	public static final int DOWNLOAD_PORT = 5033;
+	
+	public static final String Cover = ".cover_art.jpg";
 
 	@Persist(name = "location")
 	private String mBrowserLocation;
@@ -148,6 +150,10 @@ public class MediaControlUnit extends AbstractControlUnit {
 			RemoteLogger.performLog(LogPriority.ERROR, e.getClass().getSimpleName() + ": " + e.getMessage(), "MPlayer");
 		}
 		return matches;
+	}
+
+	public boolean isFile(String path) {
+		return new File (mBrowserLocation + path).isFile();
 	}
 
 }
