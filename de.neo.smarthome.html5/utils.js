@@ -282,48 +282,52 @@ function showToast(message)
 	}, 2000);
 }
 
-const RATE_PX_PER_SEC = 60; // tweak: speed of scroll (higher = faster)
-  const MIN_DURATION = 3;     // seconds minimum
+function updateMarquees()
+{
+	const RATE_PX_PER_SEC = 50; // tweak: speed of scroll (higher = faster)
+	const MIN_DURATION = 3;     // seconds minimum
+	document.querySelectorAll('.marquee').forEach(container => {
+		const inner = container.querySelector('.marquee_inner');
+		if (!inner) return;
 
-  function updateMarquees() {
-    document.querySelectorAll('.marquee').forEach(container => {
-      const inner = container.querySelector('.marquee_inner');
-      if (!inner) return;
+		// measure
+		const containerW = Math.floor(container.clientWidth);
+		const contentW = Math.ceil(inner.scrollWidth);
 
-      // measure
-      const containerW = Math.floor(container.clientWidth);
-      const contentW = Math.ceil(inner.scrollWidth);
+		if (contentW > containerW + 1) {
+			// Need to scroll:
+			const distance = contentW - containerW;             // positive px
+			// We want transform from 0 -> -distance px
+			inner.style.setProperty('--scroll-distance', `-${distance}px`);
 
-      if (contentW > containerW + 1) {
-        // Need to scroll:
-        const distance = contentW - containerW;             // positive px
-        // We want transform from 0 -> -distance px
-        inner.style.setProperty('--scroll-distance', `-${distance}px`);
+			// duration proportional to distance so long strings scroll at readable speed
+			const duration = Math.max(MIN_DURATION, distance / RATE_PX_PER_SEC);
+			inner.style.setProperty('--scroll-duration', `${duration}s`);
 
-        // duration proportional to distance so long strings scroll at readable speed
-        const duration = Math.max(MIN_DURATION, distance / RATE_PX_PER_SEC);
-        inner.style.setProperty('--scroll-duration', `${duration}s`);
+			container.classList.add('is-scrolling');
+		} else {
+			// Fits: remove scroll behavior, keep centered via flexbox
+			container.classList.remove('is-scrolling');
+			inner.style.removeProperty('--scroll-distance');
+			inner.style.removeProperty('--scroll-duration');
+		}
+	});
+}
 
-        container.classList.add('is-scrolling');
-      } else {
-        // Fits: remove scroll behavior, keep centered via flexbox
-        container.classList.remove('is-scrolling');
-        inner.style.removeProperty('--scroll-distance');
-        inner.style.removeProperty('--scroll-duration');
-      }
-    });
-  }
+(function () {
+	// Run on load and on resize (debounced)
+	let resizeTimer = null;
+	window.addEventListener('load', updateMarquees);
+	window.addEventListener('orientationchange', updateMarquees);
+	window.addEventListener('resize', () => 
+	{
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(updateMarquees, 120);
+	});
 
-  // Run on load and on resize (debounced)
-  let resizeTimer = null;
-  window.addEventListener('load', updateMarquees);
-  window.addEventListener('orientationchange', updateMarquees);
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(updateMarquees, 120);
-  });
-
-  // Also re-run if fonts load late (to avoid measuring before font applied)
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(updateMarquees).catch(() => {});
-  }
+	// Also re-run if fonts load late (to avoid measuring before font applied)
+	if (document.fonts && document.fonts.ready)
+	{
+		document.fonts.ready.then(updateMarquees).catch(() => {});
+	}
+})();

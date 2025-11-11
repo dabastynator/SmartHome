@@ -46,6 +46,7 @@ var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
 var mMediaCenter = '';
 var mPath = '';
+var mPathObj = null;
 var mUserList;
 var mSelectedUser;
 var mFiles;
@@ -581,7 +582,8 @@ function refreshMediaServer()
 	}, {'id': ''});
 }
 
-function directoryClick(index){	
+function directoryClick(index){
+	mPathObj = null;
 	if (index == Separator)
 	{
 		if (mPath.lastIndexOf(Separator) >= 1)
@@ -591,7 +593,8 @@ function directoryClick(index){
 	}
 	else
 	{
-		mPath = getPath(mFiles[index]);
+		mPathObj = mFiles[index];
+		mPath = getPath(mPathObj);
 	}
 	window.localStorage.setItem("path", mPath);
 	refreshFiles();
@@ -733,34 +736,49 @@ function getPath(file)
 	return file.path.substr(0, file.path.lastIndexOf(Separator));
 }
 
-function cdItem(f, buttons)
+function getCoverUrl(directory)
 {
 	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
-	var img_src = current_url + '/' + mMediaCenter + '/' + f.cover;
+	var img_src = current_url + '/' + mMediaCenter + '/' + directory.cover;
+	return img_src;
+}
+
+function cdItem(f, buttons)
+{
+	var img_src = getCoverUrl(f);
 	var title = f.name;
-	var artist = '';
+	var artist = 'Various';
 	var split = f.name.split(" - ");
+	var medium = "cd";
 	if (split.length > 1)
 	{
 		artist = split[0];
 		title = split[1];
+		for (var i=2; i < split.length; i++)
+			title += ' - ' + split[i];
+	}
+	if(appearence == 'sepia')
+	{
+		medium = 'vinyl';
 	}
 	result = '<div class="album-card">';
 	result += ' <div class="cd-case">';
 	result += '  <img class="case-cover" src="' + img_src + '" alt="Album Cover">';
-	result += '  <img class="cd-disc" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/CD_icon_test.svg/2048px-CD_icon_test.svg.png">';
+	result += '  <img class="cd-disc" src="img/' + medium + '.png">';
 	result += ' </div>';
 
 	result += ' <div class="album-info">';
 	result += '  <div class="marquee">';
 	result += '   <h3 class="marquee_inner">' + title + '</h3>';
 	result += '  </div>';
-	result += ' <p>' + artist + '</p>';
+	result += '  <p>' + artist + '</p>';
 	result += ' </div>';
 
 	result += ' <div class="album-actions">';
-	result += '  <button class="file_button" ' + buttons[0].onclick + '><img src="' + buttons[0].src + '"></button>';
-	result += '  <button class="file_button" ' + buttons[1].onclick + '><img src="' + buttons[1].src + '"></button>';
+	for(var i = 0; i < buttons.length; i++)
+	{
+		result += '  <button class="file_button" ' + buttons[i].onclick + '><img src="' + buttons[i].src + '"></button>';
+	}
 	result += ' </div>';
 	result += '</div>';
 
@@ -772,6 +790,7 @@ function showFiles(files, isSearch)
 	var content = "";
 	var listContent = "";
 	var cdItems = "";
+	var cdItemsEnabled = !isSearch;
 	if (mPath != '')
 	{
 		if (mPath.startsWith("/"))
@@ -814,8 +833,9 @@ function showFiles(files, isSearch)
 				{"src": "img/go.png", "onclick": 'onclick="directoryClick(' + i + ')"' }
 			];
 		}
-		if (f.cover != null && f.cover.length > 0)
+		if (cdItemsEnabled && f.cover != null && f.cover.length > 0)
 		{
+			buttons = [{"src": "img/go.png", "onclick": 'onclick="directoryClick(' + i + ')"'}, ...buttons];
 			cdItems += cdItem(f, buttons);
 		}
 		else
@@ -840,6 +860,16 @@ function showFiles(files, isSearch)
 	content += listContent + '<div style="height:50px"></div>';
 	content += '</div>';
 	htmlFiles.innerHTML = content;
+	if(!isSearch && mPathObj != null && mPathObj.cover != null && mPathObj.cover.length > 0)
+	{
+		var url = 'url("' + getCoverUrl(mPathObj) + '")';
+		htmlFiles.style.backgroundImage = 'linear-gradient(to left, rgba(255,255,255,0) 50%, var(--background)),' + url;
+	}
+	else
+	{
+		htmlFiles.style.backgroundImage = 'None';
+	}
+	updateMarquees();
 }
 
 function refreshFiles()
