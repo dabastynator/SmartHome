@@ -44,6 +44,10 @@ var apiScenes = new APIHandler();
 var apiAction = new APIHandler();
 var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
+var mPlayback = "remote";
+var mLocalPlaybackFiles = null;
+var mLocalPlaybackIdx = 0;
+var mMedia = null;
 var mMediaCenter = '';
 var mPath = '';
 var mPathObj = null;
@@ -154,6 +158,7 @@ function readSetting()
 {
 	endpoint = window.localStorage.getItem("endpoint");
 	token = window.localStorage.getItem("token");
+	mPlayback = window.localStorage.getItem("playback");
 	if (endpoint == null || endpoint == '')
 	{
 		endpoint = findGetParameter('endpoint');
@@ -206,21 +211,25 @@ function initSettings()
 	var endpoint = document.getElementById('setting_endpoint');
 	var token = document.getElementById('setting_token');
 	var appearence = document.getElementById('setting_appearence');
+	var playback = document.getElementById('setting_playback');
 
 	endpoint.value = window.localStorage.getItem("endpoint");
 	token.value = window.localStorage.getItem("token");
 	appearence.value = window.localStorage.getItem("appearence");
+	playback.value = window.localStorage.getItem("playback");
 }
 
 function saveSettings()
 {
-	endpoint = document.getElementById('setting_endpoint').value;
-	token = document.getElementById('setting_token').value;
-	appearence = document.getElementById('setting_appearence');
+	var endpoint = document.getElementById('setting_endpoint').value;
+	var token = document.getElementById('setting_token').value;
+	var appearence = document.getElementById('setting_appearence');
+	var playback = document.getElementById('setting_playback');
 	mMediaCenter = '';
 	window.localStorage.setItem("endpoint", endpoint);
 	window.localStorage.setItem("token", token);
 	window.localStorage.setItem("appearence", appearence.value);
+	window.localStorage.setItem("playback", playback.value);
 	loadAppearence();
 	readSetting();
 	refreshMediaServer();
@@ -460,86 +469,138 @@ function formatTime(seconds)
 	return hours + minutes + ':' + seconds;
 }
 
-function refreshPlayer(){
-	getPlaying(function(playing){
-		var text = '';
-		var progressWidth = '0%';
-		var progressInput = 0;
-		mCurrentPlaying = playing;
-		var title = '-';
-		var artist = '-';
-		var album = '-';
-		var inTrack = '-';
-		var duration = '-';
-		if (playing != null){
-			if (playing.artist != null && playing.artist != '')
-			{
-				text += playing.artist + '<br/>';
-				artist = playing.artist;
-			}
-			if (playing.title != null && playing.title != '')
-			{
-				text += playing.title + '<br/>';
-				title = playing.title;
-			}
-			if (playing.album != null && playing.album != '')
-			{
-				album = playing.album;
-			}
-			else if (playing.file != null && playing.file != '')
-			{
-				album = playing.file;
-			}
-			else if (playing.radio != null)
-			{
-				album = playing.radio;
-			}
-			if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
-				text += playing.file + '<br/>';
-			if (playing.state == "PLAY")
-			{
-				htmlPlayPause.src = 'player/pause.png';
-				htmlPlayDlgPlayImg.src = 'player/pause.png';
-				htmlPlayDlgPlayImg.classList.remove('player_dlg_img_play');
-			}
-			else
-			{
-				htmlPlayPause.src = 'player/play.png';
-				htmlPlayDlgPlayImg.src = 'player/play.png';
-				htmlPlayDlgPlayImg.classList.add('player_dlg_img_play');
-			}
-			if (playing.durationSec > 0)
-			{
-				progressInput = Math.round(PlayerProgressSteps * playing.inTrackSec / playing.durationSec);
-				progressWidth = Math.round(100 * playing.inTrackSec / playing.durationSec) + '%';
-				duration = formatTime(playing.durationSec);
-
-			}
-			inTrack = formatTime(playing.inTrackSec);
-			htmlPlayDlgVolume.value = playing.volume;
-			if (htmlPlayDlgInfos.style.display != 'block')
-			{
-				htmlPlayDlgInfos.style.display = 'block';
-				placeDialogs();
-			}
-		} else {
+function setPlayingInfo(playing)
+{
+	var text = '';
+	var progressWidth = '0%';
+	var progressInput = 0;
+	mCurrentPlaying = playing;
+	var title = '-';
+	var artist = '-';
+	var album = '-';
+	var inTrack = '-';
+	var duration = '-';
+	if (playing != null){
+		if (playing.artist != null && playing.artist != '')
+		{
+			text += playing.artist + '<br/>';
+			artist = playing.artist;
+		}
+		if (playing.title != null && playing.title != '')
+		{
+			text += playing.title + '<br/>';
+			title = playing.title;
+		}
+		if (playing.album != null && playing.album != '')
+		{
+			album = playing.album;
+		}
+		else if (playing.file != null && playing.file != '')
+		{
+			album = playing.file;
+		}
+		else if (playing.radio != null)
+		{
+			album = playing.radio;
+		}
+		if (playing.artist == null || playing.title == null || playing.artist == '' || playing.title == '')
+			text += playing.file + '<br/>';
+		if (playing.state == "PLAY")
+		{
+			htmlPlayPause.src = 'player/pause.png';
+			htmlPlayDlgPlayImg.src = 'player/pause.png';
+			htmlPlayDlgPlayImg.classList.remove('player_dlg_img_play');
+		}
+		else
+		{
 			htmlPlayPause.src = 'player/play.png';
-			text += 'Nothing played';
-			if (htmlPlayDlgInfos.style.display != 'none')
+			htmlPlayDlgPlayImg.src = 'player/play.png';
+			htmlPlayDlgPlayImg.classList.add('player_dlg_img_play');
+		}
+		if (playing.durationSec > 0)
+		{
+			progressInput = Math.round(PlayerProgressSteps * playing.inTrackSec / playing.durationSec);
+			progressWidth = Math.round(100 * playing.inTrackSec / playing.durationSec) + '%';
+			duration = formatTime(playing.durationSec);
+
+		}
+		inTrack = formatTime(playing.inTrackSec);
+		htmlPlayDlgVolume.value = playing.volume;
+		if (htmlPlayDlgInfos.style.display != 'block')
+		{
+			htmlPlayDlgInfos.style.display = 'block';
+			placeDialogs();
+		}
+	} else {
+		htmlPlayPause.src = 'player/play.png';
+		text += 'Nothing played';
+		if (htmlPlayDlgInfos.style.display != 'none')
+		{
+			htmlPlayDlgInfos.style.display = 'none';
+			placeDialogs();
+		}
+	}
+
+	if (('mediaSession' in navigator) && playing != null)
+	{
+		artwork = [];
+		if (playing.artwork != null)
+		{
+			artwork.push({ src: playing.artwork, type: 'image/jpeg' });
+		}
+		navigator.mediaSession.metadata = new MediaMetadata({
+			title: title,
+			artist: artist,
+			album: album,
+			artwork: artwork
+		});
+
+		navigator.mediaSession.setActionHandler('play', function() { playerAction("play_pause"); });
+		navigator.mediaSession.setActionHandler('pause', function() { playerAction("play_pause"); });
+		navigator.mediaSession.setActionHandler('seekbackward', function() { playerAction("seek_backward"); });
+		navigator.mediaSession.setActionHandler('seekforward', function() { playerAction("seek_forward"); });
+		navigator.mediaSession.setActionHandler('previoustrack', function() { playerAction("previous"); });
+		navigator.mediaSession.setActionHandler('nexttrack', function() { playerAction("next"); });
+	}
+
+	htmlPlayDlgTitle.innerHTML = title;
+	htmlPlayDlgArtist.innerHTML = artist;
+	htmlPlayDlgAlbum.innerHTML = album;
+	htmlPlayDlgInTrack.innerHTML = inTrack;
+	htmlPlayDlgDuration.innerHTML = duration;
+	htmlPlayDlgInTrackProgress.value = progressInput;
+	htmlPlayInfo.innerHTML = text;
+	htmlPlayProgress.style.width = progressWidth;
+}
+
+function refreshPlayer(){
+	if (mPlayback == "local")
+	{
+		var playing = null;
+		if(mMedia)
+		{
+			playing = {
+				"state" : (mMedia.paused ? "PAUSE": "PLAY"),
+				"inTrackSec" : Math.round(mMedia.currentTime),
+				"durationSec" : Math.round(mMedia.duration),
+				"volume" : mMedia.volume * 100
+			};
+			if(mLocalPlaybackFiles != null && mLocalPlaybackIdx < mLocalPlaybackFiles.length)
 			{
-				htmlPlayDlgInfos.style.display = 'none';
-				placeDialogs();
+				var file = mLocalPlaybackFiles[mLocalPlaybackIdx]
+				var info = splitNameToArtistFile(file.name, null, file.name);
+				playing.artist = info.artist;
+				playing.title = info.title;
+				if(file.cover != null && file.cover.length > 0)
+					playing.artwork = getFileUrl(file.cover);
 			}
 		}
-		htmlPlayDlgTitle.innerHTML = title;
-		htmlPlayDlgArtist.innerHTML = artist;
-		htmlPlayDlgAlbum.innerHTML = album;
-		htmlPlayDlgInTrack.innerHTML = inTrack;
-		htmlPlayDlgDuration.innerHTML = duration;
-		htmlPlayDlgInTrackProgress.value = progressInput;
-		htmlPlayInfo.innerHTML = text;
-		htmlPlayProgress.style.width = progressWidth;
-	});
+		setPlayingInfo(playing);
+	}
+	else
+	{
+		getPlaying(function(playing){ setPlayingInfo(playing); });
+	}
 }
 
 
@@ -600,26 +661,100 @@ function directoryClick(index){
 	refreshFiles();
 }
 
+function getNextAudioFileIdx(files, start, delta)
+{
+	var idx = start;
+	do
+	{
+		ext = files[idx].name.split('.').pop().toLowerCase();
+		if (ext == "mp3" || ext == "wav" || ext == "ogg" || ext == "wma")
+			return idx;
+		idx = (idx + delta + files.length) % files.length;
+	}
+	while(idx != start);
+	return -1;
+}
+
 function play(index)
 {
 	mFile = mFiles[index];
-	apiMediaServer.call('play_file', function(result)
+	if (mPlayback == "local")
 	{
-		if (checkResult(result)) {
-			showToast('Start playing <b>' + mFile.name + '</b>');
+		playerAction("stop");
+
+		if(mFile.filetype == "Directory")
+		{
+			apiMediaServer.call('files', function(files)
+			{
+				if (checkResult(files, htmlFiles))
+				{
+					mLocalPlaybackFiles = files;
+					mLocalPlaybackFiles.sort(function(a, b){return a.name.localeCompare(b.name);});
+					for (var i = 0; i < mLocalPlaybackFiles.length; i++)
+						mLocalPlaybackFiles[i].cover = mFile.cover;
+					mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, 0, 1);
+					if (mLocalPlaybackIdx < 0)
+					{
+						showToast("No playable file in folder!");
+					}
+					else
+					{
+						var file = mLocalPlaybackFiles[mLocalPlaybackIdx];
+						createNewLocalAudio(getFileUrl(file.path))
+					}
+				}
+			}, {'path': mFile.path});
 		}
-	}, {'file': mFile.path});
+		else
+		{
+			mLocalPlaybackFiles = mFiles;
+			mLocalPlaybackIdx = index;
+			createNewLocalAudio(getFileUrl(mFile.path))
+		}
+	}
+	else
+	{
+		apiMediaServer.call('play_file', function(result)
+		{
+			if (checkResult(result)) {
+				showToast('Start playing <b>' + mFile.name + '</b>');
+			}
+		}, {'file': mFile.path});
+	}
+}
+
+function createNewLocalAudio(fileUrl)
+{
+	playerAction("stop");
+	mMedia = new Audio(fileUrl);
+	mMedia.onended = function() {
+		playerAction("next");
+	};
+	mMedia.addEventListener("error", () => {
+		showToast(`Error loading: ${mMedia.src}`);
+	});
+	mMedia.play();
 }
 
 function playPlsFile(index)
 {
 	var plsFile = mPlaylistContent[index];
-	apiMediaServer.call('play_file', function(result)
+	if (mPlayback == "local")
 	{
-		if (checkResult(result)) {
-			showToast('Start playing file <b>' + plsFile.name + '</b>');
-		}
-	}, {'file': plsFile.path});
+		playerAction("stop");
+		mLocalPlaybackFiles = mPlaylistContent;
+		mLocalPlaybackIdx = index;
+		createNewLocalAudio(getFileUrl(plsFile.path));
+	}
+	else
+	{
+		apiMediaServer.call('play_file', function(result)
+		{
+			if (checkResult(result)) {
+				showToast('Start playing file <b>' + plsFile.name + '</b>');
+			}
+		}, {'file': plsFile.path});
+	}
 }
 
 function extendPls(index){
@@ -736,27 +871,36 @@ function getPath(file)
 	return file.path.substr(0, file.path.lastIndexOf(Separator));
 }
 
-function getCoverUrl(directory)
+function getFileUrl(file)
 {
 	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
-	var img_src = current_url + '/' + mMediaCenter + '/' + directory.cover;
+	var img_src = current_url + '/' + mMediaCenter + '/' + file;
 	return img_src;
+}
+
+function splitNameToArtistFile(name, defaultArtist, defaultTitle)
+{
+	var result = {"artist": defaultArtist, "title": defaultTitle};
+	var split = name.split(" - ");
+	if (split.length > 1)
+	{
+		if(split.length > 2 && split[0].length == 2)
+		{
+			split.shift();
+		}
+		result.artist = split[0];
+		result.title = split[1];
+		for (var i=2; i < split.length; i++)
+			result.title += ' - ' + split[i];
+	}
+	return result;
 }
 
 function cdItem(f, buttons)
 {
-	var img_src = getCoverUrl(f);
-	var title = f.name;
-	var artist = 'Various';
-	var split = f.name.split(" - ");
+	var img_src = getFileUrl(f.cover);
+	var info = splitNameToArtistFile(f.name, "Various", f.name);
 	var medium = "cd";
-	if (split.length > 1)
-	{
-		artist = split[0];
-		title = split[1];
-		for (var i=2; i < split.length; i++)
-			title += ' - ' + split[i];
-	}
 	if(appearence == 'sepia')
 	{
 		medium = 'vinyl';
@@ -769,9 +913,9 @@ function cdItem(f, buttons)
 
 	result += ' <div class="album-info">';
 	result += '  <div class="marquee">';
-	result += '   <h3 class="marquee_inner">' + title + '</h3>';
+	result += '   <h3 class="marquee_inner">' + info.title + '</h3>';
 	result += '  </div>';
-	result += '  <p>' + artist + '</p>';
+	result += '  <p>' + info.artist + '</p>';
 	result += ' </div>';
 
 	result += ' <div class="album-actions">';
@@ -862,7 +1006,7 @@ function showFiles(files, isSearch)
 	htmlFiles.innerHTML = content;
 	if(!isSearch && mPathObj != null && mPathObj.cover != null && mPathObj.cover.length > 0)
 	{
-		var url = 'url("' + getCoverUrl(mPathObj) + '")';
+		var url = 'url("' + getFileUrl(mPathObj.cover) + '")';
 		htmlFiles.style.backgroundImage = 'linear-gradient(to left, rgba(255,255,255,0) 50%, var(--background)),' + url;
 	}
 	else
@@ -902,12 +1046,35 @@ function refreshFiles()
 
 function plsClick(index){
 	mPlaylist = mPlaylists[index];
-	apiMediaServer.call('play_playlist', function(result)
+	if (mPlayback == "local")
 	{
-		if (checkResult(result)) {
-			showToast('Play playlist <b>' + mPlaylist.name + '</b>');
-		}
-	}, {'playlist': mPlaylist.name});
+		apiMediaServer.call('playlist_content', function(result)
+			{
+				if (checkResult(result))
+				{
+					mLocalPlaybackFiles = result;
+					mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, 0, 1);
+					if (mLocalPlaybackIdx < 0)
+					{
+						showToast("No playable file in folder!");
+					}
+					else
+					{
+						var file = mLocalPlaybackFiles[mLocalPlaybackIdx];
+						createNewLocalAudio(getFileUrl(file.path))
+					}
+				}
+			}, {'playlist': mPlaylist.name});		
+	}
+	else
+	{
+		apiMediaServer.call('play_playlist', function(result)
+		{
+			if (checkResult(result)) {
+				showToast('Play playlist <b>' + mPlaylist.name + '</b>');
+			}
+		}, {'playlist': mPlaylist.name});
+	}
 }
 
 function deletePlsItem(index){
@@ -1079,12 +1246,67 @@ function checkResult(result, errorHtmlElement = null, showErrorMsg = true){
 }
 
 function playerAction(action, parameter){
-	apiMediaServer.call(action, function(result)
+	if (mPlayback == "local")
 	{
-		if (checkResult(result)) {
-			refreshPlayer();
+		if (mMedia && action == "volume")
+		{
+			mMedia.volume = parameter.volume / 100;
 		}
-	}, parameter);
+		if (mMedia && action == "volume_delta")
+		{
+			mMedia.volume += parameter.delta / 100;
+		}
+		if (mMedia && !mMedia.paused && (action == "stop" || action == "next" || action == "previous"))
+		{
+			mMedia.pause();
+			mMedia = null;
+		}
+		if(action == "next")
+		{
+			mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, mLocalPlaybackIdx + 1, 1);
+		}
+		if(action == "previous")
+		{
+			mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, mLocalPlaybackIdx - 1, -1);
+		}
+		if(mMedia && action == "seek")
+		{
+			mMedia.currentTime = parameter.seek_time_sec;
+		}
+		if(action == "next" || action == "previous")
+		{
+			mFile = mLocalPlaybackFiles[mLocalPlaybackIdx];
+			createNewLocalAudio(getFileUrl(mFile.path));
+		}
+		if(mMedia != null)
+		{
+			if (action == "play_pause")
+			{
+				if (mMedia.paused)
+					mMedia.play();
+				else
+					mMedia.pause();
+			}
+			if (action == "seek_backward")
+			{
+				mMedia.currentTime = mMedia.currentTime - 10;
+			}
+			if (action == "seek_forward")
+			{
+				mMedia.currentTime = mMedia.currentTime + 10;
+			}
+		}
+		refreshPlayer();
+	}
+	else
+	{
+		apiMediaServer.call(action, function(result)
+		{
+			if (checkResult(result)) {
+				refreshPlayer();
+			}
+		}, parameter);
+	}
 }
 
 function setVolume()
