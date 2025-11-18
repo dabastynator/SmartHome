@@ -34,6 +34,99 @@ class APIHandler
 	}
 }
 
+class LocalPlayer
+{
+	constructor()
+	{
+		this.files = null;
+		this.idx = 0;
+		this.currentFile = null;
+		this.audio = new Audio();
+		this.audio.onended = function() {
+			playerAction("next");
+		};
+		this.audio.addEventListener("error", () => {
+			showToast(`Error loading: ${this.currentFile.name}`);
+		});
+	}
+
+	stop()
+	{
+		if (!this.audio.paused)
+		{
+			this.audio.pause();
+		}
+		this.currentFile = null;
+	}
+
+	startPlay(idx = -1)
+	{
+		if (idx >= 0)
+		{
+			this.idx = parseInt(idx);
+		}
+		if (this.idx < 0)
+		{
+			showToast("Nothing to play!");
+			return;
+		}
+		if (!this.audio.paused)
+		{
+			this.audio.pause();
+		}
+		this.currentFile = this.files[this.idx];
+		this.audio.src = getFileUrl(this.currentFile.path);
+		this.audio.play();
+	}
+
+	moveToNext(step = 1)
+	{
+		this.idx = this.getNextAudioFileIdx(this.idx + step, step);
+		this.startPlay();
+	}
+
+	getNextAudioFileIdx(start, delta)
+	{
+		if (this.files == null)
+		{
+			return -1;
+		}
+		var idx = start;
+		do
+		{
+			var ext = this.files[idx].name.split('.').pop().toLowerCase();
+			if (ext == "mp3" || ext == "wav" || ext == "ogg" || ext == "wma")
+				return idx;
+			idx = (idx + delta + this.files.length) % this.files.length;
+		}
+		while(idx != start);
+		return -1;
+	}
+
+	assignFiles(files, cover = null)
+	{
+		this.files = files;
+		this.files.sort(function(a, b){return a.name.localeCompare(b.name);});
+		for (var i = 0; i < this.files.length; i++)
+			this.files[i].cover = cover;
+		this.idx = this.getNextAudioFileIdx(0, 1);
+	}
+
+	isCurrentPath(path)
+	{
+		if (this.currentFile != null)
+		{
+			if (this.currentFile.path.includes(path))
+				return true;
+		}
+		if (mCurrentPlaying != null && mCurrentPlaying.path != null && mCurrentPlaying.state == "PLAY")
+		{
+			if(mCurrentPlaying.path.includes(path))
+				return true;
+		}
+		return false;
+	}
+}
 const Separator = "/";
 const PlayerProgressSteps = 300;
 
@@ -45,9 +138,7 @@ var apiAction = new APIHandler();
 var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
 var mPlayback = "remote";
-var mLocalPlaybackFiles = null;
-var mLocalPlaybackIdx = 0;
-var mMedia = null;
+var mLocalPlayer = new LocalPlayer();
 var mMediaCenter = '';
 var mPath = '';
 var mPathObj = null;
@@ -316,6 +407,10 @@ function fileRow(row, buttons)
 	{
 		onclick = row.onclick
 	}
+	if (row.hasOwnProperty('icon'))
+	{
+		file += row.icon;
+	}
 	file += '<div class="' + captionClasses + '" ' + onclick + '>' + row.caption + '</div>';
 	for(button of buttons)
 	{
@@ -474,7 +569,21 @@ function setPlayingInfo(playing)
 	var text = '';
 	var progressWidth = '0%';
 	var progressInput = 0;
+	var oldPath = null;
+	var newPath = null;
+	if (mCurrentPlaying)
+	{
+		oldPath = mCurrentPlaying.path;
+	}
 	mCurrentPlaying = playing;
+	if (mCurrentPlaying)
+	{
+		newPath = mCurrentPlaying.path;
+	}
+	if (newPath != oldPath)
+	{
+		updatePlayingFolder();
+	}
 	var title = '-';
 	var artist = '-';
 	var album = '-';
@@ -577,23 +686,21 @@ function refreshPlayer(){
 	if (mPlayback == "local")
 	{
 		var playing = null;
-		if(mMedia)
+		if(mLocalPlayer.currentFile != null)
 		{
+			var file = mLocalPlayer.currentFile;
 			playing = {
-				"state" : (mMedia.paused ? "PAUSE": "PLAY"),
-				"inTrackSec" : Math.round(mMedia.currentTime),
-				"durationSec" : Math.round(mMedia.duration),
-				"volume" : mMedia.volume * 100
+				"state" : (mLocalPlayer.audio.paused ? "PAUSE": "PLAY"),
+				"inTrackSec" : Math.round(mLocalPlayer.audio.currentTime),
+				"durationSec" : Math.round(mLocalPlayer.audio.duration),
+				"volume" : mLocalPlayer.audio.volume * 100,
+				"path" : mLocalPlayer.currentFile.path
 			};
-			if(mLocalPlaybackFiles != null && mLocalPlaybackIdx < mLocalPlaybackFiles.length)
-			{
-				var file = mLocalPlaybackFiles[mLocalPlaybackIdx]
-				var info = splitNameToArtistFile(file.name, null, file.name);
-				playing.artist = info.artist;
-				playing.title = info.title;
-				if(file.cover != null && file.cover.length > 0)
-					playing.artwork = getFileUrl(file.cover);
-			}
+			var info = splitNameToArtistFile(file.name, null, file.name);
+			playing.artist = info.artist;
+			playing.title = info.title;
+			if(file.cover != null && file.cover.length > 0)
+				playing.artwork = getFileUrl(file.cover);
 		}
 		setPlayingInfo(playing);
 	}
@@ -661,20 +768,6 @@ function directoryClick(index){
 	refreshFiles();
 }
 
-function getNextAudioFileIdx(files, start, delta)
-{
-	var idx = start;
-	do
-	{
-		ext = files[idx].name.split('.').pop().toLowerCase();
-		if (ext == "mp3" || ext == "wav" || ext == "ogg" || ext == "wma")
-			return idx;
-		idx = (idx + delta + files.length) % files.length;
-	}
-	while(idx != start);
-	return -1;
-}
-
 function play(index)
 {
 	mFile = mFiles[index];
@@ -688,28 +781,29 @@ function play(index)
 			{
 				if (checkResult(files, htmlFiles))
 				{
-					mLocalPlaybackFiles = files;
-					mLocalPlaybackFiles.sort(function(a, b){return a.name.localeCompare(b.name);});
-					for (var i = 0; i < mLocalPlaybackFiles.length; i++)
-						mLocalPlaybackFiles[i].cover = mFile.cover;
-					mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, 0, 1);
-					if (mLocalPlaybackIdx < 0)
+					mLocalPlayer.assignFiles(files, mFile.cover);
+					if (mLocalPlayer.idx < 0)
 					{
 						showToast("No playable file in folder!");
 					}
 					else
 					{
-						var file = mLocalPlaybackFiles[mLocalPlaybackIdx];
-						createNewLocalAudio(getFileUrl(file.path))
+						mLocalPlayer.startPlay();
 					}
+					updatePlayingFolder();
 				}
 			}, {'path': mFile.path});
 		}
 		else
 		{
-			mLocalPlaybackFiles = mFiles;
-			mLocalPlaybackIdx = index;
-			createNewLocalAudio(getFileUrl(mFile.path))
+			var cover = null;
+			if (mPathObj != null)
+			{
+				cover = mPathObj.cover;
+			}
+			mLocalPlayer.assignFiles(mFiles, cover);
+			mLocalPlayer.startPlay(index);
+			updatePlayingFolder();
 		}
 	}
 	else
@@ -723,17 +817,38 @@ function play(index)
 	}
 }
 
-function createNewLocalAudio(fileUrl)
+function updatePlayingFolder()
 {
-	playerAction("stop");
-	mMedia = new Audio(fileUrl);
-	mMedia.onended = function() {
-		playerAction("next");
-	};
-	mMedia.addEventListener("error", () => {
-		showToast(`Error loading: ${mMedia.src}`);
-	});
-	mMedia.play();
+	var cases = document.getElementsByClassName("cd-case");
+	for(var i = 0; i < cases.length; i++)
+	{
+		var cdCase = cases[i];
+		var cover = cdCase.getElementsByClassName("case-cover")[0];
+		var cd = cdCase.getElementsByClassName("cd-disc")[0];
+		if(mLocalPlayer.isCurrentPath(cdCase.id))
+		{
+			cover.classList.add("case-cover-open");
+			cd.classList.add("cd-rotate");
+		}
+		else
+		{
+			cover.classList.remove("case-cover-open");
+			cd.classList.remove("cd-rotate");
+		}
+	}
+	var icons = document.getElementsByClassName("file_button_left");
+	for(var i = 0; i < icons.length; i++)
+	{
+		var icon = icons[i];
+		if(mLocalPlayer.isCurrentPath(icon.id))
+		{
+			icon.classList.remove("invisible");
+		}
+		else
+		{
+			icon.classList.add("invisible");
+		}
+	}
 }
 
 function playPlsFile(index)
@@ -742,9 +857,8 @@ function playPlsFile(index)
 	if (mPlayback == "local")
 	{
 		playerAction("stop");
-		mLocalPlaybackFiles = mPlaylistContent;
-		mLocalPlaybackIdx = index;
-		createNewLocalAudio(getFileUrl(plsFile.path));
+		mLocalPlayer.files = mPlaylistContent;
+		mLocalPlayer.startPlay(index);
 	}
 	else
 	{
@@ -875,7 +989,7 @@ function getFileUrl(file)
 {
 	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
 	var img_src = current_url + '/' + mMediaCenter + '/' + file;
-	return img_src;
+	return encodeURI(img_src);
 }
 
 function splitNameToArtistFile(name, defaultArtist, defaultTitle)
@@ -901,14 +1015,21 @@ function cdItem(f, buttons)
 	var img_src = getFileUrl(f.cover);
 	var info = splitNameToArtistFile(f.name, "Various", f.name);
 	var medium = "cd";
+	var cdClass = "cd-disc";
+	var coverClass = 'case-cover';
 	if(appearence == 'sepia')
 	{
 		medium = 'vinyl';
 	}
+	if(mLocalPlayer.isCurrentPath(f.path))
+	{
+		cdClass += ' cd-rotate';
+		coverClass += ' case-cover-open';
+	}
 	result = '<div class="album-card">';
-	result += ' <div class="cd-case">';
-	result += '  <img class="case-cover" src="' + img_src + '" alt="Album Cover">';
-	result += '  <img class="cd-disc" src="img/' + medium + '.png">';
+	result += ' <div class="cd-case" id="' + f.path + '">';
+	result += '  <img class="' + coverClass + '" src="' + img_src + '" alt="Album Cover">';
+	result += '  <img class="' + cdClass + '" src="img/' + medium + '.png">';
 	result += ' </div>';
 
 	result += ' <div class="album-info">';
@@ -952,6 +1073,12 @@ function showFiles(files, isSearch)
 	{
 		var f = files[i];
 		var row = {"caption": f.name};
+		var visibility = "invisible";
+		if(mLocalPlayer.isCurrentPath(f.path))
+		{
+			visibility = "";
+		}
+		row.icon = '<img id="' + f.path + '" class="file_button_left rotate ' + visibility + '" src="img/cd.png"/>';
 		if (f.filetype == "Directory")
 		{
 			row.bold = true;
@@ -1052,16 +1179,15 @@ function plsClick(index){
 			{
 				if (checkResult(result))
 				{
-					mLocalPlaybackFiles = result;
-					mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, 0, 1);
-					if (mLocalPlaybackIdx < 0)
+					mLocalPlayer.files = result;
+					mLocalPlayer.idx = mLocalPlayer.getNextAudioFileIdx(0, 1);
+					if (mLocalPlayer.idx < 0)
 					{
 						showToast("No playable file in folder!");
 					}
 					else
 					{
-						var file = mLocalPlaybackFiles[mLocalPlaybackIdx];
-						createNewLocalAudio(getFileUrl(file.path))
+						mLocalPlayer.startPlay();
 					}
 				}
 			}, {'playlist': mPlaylist.name});		
@@ -1248,53 +1374,45 @@ function checkResult(result, errorHtmlElement = null, showErrorMsg = true){
 function playerAction(action, parameter){
 	if (mPlayback == "local")
 	{
-		if (mMedia && action == "volume")
+		if (action == "volume")
 		{
-			mMedia.volume = parameter.volume / 100;
+			mLocalPlayer.audio.volume = parameter.volume / 100;
 		}
-		if (mMedia && action == "volume_delta")
+		if (action == "volume_delta")
 		{
-			mMedia.volume += parameter.delta / 100;
+			mLocalPlayer.audio.volume += parameter.delta / 100;
 		}
-		if (mMedia && !mMedia.paused && (action == "stop" || action == "next" || action == "previous"))
+		if (action == "stop")
 		{
-			mMedia.pause();
-			mMedia = null;
+			mLocalPlayer.stop();
+			updatePlayingFolder();
 		}
 		if(action == "next")
 		{
-			mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, mLocalPlaybackIdx + 1, 1);
+			mLocalPlayer.moveToNext(1);
 		}
 		if(action == "previous")
 		{
-			mLocalPlaybackIdx = getNextAudioFileIdx(mLocalPlaybackFiles, mLocalPlaybackIdx - 1, -1);
+			mLocalPlayer.moveToNext(-1);
 		}
-		if(mMedia && action == "seek")
+		if(action == "seek")
 		{
-			mMedia.currentTime = parameter.seek_time_sec;
+			mLocalPlayer.audio.currentTime = parameter.seek_time_sec;
 		}
-		if(action == "next" || action == "previous")
+		if (action == "play_pause")
 		{
-			mFile = mLocalPlaybackFiles[mLocalPlaybackIdx];
-			createNewLocalAudio(getFileUrl(mFile.path));
+			if (mLocalPlayer.audio.paused)
+				mLocalPlayer.audio.play();
+			else
+				mLocalPlayer.audio.pause();
 		}
-		if(mMedia != null)
+		if (action == "seek_backward")
 		{
-			if (action == "play_pause")
-			{
-				if (mMedia.paused)
-					mMedia.play();
-				else
-					mMedia.pause();
-			}
-			if (action == "seek_backward")
-			{
-				mMedia.currentTime = mMedia.currentTime - 10;
-			}
-			if (action == "seek_forward")
-			{
-				mMedia.currentTime = mMedia.currentTime + 10;
-			}
+			mLocalPlayer.audio.currentTime = mLocalPlayer.audio.currentTime - 10;
+		}
+		if (action == "seek_forward")
+		{
+			mLocalPlayer.audio.currentTime = mLocalPlayer.audio.currentTime + 10;
 		}
 		refreshPlayer();
 	}

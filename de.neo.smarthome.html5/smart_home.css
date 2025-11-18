@@ -628,7 +628,8 @@ input:focus-visible{
 	line-height: 30px;
 }
 
-.file_button
+.file_button,
+.file_button_left
 {
 	height: 32px;
 	margin: auto;
@@ -636,6 +637,12 @@ input:focus-visible{
 	cursor: pointer;
 	display: flex;
 	flex: 0 0 auto;
+}
+
+.file_button_left
+{
+	margin: auto;
+	margin-left: 5px;
 }
 
 .bold
@@ -744,6 +751,11 @@ input:focus-visible{
 .z_index_back
 {
 	z-index: -1;
+}
+
+.invisible
+{
+	display: none;
 }
 
 #toast {
@@ -861,10 +873,28 @@ input:focus-visible{
   transform: rotateY(-30deg);
 }
 
+.album-card .case-cover-open
+{
+  transform: rotateY(-30deg);
+}
+
 .album-card:hover .cd-disc
 {
   transform: translate(-37%, -50%) rotate(120deg);
 }
+
+
+.album-card .cd-rotate
+{
+	animation: cd_rotation 1s infinite linear;
+}
+
+@-webkit-keyframes cd_rotation
+{
+	from { transform: translate(-37%, -50%) rotate(0deg); }
+	to { transform: translate(-37%, -50%) rotate(359deg); }
+}
+
 
 .album-info h3
 {
