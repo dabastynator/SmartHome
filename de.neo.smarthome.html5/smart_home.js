@@ -95,7 +95,7 @@ class LocalPlayer
 		do
 		{
 			var ext = this.files[idx].name.split('.').pop().toLowerCase();
-			if (ext == "mp3" || ext == "wav" || ext == "ogg" || ext == "wma")
+			if (ext == "mp3" || ext == "wav" || ext == "ogg" || ext == "wma" || ext == "m4a")
 				return idx;
 			idx = (idx + delta + this.files.length) % this.files.length;
 		}
