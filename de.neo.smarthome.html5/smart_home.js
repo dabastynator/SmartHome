@@ -1067,7 +1067,12 @@ function showFiles(files, isSearch)
 			mPath = mPath.substr(1);
 		}
 		content = fileRow(
-			{"caption": mPath.replace(/\//g, ' | '), "bold": true, "onclick": 'onclick="directoryClick(\'' + Separator + '\')"'}, 
+			{
+				"caption": mPath.replace(/\//g, ' | '), 
+				"bold": true, 
+				"onclick": 'onclick="directoryClick(\'' + Separator + '\')"',
+				"icon": '<img class="file_button_left" onclick="directoryClick(\'' + Separator + '\')" src="img/back.png"/>'
+			}, 
 			[{"src": "img/back.png", "onclick": 'onclick="directoryClick(\'' + Separator + '\')"'}]
 		);
 	}
