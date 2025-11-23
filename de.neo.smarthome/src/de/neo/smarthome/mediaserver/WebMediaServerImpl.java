@@ -263,7 +263,8 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			cache = new FileCache();
 			mFilesCache.put(user, cache);
 		}
-		ArrayList<BeanFileSystem> result = cache.getCachedFiles(path);
+		String cacheKey = id + "#" + path;
+		ArrayList<BeanFileSystem> result = cache.getCachedFiles(cacheKey);
 		if (result != null)
 		{
 			return result;
@@ -291,7 +292,7 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 			bean.fileType = FileType.File;
 			result.add(bean);
 		}
-		cache.addCachedFiles(path, result);
+		cache.addCachedFiles(cacheKey, result);
 		return result;
 	}
 	

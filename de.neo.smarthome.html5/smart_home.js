@@ -106,7 +106,6 @@ class LocalPlayer
 	assignFiles(files, cover = null)
 	{
 		this.files = files;
-		this.files.sort(function(a, b){return a.name.localeCompare(b.name);});
 		for (var i = 0; i < this.files.length; i++)
 			this.files[i].cover = cover;
 		this.idx = this.getNextAudioFileIdx(0, 1);
@@ -781,6 +780,7 @@ function play(index)
 			{
 				if (checkResult(files, htmlFiles))
 				{
+					files.sort(function(a, b){return a.name.localeCompare(b.name);});
 					mLocalPlayer.assignFiles(files, mFile.cover);
 					if (mLocalPlayer.idx < 0)
 					{
@@ -988,8 +988,9 @@ function getPath(file)
 function getFileUrl(file)
 {
 	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
-	var img_src = current_url + '/' + mMediaCenter + '/' + file;
-	return encodeURI(img_src);
+	var final_url = current_url + '/' + mMediaCenter + '/' + file;
+	//final_url = 'file:///home/sebastian/Musik/' + file;
+	return encodeURI(final_url);
 }
 
 function splitNameToArtistFile(name, defaultArtist, defaultTitle)
@@ -1006,6 +1007,10 @@ function splitNameToArtistFile(name, defaultArtist, defaultTitle)
 		result.title = split[1];
 		for (var i=2; i < split.length; i++)
 			result.title += ' - ' + split[i];
+	}
+	if (result.title.length > 4 && result.title.charAt(result.title.length-4) == '.')
+	{
+		result.title = result.title.substr(0, result.title.length - 4);
 	}
 	return result;
 }
@@ -1167,6 +1172,19 @@ function refreshFiles()
 		{
 			htmlFilesBack.classList.add("gone");
 			htmlFilesSearch.classList.add("gone");
+			if (files.error != null)
+			{
+				var message = files.error.message;
+				if (message == null && files.error.class != null){
+					message = 'Ups, that shouldn\'t happen... ' + files.error.class;
+				}
+				showToast("Error: <b>" + message + '</b>');
+				if (mPath != "")
+				{
+					mPath = "";
+					refreshFiles();
+				}
+			}	
 		}
 	}, {'path': mPath});
 }

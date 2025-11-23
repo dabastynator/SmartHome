@@ -352,12 +352,24 @@ public class MPlayer extends AbstractPlayer
 						mBean.mFile = file.trim();
 						mSeekValue = 0;
 					}
-					if (line.startsWith(" Title: "))
-						mBean.mTitle = line.substring(8).trim();
-					if (line.startsWith(" Artist: "))
-						mBean.mArtist = line.substring(9).trim();
+					if (line.startsWith(" Title: ") && mBean.mTitle == null)
+					{
+						String title = line.substring(8).trim();
+						if(title.length() > 0)
+							mBean.mTitle = line.substring(8).trim();
+					}
+					if (line.startsWith(" Artist: ") && mBean.mArtist == null)
+					{
+						String artist = line.substring(9).trim();
+						if(artist.length() > 0)
+							mBean.mArtist = artist; 
+					}
 					if (line.startsWith(" Album: "))
-						mBean.mAlbum = line.substring(8).trim();
+					{
+						String album = line.substring(8).trim();
+						if(album.length() > 0)
+							mBean.mAlbum = album;
+					}
 					if (line.equals("Starting playback...")) {
 						mBean.mState = PlayingBean.STATE.PLAY;
 						loadThumbnail(mBean);
