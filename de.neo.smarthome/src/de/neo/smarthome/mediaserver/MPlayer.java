@@ -352,19 +352,20 @@ public class MPlayer extends AbstractPlayer
 						mBean.mFile = file.trim();
 						mSeekValue = 0;
 					}
-					if (line.startsWith(" Title: ") && mBean.mTitle == null)
+					String lower = line.toLowerCase();
+					if (lower.startsWith(" title: ") && mBean.mTitle == null)
 					{
 						String title = line.substring(8).trim();
 						if(title.length() > 0)
 							mBean.mTitle = line.substring(8).trim();
 					}
-					if (line.startsWith(" Artist: ") && mBean.mArtist == null)
+					if (lower.startsWith(" artist: ") && mBean.mArtist == null)
 					{
 						String artist = line.substring(9).trim();
 						if(artist.length() > 0)
 							mBean.mArtist = artist; 
 					}
-					if (line.startsWith(" Album: "))
+					if (lower.startsWith(" album: "))
 					{
 						String album = line.substring(8).trim();
 						if(album.length() > 0)

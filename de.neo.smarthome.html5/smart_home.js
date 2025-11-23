@@ -989,7 +989,6 @@ function getFileUrl(file)
 {
 	var current_url = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/";
 	var final_url = current_url + '/' + mMediaCenter + '/' + file;
-	//final_url = 'file:///home/sebastian/Musik/' + file;
 	return encodeURI(final_url);
 }
 
