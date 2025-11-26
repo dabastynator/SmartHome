@@ -579,8 +579,7 @@ label, .label
 {
 	box-shadow: 0 0 10px 1px var(--focus);
 	transition: all 0.15s;
-	position:relative;
-	z-index:2;
+	background: color-mix(in srgb, var(--background) 40%, transparent);
 }
 
 .button:hover, input:hover, select:hover
@@ -613,7 +612,6 @@ input:focus-visible{
 	text-align: left;
 	cursor: pointer;
 	display: flex;
-	background: color-mix(in srgb, var(--background) 60%, transparent);
 }
 
 .file

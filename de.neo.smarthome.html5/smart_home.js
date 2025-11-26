@@ -144,6 +144,7 @@ var mPathObj = null;
 var mUserList;
 var mSelectedUser;
 var mFiles;
+var mFilesScrollTop = {};
 var mPlaylists;
 var mPlaylistContent;
 var mSwitchesCache = '';
@@ -751,6 +752,7 @@ function refreshMediaServer()
 
 function directoryClick(index){
 	mPathObj = null;
+	mFilesScrollTop[mPath] = htmlFiles.scrollTop;
 	if (index == Separator)
 	{
 		if (mPath.lastIndexOf(Separator) >= 1)
@@ -1140,10 +1142,18 @@ function showFiles(files, isSearch)
 	content += listContent + '<div style="height:50px"></div>';
 	content += '</div>';
 	htmlFiles.innerHTML = content;
+	if (mFilesScrollTop.hasOwnProperty(mPath))
+	{
+		htmlFiles.scrollTop = mFilesScrollTop[mPath];
+	}
+	else
+	{
+		htmlFiles.scrollTop = 0;
+	}
 	if(!isSearch && mPathObj != null && mPathObj.cover != null && mPathObj.cover.length > 0)
 	{
 		var url = 'url("' + getFileUrl(mPathObj.cover) + '")';
-		htmlFiles.style.backgroundImage = 'linear-gradient(to left, rgba(255,255,255,0) 50%, var(--background)),' + url;
+		htmlFiles.style.backgroundImage = 'linear-gradient(to left, rgba(255,255,255,0) 0%, var(--background)),' + url;
 	}
 	else
 	{
