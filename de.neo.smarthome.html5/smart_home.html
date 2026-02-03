@@ -150,7 +150,15 @@
 			<input id="player_dlg_progress" style="margin:auto; flex: 1 1 auto;" type="range" min="0" max="300" value="30"/>
 			<div id="player_dlg_duration" class="player_dlg_range_side">?</div>
 		</div>
-		<div class="dialog_dynamic_footer">
+		<div class="dialog_dynamic_footer" style="justify-content: space-between;">
+			<div class="dialog_dynamic_footer">
+				<div id="playback_remote_container" style="padding: 15px;" >
+					<img id="playback_remote" src="img/server_b.png" class="player_btn" style="width:40px" onclick="window.localStorage.setItem('playback', 'remote');readSetting();"/>
+				</div>
+				<div id="playback_local_container" style="padding: 15px;">
+					<img id="playback_local" src="img/phone_b.png" class="player_btn" style="width:40px" onclick="window.localStorage.setItem('playback', 'local');readSetting();"/>
+				</div>
+			</div>
 			<button class="button" onclick="hideDialog('player_dlg');">OK</button>
 		</div>
 	</div>

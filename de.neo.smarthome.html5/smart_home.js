@@ -285,6 +285,28 @@ function readSetting()
 			//document.getElementById('setting_current_user').value = result.name;
 		}
 	}, {'token': token});
+
+	var focus_img, focus_container, non_focus_container, non_focus_img;
+	if(mPlayback == "local")
+	{
+		focus_img = document.getElementById("playback_local");
+		focus_container = document.getElementById("playback_local_container");
+		non_focus_img = document.getElementById("playback_remote");
+		non_focus_container = document.getElementById("playback_remote_container");
+	}
+	else
+	{
+		focus_img = document.getElementById("playback_remote");
+		focus_container = document.getElementById("playback_remote_container");
+		non_focus_img = document.getElementById("playback_local");
+		non_focus_container = document.getElementById("playback_local_container");
+	}
+	focus_img.classList.remove('player_btn');
+	focus_img.classList.add('card_btn_img');
+	non_focus_img.classList.remove('card_btn_img');
+	non_focus_img.classList.add('player_btn');
+	focus_container.classList.add('player_btn_circle');
+	non_focus_container.classList.remove('player_btn_circle');
 }
 
 function setIsAdmin(isAdmin)

@@ -746,6 +746,8 @@ input:focus-visible{
 	display: flex;
 	justify-content: flex-end;
 	flex: 0 0 auto;
+	align-items: center;
+
 }
 
 .z_index_back
