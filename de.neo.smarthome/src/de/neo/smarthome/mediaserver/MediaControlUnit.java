@@ -23,6 +23,7 @@ public class MediaControlUnit extends AbstractControlUnit {
 	public static final int DOWNLOAD_PORT = 5033;
 	
 	public static final String Cover = ".cover_art.jpg";
+	public static final String Collection = ".collection.jpg";
 
 	@Persist(name = "location")
 	private String mBrowserLocation;
