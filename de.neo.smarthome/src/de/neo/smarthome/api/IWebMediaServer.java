@@ -71,15 +71,15 @@ public interface IWebMediaServer extends RemoteAble
 			@WebParam(name = "playlist") String playlist)
 					throws RemoteException, PlayerException;
 
-	@WebRequest(path = "files", description = "Get files and directories at specific path.", genericClass = BeanFileSystem.class)
-	public ArrayList<BeanFileSystem> getFiles(
+	@WebRequest(path = "files", description = "Get files and directories at specific path.")
+	public FolderInfo getFiles(
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id,
 			@WebParam(name = "path", required = false, defaultvalue = "") String path) 
 					throws RemoteException;
 	
-	@WebRequest(path = "search", description = "Search for files and directories at specific path.", genericClass = BeanFileSystem.class)
-	public ArrayList<BeanFileSystem> searchFiles(
+	@WebRequest(path = "search", description = "Search for files and directories at specific path.", genericClass = FileEntry.class)
+	public ArrayList<FileEntry> searchFiles(
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id,
 			@WebParam(name = "target") String target,
@@ -202,7 +202,8 @@ public interface IWebMediaServer extends RemoteAble
 			@WebParam(name = "id") String id)
 					throws RemoteException, IOException, DaoException;
 
-	public static class BeanFileSystem implements Comparable<BeanFileSystem>
+	
+	public static class FileEntry
 	{
 
 		@WebField(name = "filetype")
@@ -217,17 +218,18 @@ public interface IWebMediaServer extends RemoteAble
 		@WebField(name = "cover")
 		public String cover;
 		
-		@Override
-		public int compareTo(BeanFileSystem another)
-		{
-			if (another == null)
-				return 0;
-			if (fileType == another.fileType)
-				return name.compareToIgnoreCase(another.name);
-			if (fileType == FileType.Directory)
-				return -1;
-			return 1;
-		}
+	}
+	
+	public static class FolderInfo
+	{
+		@WebField(name = "cover")
+		public String cover;
+		
+		@WebField(name = "collection")
+		public String collection;
+		
+		@WebField(name = "files")
+		public ArrayList<FileEntry> files;
 	}
 
 	public static class BeanPlaylist implements Comparable<BeanPlaylist>

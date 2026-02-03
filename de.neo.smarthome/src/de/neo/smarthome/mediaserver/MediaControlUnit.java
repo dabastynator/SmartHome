@@ -14,7 +14,7 @@ import de.neo.remote.rmi.RMILogger.LogPriority;
 import de.neo.remote.rmi.RemoteException;
 import de.neo.smarthome.AbstractControlUnit;
 import de.neo.smarthome.RemoteLogger;
-import de.neo.smarthome.api.IWebMediaServer.BeanFileSystem;
+import de.neo.smarthome.api.IWebMediaServer.FileEntry;
 import de.neo.smarthome.api.IWebMediaServer.FileType;
 
 @Domain(name = "MediaServer")
@@ -118,9 +118,9 @@ public class MediaControlUnit extends AbstractControlUnit {
 		return mBrowserLocation;
 	}
 
-	public ArrayList<BeanFileSystem> search(String path, String target) {
+	public ArrayList<FileEntry> search(String path, String target) {
 		path = mBrowserLocation + path;
-		ArrayList<BeanFileSystem> matches = new ArrayList<>();
+		ArrayList<FileEntry> matches = new ArrayList<>();
 		try
 		{
 			Process exec = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", " find '" + path + "' -type d -path '*/.*' -prune -o -not -name '.*' -type f -iname '*" + target + "*' -print | sort" });
@@ -129,19 +129,19 @@ public class MediaControlUnit extends AbstractControlUnit {
 			String line = "";
 			while ((line = input.readLine()) != null) 
 			{
-				BeanFileSystem bean = new BeanFileSystem();
+				FileEntry entry = new FileEntry();
 				File file = new File(line);
-				bean.path = file.getAbsolutePath().substring(mBrowserLocation.length());
-				bean.name = file.getName();
+				entry.path = file.getAbsolutePath().substring(mBrowserLocation.length());
+				entry.name = file.getName();
 				if (file.isDirectory())
 				{
-					bean.fileType = FileType.Directory;
+					entry.fileType = FileType.Directory;
 				}
 				else if (file.isFile())
 				{
-					bean.fileType = FileType.File;
+					entry.fileType = FileType.File;
 				}
-				matches.add(bean);
+				matches.add(entry);
 			}
 			input.close();
 			error.close();

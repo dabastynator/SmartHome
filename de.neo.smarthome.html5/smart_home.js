@@ -937,7 +937,7 @@ function searchFiles()
 	{
 		if (checkResult(result))
 		{
-			showFiles(result, true);
+			showFiles(result, true, null);
 			if (result.length == 0)
 			{
 				showToast("No search result");
@@ -1056,7 +1056,7 @@ function cdItem(f, buttons)
 	return result;
 }
 
-function showFiles(files, isSearch)
+function showFiles(files, isSearch, background)
 {
 	var content = "";
 	var listContent = "";
@@ -1150,9 +1150,9 @@ function showFiles(files, isSearch)
 	{
 		htmlFiles.scrollTop = 0;
 	}
-	if(!isSearch && mPathObj != null && mPathObj.cover != null && mPathObj.cover.length > 0)
+	if(background != null)
 	{
-		var url = 'url("' + getFileUrl(mPathObj.cover) + '")';
+		var url = 'url("' + getFileUrl(background) + '")';
 		htmlFiles.style.backgroundImage = 'linear-gradient(to left, rgba(255,255,255,0) 0%, var(--background)),' + url;
 	}
 	else
@@ -1170,7 +1170,7 @@ function refreshFiles()
 		htmlFiles.classList.remove("list_gone");
 		if (checkResult(files, htmlFiles))
 		{
-			showFiles(files, false);
+			showFiles(files.files, false, files.cover);
 			if (mPath != '')
 			{
 				htmlFilesBack.classList.remove("gone");

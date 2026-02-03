@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import de.neo.persist.Dao;
 import de.neo.persist.DaoException;
@@ -30,54 +27,7 @@ import de.neo.smarthome.user.UserSessionHandler;
 
 public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMediaServer
 {
-	private class FileCache
-	{
-		static int MAX_SIZE = 5;
-		
-		private class CacheEntry
-		{
-			String mPath;
-			ArrayList<BeanFileSystem> mFiles = new ArrayList<>();
-		}
-		
-		private List<CacheEntry> mEntries = new ArrayList<>();
-		
-		public ArrayList<BeanFileSystem> getCachedFiles(String path)
-		{
-			int idx = -1;
-			for (int i = 0; i < mEntries.size(); i++)
-			{
-				if (mEntries.get(i).mPath.equals(path))
-				{
-					idx = i;
-					break;
-				}
-			}
-			if (idx >= 0)
-			{
-				CacheEntry entry = mEntries.get(idx);
-				mEntries.remove(idx);
-				mEntries.add(0, entry);
-				return entry.mFiles;
-			}
-			return null;
-		}
-		
-		public void addCachedFiles(String path, ArrayList<BeanFileSystem> files)
-		{
-			CacheEntry entry = new CacheEntry();
-			entry.mPath = path;
-			entry.mFiles = files;
-			while (mEntries.size() >= MAX_SIZE)
-			{
-				mEntries.remove(mEntries.size()-1);
-			}
-			mEntries.add(0, entry);
-		}
-	}
 	
-	private Map<User, FileCache> mFilesCache = new HashMap<>();
-
 	public WebMediaServerImpl(ControlCenter center)
 	{
 		super(center);
@@ -241,8 +191,8 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		return "mediaserver";
 	}
 
-	@WebRequest(path = "files", description = "Get files and directories at specific path.", genericClass = BeanFileSystem.class)
-	public ArrayList<BeanFileSystem> getFiles(
+	@WebRequest(path = "files", description = "Get files and directories at specific path.")
+	public FolderInfo getFiles(
 			@WebParam(name = "token") String token,
 			@WebParam(name = "id") String id,
 			@WebParam(name = "path", required = false, defaultvalue = "") String path)
@@ -252,56 +202,50 @@ public class WebMediaServerImpl extends AbstractUnitHandler implements IWebMedia
 		{
 			path += File.separator;
 		}
-		User user = UserSessionHandler.require(token);
-		FileCache cache;
-		if (mFilesCache.containsKey(user))
-		{
-			cache = mFilesCache.get(user);
-		}
-		else
-		{
-			cache = new FileCache();
-			mFilesCache.put(user, cache);
-		}
-		String cacheKey = id + "#" + path;
-		ArrayList<BeanFileSystem> result = cache.getCachedFiles(cacheKey);
-		if (result != null)
-		{
-			return result;
-		}
-		result = new ArrayList<>();	
+		UserSessionHandler.require(token);
+		
+		FolderInfo result = new FolderInfo();
+		result.files = new ArrayList<>();
 		MediaControlUnit mediaServer = mCenter.getAccessHandler().require(token, id);
+		
+		if (mediaServer.isFile(path + MediaControlUnit.Cover))
+		{
+			result.cover = path + MediaControlUnit.Cover;
+		} else if (mediaServer.isFile(path + MediaControlUnit.Collection))
+		{
+			result.collection = path + MediaControlUnit.Collection;
+		}
+		
 		for (String dir : mediaServer.listDirectories(path))
 		{
-			BeanFileSystem bean = new BeanFileSystem();
-			bean.name = dir;
-			bean.path = path + dir;
-			bean.fileType = FileType.Directory;
+			FileEntry entry = new FileEntry();
+			entry.name = dir;
+			entry.path = path + dir;
+			entry.fileType = FileType.Directory;
 			String cover = path + dir + File.separator + MediaControlUnit.Cover;
 			String collection = path + dir + File.separator + MediaControlUnit.Collection;
 			if (mediaServer.isFile(cover))
 			{
-				bean.cover = cover;
+				entry.cover = cover;
 			} else if (mediaServer.isFile(collection))
 			{
-				bean.cover = collection;
+				entry.cover = collection;
 			}
-			result.add(bean);
+			result.files.add(entry);
 		}
 		for (String file : mediaServer.listFiles(path))
 		{
-			BeanFileSystem bean = new BeanFileSystem();
-			bean.name = file;
-			bean.path = path + file;
-			bean.fileType = FileType.File;
-			result.add(bean);
+			FileEntry entry = new FileEntry();
+			entry.name = file;
+			entry.path = path + file;
+			entry.fileType = FileType.File;
+			result.files.add(entry);
 		}
-		cache.addCachedFiles(cacheKey, result);
 		return result;
 	}
 	
-	@WebRequest(path = "search", description = "Search for files and directories at specific path.", genericClass = BeanFileSystem.class)
-	public ArrayList<BeanFileSystem> searchFiles(
+	@WebRequest(path = "search", description = "Search for files and directories at specific path.")
+	public ArrayList<FileEntry> searchFiles(
 			@WebParam(name = "token") String token, 
 			@WebParam(name = "id") String id,
 			@WebParam(name = "target") String target,
