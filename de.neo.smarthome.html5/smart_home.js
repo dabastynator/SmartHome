@@ -1201,6 +1201,10 @@ function refreshFiles()
 		htmlFiles.classList.remove("list_gone");
 		if (checkResult(files, htmlFiles))
 		{
+			if (mPathObj == null)
+			{
+				mPathObj = {"path": mPath, "cover": files.cover};
+			}
 			showFiles(files.files, false, files.cover);
 			if (mPath != '')
 			{
