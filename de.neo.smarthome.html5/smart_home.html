@@ -103,6 +103,13 @@
 				<option value="remote">Remote on server</option>
 				<option value="local">Local on device</option>
 			</select>
+		<div class="dialog_dynamic_footer" style="justify-content: space-between;">
+			<div>CD Items</div>
+			<div class="checkbox_container">
+				<input class="tgl tgl-light" id="setting_show_cd" type="checkbox"/>
+				<label class="tgl-btn" for="setting_show_cd">
+			</div>
+		</div>
 		<div class="dialog_dynamic_footer">
 			<button class="button" onclick="clearSettings();hideDialog('settings');initialize();">Clear</button>
 			<button class="button" onclick="saveSettings();hideDialog('settings');initialize();">OK</button>
@@ -153,10 +160,10 @@
 		<div class="dialog_dynamic_footer" style="justify-content: space-between;">
 			<div class="dialog_dynamic_footer">
 				<div id="playback_remote_container" style="padding: 15px;" >
-					<img id="playback_remote" src="img/server_b.png" class="player_btn" style="width:40px" onclick="window.localStorage.setItem('playback', 'remote');readSetting();"/>
+					<img id="playback_remote" src="img/server_b.png" class="player_btn" onclick="window.localStorage.setItem('playback', 'remote');readSetting();"/>
 				</div>
 				<div id="playback_local_container" style="padding: 15px;">
-					<img id="playback_local" src="img/phone_b.png" class="player_btn" style="width:40px" onclick="window.localStorage.setItem('playback', 'local');readSetting();"/>
+					<img id="playback_local" src="img/phone_b.png" class="player_btn" onclick="window.localStorage.setItem('playback', 'local');readSetting();"/>
 				</div>
 			</div>
 			<button class="button" onclick="hideDialog('player_dlg');">OK</button>
@@ -246,4 +253,4 @@
 </div>
 
 </body>
-</html> 
+</html>

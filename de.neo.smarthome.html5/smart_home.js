@@ -137,6 +137,7 @@ var apiAction = new APIHandler();
 var apiUser = new APIHandler();
 var apiInformation = new APIHandler();
 var mPlayback = "remote";
+var mShowCd = true;
 var mLocalPlayer = new LocalPlayer();
 var mMediaCenter = '';
 var mPath = '';
@@ -250,6 +251,8 @@ function readSetting()
 	endpoint = window.localStorage.getItem("endpoint");
 	token = window.localStorage.getItem("token");
 	mPlayback = window.localStorage.getItem("playback");
+	var showCdValue = window.localStorage.getItem("show_cd");
+	mShowCd = (showCdValue === null || showCdValue === "true");
 	if (endpoint == null || endpoint == '')
 	{
 		endpoint = findGetParameter('endpoint');
@@ -325,11 +328,14 @@ function initSettings()
 	var token = document.getElementById('setting_token');
 	var appearence = document.getElementById('setting_appearence');
 	var playback = document.getElementById('setting_playback');
+	var showCd = document.getElementById('setting_show_cd');
 
 	endpoint.value = window.localStorage.getItem("endpoint");
 	token.value = window.localStorage.getItem("token");
 	appearence.value = window.localStorage.getItem("appearence");
 	playback.value = window.localStorage.getItem("playback");
+	var showCdValue = window.localStorage.getItem("show_cd");
+	showCd.checked = (showCdValue === null || showCdValue === "true");
 }
 
 function saveSettings()
@@ -338,11 +344,13 @@ function saveSettings()
 	var token = document.getElementById('setting_token').value;
 	var appearence = document.getElementById('setting_appearence');
 	var playback = document.getElementById('setting_playback');
+	var showCd = document.getElementById('setting_show_cd');
 	mMediaCenter = '';
 	window.localStorage.setItem("endpoint", endpoint);
 	window.localStorage.setItem("token", token);
 	window.localStorage.setItem("appearence", appearence.value);
 	window.localStorage.setItem("playback", playback.value);
+	window.localStorage.setItem("show_cd", showCd.checked.toString());
 	loadAppearence();
 	readSetting();
 	refreshMediaServer();
@@ -800,12 +808,13 @@ function play(index)
 
 		if(mFile.filetype == "Directory")
 		{
-			apiMediaServer.call('files', function(files)
+			apiMediaServer.call('files', function(result)
 			{
-				if (checkResult(files, htmlFiles))
+				if (checkResult(result, htmlFiles))
 				{
+					files = result.files;
 					files.sort(function(a, b){return a.name.localeCompare(b.name);});
-					mLocalPlayer.assignFiles(files, mFile.cover);
+					mLocalPlayer.assignFiles(files, result.cover);
 					if (mLocalPlayer.idx < 0)
 					{
 						showToast("No playable file in folder!");
@@ -1041,7 +1050,7 @@ function splitNameToArtistFile(name, defaultArtist, defaultTitle)
 function cdItem(f, buttons)
 {
 	var img_src = getFileUrl(f.cover);
-	var info = splitNameToArtistFile(f.name, "Various", f.name);
+	var info = splitNameToArtistFile(f.name, "", f.name);
 	var medium = "cd";
 	var cdClass = "cd-disc";
 	var coverClass = 'case-cover';
@@ -1083,7 +1092,7 @@ function showFiles(files, isSearch, background)
 	var content = "";
 	var listContent = "";
 	var cdItems = "";
-	var cdItemsEnabled = !isSearch;
+	var cdItemsEnabled = !isSearch && mShowCd;
 	if (mPath != '')
 	{
 		if (mPath.startsWith("/"))
