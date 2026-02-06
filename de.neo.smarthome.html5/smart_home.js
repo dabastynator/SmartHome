@@ -42,19 +42,56 @@ class LocalPlayer
 		this.idx = 0;
 		this.currentFile = null;
 		this.audio = new Audio();
-		this.audio.onended = function() {
-			playerAction("next");
+		this.nextAudio = new Audio(); // Add second audio element for preloading
+		this.isUsingPrimary = true; // Track which audio element is active
+
+		this.audio.onended = () => {
+			this.moveToNext(1);
 		};
+		this.nextAudio.onended = () => {
+			this.moveToNext(1);
+		};
+
 		this.audio.addEventListener("error", () => {
 			showToast(`Error loading: ${this.currentFile.name}`);
 		});
+		this.nextAudio.addEventListener("error", () => {
+			console.error("Error preloading next track");
+		});
+	}
+
+	setVolume(volume)
+	{
+		this.audio.volume = volume;
+		this.nextAudio.volume = volume;
+	}
+
+	getAudio()
+	{
+		return this.isUsingPrimary ? this.audio : this.nextAudio;
+	}
+
+	getNextAudio()
+	{
+		return this.isUsingPrimary ? this.nextAudio : this.audio;
+	}
+
+	preloadNextTrack()
+	{
+		const nextIdx = this.getNextAudioFileIdx(this.idx + 1, 1);
+		if (nextIdx >= 0 && nextIdx < this.files.length)
+		{
+			const nextAudio = this.getNextAudio();
+			nextAudio.src = getFileUrl(this.files[nextIdx].path);
+			nextAudio.load(); // Force preloading
+		}
 	}
 
 	stop()
 	{
-		if (!this.audio.paused)
+		if (!this.getAudio().paused)
 		{
-			this.audio.pause();
+			this.getAudio().pause();
 		}
 		this.currentFile = null;
 	}
@@ -70,19 +107,49 @@ class LocalPlayer
 			showToast("Nothing to play!");
 			return;
 		}
-		if (!this.audio.paused)
+
+		const currentAudio = this.getAudio();
+		if (!currentAudio.paused)
 		{
-			this.audio.pause();
+			currentAudio.pause();
 		}
+
 		this.currentFile = this.files[this.idx];
-		this.audio.src = getFileUrl(this.currentFile.path);
-		this.audio.play();
+		currentAudio.src = getFileUrl(this.currentFile.path);
+		currentAudio.play();
+
+		// Preload next track
+		this.preloadNextTrack();
 	}
 
 	moveToNext(step = 1)
 	{
 		this.idx = this.getNextAudioFileIdx(this.idx + step, step);
-		this.startPlay();
+		if (this.idx >= 0)
+		{
+			// If we're switching due to track end and next is preloaded, just play it
+			const nextAudio = this.getNextAudio();
+			var usedCache = false;
+			if (nextAudio.src && nextAudio.readyState >= 3) // HAVE_FUTURE_DATA
+			{
+				var asrc = nextAudio.src;
+				var fsrc = getFileUrl(this.files[this.idx].path);
+				if (nextAudio.src === getFileUrl(this.files[this.idx].path))
+				{
+					this.stop();
+					this.isUsingPrimary = !this.isUsingPrimary;
+					this.currentFile = this.files[this.idx];
+					nextAudio.currentTime = 0;
+					nextAudio.play();
+					usedCache = true;
+				}
+			}
+			if (!usedCache)
+			{
+				this.startPlay();
+			}
+			this.preloadNextTrack();
+		}
 	}
 
 	getNextAudioFileIdx(start, delta)
@@ -719,11 +786,12 @@ function refreshPlayer(){
 		if(mLocalPlayer.currentFile != null)
 		{
 			var file = mLocalPlayer.currentFile;
+			var audio = mLocalPlayer.getAudio();
 			playing = {
-				"state" : (mLocalPlayer.audio.paused ? "PAUSE": "PLAY"),
-				"inTrackSec" : Math.round(mLocalPlayer.audio.currentTime),
-				"durationSec" : Math.round(mLocalPlayer.audio.duration),
-				"volume" : mLocalPlayer.audio.volume * 100,
+				"state" : (audio.paused ? "PAUSE": "PLAY"),
+				"inTrackSec" : Math.round(audio.currentTime),
+				"durationSec" : Math.round(audio.duration),
+				"volume" : audio.volume * 100,
 				"path" : mLocalPlayer.currentFile.path
 			};
 			var info = splitNameToArtistFile(file.name, null, file.name);
@@ -1441,13 +1509,14 @@ function checkResult(result, errorHtmlElement = null, showErrorMsg = true){
 function playerAction(action, parameter){
 	if (mPlayback == "local")
 	{
+		var audio = mLocalPlayer.getAudio();
 		if (action == "volume")
 		{
-			mLocalPlayer.audio.volume = parameter.volume / 100;
+			mLocalPlayer.setVolume(parameter.volume / 100);
 		}
 		if (action == "volume_delta")
 		{
-			mLocalPlayer.audio.volume += parameter.delta / 100;
+			mLocalPlayer.setVolume(audio.volume + parameter.delta / 100);
 		}
 		if (action == "stop")
 		{
@@ -1464,22 +1533,22 @@ function playerAction(action, parameter){
 		}
 		if(action == "seek")
 		{
-			mLocalPlayer.audio.currentTime = parameter.seek_time_sec;
+			audio.currentTime = parameter.seek_time_sec;
 		}
 		if (action == "play_pause")
 		{
-			if (mLocalPlayer.audio.paused)
-				mLocalPlayer.audio.play();
+			if (audio.paused)
+				audio.play();
 			else
-				mLocalPlayer.audio.pause();
+				audio.pause();
 		}
 		if (action == "seek_backward")
 		{
-			mLocalPlayer.audio.currentTime = mLocalPlayer.audio.currentTime - 10;
+			audio.currentTime = audio.currentTime - 10;
 		}
 		if (action == "seek_forward")
 		{
-			mLocalPlayer.audio.currentTime = mLocalPlayer.audio.currentTime + 10;
+			audio.currentTime = audio.currentTime + 10;
 		}
 		refreshPlayer();
 	}
